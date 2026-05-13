@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 5: Memory
+## LLM Exercise — Chapter 5: Memory
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** The first verdict module — `memory.py` — which compares a model's flash + SRAM demands against a target's budget and emits a typed verdict with mitigations.
@@ -19,7 +19,7 @@ Frozen MemoryVerdict dataclass:
 - flash_margin_pct: float
 - sram_margin_pct: float
 - verdict: Literal["FITS", "TIGHT", "FAILS"]
-- mitigations: list[str]  (suggestions if TIGHT or FAILS)
+- mitigations: list[str] (suggestions if TIGHT or FAILS)
 - to_markdown() method — emits a section in the same shape as Chapter 14's case-study memory blocks
 
 Public function:
@@ -28,15 +28,15 @@ Public function:
 Implementation:
 - weight_kb = model.parameter_count * bytes_per_element(model.precision) / 1024
 - activation_kb = model.largest_activation_elements * bytes_per_element / 1024
-- scratch_kb = activation_kb * scratch_overhead  (im2col approximation)
+- scratch_kb = activation_kb * scratch_overhead (im2col approximation)
 - total_sram_kb = activation_kb + scratch_kb
 - flash_margin_pct = (target.flash_kb - weight_kb) / target.flash_kb * 100
 - sram_margin_pct = (target.sram_kb - total_sram_kb) / target.sram_kb * 100
 - verdict: FITS if both margins > 20; FAILS if either < 0; TIGHT otherwise
 - mitigations dict-driven from chapter 5's repertoire:
-   - if weight_kb is the bottleneck: "Quantize float32 → int8 (75% weight reduction)", "Switch to smaller MobileNet width multiplier"
-   - if activation_kb is the bottleneck: "Buffer reuse (20-40% activation reduction)", "In-place computation", "Smaller input resolution"
-   - if scratch_kb is the bottleneck: "Switch to direct convolution kernels (no im2col)"
+ - if weight_kb is the bottleneck: "Quantize float32 → int8 (75% weight reduction)", "Switch to smaller MobileNet width multiplier"
+ - if activation_kb is the bottleneck: "Buffer reuse (20-40% activation reduction)", "In-place computation", "Smaller input resolution"
+ - if scratch_kb is the bottleneck: "Switch to direct convolution kernels (no im2col)"
 
 CLI extension:
 - `tinyml-feasibility check-memory --app <yaml> --target <name> --model <path>` prints the MemoryVerdict and includes the to_markdown() output

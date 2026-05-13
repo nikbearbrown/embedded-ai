@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 14: Integration Case Studies — Full Design Decisions
+## LLM Exercise — Chapter 14: Integration Case Studies — Full Design Decisions
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** The integration-report generator that aggregates every prior verdict into a single Markdown decision document matching the shape of Chapter 14's three case studies — plus integration tests that replicate those case studies as toolkit invocations.
@@ -25,7 +25,7 @@ Frozen IntegrationReport dataclass:
 - optimization_plan: OptimizationPlan | None
 - deployment_report: DeploymentReport | None
 - binding_constraint: Literal["memory", "compute", "power", "real_time", "comms_bandwidth", "regulation", "accuracy"]
-- rejected_alternatives: list[dict]  (each: name, reason, citation back to verdict)
+- rejected_alternatives: list[dict] (each: name, reason, citation back to verdict)
 - risk_register: list[str]
 - to_markdown() emits the full decision document — same structure as Chapter 14's three case studies
 

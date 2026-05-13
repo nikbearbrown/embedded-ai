@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 11: Selecting Models for Constrained Deployment
+## LLM Exercise — Chapter 11: Selecting Models for Constrained Deployment
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A multi-model Pareto comparison module — given N candidate models, score each against the application's constraints and identify which lie on the Pareto frontier.
@@ -13,7 +13,7 @@ Add src/tinyml_feasibility/compare.py to the tinyml-feasibility toolkit.
 
 Frozen ModelCandidate dataclass:
 - model: ModelSummary
-- accuracy_pct: float  (validation accuracy on the app's dataset; supplied by user)
+- accuracy_pct: float (validation accuracy on the app's dataset; supplied by user)
 - memory_verdict: MemoryVerdict
 - compute_verdict: ComputeVerdict
 - power_verdict: PowerVerdict
@@ -21,10 +21,10 @@ Frozen ModelCandidate dataclass:
 
 Frozen ParetoFrontier dataclass:
 - candidates: list[ModelCandidate]
-- pareto_optimal_indices: list[int]  (indices of candidates on the frontier)
-- recommended_index: int  (best feasible candidate per the chosen criterion)
+- pareto_optimal_indices: list[int] (indices of candidates on the frontier)
+- recommended_index: int (best feasible candidate per the chosen criterion)
 - selection_criterion: Literal["max_accuracy_within_constraints", "max_margin_above_threshold", "min_latency"]
-- rejection_log: dict  (rejected_model_name → reason string)
+- rejection_log: dict (rejected_model_name → reason string)
 - to_markdown() emits a Model Selection section matching Chapter 14's shape, including a Pareto frontier description
 
 Public functions:

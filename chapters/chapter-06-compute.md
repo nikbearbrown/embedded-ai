@@ -46,7 +46,7 @@ When the latency budget cannot be met, four moves remain. Upgrade the hardware t
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 6: Compute
+## LLM Exercise — Chapter 6: Compute
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** The compute verdict module — same pattern as memory, but comparing predicted latency against the latency constraint and emitting processor-class upgrade recommendations when the budget doesn't close.
@@ -63,10 +63,10 @@ Frozen ComputeVerdict dataclass:
 - predicted_latency_ms: float
 - latency_budget_ms: float
 - headroom_pct: float
-- arithmetic_intensity: float  (MACs per byte of activation traffic — flags memory-bound vs compute-bound)
+- arithmetic_intensity: float (MACs per byte of activation traffic — flags memory-bound vs compute-bound)
 - verdict: Literal["FITS", "TIGHT", "FAILS"]
 - mitigations: list[str]
-- upgrade_path: list[Target]  (targets in TARGETS that would close the budget, ranked by cost)
+- upgrade_path: list[Target] (targets in TARGETS that would close the budget, ranked by cost)
 - to_markdown() method emits a Compute section matching Chapter 14's shape
 
 Public function:
@@ -75,11 +75,11 @@ Public function:
 Implementation:
 - predicted_latency_ms comes from profiling.predict_pipeline (chapter 4)
 - headroom_pct = (latency_budget - predicted) / latency_budget * 100
-- arithmetic_intensity = mac_count / (largest_activation_elements * 2)  (rough; flags <1.0 as likely memory-bound)
+- arithmetic_intensity = mac_count / (largest_activation_elements * 2) (rough; flags <1.0 as likely memory-bound)
 - verdict: FITS if headroom > 20%; FAILS if headroom < 0; TIGHT otherwise
 - mitigations from chapter 6's repertoire:
-   - if compute-bound: "Boost clock", "Add SIMD-optimized kernel (CMSIS-NN)", "Reduce model MAC count via pruning"
-   - if memory-bound: "Reduce activation footprint", "Add data prefetch", "Reduce input resolution"
+ - if compute-bound: "Boost clock", "Add SIMD-optimized kernel (CMSIS-NN)", "Reduce model MAC count via pruning"
+ - if memory-bound: "Reduce activation footprint", "Add data prefetch", "Reduce input resolution"
 - upgrade_path: filter TARGETS to those whose predicted latency on this model is < latency_budget; sort by cost_usd ascending, take top 3
 
 CLI:
@@ -107,7 +107,7 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Frances Allen** invented the techniques that turn a high-level loop into the SIMD instructions you're now counting cycles on — vectorizing compilers, decades before CMSIS-NN.
 

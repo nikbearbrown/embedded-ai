@@ -112,7 +112,7 @@ Still puzzling: why per-channel quantization helps so much on some architectures
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 12: Optimizing Models — Quantization, Pruning, Distillation
+## LLM Exercise — Chapter 12: Optimizing Models — Quantization, Pruning, Distillation
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** An optimization-plan recommender that takes a model that almost fits and predicts the size, latency, and accuracy after each compression step in the prune → distill → quantize order.
@@ -132,12 +132,12 @@ Frozen OptimizationStep dataclass:
 - predicted_latency_ms: float
 - predicted_accuracy_pct: float
 - predicted_accuracy_drop_pct: float
-- justification: str  (why this step was inserted at this position)
+- justification: str (why this step was inserted at this position)
 
 Frozen OptimizationPlan dataclass:
 - baseline_model: ModelSummary
 - baseline_accuracy_pct: float
-- target_constraints: dict  (the four-constraint targets)
+- target_constraints: dict (the four-constraint targets)
 - accuracy_floor_pct: float
 - steps: list[OptimizationStep]
 - final_predicted_metrics: dict
@@ -183,7 +183,19 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## A note about AI
+
+Optimization here means quantization, pruning, knowledge distillation, operator fusion — techniques that trade off properties of the model against properties of the deployment. The model can recite the techniques and not internalize the trade-offs.
+
+Where the model genuinely helps: explaining the mathematical intuition behind each technique and producing toy examples that make the trade-offs visible.
+
+Where the model does damage: predicting how a specific technique will affect your model's accuracy on your task. The empirical effect is unpredictable from first principles in many cases.
+
+The rule: techniques from the model; effects from your measurements.
+
+---
+
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Jacob Ziv** co-invented the LZ77 and LZ78 algorithms — the lossless-compression theory that underlies every ZIP file. Quantizing a neural network is the lossy cousin: same idea, different trade-off.
 

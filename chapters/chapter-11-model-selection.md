@@ -88,7 +88,7 @@ Still puzzling: how to compare two candidates that lie on the Pareto frontier of
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 11: Selecting Models for Constrained Deployment
+## LLM Exercise — Chapter 11: Selecting Models for Constrained Deployment
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A multi-model Pareto comparison module — given N candidate models, score each against the application's constraints and identify which lie on the Pareto frontier.
@@ -103,7 +103,7 @@ Add src/tinyml_feasibility/compare.py to the tinyml-feasibility toolkit.
 
 Frozen ModelCandidate dataclass:
 - model: ModelSummary
-- accuracy_pct: float  (validation accuracy on the app's dataset; supplied by user)
+- accuracy_pct: float (validation accuracy on the app's dataset; supplied by user)
 - memory_verdict: MemoryVerdict
 - compute_verdict: ComputeVerdict
 - power_verdict: PowerVerdict
@@ -111,10 +111,10 @@ Frozen ModelCandidate dataclass:
 
 Frozen ParetoFrontier dataclass:
 - candidates: list[ModelCandidate]
-- pareto_optimal_indices: list[int]  (indices of candidates on the frontier)
-- recommended_index: int  (best feasible candidate per the chosen criterion)
+- pareto_optimal_indices: list[int] (indices of candidates on the frontier)
+- recommended_index: int (best feasible candidate per the chosen criterion)
 - selection_criterion: Literal["max_accuracy_within_constraints", "max_margin_above_threshold", "min_latency"]
-- rejection_log: dict  (rejected_model_name → reason string)
+- rejection_log: dict (rejected_model_name → reason string)
 - to_markdown() emits a Model Selection section matching Chapter 14's shape, including a Pareto frontier description
 
 Public functions:
@@ -152,7 +152,19 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## A note about AI
+
+Model selection on embedded hardware is the trade-off chapter where every design choice closes other doors. The model will describe each choice as if the doors are still open.
+
+Where the model genuinely helps: producing a structured comparison of candidate models against your stated constraints. The comparison is useful for surfacing the trade-offs you might otherwise miss.
+
+Where the model does damage: ranking the candidates as if accuracy were the only constraint that mattered. In embedded contexts, accuracy is rarely the binding constraint.
+
+The rule: you set the constraints; the model lays out the trade-offs against those constraints.
+
+---
+
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Vilfredo Pareto** was an Italian economist studying income distribution in 1906 when he formalized the idea that some allocations are dominated and some are not — the same Pareto frontier you used to choose between MobileNet variants.
 

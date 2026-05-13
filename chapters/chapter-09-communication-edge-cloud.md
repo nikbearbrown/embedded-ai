@@ -46,7 +46,7 @@ The next chapter takes the hardest constraint category: real-time guarantees. Th
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 9: Communication: Edge-Cloud
+## LLM Exercise — Chapter 9: Communication: Edge-Cloud
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A communication-cost calculator that scores each processing tier (cloud / edge gateway / on-device / hybrid) on the four communication costs and recommends the right tier for the application.
@@ -67,13 +67,13 @@ Frozen CommsCost dataclass:
 - bandwidth_required_kbps: float
 - energy_per_message_mj: float
 - monthly_cost_usd: float
-- is_feasible: bool  (False if violates a hard constraint like bandwidth ceiling)
+- is_feasible: bool (False if violates a hard constraint like bandwidth ceiling)
 - failure_reasons: list[str]
 
 Frozen TierRecommendation dataclass:
 - candidate_tiers: list[CommsCost]
 - recommended_tier: Literal["cloud", "edge_gateway", "on_device", "hybrid"]
-- binding_constraint: str  (e.g., "bandwidth", "energy", "regulation")
+- binding_constraint: str (e.g., "bandwidth", "energy", "regulation")
 - justification: str
 - to_markdown() emits a Communication section matching Chapter 14's shape
 
@@ -115,7 +115,7 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Radia Perlman** designed the spanning tree protocol that makes every Ethernet network work — the kind of distributed coordination that decides where your edge inference output ends up.
 

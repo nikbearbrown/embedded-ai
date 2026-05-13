@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 4: Inference Mechanics
+## LLM Exercise — Chapter 4: Inference Mechanics
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A latency predictor that decomposes a model's inference into the four pipeline stages and estimates each stage's wall-clock time on a given target.
@@ -14,13 +14,13 @@ Extend tinyml-feasibility with a latency-prediction module grounded in the four-
 Add src/tinyml_feasibility/profiling.py:
 
 Frozen LatencyEstimate dataclass:
-- acquire_ms: float  (sensor read time; default 1.0, override by app config)
-- preprocess_ms: float  (e.g., MFCC for audio, normalization for vision)
+- acquire_ms: float (sensor read time; default 1.0, override by app config)
+- preprocess_ms: float (e.g., MFCC for audio, normalization for vision)
 - inference_ms: float
 - postprocess_ms: float
 - total_ms: float
 - bottleneck_stage: Literal["acquire", "preprocess", "run", "postprocess"]
-- assumption_notes: list[str]  (every estimate that came from a lookup table goes here)
+- assumption_notes: list[str] (every estimate that came from a lookup table goes here)
 
 Public functions:
 - `predict_inference_ms(model: ModelSummary, target: Target) -> float` — uses MAC throughput lookup. Provide a CORE_THROUGHPUT dict mapping core string ("Cortex-M0+", "Cortex-M4", "Cortex-M7", "Cortex-M55", "Cortex-A53") to MAC/sec at 1 MHz with int8 + CMSIS-NN. Source each value with a citation comment (e.g., ARM benchmark URLs, CMSIS-NN README).

@@ -43,7 +43,7 @@ Option B is the only viable answer. The NPU's 4× speedup over the CPU is the di
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 8: Hardware for AI
+## LLM Exercise — Chapter 8: Hardware for AI
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** An accelerator decision module — given a model and a target without an NPU, evaluate whether moving to an accelerator-equipped target closes the budget and at what cost.
@@ -57,13 +57,13 @@ Option B is the only viable answer. The NPU's 4× speedup over the CPU is the di
 Add src/tinyml_feasibility/accelerator.py to the tinyml-feasibility toolkit.
 
 Frozen AcceleratorDecision dataclass:
-- baseline_target: Target  (current pick, CPU-only)
-- baseline_verdict: dict  (combined memory+compute+power verdict from prior modules)
-- candidate_targets: list[Target]  (TARGETS where has_accelerator=True)
+- baseline_target: Target (current pick, CPU-only)
+- baseline_verdict: dict (combined memory+compute+power verdict from prior modules)
+- candidate_targets: list[Target] (TARGETS where has_accelerator=True)
 - candidate_verdicts: list[dict]
 - recommendation: Literal["KEEP_BASELINE", "UPGRADE_TO_NPU", "INSUFFICIENT_DATA"]
 - recommended_target: Target | None
-- justification: str  (one paragraph naming the constraint that decided)
+- justification: str (one paragraph naming the constraint that decided)
 - to_markdown() emits an Acceleration section matching Chapter 14's shape
 
 Public function:
@@ -101,7 +101,7 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Carver Mead** coined the term "neuromorphic engineering" and built analog circuits that imitated biological neurons in silicon — the deep history of every NPU on the market today.
 

@@ -74,7 +74,7 @@ The next chapter starts with the constraints themselves, in the units the datash
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 1: When AI Meets Constrained Hardware
+## LLM Exercise — Chapter 1: When AI Meets Constrained Hardware
 
 **Project:** TinyML Feasibility Toolkit (Python CLI)
 **What you're building this chapter:** The package scaffold, the `Application` dataclass, and a CLI that loads a YAML application spec and reports the four constraint targets.
@@ -125,7 +125,19 @@ Use the src/ layout. Run `pip install -e .` and `pytest` after writing — both 
 
 ---
 
-## 🕰️ AI Wayback Machine
+## A note about AI
+
+The chapter sets up the central problem: AI was designed for unconstrained compute, and most real deployments are constrained. The model lives on the unconstrained side of that boundary.
+
+Where the model genuinely helps: explaining the architectural choices that distinguish embedded AI from cloud AI, with worked numerical examples of memory and compute budgets.
+
+Where the model does damage: producing specific recommendations about which neural architecture fits a given microcontroller. The recommendation depends on toolchain, vendor, and your specific application's latency budget — none of which the model knows.
+
+The rule: use the model for the architecture lecture, not the architecture choice.
+
+---
+
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Annie Easley** wrote rocket-booster code in machine language for NASA's Centaur upper stage — software so constrained that every byte was hand-counted, decades before "embedded AI" was a phrase.
 

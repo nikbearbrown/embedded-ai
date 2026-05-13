@@ -9,7 +9,7 @@
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Annie Easley** wrote rocket-booster code in machine language for NASA's Centaur upper stage — software so constrained that every byte was hand-counted, decades before "embedded AI" was a phrase.
 
@@ -37,7 +37,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Lynn Conway** co-wrote the textbook that turned chip design from black art into a set of design rules — turning silicon constraints into variables you could reason about, decades before tinyML.
 
@@ -65,7 +65,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Lotfi Zadeh** invented fuzzy logic — a way to make machines reason about "warmer," "almost full," "a little wobbly" — and it ran in millions of embedded controllers (cameras, rice cookers, subway brakes) long before deep learning shipped on microcontrollers.
 
@@ -93,7 +93,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Thelma Estrin** built one of the first real-time biomedical computing systems — getting EEG signals into a computer fast enough to be useful — when "real-time" still meant tape and paper.
 
@@ -121,7 +121,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **An Wang** invented magnetic core memory — the technology that stored every bit in every computer for two decades, the spiritual ancestor of the SRAM you're allocating tensors into now.
 
@@ -149,7 +149,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Frances Allen** invented the techniques that turn a high-level loop into the SIMD instructions you're now counting cycles on — vectorizing compilers, decades before CMSIS-NN.
 
@@ -177,7 +177,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Rolf Landauer** proved that erasing a single bit of information costs a minimum amount of energy — kT ln 2, set by physics — and every joule your inference burns is paying some multiple of that bill.
 
@@ -205,7 +205,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Carver Mead** coined the term "neuromorphic engineering" and built analog circuits that imitated biological neurons in silicon — the deep history of every NPU on the market today.
 
@@ -233,7 +233,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Radia Perlman** designed the spanning tree protocol that makes every Ethernet network work — the kind of distributed coordination that decides where your edge inference output ends up.
 
@@ -261,7 +261,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Chung Laung "C.L." Liu** co-authored the 1973 paper on rate-monotonic scheduling — the math behind every hard-real-time system that has to guarantee a deadline, including the AI ones.
 
@@ -289,7 +289,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Vilfredo Pareto** was an Italian economist studying income distribution in 1906 when he formalized the idea that some allocations are dominated and some are not — the same Pareto frontier you used to choose between MobileNet variants.
 
@@ -317,7 +317,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Jacob Ziv** co-invented the LZ77 and LZ78 algorithms — the lossless-compression theory that underlies every ZIP file. Quantizing a neural network is the lossy cousin: same idea, different trade-off.
 
@@ -345,7 +345,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Sophie Wilson** designed the original ARM instruction set in 1983 — the architecture every Cortex-M chip in this book inherits, the silicon your `.tflite` ultimately gets compiled down to.
 
@@ -373,7 +373,7 @@ What changes? What gets better? What gets worse?
 ```markdown
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **W. Ross Ashby** was a British psychiatrist who founded cybernetics from the inside out, and his Law of Requisite Variety — a controller must have at least as much variety as the system it controls — is the structural reason why constraints decide your architecture, not your preferences.
 

@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 13: TinyML Toolchains and Deployment Pipelines
+## LLM Exercise — Chapter 13: TinyML Toolchains and Deployment Pipelines
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A deployment runner — a TFLite-converter wrapper that runs the conversion, simulates on-target inference via the TFLite Python interpreter, and emits a verification report comparing simulated outputs against the original training-model outputs.
@@ -17,11 +17,11 @@ Frozen DeploymentReport dataclass:
 - conversion_succeeded: bool
 - conversion_warnings: list[str]
 - calibration_set_size: int
-- mean_absolute_error_vs_source: float  (across the validation samples)
+- mean_absolute_error_vs_source: float (across the validation samples)
 - max_absolute_error_vs_source: float
-- accuracy_drift_pct: float  (deployed accuracy − source accuracy, negative if drift down)
-- toolchain_loss_flagged: bool  (True if drift > 2 percentage points — bisection signal)
-- ops_used: list[str]  (every op from the converted model that needs to be in the OpResolver)
+- accuracy_drift_pct: float (deployed accuracy − source accuracy, negative if drift down)
+- toolchain_loss_flagged: bool (True if drift > 2 percentage points — bisection signal)
+- ops_used: list[str] (every op from the converted model that needs to be in the OpResolver)
 - estimated_tensor_arena_kb: int
 - to_markdown() emits a Deployment section matching Chapter 14's shape
 

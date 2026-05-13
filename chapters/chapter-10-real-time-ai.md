@@ -38,7 +38,7 @@ That closes Part II. The next chapter starts Part III, where the model is no lon
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 10: Real-Time AI
+## LLM Exercise — Chapter 10: Real-Time AI
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A real-time verdict module that classifies an application's deadline class (soft / firm / hard), checks WCET against the deadline, and recommends a design pattern when AI is in a safety-critical loop.
@@ -53,7 +53,7 @@ Add src/tinyml_feasibility/realtime.py to the tinyml-feasibility toolkit.
 
 Frozen RealTimeVerdict dataclass:
 - real_time_class: Literal["soft", "firm", "hard"]
-- predicted_wcet_ms: float  (95th-percentile latency × 1.5 safety factor for hard real-time)
+- predicted_wcet_ms: float (95th-percentile latency × 1.5 safety factor for hard real-time)
 - deadline_ms: float
 - headroom_pct: float
 - safety_class: Literal["non-critical", "iec61508_sil1", "iec61508_sil4", "iso26262_asilA", "iso26262_asilD", "iec62304_classB", "iec62304_classC", "do178c_levelA"]
@@ -68,7 +68,7 @@ Public functions:
 - `recommend_design_pattern(safety_class: str, headroom_pct: float, real_time_class: str) -> str` — returns a pattern name with rationale
 
 Implementation:
-- predicted_wcet_ms = latency_estimate.total_ms × 1.5  (conservative — real WCET requires measurement on target)
+- predicted_wcet_ms = latency_estimate.total_ms × 1.5 (conservative — real WCET requires measurement on target)
 - For hard real-time AND safety_class in (iso26262_asilD, do178c_levelA): if AI cannot prove WCET deterministically, design_pattern = "exclude_ai" with justification
 - For hard real-time + lower safety class: design_pattern = "hierarchical_fallback" — AI advisory, deterministic fallback enforces safety
 - For firm real-time: design_pattern = "confidence_gating" — discard low-confidence predictions
@@ -101,7 +101,7 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Chung Laung "C.L." Liu** co-authored the 1973 paper on rate-monotonic scheduling — the math behind every hard-real-time system that has to guarantee a deadline, including the AI ones.
 

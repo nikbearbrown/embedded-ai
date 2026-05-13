@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 7: Power and Energy
+## LLM Exercise — Chapter 7: Power and Energy
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** The power verdict module — energy-balance equation, average power, battery-life prediction, and duty-cycle recommendations.
@@ -12,11 +12,11 @@
 Add src/tinyml_feasibility/power.py to the tinyml-feasibility toolkit.
 
 Frozen PowerVerdict dataclass:
-- active_energy_mj: float  (energy per inference)
+- active_energy_mj: float (energy per inference)
 - sleep_power_mw: float
-- duty_cycle_s: float  (inference period from app config)
+- duty_cycle_s: float (inference period from app config)
 - average_power_mw: float
-- battery_life_days: float | None  (None if no battery_mah in app config)
+- battery_life_days: float | None (None if no battery_mah in app config)
 - power_budget_mw: float
 - headroom_pct: float
 - verdict: Literal["FITS", "TIGHT", "FAILS"]
@@ -28,19 +28,19 @@ Public function:
 
 Implementation:
 - active_current_ma = target.active_current_ma_per_mhz * target.clock_mhz
-- active_power_mw = active_current_ma * supply_voltage  (default 3.3V; configurable)
+- active_power_mw = active_current_ma * supply_voltage (default 3.3V; configurable)
 - active_energy_mj = active_power_mw * latency_estimate.total_ms / 1000
 - sleep_power_mw = target.sleep_current_ua * supply_voltage / 1000
 - average_power_mw = (active_energy_mj / duty_cycle_s) + sleep_power_mw
-- battery_life_days = (battery_mah * supply_voltage * 3.6 / 1000) / (average_power_mw / 1000) / 86400  (only if app.battery_mah set)
+- battery_life_days = (battery_mah * supply_voltage * 3.6 / 1000) / (average_power_mw / 1000) / 86400 (only if app.battery_mah set)
 - headroom_pct = (power_budget - average_power) / power_budget * 100
 - verdict: FITS if headroom > 20%; FAILS if headroom < 0; TIGHT otherwise
 - mitigations:
-   - "Increase duty cycle (run inference less often)"
-   - "Race-to-sleep — boost clock to finish faster" (recompute and verify it actually wins)
-   - "Event-driven trigger (wake on threshold) instead of fixed interval"
-   - "Smaller model — less active energy per inference"
-   - "Lower-power target — see upgrade_path"
+ - "Increase duty cycle (run inference less often)"
+ - "Race-to-sleep — boost clock to finish faster" (recompute and verify it actually wins)
+ - "Event-driven trigger (wake on threshold) instead of fixed interval"
+ - "Smaller model — less active energy per inference"
+ - "Lower-power target — see upgrade_path"
 
 Add `app` fields if missing:
 - battery_mah: float | None

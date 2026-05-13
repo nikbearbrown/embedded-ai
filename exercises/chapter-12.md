@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 12: Optimizing Models — Quantization, Pruning, Distillation
+## LLM Exercise — Chapter 12: Optimizing Models — Quantization, Pruning, Distillation
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** An optimization-plan recommender that takes a model that almost fits and predicts the size, latency, and accuracy after each compression step in the prune → distill → quantize order.
@@ -18,12 +18,12 @@ Frozen OptimizationStep dataclass:
 - predicted_latency_ms: float
 - predicted_accuracy_pct: float
 - predicted_accuracy_drop_pct: float
-- justification: str  (why this step was inserted at this position)
+- justification: str (why this step was inserted at this position)
 
 Frozen OptimizationPlan dataclass:
 - baseline_model: ModelSummary
 - baseline_accuracy_pct: float
-- target_constraints: dict  (the four-constraint targets)
+- target_constraints: dict (the four-constraint targets)
 - accuracy_floor_pct: float
 - steps: list[OptimizationStep]
 - final_predicted_metrics: dict

@@ -96,7 +96,7 @@ That is what *constraints as design variables* means. Memory, compute, power, re
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 2: Embedded Constraints as Design Variables
+## LLM Exercise — Chapter 2: Embedded Constraints as Design Variables
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A `Target` dataclass with a real microcontroller catalog, and a `Constraints` translator that converts `Application` + `Target` into the four-constraint object the toolkit reasons over.
@@ -112,13 +112,13 @@ Extend the tinyml-feasibility package (chapter 1 set up the scaffold and Applica
 Add two modules:
 
 1. src/tinyml_feasibility/target.py
-   Frozen Target dataclass with fields: name, core (e.g., "Cortex-M4"), clock_mhz, sram_kb, flash_kb, active_current_ma_per_mhz, sleep_current_ua, has_accelerator (bool), accelerator_tops (float, 0.0 if none), cost_usd.
-   Provide a TARGETS dict mapping name → Target instance, populated from datasheets for at least: STM32L4R5, STM32H743, STM32N6, nRF52840, ESP32-S3, RPi-Zero-2W, Arduino-Nano-33-BLE-Sense.
-   Every numeric value gets a comment with the datasheet URL it came from. NO FABRICATION — if a number can't be sourced, leave it None and emit a warning.
+ Frozen Target dataclass with fields: name, core (e.g., "Cortex-M4"), clock_mhz, sram_kb, flash_kb, active_current_ma_per_mhz, sleep_current_ua, has_accelerator (bool), accelerator_tops (float, 0.0 if none), cost_usd.
+ Provide a TARGETS dict mapping name → Target instance, populated from datasheets for at least: STM32L4R5, STM32H743, STM32N6, nRF52840, ESP32-S3, RPi-Zero-2W, Arduino-Nano-33-BLE-Sense.
+ Every numeric value gets a comment with the datasheet URL it came from. NO FABRICATION — if a number can't be sourced, leave it None and emit a warning.
 
 2. src/tinyml_feasibility/constraints.py
-   Constraint dataclass: category (Literal["memory","compute","power","real_time"]), axis (str, e.g., "sram_kb", "latency_ms"), budget (float | str), source (str pointing to where the budget came from, e.g., "application.memory_budget.sram_kb").
-   Function `derive_constraints(app: Application, target: Target) -> list[Constraint]` produces one Constraint per axis: memory:flash, memory:sram, compute:latency, power:average, real_time:class.
+ Constraint dataclass: category (Literal["memory","compute","power","real_time"]), axis (str, e.g., "sram_kb", "latency_ms"), budget (float | str), source (str pointing to where the budget came from, e.g., "application.memory_budget.sram_kb").
+ Function `derive_constraints(app: Application, target: Target) -> list[Constraint]` produces one Constraint per axis: memory:flash, memory:sram, compute:latency, power:average, real_time:class.
 
 CLI extension:
 - `tinyml-feasibility list-targets` prints each Target as a table (name, core, clock, sram, flash, sleep current, cost)
@@ -148,7 +148,7 @@ Run pytest. All tests pass before you stop.
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Lynn Conway** co-wrote the textbook that turned chip design from black art into a set of design rules — turning silicon constraints into variables you could reason about, decades before tinyML.
 

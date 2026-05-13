@@ -80,7 +80,7 @@ Still puzzling: how to choose between two viable architectures when their bindin
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 14: Integration Case Studies — Full Design Decisions
+## LLM Exercise — Chapter 14: Integration Case Studies — Full Design Decisions
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** The integration-report generator that aggregates every prior verdict into a single Markdown decision document matching the shape of Chapter 14's three case studies — plus integration tests that replicate those case studies as toolkit invocations.
@@ -107,7 +107,7 @@ Frozen IntegrationReport dataclass:
 - optimization_plan: OptimizationPlan | None
 - deployment_report: DeploymentReport | None
 - binding_constraint: Literal["memory", "compute", "power", "real_time", "comms_bandwidth", "regulation", "accuracy"]
-- rejected_alternatives: list[dict]  (each: name, reason, citation back to verdict)
+- rejected_alternatives: list[dict] (each: name, reason, citation back to verdict)
 - risk_register: list[str]
 - to_markdown() emits the full decision document — same structure as Chapter 14's three case studies
 
@@ -151,7 +151,7 @@ Run pytest. All unit tests + all three integration tests pass before you stop.
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **W. Ross Ashby** was a British psychiatrist who founded cybernetics from the inside out, and his Law of Requisite Variety — a controller must have at least as much variety as the system it controls — is the structural reason why constraints decide your architecture, not your preferences.
 

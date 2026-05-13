@@ -30,12 +30,12 @@ Now you have to measure. The most basic profiling on ARM Cortex-M cores uses the
 // Enable DWT cycle counter (once during init)
 CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 DWT->CYCCNT = 0;
-DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;
+DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
 // Measure inference
 uint32_t start = DWT->CYCCNT;
 run_inference();
-uint32_t end   = DWT->CYCCNT;
+uint32_t end = DWT->CYCCNT;
 uint32_t cycles = end - start;
 
 // Convert to time
@@ -45,12 +45,12 @@ float latency_ms = (cycles / (float)CPU_FREQ_HZ) * 1000.0f;
 At 100 MHz, 10 million cycles is 100 ms. The same pattern wrapped around individual layers gives operator-level profiling — and for most embedded ML frameworks you do not have to wrap manually. TFLite Micro has built-in profiling that reports per-operator timing over UART when you enable it at compile time. The output looks like
 
 ```
-Operator,           Count, Time (ms)
-CONV_2D,                1,       45.2
-DEPTHWISE_CONV_2D,     13,       82.3
-FULLY_CONNECTED,        1,        3.1
-SOFTMAX,                1,        0.8
-Total inference time:        131.4 ms
+Operator, Count, Time (ms)
+CONV_2D, 1, 45.2
+DEPTHWISE_CONV_2D, 13, 82.3
+FULLY_CONNECTED, 1, 3.1
+SOFTMAX, 1, 0.8
+Total inference time: 131.4 ms
 ```
 
 If 63% of inference time is depthwise convolutions, you know exactly where to spend optimization effort. Without that breakdown, you are guessing.
@@ -85,7 +85,7 @@ The next chapter goes deep on the first of the four constraints in detail — me
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 4: Inference Mechanics
+## LLM Exercise — Chapter 4: Inference Mechanics
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A latency predictor that decomposes a model's inference into the four pipeline stages and estimates each stage's wall-clock time on a given target.
@@ -101,13 +101,13 @@ Extend tinyml-feasibility with a latency-prediction module grounded in the four-
 Add src/tinyml_feasibility/profiling.py:
 
 Frozen LatencyEstimate dataclass:
-- acquire_ms: float  (sensor read time; default 1.0, override by app config)
-- preprocess_ms: float  (e.g., MFCC for audio, normalization for vision)
+- acquire_ms: float (sensor read time; default 1.0, override by app config)
+- preprocess_ms: float (e.g., MFCC for audio, normalization for vision)
 - inference_ms: float
 - postprocess_ms: float
 - total_ms: float
 - bottleneck_stage: Literal["acquire", "preprocess", "run", "postprocess"]
-- assumption_notes: list[str]  (every estimate that came from a lookup table goes here)
+- assumption_notes: list[str] (every estimate that came from a lookup table goes here)
 
 Public functions:
 - `predict_inference_ms(model: ModelSummary, target: Target) -> float` — uses MAC throughput lookup. Provide a CORE_THROUGHPUT dict mapping core string ("Cortex-M0+", "Cortex-M4", "Cortex-M7", "Cortex-M55", "Cortex-A53") to MAC/sec at 1 MHz with int8 + CMSIS-NN. Source each value with a citation comment (e.g., ARM benchmark URLs, CMSIS-NN README).
@@ -140,7 +140,19 @@ Note: the lookup tables are imperfect approximations. Document this clearly in t
 
 ---
 
-## 🕰️ AI Wayback Machine
+## A note about AI
+
+Inference mechanics is the layer where the abstractions of a deep-learning framework meet the realities of a specific chip. The gap is where most embedded AI work happens.
+
+Where the model genuinely helps: walking through how a forward pass actually executes on a constrained device — load, compute, store, with attention to memory locality.
+
+Where the model does damage: producing inference latency estimates without flagging that the estimates depend on the toolchain's optimizer, the operator coverage of the runtime, and the specific quantization scheme. The numbers will sound precise and be wrong by an order of magnitude.
+
+The rule: the model is useful for the mechanics. The numbers come from your profiler.
+
+---
+
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Thelma Estrin** built one of the first real-time biomedical computing systems — getting EEG signals into a computer fast enough to be useful — when "real-time" still meant tape and paper.
 

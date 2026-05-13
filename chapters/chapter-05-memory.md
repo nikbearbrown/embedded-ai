@@ -27,7 +27,7 @@ Three layout strategies reduce activation memory. *In-place computation* writes 
 You control all of this by configuring the inference engine at compile time. TFLite Micro requires a static *tensor arena*:
 
 ```c
-constexpr int kTensorArenaSize = 200 * 1024;        // 200 KB
+constexpr int kTensorArenaSize = 200 * 1024; // 200 KB
 alignas(16) uint8_t tensor_arena[kTensorArenaSize];
 
 tflite::MicroInterpreter interpreter(model, resolver, tensor_arena, kTensorArenaSize);
@@ -40,8 +40,8 @@ Dynamic allocation during inference is a design error on embedded systems. The h
 Profiling is how you bridge theoretical and actual. The simplest method is to fill unused RAM with a known pattern, run inference, and count how many bytes were overwritten:
 
 ```c
-extern uint8_t _end;        // end of .bss section (linker-provided)
-extern uint8_t _estack;     // top of stack
+extern uint8_t _end; // end of .bss section (linker-provided)
+extern uint8_t _estack; // top of stack
 memset(&_end, 0xAA, &_estack - &_end);
 
 run_inference();
@@ -70,7 +70,7 @@ Memory is binary. The model fits or it does not. If it does not fit, no amount o
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 5: Memory
+## LLM Exercise — Chapter 5: Memory
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** The first verdict module — `memory.py` — which compares a model's flash + SRAM demands against a target's budget and emits a typed verdict with mitigations.
@@ -91,7 +91,7 @@ Frozen MemoryVerdict dataclass:
 - flash_margin_pct: float
 - sram_margin_pct: float
 - verdict: Literal["FITS", "TIGHT", "FAILS"]
-- mitigations: list[str]  (suggestions if TIGHT or FAILS)
+- mitigations: list[str] (suggestions if TIGHT or FAILS)
 - to_markdown() method — emits a section in the same shape as Chapter 14's case-study memory blocks
 
 Public function:
@@ -100,15 +100,15 @@ Public function:
 Implementation:
 - weight_kb = model.parameter_count * bytes_per_element(model.precision) / 1024
 - activation_kb = model.largest_activation_elements * bytes_per_element / 1024
-- scratch_kb = activation_kb * scratch_overhead  (im2col approximation)
+- scratch_kb = activation_kb * scratch_overhead (im2col approximation)
 - total_sram_kb = activation_kb + scratch_kb
 - flash_margin_pct = (target.flash_kb - weight_kb) / target.flash_kb * 100
 - sram_margin_pct = (target.sram_kb - total_sram_kb) / target.sram_kb * 100
 - verdict: FITS if both margins > 20; FAILS if either < 0; TIGHT otherwise
 - mitigations dict-driven from chapter 5's repertoire:
-   - if weight_kb is the bottleneck: "Quantize float32 → int8 (75% weight reduction)", "Switch to smaller MobileNet width multiplier"
-   - if activation_kb is the bottleneck: "Buffer reuse (20-40% activation reduction)", "In-place computation", "Smaller input resolution"
-   - if scratch_kb is the bottleneck: "Switch to direct convolution kernels (no im2col)"
+ - if weight_kb is the bottleneck: "Quantize float32 → int8 (75% weight reduction)", "Switch to smaller MobileNet width multiplier"
+ - if activation_kb is the bottleneck: "Buffer reuse (20-40% activation reduction)", "In-place computation", "Smaller input resolution"
+ - if scratch_kb is the bottleneck: "Switch to direct convolution kernels (no im2col)"
 
 CLI extension:
 - `tinyml-feasibility check-memory --app <yaml> --target <name> --model <path>` prints the MemoryVerdict and includes the to_markdown() output
@@ -136,7 +136,7 @@ Tests:
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **An Wang** invented magnetic core memory — the technology that stored every bit in every computer for two decades, the spiritual ancestor of the SRAM you're allocating tensors into now.
 

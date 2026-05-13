@@ -42,7 +42,7 @@ The pattern across all of these is the same one. Use the simplest model that mee
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 3: ML for Embedded Engineers
+## LLM Exercise — Chapter 3: ML for Embedded Engineers
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A model-loader module that ingests a TFLite (and optionally ONNX) model file and returns the three numbers every downstream module needs: parameter count, MAC count, and largest activation tensor size.
@@ -63,8 +63,8 @@ Frozen ModelSummary dataclass with fields:
 - parameter_count: int
 - mac_count: int
 - precision: Literal["int8", "int16", "float16", "float32"]
-- largest_activation_elements: int  (largest single-tensor activation)
-- layer_summary: list[tuple[str, dict]]  (layer name → key parameters)
+- largest_activation_elements: int (largest single-tensor activation)
+- layer_summary: list[tuple[str, dict]] (layer name → key parameters)
 
 Public functions:
 - `load_model(path: Path) -> ModelSummary` — dispatches on file extension. Implement TFLite first using the `tflite-micro` reference parser or the `tflite` python package.
@@ -99,7 +99,7 @@ Use `tflite` package (PyPI) or write a minimal FlatBuffers parser. Document whic
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Lotfi Zadeh** invented fuzzy logic — a way to make machines reason about "warmer," "almost full," "a little wobbly" — and it ran in millions of embedded controllers (cameras, rice cookers, subway brakes) long before deep learning shipped on microcontrollers.
 

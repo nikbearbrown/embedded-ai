@@ -38,7 +38,7 @@ converter.representative_dataset = representative_dataset_gen
 tflite_model = converter.convert()
 
 with open('my_model.tflite', 'wb') as f:
-    f.write(tflite_model)
+ f.write(tflite_model)
 ```
 
 The `representative_dataset_gen` is the calibration set — 100–1,000 inputs the converter runs through the network to record activation ranges and pick scale and zero_point per tensor. Skip this step or use a non-representative set and the resulting quantization will be wrong in ways that don't surface until on-device inference.
@@ -82,7 +82,7 @@ ONNX is the framework-agnostic intermediate format. Train in PyTorch, export to 
 
 ```python
 torch.onnx.export(model, dummy_input, 'my_model.onnx',
-                  input_names=['input'], output_names=['output'])
+ input_names=['input'], output_names=['output'])
 ```
 
 The `dummy_input` matters: ONNX export traces the model, so the shape you supply is the shape baked into the graph unless you declare dynamic axes.
@@ -141,7 +141,7 @@ Still puzzling: when on-device accuracy lands a percentage point or two below th
 
 ---
 
-## 🛠️ LLM Exercise — Chapter 13: TinyML Toolchains and Deployment Pipelines
+## LLM Exercise — Chapter 13: TinyML Toolchains and Deployment Pipelines
 
 **Project:** TinyML Feasibility Toolkit
 **What you're building this chapter:** A deployment runner — a TFLite-converter wrapper that runs the conversion, simulates on-target inference via the TFLite Python interpreter, and emits a verification report comparing simulated outputs against the original training-model outputs.
@@ -160,11 +160,11 @@ Frozen DeploymentReport dataclass:
 - conversion_succeeded: bool
 - conversion_warnings: list[str]
 - calibration_set_size: int
-- mean_absolute_error_vs_source: float  (across the validation samples)
+- mean_absolute_error_vs_source: float (across the validation samples)
 - max_absolute_error_vs_source: float
-- accuracy_drift_pct: float  (deployed accuracy − source accuracy, negative if drift down)
-- toolchain_loss_flagged: bool  (True if drift > 2 percentage points — bisection signal)
-- ops_used: list[str]  (every op from the converted model that needs to be in the OpResolver)
+- accuracy_drift_pct: float (deployed accuracy − source accuracy, negative if drift down)
+- toolchain_loss_flagged: bool (True if drift > 2 percentage points — bisection signal)
+- ops_used: list[str] (every op from the converted model that needs to be in the OpResolver)
 - estimated_tensor_arena_kb: int
 - to_markdown() emits a Deployment section matching Chapter 14's shape
 
@@ -206,7 +206,7 @@ Note: this module requires `tensorflow` as an optional dependency. Document the 
 
 ---
 
-## 🕰️ AI Wayback Machine
+## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Sophie Wilson** designed the original ARM instruction set in 1983 — the architecture every Cortex-M chip in this book inherits, the silicon your `.tflite` ultimately gets compiled down to.
 

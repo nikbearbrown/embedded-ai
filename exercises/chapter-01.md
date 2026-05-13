@@ -1,4 +1,4 @@
-## 🛠️ LLM Exercise — Chapter 1: When AI Meets Constrained Hardware
+## LLM Exercise — Chapter 1: When AI Meets Constrained Hardware
 
 **Project:** TinyML Feasibility Toolkit (Python CLI)
 **What you're building this chapter:** The package scaffold, the `Application` dataclass, and a CLI that loads a YAML application spec and reports the four constraint targets.
