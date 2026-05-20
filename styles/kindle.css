@@ -1,0 +1,139 @@
+body {
+  font-size: 1em;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  font-weight: bold;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  page-break-after: avoid;
+}
+
+h1 { font-size: 1.6em; }
+h2 { font-size: 1.3em; }
+h3 { font-size: 1.1em; }
+
+p {
+  margin: 0;
+  text-indent: 1.5em;
+}
+
+h1 + p, h2 + p, h3 + p {
+  text-indent: 0;
+}
+
+blockquote {
+  margin-left: 2em;
+  margin-right: 2em;
+  font-style: italic;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+}
+
+figure { margin: 1.5em 0; }
+figcaption { font-size: 0.85em; text-align: center; }
+
+/* ─────────────────────────────────────────────
+   Figure classes — applied by graphs.sh via Pandoc attribute syntax {.classname}
+   ───────────────────────────────────────────── */
+
+table.infographic-table,
+table.comparison-table,
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+  page-break-inside: avoid;
+}
+
+table.infographic-table thead tr {
+  background-color: #1a1814;
+  color: #f5f0e8;
+}
+table.infographic-table thead th {
+  padding: 0.6em 0.8em;
+  text-align: left;
+  font-weight: bold;
+  font-size: 0.95em;
+  border: none;
+}
+table.infographic-table tbody tr {
+  border-bottom: 1px solid #c8bfaa;
+}
+table.infographic-table tbody tr:last-child {
+  border-bottom: 2px solid #1a1814;
+}
+table.infographic-table tbody td {
+  padding: 0.65em 0.8em;
+  vertical-align: top;
+  line-height: 1.5;
+}
+table.infographic-table tbody td:first-child {
+  font-weight: bold;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  padding-right: 1em;
+}
+
+table.comparison-table thead tr {
+  border-bottom: 2px solid #1a1814;
+}
+table.comparison-table thead th {
+  padding: 0.6em 0.8em;
+  text-align: left;
+  font-weight: bold;
+}
+table.comparison-table tbody tr:nth-child(even) {
+  background-color: #f0ebe0;
+}
+table.comparison-table tbody td {
+  padding: 0.6em 0.8em;
+  vertical-align: top;
+  line-height: 1.5;
+  border-bottom: 1px solid #c8bfaa;
+}
+
+table.data-table thead tr {
+  border-bottom: 2px solid #1a1814;
+}
+table.data-table thead th {
+  padding: 0.5em 0.75em;
+  text-align: right;
+  font-weight: bold;
+}
+table.data-table thead th:first-child {
+  text-align: left;
+}
+table.data-table tbody td {
+  padding: 0.45em 0.75em;
+  text-align: right;
+  border-bottom: 1px solid #c8bfaa;
+  font-variant-numeric: tabular-nums;
+}
+table.data-table tbody td:first-child {
+  text-align: left;
+}
+table.data-table tbody tr:last-child td {
+  border-bottom: 2px solid #1a1814;
+  font-weight: bold;
+}
+
+p.figure-kicker {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6b6254;
+  margin-bottom: 0.25em;
+  text-indent: 0;
+}
