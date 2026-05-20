@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 6.1 — FLOP vs MAC equivalence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 65ch; }
+  .formula { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 18px; color: var(--color-ink); margin-bottom: 16px; }
+  #wrap { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 12px; align-items: center; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 220px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .op-row { border: 1px solid var(--color-secondary); padding: 12px; margin-bottom: 8px; transition: background 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: default; }
+  .op-row:last-child { margin-bottom: 0; }
+  .op-row:hover, .op-row:focus { background: var(--color-border); outline: none; }
+  .op-label { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--color-secondary); margin-bottom: 4px; }
+  .op-expr { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--color-ink); }
+  .fused { background: var(--color-ink); color: var(--color-white); padding: 28px 16px; text-align: center; transition: background 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: default; }
+  .fused:hover, .fused:focus { background: var(--color-red); outline: none; }
+  .fused-label { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--color-border); margin-bottom: 8px; }
+  .fused-expr { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; }
+  .fused-note { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--color-border); margin-top: 12px; }
+  .arrow { font-family: 'EB Garamond', Georgia, serif; font-size: 28px; color: var(--color-ink); text-align: center; }
+  .arrow-cap { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-style: italic; color: var(--color-secondary); margin-top: 4px; }
+  .rule { margin-top: 24px; padding: 12px 16px; border-left: 3px solid var(--color-ochre); }
+  .rule strong { font-weight: 700; }
+  .rule p { margin-bottom: 6px; font-size: 14px; }
+  .rule p:last-child { margin-bottom: 0; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; max-width: 240px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 6.1 — FLOP vs MAC equivalence</h1>
+<p class="subtitle">A fully connected layer y = Wx + b decomposes into a multiply and an add. Hardware fuses them.</p>
+<div class="formula">y = W·x + b</div>
+<div id="wrap">
+  <div class="panel" role="img" aria-labelledby="flop-t flop-d">
+    <h2 class="panel-title" id="flop-t">FLOP view — frameworks count this way</h2>
+    <p id="flop-d" style="display:none">Two FLOPs per output element: one multiply followed by one add.</p>
+    <div class="op-row" tabindex="0" aria-label="First FLOP: multiply a times b stored in t">
+      <div class="op-label">FLOP 1 — multiply</div>
+      <div class="op-expr">a × b → t</div>
+    </div>
+    <div class="op-row" tabindex="0" aria-label="Second FLOP: add t to running result">
+      <div class="op-label">FLOP 2 — add</div>
+      <div class="op-expr">result + t → result</div>
+    </div>
+    <p class="op-label" style="margin-top:12px">2 FLOPs · two cycles on a scalar pipeline</p>
+  </div>
+  <div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="arrow-cap">collapses to</div>
+  </div>
+  <div class="panel" role="img" aria-labelledby="mac-t mac-d">
+    <h2 class="panel-title" id="mac-t">MAC view — hardware does this</h2>
+    <p id="mac-d" style="display:none">One fused multiply-accumulate instruction completes in a single cycle.</p>
+    <div class="fused" tabindex="0" aria-label="One MAC instruction: result plus equals a times b">
+      <div class="fused-label">1 MAC — fused multiply-accumulate</div>
+      <div class="fused-expr">result += a × b</div>
+      <div class="fused-note">one instruction · one cycle on M4 / M7 / A53</div>
+    </div>
+    <p class="op-label" style="margin-top:12px">1 MAC · half the instruction count, same math</p>
+  </div>
+</div>
+<div class="rule" id="ratio-chart-wrap">
+  <p><strong>Rule of thumb.</strong> For pure multiply-add kernels (matmul, conv): MACs ≈ FLOPs ÷ 2.</p>
+  <p>Mixed work (activations, pooling) — keep FLOPs as a conservative upper bound; only fused MAD lanes save the cycle.</p>
+  <div id="ratio-chart" class="chart" role="img" aria-labelledby="ratio-t ratio-d" style="margin-top:12px"></div>
+  <p id="ratio-t" style="display:none">FLOP and MAC counts for a sample fully-connected layer.</p>
+  <p id="ratio-d" style="display:none">For a layer with input 256 and output 128, multiply-add gives 32,768 MACs versus 65,664 FLOPs; bias-only adds give 128 FLOPs with no MAC equivalent.</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const layerData = [
+  { label: 'MACs (W·x)',      value: 32768, kind: 'mac', note: 'input 256 × output 128 = 32,768 fused MACs' },
+  { label: 'FLOPs (W·x)',     value: 65536, kind: 'flop', note: '2 × (256 × 128) = 65,536 FLOPs (multiply + add)' },
+  { label: 'FLOPs (bias)',    value: 128,   kind: 'flop', note: '+ 128 scalar adds for the bias term' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>${d.value.toLocaleString()} ops<br><span style="opacity:0.8">${d.note}</span>`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawRatio() {
+  const sel = '#ratio-chart';
+  const container = document.querySelector(sel);
+  if (!container) return;
+  d3.select(sel).selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 600;
+  const totalHeight = container.clientHeight || 220;
+  const margin = { top: 16, right: 80, bottom: 40, left: 140 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'ratio-t ratio-d');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const yScaleBand = d3.scaleBand().domain(layerData.map(d => d.label)).range([0, chartHeight]).padding(0.25);
+  const xScaleLinear = d3.scaleLinear().domain([0, 70000]).range([0, chartWidth]);
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(4).tickFormat(d => d3.format(',')(d)));
+  gChart.append('g').attr('class', 'axis').call(d3.axisLeft(yScaleBand));
+
+  gChart.selectAll('.bar-rect')
+    .data(layerData)
+    .join('rect')
+      .attr('class', 'bar-rect')
+      .attr('x', 0)
+      .attr('y', d => yScaleBand(d.label))
+      .attr('width', d => xScaleLinear(d.value))
+      .attr('height', yScaleBand.bandwidth())
+      .attr('fill', d => d.kind === 'mac' ? 'var(--color-red)' : 'var(--color-ink)')
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.label}: ${d.value.toLocaleString()} operations`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  gChart.selectAll('.bar-num')
+    .data(layerData)
+    .join('text')
+      .attr('class', 'bar-num')
+      .attr('x', d => xScaleLinear(d.value) + 6)
+      .attr('y', d => yScaleBand(d.label) + yScaleBand.bandwidth() / 2 + 4)
+      .attr('font-family', "'JetBrains Mono', monospace")
+      .attr('font-size', 11)
+      .attr('fill', 'var(--color-ink)')
+      .text(d => d.value.toLocaleString());
+}
+
+drawRatio();
+const ro = new ResizeObserver(() => drawRatio());
+ro.observe(document.getElementById('ratio-chart'));
+</script>
+</body>
+</html>

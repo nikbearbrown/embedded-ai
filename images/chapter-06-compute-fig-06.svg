@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t06-06 d06-06">
+  <title id="t06-06">Latency budget waterfall — one-second duty cycle with 80 ms inference at 28 mA against a 5 mA average</title>
+  <desc id="d06-06">Horizontal stacked bar showing the 1000 ms duty cycle. A narrow 80 ms inference block at 28 mA is highlighted against the 920 ms sleep block at near-zero current. Annotations show the time-weighted average of 2.24 mA against a 5 mA budget ceiling.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: bold; fill: #1f1a14; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #1f1a14; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
+      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
+      .num { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #1f1a14; }
+      .red { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #C8102E; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+    </style>
+    <marker id="ar6" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1f1a14"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <text x="350" y="28" text-anchor="middle" class="ti">Duty-cycle waterfall — inference is loud but brief; the average stays under budget</text>
+
+  <!-- TIME-AXIS LAYOUT -->
+  <!-- 1000 ms across 600 px → 0.6 px per ms. Bar from x = 60 to 660 -->
+  <!-- Inference: 80 ms = 48 px, from x=60 to x=108. Sleep: 920 ms = 552 px, from x=108 to x=660. -->
+
+  <!-- CURRENT-AXIS (vertical) for the profile: -->
+  <!-- y top (28 mA) = 100, baseline (0 mA) = 220, midpoint (5 mA budget) computed proportional -->
+  <!-- height of inference block (current 28 mA) = 120 px, baseline at y=220 → top at y=100 -->
+  <!-- height of sleep block ≈ 0.002 mA: invisible, drawn as 1 px line at y=219 -->
+
+  <text x="36" y="60" class="lb">Current (mA)</text>
+
+  <!-- Y axis ticks -->
+  <line x1="60" y1="100" x2="60" y2="220" stroke="#4a4540" stroke-width="1"/>
+  <line x1="56" y1="100" x2="60" y2="100" stroke="#4a4540"/>
+  <text x="52" y="104" text-anchor="end" class="ax">28</text>
+  <!-- 5 mA budget: y = 220 - (5/28)*120 = 220 - 21.43 = 198.57 -->
+  <line x1="56" y1="198.57" x2="60" y2="198.57" stroke="#4a4540"/>
+  <text x="52" y="202" text-anchor="end" class="ax">5</text>
+  <!-- 2.24 mA average: y = 220 - (2.24/28)*120 = 220 - 9.6 = 210.4 -->
+  <line x1="56" y1="210.4" x2="60" y2="210.4" stroke="#4a4540"/>
+  <text x="52" y="214" text-anchor="end" class="ax">2.24</text>
+  <line x1="56" y1="220" x2="60" y2="220" stroke="#4a4540"/>
+  <text x="52" y="224" text-anchor="end" class="ax">0</text>
+
+  <!-- Time axis -->
+  <line x1="60" y1="220" x2="660" y2="220" stroke="#4a4540" stroke-width="1"/>
+
+  <!-- X axis ticks at 0, 200, 400, 600, 800, 1000 ms (200 ms = 120 px) -->
+  <line x1="60" y1="220" x2="60" y2="224" stroke="#4a4540"/>
+  <text x="60" y="238" text-anchor="middle" class="ax">0</text>
+  <line x1="180" y1="220" x2="180" y2="224" stroke="#4a4540"/>
+  <text x="180" y="238" text-anchor="middle" class="ax">200</text>
+  <line x1="300" y1="220" x2="300" y2="224" stroke="#4a4540"/>
+  <text x="300" y="238" text-anchor="middle" class="ax">400</text>
+  <line x1="420" y1="220" x2="420" y2="224" stroke="#4a4540"/>
+  <text x="420" y="238" text-anchor="middle" class="ax">600</text>
+  <line x1="540" y1="220" x2="540" y2="224" stroke="#4a4540"/>
+  <text x="540" y="238" text-anchor="middle" class="ax">800</text>
+  <line x1="660" y1="220" x2="660" y2="224" stroke="#4a4540"/>
+  <text x="660" y="238" text-anchor="middle" class="ax">1000</text>
+  <text x="360" y="258" text-anchor="middle" class="lb">Time within 1-second window (ms)</text>
+
+  <!-- 5 mA budget ceiling (dashed red across the whole window) -->
+  <line x1="60" y1="198.57" x2="660" y2="198.57" stroke="#C8102E" stroke-width="1.25" stroke-dasharray="5 4"/>
+  <text x="660" y="194" text-anchor="end" class="sm" fill="#C8102E">5 mA budget ceiling</text>
+
+  <!-- Inference block: x 60-108, y 100-220 (28 mA, 80 ms) -->
+  <rect x="60" y="100" width="48" height="120" fill="#1f1a14"/>
+  <!-- Sleep block: x 108-660, y 219-220 (≈ 0 mA) -->
+  <rect x="108" y="219" width="552" height="1" fill="#1f1a14"/>
+
+  <!-- Average level dashed line at 2.24 mA -->
+  <line x1="60" y1="210.4" x2="660" y2="210.4" stroke="#1f1a14" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="660" y="207" text-anchor="end" class="sm">2.24 mA time-weighted average</text>
+
+  <!-- Annotate inference block -->
+  <path d="M 84 95 L 84 78 L 220 78" fill="none" stroke="#1f1a14" stroke-width="1" marker-end="url(#ar6)"/>
+  <text x="226" y="76" class="lb">Inference burst: 80 ms × 28 mA</text>
+  <text x="226" y="92" class="sm">(active radio off; MCU at full clock)</text>
+
+  <!-- Annotate sleep -->
+  <path d="M 400 215 L 400 195" fill="none" stroke="#1f1a14" stroke-width="1" marker-end="url(#ar6)"/>
+  <text x="400" y="188" text-anchor="middle" class="lb">920 ms sleep at ~2 µA — practically zero</text>
+
+  <!-- Math row below -->
+  <line x1="60" y1="290" x2="660" y2="290" stroke="#8a8480" stroke-width="0.5"/>
+  <text x="60" y="312" class="lb"><tspan font-weight="bold">Average current</tspan>  =  (28 mA × 0.08 s  +  0.002 mA × 0.92 s) ÷ 1 s</text>
+  <text x="60" y="334" class="num">≈ 2.24 mA</text>
+  <text x="170" y="334" class="sm">vs. 5 mA budget</text>
+
+  <!-- Outcome boxes -->
+  <rect x="350" y="295" width="140" height="44" fill="#fdfcfb" stroke="#1f1a14"/>
+  <text x="420" y="313" text-anchor="middle" class="sm">budget remaining</text>
+  <text x="420" y="332" text-anchor="middle" class="num">2.76 mA</text>
+
+  <rect x="510" y="295" width="140" height="44" fill="#1f1a14"/>
+  <text x="580" y="313" text-anchor="middle" class="sm" fill="#c8c4c0">tight but feasible</text>
+  <text x="580" y="332" text-anchor="middle" class="num" fill="#fdfcfb">verdict: pass</text>
+
+  <!-- Caption -->
+  <text x="350" y="370" text-anchor="middle" class="cap">Duty cycling buys the average. Even at 28 mA peak the device runs inside 2.24 mA on average,</text>
+  <text x="350" y="388" text-anchor="middle" class="cap">because inference is brief and sleep is long. The 2.76 mA headroom pays for sensors and radio.</text>
+  <text x="350" y="406" text-anchor="middle" class="cap">Stretch inference past ≈ 180 ms and the average crosses the 5 mA ceiling.</text>
+</svg>

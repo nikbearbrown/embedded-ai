@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="t02 d02">
+  <title id="t02">Tier-selection decision flowchart — four gates from latency to model fit</title>
+  <desc id="d02">A vertical decision flow with four gates: latency budget, privacy or regulation, connectivity availability, and model fit. Each "yes" path arrives at on-device or near-edge; a "no" through all four leads to offloading and a four-cost check.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
+      .gate { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-weight: bold; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .ans { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #2a1a0e; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .out { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #fdfcfb; }
+    </style>
+    <marker id="ar2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="720" height="460" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">Decision flow — pick a tier by elimination, not by aspiration</text>
+
+  <!-- Vertical spine of gates on the left; right column for "on-device / near-edge" outcomes -->
+  <!-- Gate 1: latency -->
+  <polygon points="200,80 360,80 380,108 360,136 200,136 180,108" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="280" y="103" text-anchor="middle" class="gate">Latency budget &lt; 100 ms?</text>
+  <text x="280" y="123" text-anchor="middle" class="sm">hard real-time? control loop? closed-loop?</text>
+
+  <!-- Gate 2: privacy -->
+  <polygon points="200,170 360,170 380,198 360,226 200,226 180,198" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="280" y="193" text-anchor="middle" class="gate">Privacy or regulation forbids exfiltration?</text>
+  <text x="280" y="213" text-anchor="middle" class="sm">HIPAA, GDPR, PCI-DSS, on-prem mandate</text>
+
+  <!-- Gate 3: connectivity -->
+  <polygon points="200,260 360,260 380,288 360,316 200,316 180,288" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="280" y="283" text-anchor="middle" class="gate">Connectivity intermittent or absent?</text>
+  <text x="280" y="303" text-anchor="middle" class="sm">remote, maritime, jamming, drop-tolerant</text>
+
+  <!-- Gate 4: model fit -->
+  <polygon points="200,350 360,350 380,378 360,406 200,406 180,378" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="280" y="373" text-anchor="middle" class="gate">Model fits on device?</text>
+  <text x="280" y="393" text-anchor="middle" class="sm">parameters, MACs, SRAM, latency budget</text>
+
+  <!-- arrows down the spine -->
+  <line x1="280" y1="136" x2="280" y2="168" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="290" y="158" class="ans">NO</text>
+  <line x1="280" y1="226" x2="280" y2="258" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="290" y="248" class="ans">NO</text>
+  <line x1="280" y1="316" x2="280" y2="348" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="290" y="338" class="ans">NO</text>
+
+  <!-- YES branches go RIGHT into the on-device column -->
+  <line x1="380" y1="108" x2="510" y2="108" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="445" y="100" text-anchor="middle" class="ans">YES</text>
+  <line x1="380" y1="198" x2="510" y2="198" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="445" y="190" text-anchor="middle" class="ans">YES</text>
+  <line x1="380" y1="288" x2="510" y2="288" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="445" y="280" text-anchor="middle" class="ans">YES</text>
+  <line x1="380" y1="378" x2="510" y2="378" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="445" y="370" text-anchor="middle" class="ans">YES</text>
+
+  <!-- Outcome boxes on right -->
+  <rect x="510" y="92"  width="180" height="34" fill="#2a1a0e"/>
+  <text x="600" y="114" text-anchor="middle" class="out">on-device or near-edge</text>
+  <rect x="510" y="182" width="180" height="34" fill="#2a1a0e"/>
+  <text x="600" y="204" text-anchor="middle" class="out">on-device only</text>
+  <rect x="510" y="272" width="180" height="34" fill="#2a1a0e"/>
+  <text x="600" y="294" text-anchor="middle" class="out">on-device only</text>
+  <rect x="510" y="362" width="180" height="34" fill="#2a1a0e"/>
+  <text x="600" y="384" text-anchor="middle" class="out">prefer on-device</text>
+
+  <!-- Final NO arrow goes down to offload box -->
+  <line x1="280" y1="406" x2="280" y2="430" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="290" y="424" class="ans">NO</text>
+  <rect x="50" y="426" width="460" height="28" fill="#fdfcfb" stroke="#8a1f1f" stroke-width="1.5"/>
+  <text x="280" y="445" text-anchor="middle" class="lb" fill="#8a1f1f">offload — run the four-cost check: latency, bandwidth, energy, money</text>
+
+  <!-- Side note column -->
+  <text x="40"  y="68" class="sm">enter at the top</text>
+  <text x="40"  y="82" class="sm">with the application's</text>
+  <text x="40"  y="96" class="sm">latency, privacy,</text>
+  <text x="40"  y="110" class="sm">connectivity, and</text>
+  <text x="40"  y="124" class="sm">model spec.</text>
+
+  <text x="40" y="160" class="cap">first yes wins</text>
+  <text x="40" y="174" class="sm">don't fall through</text>
+  <text x="40" y="188" class="sm">to the next gate</text>
+  <text x="40" y="202" class="sm">unless this one is</text>
+  <text x="40" y="216" class="sm">truly satisfied.</text>
+</svg>

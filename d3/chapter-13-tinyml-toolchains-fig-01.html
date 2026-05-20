@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 13.1 — Six-step deployment pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 380px; position: relative; }
+  .step-rect { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.5; transition: fill 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .step-rect:hover, .step-rect:focus { fill: var(--color-border); outline: none; }
+  .step-name { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 16px; fill: var(--color-ink); }
+  .step-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .artifact { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .artifact-cap { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; fill: var(--color-secondary); }
+  .fail-line { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .arrow { stroke: var(--color-ink); stroke-width: 1.25; fill: none; }
+  .silent-note { font-family: 'EB Garamond', Georgia, serif; font-style: italic; fill: var(--color-ink); font-size: 13px; }
+  .silent-frame { fill: none; stroke: var(--color-ochre); stroke-width: 2; stroke-dasharray: 4 3; }
+  .caption { color: var(--color-secondary); font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 13px; margin-top: 16px; max-width: 70ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 13.1 — Six-step deployment pipeline</h1>
+<p class="subtitle">Train, Convert, Optimize, Compile, Deploy, Verify. Each step has an artifact and a dominant silent-failure mode.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Every gate reports success. Only the verification step catches the lie.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const stepData = [
+  { n: 1, name: 'Train',    artifact: '.h5 / .pth',     failure: 'model below threshold before deploy' },
+  { n: 2, name: 'Convert',  artifact: '.tflite / .onnx', failure: 'custom layer silently substituted' },
+  { n: 3, name: 'Optimize', artifact: 'int8 .tflite',    failure: 'fusion unsupported by runtime' },
+  { n: 4, name: 'Compile',  artifact: '.elf binary',     failure: 'arena alignment mismatch' },
+  { n: 5, name: 'Deploy',   artifact: 'flashed image',   failure: 'flash region corrupts one weight' },
+  { n: 6, name: 'Verify',   artifact: 'accuracy Δ',      failure: 'accuracy drift, no root cause' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>Step ${d.n} — ${d.name}</strong><br><span style="font-family:JetBrains Mono,monospace">${d.artifact}</span><br><br><em>silent failure:</em><br>${d.failure}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 880;
+  const totalHeight = 380;
+  const margin = { top: 60, right: 24, bottom: 80, left: 24 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Six-step embedded ML deployment pipeline');
+  svg.append('desc').attr('id', 'chart-desc').text('Horizontal flow of six gates from trained checkpoint to verified binary, with each gate showing its artifact format and dominant silent failure mode.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // arrow marker
+  svg.append('defs').append('marker')
+    .attr('id', 'arrow-pipeline').attr('markerWidth', 9).attr('markerHeight', 7)
+    .attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-ink)');
+
+  const xScaleBand = d3.scaleBand()
+    .domain(stepData.map(d => d.n))
+    .range([0, chartWidth])
+    .padding(0.18);
+
+  const boxH = 70;
+  const boxY = 30;
+
+  // artifact row label
+  gChart.append('text')
+    .attr('class', 'artifact-cap')
+    .attr('x', 0).attr('y', -20)
+    .text('artifact');
+
+  // step boxes
+  const gBoxes = gChart.append('g').attr('class', 'g-steps');
+  const stepBox = gBoxes.selectAll('.step-g').data(stepData).join('g')
+    .attr('class', 'step-g')
+    .attr('transform', d => `translate(${xScaleBand(d.n)},0)`);
+
+  stepBox.append('rect')
+    .attr('class', 'step-rect')
+    .attr('x', 0).attr('y', boxY).attr('width', xScaleBand.bandwidth()).attr('height', boxH)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `Step ${d.n}, ${d.name}, artifact ${d.artifact}, failure mode ${d.failure}`)
+    .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip)
+    .on('focus', (event, d) => showTip(event, d)).on('blur', hideTip);
+
+  stepBox.append('text')
+    .attr('class', 'step-num')
+    .attr('x', xScaleBand.bandwidth() / 2).attr('y', boxY + 18)
+    .attr('text-anchor', 'middle')
+    .text(d => `step ${d.n}`);
+
+  stepBox.append('text')
+    .attr('class', 'step-name')
+    .attr('x', xScaleBand.bandwidth() / 2).attr('y', boxY + 46)
+    .attr('text-anchor', 'middle')
+    .text(d => d.name);
+
+  // artifact text above boxes
+  stepBox.append('text')
+    .attr('class', 'artifact')
+    .attr('x', xScaleBand.bandwidth() / 2).attr('y', 12)
+    .attr('text-anchor', 'middle')
+    .text(d => d.artifact);
+
+  // arrows between boxes
+  for (let i = 0; i < stepData.length - 1; i++) {
+    const x1 = xScaleBand(stepData[i].n) + xScaleBand.bandwidth();
+    const x2 = xScaleBand(stepData[i + 1].n);
+    gChart.append('line').attr('class', 'arrow')
+      .attr('x1', x1 + 2).attr('y1', boxY + boxH / 2)
+      .attr('x2', x2 - 4).attr('y2', boxY + boxH / 2)
+      .attr('marker-end', 'url(#arrow-pipeline)');
+  }
+
+  // failure mode under boxes
+  stepBox.each(function (d) {
+    const lines = d.failure.split(/(?<=\b)\s+(?=\b)/).reduce((acc, w) => {
+      const cur = acc[acc.length - 1];
+      if (cur && (cur + ' ' + w).length < 18) acc[acc.length - 1] = cur + ' ' + w;
+      else acc.push(w);
+      return acc;
+    }, []);
+    const g = d3.select(this);
+    lines.forEach((line, i) => {
+      g.append('text').attr('class', 'fail-line')
+        .attr('x', xScaleBand.bandwidth() / 2).attr('y', boxY + boxH + 18 + i * 14)
+        .attr('text-anchor', 'middle')
+        .text(line);
+    });
+  });
+
+  // silent-failure callout below
+  const noteY = boxY + boxH + 78;
+  gChart.append('rect').attr('class', 'silent-frame')
+    .attr('x', 0).attr('y', noteY).attr('width', chartWidth).attr('height', 32);
+  gChart.append('text').attr('class', 'silent-note')
+    .attr('x', chartWidth / 2).attr('y', noteY + 21)
+    .attr('text-anchor', 'middle')
+    .text('Every gate reports success. Only step 6 catches the lie.');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

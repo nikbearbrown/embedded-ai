@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 1.3 — Edge / fog / cloud topology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 520px; position: relative; }
+  .ring { fill: none; stroke: var(--color-border); stroke-width: 0.75; stroke-dasharray: 3 3; }
+  .ring.edge { stroke: var(--color-ink); stroke-width: 1; stroke-dasharray: none; }
+  .ring-fill { fill: var(--color-border); opacity: 0.15; }
+  .node-sensor { fill: var(--color-ink); }
+  .node-gateway { fill: var(--color-secondary); }
+  .node-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; fill: var(--color-ink); }
+  .node-detail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .ring-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; fill: var(--color-ink); }
+  .ring-detail { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .link { stroke: var(--color-ink); stroke-width: 1; fill: none; }
+  .link.wan { stroke-dasharray: 4 3; }
+  .panel { fill: var(--color-white); stroke: var(--color-border); }
+  .panel-marker { stroke: none; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: var(--color-ink); }
+  .panel-detail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 70ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 1.3 — Edge / fog / cloud topology</h1>
+<p class="subtitle">Three concentric placements for inference. Each ring sets a latency floor and decides what physically leaves the device.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Placement is physics, not preference. The latency floor or the privacy law makes the choice.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const placementData = [
+  { id: 'edge',  label: 'on-device edge', latency: '< 10 ms', network: 'no network', leaves: 'only the result', satisfies: 'latency, privacy, connectivity, cost', violates: 'compute, memory headroom', radius: 0.18, color: 'var(--color-ink)' },
+  { id: 'fog',   label: 'fog / gateway',  latency: '10–50 ms', network: 'LAN',        leaves: 'features or raw',   satisfies: 'latency, partial privacy',             violates: 'connectivity if LAN drops', radius: 0.42, color: 'var(--color-secondary)' },
+  { id: 'cloud', label: 'cloud',          latency: '50–500+ ms', network: 'WAN / cellular', leaves: 'raw sensor data', satisfies: 'compute, memory, retraining', violates: 'latency, privacy, cost', radius: 0.75, color: 'var(--color-border)' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>latency ${d.latency} · ${d.network}<br>leaves device: ${d.leaves}<br><br>satisfies: ${d.satisfies}<br>violates: ${d.violates}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 800;
+  const totalHeight = 520;
+  const margin = { top: 60, right: 24, bottom: 200, left: 24 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Edge fog cloud topology');
+  svg.append('desc').attr('id', 'chart-desc').text('A topology diagram with a sensor on the left and a cloud datacenter on the right, with three concentric inference-placement rings annotated with latency and what leaves the device.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const sensorX = chartWidth * 0.16;
+  const sensorY = chartHeight * 0.55;
+  const cloudX = chartWidth * 0.88;
+  const cloudY = chartHeight * 0.55;
+  const gatewayX = chartWidth * 0.35;
+  const gatewayY = chartHeight * 0.32;
+
+  const rScaleSqrt = d3.scaleSqrt().domain([0, 1]).range([0, chartHeight * 0.85]);
+
+  // Rings (largest first so smaller draws on top)
+  const rings = [...placementData].reverse();
+  gChart.selectAll('.ring').data(rings).join('circle')
+    .attr('class', d => d.id === 'edge' ? 'ring edge' : 'ring')
+    .attr('cx', sensorX).attr('cy', sensorY)
+    .attr('r', d => rScaleSqrt(d.radius))
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label}: ${d.latency} latency, leaves device ${d.leaves}`)
+    .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  // Edge ring fill
+  gChart.append('circle').attr('class', 'ring-fill')
+    .attr('cx', sensorX).attr('cy', sensorY).attr('r', rScaleSqrt(0.18));
+
+  // Ring labels positioned along upper arcs
+  const ringLabels = [
+    { d: placementData[0], offsetY: -rScaleSqrt(0.18) - 16 },
+    { d: placementData[1], x: sensorX + rScaleSqrt(0.42) * 0.6, y: sensorY - rScaleSqrt(0.42) * 0.8 },
+    { d: placementData[2], x: sensorX + rScaleSqrt(0.75) * 0.7, y: sensorY - rScaleSqrt(0.75) * 0.7 }
+  ];
+
+  // Edge label (above sensor)
+  gChart.append('text').attr('class', 'ring-label')
+    .attr('x', sensorX).attr('y', sensorY - rScaleSqrt(0.18) - 16).attr('text-anchor', 'middle')
+    .text(placementData[0].label);
+  gChart.append('text').attr('class', 'ring-detail')
+    .attr('x', sensorX).attr('y', sensorY - rScaleSqrt(0.18) - 2).attr('text-anchor', 'middle')
+    .text(`${placementData[0].latency} · ${placementData[0].network}`);
+
+  // Fog label
+  gChart.append('text').attr('class', 'ring-label')
+    .attr('x', sensorX + rScaleSqrt(0.42) * 0.5).attr('y', sensorY - rScaleSqrt(0.42) * 0.95).attr('text-anchor', 'middle')
+    .text(placementData[1].label);
+  gChart.append('text').attr('class', 'ring-detail')
+    .attr('x', sensorX + rScaleSqrt(0.42) * 0.5).attr('y', sensorY - rScaleSqrt(0.42) * 0.95 + 14).attr('text-anchor', 'middle')
+    .text(`${placementData[1].latency} · ${placementData[1].network}`);
+
+  // Cloud label
+  gChart.append('text').attr('class', 'ring-label')
+    .attr('x', sensorX + rScaleSqrt(0.75) * 0.55).attr('y', sensorY - rScaleSqrt(0.75) * 0.9).attr('text-anchor', 'middle')
+    .text(placementData[2].label);
+  gChart.append('text').attr('class', 'ring-detail')
+    .attr('x', sensorX + rScaleSqrt(0.75) * 0.55).attr('y', sensorY - rScaleSqrt(0.75) * 0.9 + 14).attr('text-anchor', 'middle')
+    .text(`${placementData[2].latency} · ${placementData[2].network}`);
+
+  // Connection: sensor → gateway
+  gChart.append('line').attr('class', 'link')
+    .attr('x1', sensorX + 18).attr('y1', sensorY - 6)
+    .attr('x2', gatewayX - 12).attr('y2', gatewayY + 8)
+    .attr('marker-end', 'url(#arrow3)');
+  // Connection: gateway → cloud
+  gChart.append('line').attr('class', 'link wan')
+    .attr('x1', gatewayX + 22).attr('y1', gatewayY + 4)
+    .attr('x2', cloudX - 30).attr('y2', cloudY - 8);
+
+  // Arrow marker
+  svg.append('defs').append('marker').attr('id', 'arrow3')
+    .attr('markerWidth', 8).attr('markerHeight', 6).attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+
+  // Sensor
+  const sg = gChart.append('g').attr('transform', `translate(${sensorX}, ${sensorY})`);
+  sg.append('rect').attr('class', 'node-sensor')
+    .attr('x', -18).attr('y', -18).attr('width', 36).attr('height', 36).attr('rx', 2);
+  sg.append('circle').attr('cx', 0).attr('cy', 0).attr('r', 5).attr('fill', 'var(--color-white)');
+  sg.append('text').attr('class', 'node-label').attr('y', 36).attr('text-anchor', 'middle').text('sensor');
+  sg.append('text').attr('class', 'node-detail').attr('y', 50).attr('text-anchor', 'middle').text('camera · mic · ECG');
+
+  // Gateway
+  const gg = gChart.append('g').attr('transform', `translate(${gatewayX}, ${gatewayY})`);
+  gg.append('rect').attr('class', 'node-gateway')
+    .attr('x', -16).attr('y', -12).attr('width', 32).attr('height', 24).attr('rx', 2);
+  gg.append('text').attr('class', 'node-label').attr('y', 4).attr('text-anchor', 'middle').attr('fill', 'var(--color-white)').text('GW');
+  gg.append('text').attr('class', 'node-label').attr('y', 28).attr('text-anchor', 'middle').text('gateway');
+  gg.append('text').attr('class', 'node-detail').attr('y', 42).attr('text-anchor', 'middle').text('router · hub');
+
+  // Cloud
+  const cg = gChart.append('g').attr('transform', `translate(${cloudX}, ${cloudY})`);
+  cg.append('path')
+    .attr('d', 'M -36 -10 Q -36 -28 -18 -28 Q -14 -40 0 -40 Q 16 -40 22 -28 Q 38 -30 38 -12 Q 46 -8 46 0 L -36 0 Z')
+    .attr('fill', 'var(--color-ink)');
+  cg.append('rect').attr('x', -24).attr('y', 0).attr('width', 56).attr('height', 22).attr('fill', 'var(--color-secondary)');
+  cg.append('text').attr('class', 'node-label').attr('y', 40).attr('text-anchor', 'middle').text('cloud datacenter');
+  cg.append('text').attr('class', 'node-detail').attr('y', 54).attr('text-anchor', 'middle').text('unbounded compute');
+
+  // Annotation panels below
+  const panelTop = chartHeight + 30;
+  const panelW = (chartWidth - 32) / 3;
+  placementData.forEach((d, i) => {
+    const px = i * (panelW + 16);
+    const pg = gChart.append('g').attr('transform', `translate(${px}, ${panelTop})`);
+    pg.append('rect').attr('class', 'panel')
+      .attr('x', 0).attr('y', 0).attr('width', panelW).attr('height', 110)
+      .attr('stroke-width', 0.75);
+    pg.append('rect').attr('class', 'panel-marker')
+      .attr('x', 0).attr('y', 0).attr('width', 6).attr('height', 110)
+      .attr('fill', d.color === 'var(--color-border)' ? 'var(--color-border)' : d.color);
+    pg.append('text').attr('class', 'panel-title').attr('x', 16).attr('y', 22).text(d.label);
+    pg.append('text').attr('class', 'panel-detail').attr('x', 16).attr('y', 40).text(`leaves: ${d.leaves}`);
+    pg.append('text').attr('class', 'panel-detail').attr('x', 16).attr('y', 58).text('satisfies:');
+    pg.append('text').attr('class', 'panel-detail').attr('x', 16).attr('y', 72).text(d.satisfies);
+    pg.append('text').attr('class', 'panel-detail').attr('x', 16).attr('y', 92).text('violates:');
+    pg.append('text').attr('class', 'panel-detail').attr('x', 16).attr('y', 106).text(d.violates);
+  });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

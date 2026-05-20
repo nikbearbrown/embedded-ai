@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t04 d04">
+  <title id="t04">Medical wearable compression cascade — model size shrinks while sensitivity climbs back to the regulatory floor</title>
+  <desc id="d04">A dual-axis chart tracking a 1D CNN for arrhythmia detection across four optimization stages: float32 baseline at 10 megabytes, 40 percent structured pruning, distillation onto a smaller student, and int8 quantization-aware training. The left axis tracks model size (10 MB to 800 KB) and the right axis tracks ventricular-tachycardia sensitivity (baseline to 97.8 percent). Horizontal reference lines mark the 2 MB on-chip flash ceiling and the 98 percent regulatory sensitivity floor.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+    </style>
+    <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="440" fill="#fdfcfb"/>
+
+  <text x="32" y="30" class="ti">Medical wearable compression cascade — prune → distill → QAT</text>
+  <text x="32" y="48" class="sm">model size (left axis, log-ish) and VT/VF sensitivity (right axis) across four stages</text>
+
+  <!-- Plot area: x from 130 to 640, y from 80 to 320 -->
+  <line x1="130" y1="320" x2="640" y2="320" stroke="#8a8480" stroke-width="1"/>
+  <line x1="130" y1="80" x2="130" y2="320" stroke="#8a8480" stroke-width="1"/>
+  <line x1="640" y1="80" x2="640" y2="320" stroke="#8a8480" stroke-width="1"/>
+
+  <!-- Left y-axis: log-style ticks at 10 MB, 4 MB, 2 MB, 1 MB, 0.5 MB -->
+  <!-- Use simple linear positions: 10 MB at top (y=80), 0.5 MB near bottom (y=320). Position by visual stage. -->
+  <g class="sm">
+    <line x1="128" y1="80" x2="130" y2="80" stroke="#4a4540"/>
+    <text x="124" y="83" text-anchor="end">10 MB</text>
+    <line x1="128" y1="140" x2="130" y2="140" stroke="#4a4540"/>
+    <text x="124" y="143" text-anchor="end">6 MB</text>
+    <line x1="128" y1="200" x2="130" y2="200" stroke="#4a4540"/>
+    <text x="124" y="203" text-anchor="end">3 MB</text>
+    <line x1="128" y1="260" x2="130" y2="260" stroke="#4a4540"/>
+    <text x="124" y="263" text-anchor="end">1.5 MB</text>
+    <line x1="128" y1="320" x2="130" y2="320" stroke="#4a4540"/>
+    <text x="124" y="323" text-anchor="end">0.5 MB</text>
+  </g>
+  <text x="70" y="200" text-anchor="middle" transform="rotate(-90 70 200)" class="lb">model size</text>
+
+  <!-- Right y-axis: sensitivity 92% to 99% across y from 320 (92) to 80 (99): 7%/240px -->
+  <g class="sm">
+    <line x1="640" y1="320" x2="642" y2="320" stroke="#4a4540"/>
+    <text x="646" y="323">92%</text>
+    <line x1="640" y1="251.4" x2="642" y2="251.4" stroke="#4a4540"/>
+    <text x="646" y="254.4">94%</text>
+    <line x1="640" y1="182.9" x2="642" y2="182.9" stroke="#4a4540"/>
+    <text x="646" y="185.9">96%</text>
+    <line x1="640" y1="114.3" x2="642" y2="114.3" stroke="#4a4540"/>
+    <text x="646" y="117.3">98%</text>
+    <line x1="640" y1="80" x2="642" y2="80" stroke="#4a4540"/>
+    <text x="646" y="83">99%</text>
+  </g>
+  <text x="688" y="200" text-anchor="middle" transform="rotate(90 688 200)" class="lb">VT/VF sensitivity</text>
+
+  <!-- X-axis stages at 200, 330, 460, 590 -->
+  <g class="sm">
+    <text x="200" y="338" text-anchor="middle">float32</text>
+    <text x="200" y="352" text-anchor="middle" fill="#8a8480">baseline</text>
+    <text x="330" y="338" text-anchor="middle">pruned 40%</text>
+    <text x="330" y="352" text-anchor="middle" fill="#8a8480">1.5M params</text>
+    <text x="460" y="338" text-anchor="middle">distilled</text>
+    <text x="460" y="352" text-anchor="middle" fill="#8a8480">800K student</text>
+    <text x="590" y="338" text-anchor="middle">QAT int8</text>
+    <text x="590" y="352" text-anchor="middle" fill="#8a8480">800 KB</text>
+  </g>
+
+  <!-- 2 MB flash ceiling: 2 MB position. Linear mapping: 10MB=80, 0.5MB=320 → 9.5 MB range over 240 px → 1 MB = 25.26 px. 2 MB → 320 - 1.5*25.26 = 282.1 -->
+  <line x1="130" y1="282" x2="640" y2="282" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="135" y="278" class="lb">2 MB flash ceiling</text>
+
+  <!-- 98% sensitivity regulatory floor: y = 320 - (98-92)*34.3 = 114.3 -->
+  <line x1="130" y1="114.3" x2="640" y2="114.3" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="635" y="110" text-anchor="end" class="lb">98% regulatory floor</text>
+
+  <!-- Model size line (ink). Approximate y positions:
+       float32 10 MB → 80
+       pruned 6 MB → 140
+       distilled 3.2 MB → 195
+       QAT 0.8 MB → 312 -->
+  <polyline points="200,80 330,140 460,195 590,312" fill="none" stroke="#2a1a0e" stroke-width="2"/>
+  <!-- size points -->
+  <circle cx="200" cy="80" r="4" fill="#2a1a0e"/>
+  <circle cx="330" cy="140" r="4" fill="#2a1a0e"/>
+  <circle cx="460" cy="195" r="4" fill="#2a1a0e"/>
+  <circle cx="590" cy="312" r="4" fill="#2a1a0e"/>
+  <!-- size labels -->
+  <text x="200" y="72" text-anchor="middle" class="sm">10 MB</text>
+  <text x="330" y="132" text-anchor="middle" class="sm">6 MB</text>
+  <text x="460" y="187" text-anchor="middle" class="sm">3.2 MB</text>
+  <text x="590" y="304" text-anchor="middle" class="sm">0.8 MB</text>
+
+  <!-- Sensitivity line (gray dashed). Values:
+       float32 ~98.5% → y = 320 - 6.5*34.3 = 97.05
+       pruned 97.2% → 320 - 5.2*34.3 = 141.6
+       distilled 98.1% → 320 - 6.1*34.3 = 110.8
+       QAT 97.8% → 320 - 5.8*34.3 = 121.1 -->
+  <polyline points="200,97 330,141.6 460,110.8 590,121.1" fill="none" stroke="#8a8480" stroke-width="2" stroke-dasharray="4 3"/>
+  <circle cx="200" cy="97" r="4" fill="#8a8480"/>
+  <circle cx="330" cy="141.6" r="4" fill="#8a8480"/>
+  <circle cx="460" cy="110.8" r="4" fill="#8a8480"/>
+  <circle cx="590" cy="121.1" r="4" fill="#8a8480"/>
+  <text x="208" y="93" class="sm">98.5%</text>
+  <text x="338" y="138" class="sm">97.2%</text>
+  <text x="468" y="107" class="sm">98.1%</text>
+  <text x="598" y="118" class="sm">97.8%</text>
+
+  <!-- Status row beneath x-axis -->
+  <g class="sm">
+    <text x="200" y="372" text-anchor="middle" fill="#8a8480">overflows flash</text>
+    <text x="330" y="372" text-anchor="middle" fill="#8a8480">below floor</text>
+    <text x="460" y="372" text-anchor="middle" class="nm">above floor</text>
+    <text x="590" y="372" text-anchor="middle" class="nm">accepted: 0.2 pt gap</text>
+  </g>
+
+  <!-- Legend -->
+  <line x1="32" y1="396" x2="60" y2="396" stroke="#2a1a0e" stroke-width="2"/>
+  <text x="66" y="400" class="sm">model size</text>
+  <line x1="150" y1="396" x2="178" y2="396" stroke="#8a8480" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="184" y="400" class="sm">VT/VF sensitivity</text>
+
+  <text x="350" y="425" text-anchor="middle" class="cap">Prune first, distill second, quantize last — the only sequence that puts a 10 MB ECG CNN inside 2 MB of flash without losing the regulatory floor.</text>
+</svg>

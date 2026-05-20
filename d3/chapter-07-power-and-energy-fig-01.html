@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 7.1 — Same average, two current profiles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub   { color: var(--color-secondary); font-size: 13px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 320px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .trace { fill: none; stroke: var(--color-ink); stroke-width: 2; }
+  .trace-fill { fill: var(--color-secondary); opacity: 0.25; }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 7.1 — Same average, two current profiles</h1>
+<p class="subtitle">Steady draw vs duty-cycled bursts. Both average 10 mW. Battery life is essentially identical.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Steady 10 mW</div>
+    <div class="panel-sub">Continuous 3 mA at 3.3 V</div>
+    <div id="chartSteady" class="chart" role="img"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Duty cycled · 5% at 200 mW</div>
+    <div class="panel-sub">Sleep floor at 0.5 mW</div>
+    <div id="chartDuty" class="chart" role="img"></div>
+  </div>
+</div>
+<p class="caption">Duty cycling exchanges instantaneous peak power for short active windows. The energy under both curves is the same. Most embedded AI systems use the right shape, because sleep is cheap and peak is rare.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const steadyTrace = d3.range(0, 10.01, 0.05).map(t => ({ t, mA: 3.0 }));
+const dutyTrace = d3.range(0, 10.01, 0.05).map(t => {
+  const inBurst = (t % 3 < 0.15);
+  return { t, mA: inBurst ? 60 : 0.15 };
+});
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawTrace(selector, data, titleText, descText) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 400;
+  const totalHeight = container.clientHeight || 320;
+  const margin = { top: 24, right: 16, bottom: 48, left: 56 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(selector).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', `${selector.slice(1)}-t ${selector.slice(1)}-d`);
+  svg.append('title').attr('id', `${selector.slice(1)}-t`).text(titleText);
+  svg.append('desc').attr('id', `${selector.slice(1)}-d`).text(descText);
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 10]).range([0, chartWidth]);
+  const yScaleLog    = d3.scaleLog().domain([0.1, 200]).range([chartHeight, 0]);
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(5).tickFormat(d => d + ' s'));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLog).tickValues([0.1, 1, 10, 100]).tickFormat(d => d + ' mA'));
+
+  const lineGen = d3.line().x(d => xScaleLinear(d.t)).y(d => yScaleLog(d.mA)).curve(d3.curveStepAfter);
+  const areaGen = d3.area().x(d => xScaleLinear(d.t)).y0(chartHeight).y1(d => yScaleLog(d.mA)).curve(d3.curveStepAfter);
+
+  gChart.append('path').datum(data).attr('class', 'trace-fill').attr('d', areaGen);
+  gChart.append('path').datum(data).attr('class', 'trace').attr('d', lineGen);
+
+  gChart.append('rect')
+    .attr('x', 0).attr('y', 0).attr('width', chartWidth).attr('height', chartHeight)
+    .attr('fill', 'transparent').attr('tabindex', 0)
+    .on('mousemove', (event) => {
+      const [mx] = d3.pointer(event);
+      const t = xScaleLinear.invert(mx);
+      const idx = Math.min(data.length - 1, Math.max(0, Math.round(t / 0.05)));
+      const d = data[idx];
+      showTip(event, `<strong>t = ${d.t.toFixed(2)} s</strong><br/>current ${d.mA} mA`);
+    })
+    .on('mouseout', hideTip);
+}
+
+function draw() {
+  drawTrace('#chartSteady', steadyTrace,
+    'Steady-draw current trace',
+    'A continuous 3 milliamp draw over a 10 second window, equivalent to 10 milliwatts at 3.3 volts.');
+  drawTrace('#chartDuty', dutyTrace,
+    'Duty-cycled current trace',
+    'Tall 60 milliamp bursts of 150 ms duration over a 0.15 milliamp sleep floor.');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chartSteady'));
+ro.observe(document.getElementById('chartDuty'));
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.5 — STM32H743 SRAM budget after arena bump</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 360px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); }
+  .seg-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--color-white); }
+  .seg-label-dark { fill: var(--color-ink); }
+  .seg-alert { fill: var(--color-red); }
+  .threshold { stroke: var(--color-ochre); stroke-width: 1.5; stroke-dasharray: 3 3; }
+  .threshold-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ochre); }
+  .panel-box { stroke: var(--color-border); fill: var(--color-white); }
+  .panel-box.alert { stroke: var(--color-red); stroke-width: 1.5; }
+  .panel-h { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .panel-h.alert { fill: var(--color-red); }
+  .panel-p { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 5.5 — STM32H743 · 1 MB SRAM budget after arena bump</h1>
+<p class="subtitle">Arena fits at 350 KB; inference then crashes 80 ms in with stack overflow.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">"Fits at 80 percent" is not fit — runtime variation eats the margin.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const segData = [
+  { label: 'arena',         kb: 350, fill: 'var(--color-ink)',  textClass: 'seg-label'      },
+  { label: 'comms',         kb: 200, fill: '#404040',           textClass: 'seg-label'      },
+  { label: 'RTOS',          kb: 120, fill: '#787878',           textClass: 'seg-label'      },
+  { label: 'heap',          kb: 80,  fill: '#A8A4A0',           textClass: 'seg-label'      },
+  { label: 'globals',       kb: 50,  fill: '#D4D4D4',           textClass: 'seg-label-dark' },
+  { label: 'stack headroom',kb: 224, fill: 'var(--color-white)',textClass: 'seg-alert', stroke: 'var(--color-red)' }
+];
+const totalKb = 1024;
+const threshold = 0.80;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = container.clientHeight || 360;
+  const margin = { top: 60, right: 24, bottom: 60, left: 24 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('STM32H743 SRAM budget after arena bump');
+  svg.append('desc').attr('id', 'chart-desc').text('Stacked horizontal bar showing the 1 MB SRAM budget split across arena, communication buffers, RTOS, heap, globals, and remaining headroom.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const xScaleLinear = d3.scaleLinear().domain([0, totalKb]).range([0, chartWidth]);
+  const barY = 60, barH = 60;
+
+  let cumulative = 0;
+  segData.forEach(d => {
+    const x = xScaleLinear(cumulative);
+    const w = xScaleLinear(d.kb);
+    const g = gChart.append('g').attr('tabindex', 0).attr('aria-label', `${d.label}: ${d.kb} KB`);
+    const rect = g.append('rect')
+      .attr('x', x).attr('y', barY).attr('width', w).attr('height', barH)
+      .attr('fill', d.fill);
+    if (d.stroke) rect.attr('stroke', d.stroke).attr('stroke-width', 2);
+    rect.on('mouseover', (event) => {
+      tooltip.html(`<strong>${d.label}</strong><br>${d.kb} KB (${(d.kb / totalKb * 100).toFixed(1)}%)`)
+        .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+        .transition().duration(150).style('opacity', 1);
+    }).on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+
+    if (w > 40) {
+      g.append('text').attr('class', d.textClass)
+        .attr('x', x + w / 2).attr('y', barY + barH / 2 - 4)
+        .attr('text-anchor', 'middle').text(d.label);
+      g.append('text').attr('class', d.textClass)
+        .attr('x', x + w / 2).attr('y', barY + barH / 2 + 14)
+        .attr('text-anchor', 'middle').text(`${d.kb} KB`);
+    }
+    cumulative += d.kb;
+  });
+
+  // axis
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${barY + barH})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(5).tickFormat(d => d + ' KB'));
+
+  // 80% threshold line
+  const tx = xScaleLinear(totalKb * threshold);
+  gChart.append('line').attr('class', 'threshold')
+    .attr('x1', tx).attr('x2', tx).attr('y1', 30).attr('y2', barY + barH);
+  gChart.append('text').attr('class', 'threshold-label')
+    .attr('x', tx).attr('y', 24).attr('text-anchor', 'middle')
+    .text(`80% threshold (${Math.round(totalKb * threshold)} KB)`);
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

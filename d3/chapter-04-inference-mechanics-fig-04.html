@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 4.4 — Tensor arena: reuse vs. no reuse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel.primary { border-color: var(--color-red); }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub   { color: var(--color-secondary); font-size: 13px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 360px; }
+  .block        { stroke: var(--color-ink); stroke-width: 0.6; }
+  .block.weights { fill: var(--color-border); }
+  .block.scratch { fill: var(--color-secondary); opacity: 0.6; }
+  .block.act     { fill: var(--color-secondary); }
+  .block.act-late { fill: var(--color-red); }
+  .block.io      { fill: var(--color-secondary); opacity: 0.5; }
+  .block-label   { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-white); pointer-events: none; }
+  .row-label     { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis-title    { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .peak-text     { font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: var(--color-ink); }
+  .peak-text.alert { fill: var(--color-red); font-weight: 600; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 4.4 — Tensor arena: reuse vs. no reuse</h1>
+<p class="subtitle">One static arena with time-sliced activation reuse, versus a stacked arena that keeps every layer's output.</p>
+<div id="wrap">
+  <div class="panel primary">
+    <div class="panel-title">With buffer reuse — single arena, time-sliced</div>
+    <div class="panel-sub">peak = weights + scratch + max(layer outputs)</div>
+    <div id="chartReuse" class="chart" role="img" aria-labelledby="t-reuse d-reuse"></div>
+    <p class="peak-text" style="margin-top:8px;">peak activation memory ≈ 28 KB</p>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Without reuse — every output kept</div>
+    <div class="panel-sub">peak = weights + Σ all layer outputs</div>
+    <div id="chartStack" class="chart" role="img" aria-labelledby="t-stack d-stack"></div>
+    <p class="peak-text alert" style="margin-top:8px;">peak ≈ 8–10× larger; usually does not fit</p>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const reuseRegions = [
+  { kind: 'weights', label: 'model weights — persistent', startByte: 0,    bytes: 320, t: 0 },
+  { kind: 'scratch', label: 'scratch (im2col)',            startByte: 320,  bytes: 60,  t: 0 },
+  { kind: 'act',     label: 'Layer 1 output (t=1)',        startByte: 380,  bytes: 200, t: 1 },
+  { kind: 'act-late',label: 'Layer 3 output (t=3, same bytes)', startByte: 380, bytes: 200, t: 3 },
+  { kind: 'io',      label: 'input / output tensors',     startByte: 580,  bytes: 220, t: 0 }
+];
+
+const stackRegions = [
+  { kind: 'weights', label: 'model weights', bytes: 320 },
+  { kind: 'act',     label: 'Layer 1 (kept)', bytes: 140 },
+  { kind: 'act',     label: 'Layer 2 (kept)', bytes: 160 },
+  { kind: 'act',     label: 'Layer 3 (kept)', bytes: 200 },
+  { kind: 'act',     label: 'Layer 4 (kept)', bytes: 180 },
+  { kind: 'act',     label: 'Layer 5 (kept)', bytes: 160 },
+  { kind: 'act',     label: 'Layer 6 (kept)', bytes: 180 },
+  { kind: 'io',      label: 'I/O tensors',    bytes: 220 }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>${d.bytes} bytes`)
+    .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.style('opacity', 0); }
+
+function drawReuse() {
+  const sel = '#chartReuse';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.querySelector(sel);
+  const totalWidth = container.clientWidth || 420;
+  const totalHeight = container.clientHeight || 360;
+  const margin = { top: 16, right: 12, bottom: 30, left: 60 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-reuse d-reuse');
+  svg.append('title').attr('id', 't-reuse').text('Tensor arena with buffer reuse');
+  svg.append('desc').attr('id', 'd-reuse').text('A single contiguous SRAM block split into weights, scratch, time-sliced activation slots, and I/O tensors. Layer 1 output and Layer 3 output share the same byte range at different times.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 800]).range([0, chartWidth]);
+
+  // rows: weights/scratch at top, two activation time rows in middle, I/O at bottom
+  const rowH = (chartHeight - 16) / 4;
+  const rowY = i => i * (rowH + 4);
+
+  // weights
+  g.append('rect').attr('class', 'block weights')
+    .attr('x', xScaleLinear(0)).attr('y', rowY(0))
+    .attr('width', xScaleLinear(320) - xScaleLinear(0)).attr('height', rowH)
+    .on('mouseover', (e) => showTip(e, { label: 'model weights', bytes: 320 }))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('rect').attr('class', 'block scratch')
+    .attr('x', xScaleLinear(320)).attr('y', rowY(0))
+    .attr('width', xScaleLinear(60)).attr('height', rowH)
+    .on('mouseover', (e) => showTip(e, { label: 'scratch (im2col)', bytes: 60 }))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('text').attr('class', 'block-label')
+    .attr('x', xScaleLinear(160)).attr('y', rowY(0) + rowH / 2 + 4).attr('text-anchor', 'middle')
+    .text('model weights — persistent');
+
+  // t=1 row
+  g.append('text').attr('class', 'row-label').attr('x', -8).attr('y', rowY(1) + rowH / 2 + 4)
+    .attr('text-anchor', 'end').text('t = 1');
+  g.append('rect').attr('class', 'block act')
+    .attr('x', xScaleLinear(380)).attr('y', rowY(1))
+    .attr('width', xScaleLinear(200) - xScaleLinear(0)).attr('height', rowH)
+    .on('mouseover', (e) => showTip(e, { label: 'Layer 1 output', bytes: 200 }))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('text').attr('class', 'block-label')
+    .attr('x', xScaleLinear(480)).attr('y', rowY(1) + rowH / 2 + 4).attr('text-anchor', 'middle')
+    .text('Layer 1 output');
+
+  // t=3 row — same bytes
+  g.append('text').attr('class', 'row-label').attr('x', -8).attr('y', rowY(2) + rowH / 2 + 4)
+    .attr('text-anchor', 'end').text('t = 3');
+  g.append('rect').attr('class', 'block act-late')
+    .attr('x', xScaleLinear(380)).attr('y', rowY(2))
+    .attr('width', xScaleLinear(200) - xScaleLinear(0)).attr('height', rowH)
+    .on('mouseover', (e) => showTip(e, { label: 'Layer 3 output (reuses Layer 1 bytes)', bytes: 200 }))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('text').attr('class', 'block-label')
+    .attr('x', xScaleLinear(480)).attr('y', rowY(2) + rowH / 2 + 4).attr('text-anchor', 'middle')
+    .text('Layer 3 output');
+
+  // I/O row
+  g.append('text').attr('class', 'row-label').attr('x', -8).attr('y', rowY(3) + rowH / 2 + 4)
+    .attr('text-anchor', 'end').text('I/O');
+  g.append('rect').attr('class', 'block io')
+    .attr('x', xScaleLinear(580)).attr('y', rowY(3))
+    .attr('width', xScaleLinear(220) - xScaleLinear(0)).attr('height', rowH)
+    .on('mouseover', (e) => showTip(e, { label: 'I/O tensors', bytes: 220 }))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('text').attr('class', 'block-label')
+    .attr('x', xScaleLinear(690)).attr('y', rowY(3) + rowH / 2 + 4).attr('text-anchor', 'middle')
+    .text('input + output tensors');
+
+  // byte axis
+  g.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight - 8})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(4));
+  g.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 18)
+    .attr('text-anchor', 'middle').text('arena byte offset');
+}
+
+function drawStack() {
+  const sel = '#chartStack';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.querySelector(sel);
+  const totalWidth = container.clientWidth || 420;
+  const totalHeight = container.clientHeight || 360;
+  const margin = { top: 16, right: 12, bottom: 12, left: 12 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-stack d-stack');
+  svg.append('title').attr('id', 't-stack').text('Arena without reuse');
+  svg.append('desc').attr('id', 'd-stack').text('Stacked diagram: weights at the bottom and every layer\'s output kept above, growing the peak to roughly an order of magnitude more memory.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const totalBytes = stackRegions.reduce((s, r) => s + r.bytes, 0);
+  const yScaleLinear = d3.scaleLinear().domain([0, totalBytes]).range([chartHeight, 0]);
+
+  let acc = 0;
+  for (const r of stackRegions) {
+    const top = yScaleLinear(acc + r.bytes);
+    const bot = yScaleLinear(acc);
+    g.append('rect').attr('class', `block ${r.kind}`)
+      .attr('x', 0).attr('y', top).attr('width', chartWidth).attr('height', bot - top)
+      .on('mouseover', (e) => showTip(e, r))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+    g.append('text').attr('class', 'block-label')
+      .attr('x', chartWidth / 2).attr('y', (top + bot) / 2 + 4).attr('text-anchor', 'middle')
+      .style('fill', r.kind === 'weights' ? 'var(--color-ink)' : 'var(--color-white)')
+      .text(r.label);
+    acc += r.bytes;
+  }
+}
+
+function draw() { drawReuse(); drawStack(); }
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chartReuse'));
+ro.observe(document.getElementById('chartStack'));
+</script>
+</body>
+</html>

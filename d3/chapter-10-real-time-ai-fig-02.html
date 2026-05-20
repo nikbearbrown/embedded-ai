@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 10.2 — Latency distribution histogram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #121212; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; min-height: 460px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .bar { fill: var(--color-ink); }
+  .marker-line { stroke-dasharray: 4 3; }
+  .marker-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: var(--color-ink); }
+  .marker-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-white);
+             border: 1px solid var(--color-border); padding: 8px 12px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 10.2 — Latency distribution of repeated CNN inferences on Cortex-M7</h1>
+<p class="subtitle">10,000 runs of the same model. The mean is honest. The deadline does not care about the mean.</p>
+<div id="chart" role="main"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+// Synthesized histogram bin data — millisecond bins, frequency counts
+const latencyBins = [
+  { ms: 25, count: 12 }, { ms: 26, count: 40 }, { ms: 27, count: 95 }, { ms: 28, count: 200 },
+  { ms: 29, count: 390 }, { ms: 30, count: 620 }, { ms: 31, count: 890 }, { ms: 32, count: 1130 },
+  { ms: 33, count: 1330 }, { ms: 34, count: 1480 }, { ms: 35, count: 1570 }, { ms: 36, count: 1600 },
+  { ms: 37, count: 1560 }, { ms: 38, count: 1440 }, { ms: 39, count: 1250 }, { ms: 40, count: 1020 },
+  { ms: 41, count: 800 }, { ms: 42, count: 630 }, { ms: 43, count: 480 }, { ms: 44, count: 390 },
+  { ms: 45, count: 310 }, { ms: 46, count: 240 }, { ms: 47, count: 200 }, { ms: 48, count: 160 },
+  { ms: 49, count: 130 }, { ms: 50, count: 105 }, { ms: 51, count: 80 }, { ms: 52, count: 65 },
+  { ms: 53, count: 55 }, { ms: 54, count: 45 }, { ms: 55, count: 40 }, { ms: 56, count: 32 },
+  { ms: 57, count: 26 }, { ms: 58, count: 22 }, { ms: 59, count: 18 }, { ms: 60, count: 15 },
+  { ms: 61, count: 12 }, { ms: 62, count: 10 }, { ms: 63, count: 6 }, { ms: 64, count: 3 }
+];
+
+const markers = [
+  { name: 'mean',          ms: 38, color: 'var(--color-secondary)' },
+  { name: 'p95',           ms: 47, color: 'var(--color-secondary)' },
+  { name: 'p99',           ms: 53, color: 'var(--color-secondary)' },
+  { name: 'worst observed',ms: 62, color: 'var(--color-ink)', heavy: true }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth = container.clientWidth || 900;
+  const totalHeight = 460;
+  const margin = { top: 80, right: 40, bottom: 100, left: 64 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'fig02-title fig02-desc');
+  svg.append('title').attr('id', 'fig02-title').text('Latency histogram of CNN inference');
+  svg.append('desc').attr('id', 'fig02-desc').text('Distribution of inference times in milliseconds with mean, p95, p99, and worst-case observed marked.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([25, 65]).range([0, chartWidth]);
+  const yScaleLinear = d3.scaleLinear().domain([0, d3.max(latencyBins, d => d.count) * 1.05]).range([chartHeight, 0]);
+
+  const xAxis = d3.axisBottom(xScaleLinear).tickValues([25, 33, 41, 49, 57, 65]).tickFormat(d => d + ' ms');
+  const yAxis = d3.axisLeft(yScaleLinear).ticks(5);
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`).call(xAxis);
+  gChart.append('g').attr('class', 'axis').call(yAxis);
+
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 40).attr('text-anchor', 'middle')
+    .text('execution time per inference');
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('transform', 'rotate(-90)').attr('x', -chartHeight / 2).attr('y', -48).attr('text-anchor', 'middle')
+    .text('runs at this latency');
+
+  // Bars
+  const binWidth = chartWidth / 40 * 0.9;
+  gChart.selectAll('.bar').data(latencyBins).join('rect')
+    .attr('class', 'bar')
+    .attr('x', d => xScaleLinear(d.ms) - binWidth / 2)
+    .attr('y', d => yScaleLinear(d.count))
+    .attr('width', binWidth)
+    .attr('height', d => chartHeight - yScaleLinear(d.count))
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.ms} ms: ${d.count} runs`)
+    .on('mouseover', (event, d) => {
+      tooltip.html(`<strong>${d.ms} ms</strong><br>${d.count} runs at this latency`)
+        .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+        .transition().duration(150).style('opacity', 1);
+    })
+    .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+    .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+
+  // Markers
+  const gAnnotations = gChart.append('g').attr('class', 'g-annotations');
+  markers.forEach(m => {
+    gAnnotations.append('line')
+      .attr('class', 'marker-line')
+      .attr('x1', xScaleLinear(m.ms)).attr('x2', xScaleLinear(m.ms))
+      .attr('y1', -28).attr('y2', chartHeight)
+      .attr('stroke', m.color).attr('stroke-width', m.heavy ? 1.5 : 1)
+      .attr('stroke-dasharray', m.heavy ? null : '4 3');
+    gAnnotations.append('text').attr('class', 'marker-label')
+      .attr('x', xScaleLinear(m.ms)).attr('y', -16).attr('text-anchor', 'middle').text(m.name);
+    gAnnotations.append('text').attr('class', 'marker-sub')
+      .attr('x', xScaleLinear(m.ms)).attr('y', -4).attr('text-anchor', 'middle').text(m.ms + ' ms');
+  });
+
+  // Span between mean and worst
+  const xMean = xScaleLinear(38), xWorst = xScaleLinear(62);
+  const ySpan = chartHeight + 56;
+  gAnnotations.append('line')
+    .attr('x1', xMean).attr('x2', xWorst).attr('y1', ySpan).attr('y2', ySpan)
+    .attr('stroke', 'var(--color-ink)').attr('marker-end', 'url(#arrA)');
+  svg.append('defs').append('marker').attr('id', 'arrA')
+    .attr('markerWidth', 8).attr('markerHeight', 6).attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+  gAnnotations.append('text').attr('class', 'marker-label')
+    .attr('x', (xMean + xWorst) / 2).attr('y', ySpan + 16).attr('text-anchor', 'middle')
+    .text('+24 ms — variability the deadline must absorb');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

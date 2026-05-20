@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 7.2 — Power composition by duty cycle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 460px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .seg-dyn { fill: var(--color-ink); }
+  .seg-leak { fill: var(--color-secondary); }
+  .seg-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-white); }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .callout { fill: var(--color-ochre); font-weight: 600; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 7.2 — Power composition by duty cycle</h1>
+<p class="subtitle">Where the milliwatts go depends on whether the chip is mostly awake or mostly asleep.</p>
+<div id="chart" role="img"></div>
+<p class="caption">High duty cycle: dynamic power dominates — reduce voltage and frequency. Low duty cycle: leakage dominates the average — deepen sleep and gate peripherals. Bar lengths normalised to share; absolute power differs by an order of magnitude.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const barData = [
+  { label: 'High duty (80% active)', sub: 'avg ≈ 12 mW',  dynamic: 0.96, leakage: 0.04, mitigation: 'reduce V and f · DVFS · accelerator offload' },
+  { label: 'Low duty (1% active)',   sub: 'avg ≈ 0.6 mW', dynamic: 0.17, leakage: 0.83, mitigation: 'deepen sleep · gate peripherals' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 56, right: 40, bottom: 80, left: 64 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Stacked bars showing average power composition at two duty cycles.');
+  svg.append('desc').attr('id', 'chart-desc').text('Each bar normalised to total share. Dark segment is dynamic power, gray segment is sleep leakage. At 80 percent active, dynamic dominates; at 1 percent active, leakage dominates.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand().domain(barData.map(d => d.label)).range([0, chartWidth]).padding(0.45);
+  const yScaleLinear = d3.scaleLinear().domain([0, 1]).range([chartHeight, 0]);
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`).call(d3.axisBottom(xScaleBand));
+  gChart.append('g').attr('class', 'axis').call(d3.axisLeft(yScaleLinear).tickFormat(d => `${Math.round(d * 100)}%`));
+
+  const gBars = gChart.append('g').attr('class', 'g-bars');
+
+  gBars.selectAll('.seg-dyn').data(barData).join('rect')
+    .attr('class', 'seg-dyn')
+    .attr('x', d => xScaleBand(d.label))
+    .attr('y', d => yScaleLinear(d.dynamic + d.leakage))
+    .attr('width', xScaleBand.bandwidth())
+    .attr('height', d => yScaleLinear(d.leakage) - yScaleLinear(d.dynamic + d.leakage))
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label}: dynamic ${(d.dynamic*100).toFixed(0)}%`)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.label}</strong><br/>dynamic: ${(d.dynamic*100).toFixed(0)}%`))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+
+  gBars.selectAll('.seg-leak').data(barData).join('rect')
+    .attr('class', 'seg-leak')
+    .attr('x', d => xScaleBand(d.label))
+    .attr('y', d => yScaleLinear(d.leakage))
+    .attr('width', xScaleBand.bandwidth())
+    .attr('height', d => chartHeight - yScaleLinear(d.leakage))
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label}: sleep leakage ${(d.leakage*100).toFixed(0)}%`)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.label}</strong><br/>leakage: ${(d.leakage*100).toFixed(0)}%`))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+
+  // mitigation labels above each bar
+  gChart.selectAll('.mitigation').data(barData).join('text')
+    .attr('class', 'callout')
+    .attr('x', d => xScaleBand(d.label) + xScaleBand.bandwidth() / 2)
+    .attr('y', -24)
+    .attr('text-anchor', 'middle')
+    .style('font-family', "'Inter', sans-serif")
+    .style('font-size', '12px')
+    .style('fill', 'var(--color-ochre)')
+    .text(d => d.mitigation);
+
+  // sub-labels under each bar
+  gChart.selectAll('.sublabel').data(barData).join('text')
+    .attr('x', d => xScaleBand(d.label) + xScaleBand.bandwidth() / 2)
+    .attr('y', chartHeight + 44)
+    .attr('text-anchor', 'middle')
+    .style('font-family', "'Inter', sans-serif")
+    .style('font-size', '12px')
+    .style('fill', 'var(--color-secondary)')
+    .text(d => d.sub);
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

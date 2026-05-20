@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 1.2 — Wristband constraint waterfall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 460px; position: relative; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .seg { transition: opacity 200ms ease; }
+  .seg:hover { opacity: 0.85; }
+  .row-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; fill: var(--color-ink); }
+  .row-detail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .seg-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-white); }
+  .seg-label.dark { fill: var(--color-ink); }
+  .verdict-pass { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-ink); }
+  .verdict-fail { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-red); }
+  .budget-line { stroke: var(--color-secondary); stroke-width: 0.75; stroke-dasharray: 3 3; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 70ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 1.2 — Wristband constraint waterfall</h1>
+<p class="subtitle">Three constraints cascade: memory, latency, power. Two pass; the third is the design's binding failure.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Memory fits. Latency fits. Power decides. The doorbell story in miniature.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const waterfallData = [
+  {
+    constraint: 'Memory',
+    detail: 'weights + activations vs 256 KB SRAM',
+    segments: [
+      { name: 'weights',      used: 180, pct: 70.3, color: 'var(--color-ink)',       labelColor: 'white' },
+      { name: 'activations',  used: 60,  pct: 23.4, color: 'var(--color-secondary)', labelColor: 'white' },
+      { name: 'headroom',     used: 16,  pct: 6.3,  color: 'var(--color-border)',    labelColor: 'dark' }
+    ],
+    unit: 'KB',
+    verdict: 'PASS',
+    note: '16 KB headroom'
+  },
+  {
+    constraint: 'Latency / duty',
+    detail: '3.4 s inference per 30 s window',
+    segments: [
+      { name: 'active',  used: 3.4,  pct: 11.3, color: 'var(--color-secondary)', labelColor: 'white' },
+      { name: 'asleep',  used: 26.6, pct: 88.7, color: 'var(--color-border)',    labelColor: 'dark' }
+    ],
+    unit: 's',
+    verdict: 'PASS',
+    note: 'duty cycle fits'
+  },
+  {
+    constraint: 'Power / battery',
+    detail: '1.7 mA avg → 130 h vs 336 h required',
+    segments: [
+      { name: 'delivered', used: 130, pct: 38.7, color: 'var(--color-ink)',  labelColor: 'white' },
+      { name: 'shortfall', used: 206, pct: 61.3, color: 'transparent',       labelColor: 'dark', outline: true }
+    ],
+    unit: 'h',
+    verdict: 'FAIL',
+    note: '5 days, not 14'
+  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 800;
+  const totalHeight = 460;
+  const margin = { top: 48, right: 140, bottom: 48, left: 200 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Wristband arrhythmia constraint waterfall');
+  svg.append('desc').attr('id', 'chart-desc').text('Three horizontal bars showing how the wristband case sits against its memory, latency, and power budgets. Memory and latency pass; power fails.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const yScaleBand = d3.scaleBand()
+    .domain(waterfallData.map(d => d.constraint))
+    .range([0, chartHeight])
+    .padding(0.25);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 100]).range([0, chartWidth]);
+
+  // Top axis with 0% and 100% markers
+  gChart.append('text').attr('x', 0).attr('y', -8)
+    .attr('font-family', "'JetBrains Mono', monospace").attr('font-size', 11).attr('fill', 'var(--color-secondary)')
+    .text('0%');
+  gChart.append('text').attr('x', chartWidth).attr('y', -8).attr('text-anchor', 'end')
+    .attr('font-family', "'JetBrains Mono', monospace").attr('font-size', 11).attr('fill', 'var(--color-secondary)')
+    .text('100% of budget');
+
+  // Budget line at 100%
+  gChart.append('line').attr('class', 'budget-line')
+    .attr('x1', chartWidth).attr('y1', 0).attr('x2', chartWidth).attr('y2', chartHeight);
+
+  // Rows
+  const rows = gChart.selectAll('.row')
+    .data(waterfallData)
+    .join('g')
+      .attr('class', 'row')
+      .attr('transform', d => `translate(0,${yScaleBand(d.constraint)})`);
+
+  const rowH = yScaleBand.bandwidth();
+
+  // Background track
+  rows.append('rect')
+    .attr('x', 0).attr('y', 0)
+    .attr('width', chartWidth).attr('height', rowH)
+    .attr('fill', 'var(--color-white)')
+    .attr('stroke', 'var(--color-border)')
+    .attr('stroke-width', 0.5);
+
+  // Segments
+  rows.each(function(d) {
+    const g = d3.select(this);
+    let xOff = 0;
+    d.segments.forEach(seg => {
+      const w = xScaleLinear(seg.pct);
+      const r = g.append('rect')
+        .attr('class', 'seg')
+        .attr('x', xOff).attr('y', 0)
+        .attr('width', w).attr('height', rowH)
+        .attr('fill', seg.color)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${d.constraint} ${seg.name}: ${seg.used}${d.unit}`)
+        .on('mouseover', (event) => showTip(event, `<strong>${d.constraint} — ${seg.name}</strong><br>${seg.used} ${d.unit} · ${seg.pct.toFixed(1)}%`))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+      if (seg.outline) {
+        r.attr('stroke', 'var(--color-ink)').attr('stroke-width', 0.75).attr('stroke-dasharray', '3 2');
+      }
+      if (w > 40) {
+        g.append('text')
+          .attr('class', seg.labelColor === 'dark' ? 'seg-label dark' : 'seg-label')
+          .attr('x', xOff + w / 2).attr('y', rowH / 2 + 4)
+          .attr('text-anchor', 'middle')
+          .text(`${seg.name} ${seg.used}${d.unit}`);
+      }
+      xOff += w;
+    });
+  });
+
+  // Row labels (left)
+  rows.append('text').attr('class', 'row-label')
+    .attr('x', -12).attr('y', rowH / 2 - 4).attr('text-anchor', 'end')
+    .text(d => d.constraint);
+  rows.append('text').attr('class', 'row-detail')
+    .attr('x', -12).attr('y', rowH / 2 + 12).attr('text-anchor', 'end')
+    .text(d => d.detail);
+
+  // Verdict labels (right)
+  rows.append('text')
+    .attr('class', d => d.verdict === 'PASS' ? 'verdict-pass' : 'verdict-fail')
+    .attr('x', chartWidth + 12).attr('y', rowH / 2 - 2)
+    .text(d => d.verdict);
+  rows.append('text').attr('class', 'row-detail')
+    .attr('x', chartWidth + 12).attr('y', rowH / 2 + 14)
+    .text(d => d.note);
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 12.5 — Knowledge distillation pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #2a1a0e; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  .panel { border: 1px solid var(--color-border); padding: 16px; }
+  .chart { width: 100%; height: 460px; position: relative; }
+  .node-box { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.5; }
+  .node-box.teacher-header { fill: var(--color-ink); }
+  .node-box.student-header { fill: #4a4540; }
+  .node-box.label-header { fill: var(--color-ochre); }
+  .node-box.loss-header { fill: var(--color-ink); }
+  .node-box.loss-border { stroke-width: 2; }
+  .badge { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-white); }
+  .label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .sublabel { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .mono.soft { fill: var(--color-red); }
+  .flow { stroke: var(--color-ink); stroke-width: 1.2; fill: none; }
+  .flow.soft { stroke: var(--color-red); stroke-dasharray: 4 3; }
+  .flow.hard { stroke: var(--color-ochre); }
+  .flow.feedback { stroke: var(--color-ink); stroke-dasharray: 3 3; }
+  .dist-bar { fill: var(--color-ink); }
+  .dist-bar.peak { fill: var(--color-red); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 75ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 12.5 — Knowledge distillation pipeline</h1>
+<p class="subtitle">student loss = α · hard cross-entropy + (1 − α) · soft KL divergence at temperature T</p>
+<div class="panel">
+  <div id="chart" class="chart" role="img" aria-label="Pipeline showing teacher and student outputs feeding a mixed loss"></div>
+</div>
+<p class="caption">The teacher's 5% confidence on "dog" tells the student which mistakes are reasonable. The one-hot label throws that away.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(d.html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px').transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+const teacherDist = [0.01, 0.02, 0.85, 0.05, 0.01, 0.02, 0.01, 0.01, 0.01, 0.01];
+const studentDist = [0.02, 0.05, 0.72, 0.10, 0.02, 0.04, 0.02, 0.01, 0.01, 0.01];
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const w = container.clientWidth || 700;
+  const h = container.clientHeight || 460;
+  const svg = d3.select('#chart').append('svg').attr('width', w).attr('height', h).attr('viewBox', '0 0 700 460').attr('preserveAspectRatio', 'xMidYMid meet');
+
+  // arrowhead defs
+  const defs = svg.append('defs');
+  ['ar', 'arSoft', 'arOchre'].forEach(id => {
+    defs.append('marker').attr('id', id).attr('markerWidth', 8).attr('markerHeight', 6).attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+      .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', id === 'arSoft' ? 'var(--color-red)' : (id === 'arOchre' ? 'var(--color-ochre)' : 'var(--color-ink)'));
+  });
+
+  // INPUT
+  svg.append('rect').attr('class', 'node-box').attr('x', 32).attr('y', 200).attr('width', 60).attr('height', 60);
+  svg.append('text').attr('class', 'label').attr('x', 62).attr('y', 226).attr('text-anchor', 'middle').text('image');
+  svg.append('text').attr('class', 'sublabel').attr('x', 62).attr('y', 244).attr('text-anchor', 'middle').text('cat');
+  svg.append('text').attr('class', 'sublabel').attr('x', 62).attr('y', 280).attr('text-anchor', 'middle').text('input');
+
+  // branches
+  svg.append('path').attr('class', 'flow').attr('d', 'M 92 220 L 130 140').attr('marker-end', 'url(#ar)');
+  svg.append('path').attr('class', 'flow').attr('d', 'M 92 250 L 130 320').attr('marker-end', 'url(#ar)');
+
+  // TEACHER
+  svg.append('rect').attr('class', 'node-box').attr('x', 140).attr('y', 100).attr('width', 140).attr('height', 80);
+  svg.append('rect').attr('class', 'node-box teacher-header').attr('x', 140).attr('y', 100).attr('width', 140).attr('height', 20);
+  svg.append('text').attr('class', 'badge').attr('x', 210).attr('y', 114).attr('text-anchor', 'middle').text('TEACHER — LARGE');
+  svg.append('text').attr('class', 'label').attr('x', 210).attr('y', 144).attr('text-anchor', 'middle').text('trained float32');
+  svg.append('text').attr('class', 'sublabel').attr('x', 210).attr('y', 162).attr('text-anchor', 'middle').text('frozen during distillation');
+
+  // STUDENT
+  svg.append('rect').attr('class', 'node-box').attr('x', 140).attr('y', 300).attr('width', 100).attr('height', 60);
+  svg.append('rect').attr('class', 'node-box student-header').attr('x', 140).attr('y', 300).attr('width', 100).attr('height', 20);
+  svg.append('text').attr('class', 'badge').attr('x', 190).attr('y', 314).attr('text-anchor', 'middle').text('STUDENT');
+  svg.append('text').attr('class', 'label').attr('x', 190).attr('y', 338).attr('text-anchor', 'middle').text('small int8-ready');
+  svg.append('text').attr('class', 'sublabel').attr('x', 190).attr('y', 354).attr('text-anchor', 'middle').text('trainable');
+
+  // teacher → distribution
+  svg.append('path').attr('class', 'flow').attr('d', 'M 280 140 L 320 140').attr('marker-end', 'url(#ar)');
+
+  // teacher distribution bars
+  svg.append('text').attr('class', 'label').attr('x', 380).attr('y', 92).attr('text-anchor', 'middle').text('soft labels (T > 1)');
+  teacherDist.forEach((p, i) => {
+    const xb = 325 + i * 10;
+    const yh = p * 60;
+    const isPeak = i === 2;
+    svg.append('rect').attr('class', 'dist-bar' + (isPeak ? ' peak' : ''))
+      .attr('x', xb).attr('y', 165 - yh).attr('width', 8).attr('height', yh)
+      .style('cursor', 'pointer')
+      .on('mouseover', (e) => showTip(e, { html: `<strong>class ${i}</strong>: ${(p * 100).toFixed(1)}%` }))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+  svg.append('line').attr('x1', 325).attr('x2', 423).attr('y1', 167).attr('y2', 167).attr('stroke', 'var(--color-ink)').attr('stroke-width', 0.8);
+  svg.append('text').attr('class', 'sublabel').attr('x', 349).attr('y', 106).attr('text-anchor', 'middle').text('cat 0.85');
+  svg.append('text').attr('class', 'sublabel').attr('x', 359).attr('y', 158).attr('text-anchor', 'middle').text('dog 0.05');
+
+  // student distribution bars
+  svg.append('text').attr('class', 'label').attr('x', 335).attr('y', 290).attr('text-anchor', 'middle').text('student output');
+  svg.append('path').attr('class', 'flow').attr('d', 'M 240 330 L 280 330').attr('marker-end', 'url(#ar)');
+  studentDist.forEach((p, i) => {
+    const xb = 285 + i * 10;
+    const yh = p * 60;
+    svg.append('rect').attr('class', 'dist-bar')
+      .attr('x', xb).attr('y', 354 - yh).attr('width', 8).attr('height', yh)
+      .style('cursor', 'pointer')
+      .on('mouseover', (e) => showTip(e, { html: `<strong>class ${i}</strong>: ${(p * 100).toFixed(1)}%` }))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+  svg.append('line').attr('x1', 285).attr('x2', 383).attr('y1', 356).attr('y2', 356).attr('stroke', 'var(--color-ink)').attr('stroke-width', 0.8);
+
+  // HARD LABEL
+  svg.append('rect').attr('class', 'node-box').attr('x', 500).attr('y', 108).attr('width', 160).attr('height', 68);
+  svg.append('rect').attr('class', 'node-box label-header').attr('x', 500).attr('y', 108).attr('width', 160).attr('height', 20);
+  svg.append('text').attr('class', 'badge').attr('x', 580).attr('y', 122).attr('text-anchor', 'middle').text('HARD LABEL');
+  svg.append('text').attr('class', 'mono').attr('x', 580).attr('y', 145).attr('text-anchor', 'middle').text('[0,0,1,0,0,0,0,0,0,0]');
+  svg.append('text').attr('class', 'sublabel').attr('x', 580).attr('y', 162).attr('text-anchor', 'middle').text('one-hot — "it\'s a cat"');
+
+  // MIXED LOSS
+  svg.append('rect').attr('class', 'node-box loss-border').attr('x', 500).attr('y', 230).attr('width', 160).attr('height', 100);
+  svg.append('rect').attr('class', 'node-box loss-header').attr('x', 500).attr('y', 230).attr('width', 160).attr('height', 22);
+  svg.append('text').attr('class', 'badge').attr('x', 580).attr('y', 245).attr('text-anchor', 'middle').text('MIXED LOSS');
+  svg.append('text').attr('class', 'mono').attr('x', 510).attr('y', 272).text('α · L_hard');
+  svg.append('text').attr('class', 'sublabel').attr('x', 510).attr('y', 290).text('cross-entropy vs one-hot');
+  svg.append('text').attr('class', 'mono soft').attr('x', 510).attr('y', 310).text('(1 − α) · L_soft');
+  svg.append('text').attr('class', 'sublabel').attr('x', 510).attr('y', 326).style('fill', 'var(--color-red)').text('KL divergence at T');
+
+  // flows into loss
+  svg.append('path').attr('class', 'flow soft').attr('d', 'M 423 155 Q 470 230 500 262').attr('marker-end', 'url(#arSoft)');
+  svg.append('text').attr('class', 'sublabel').attr('x', 445).attr('y', 218).style('fill', 'var(--color-red)').text('soft signal');
+  svg.append('path').attr('class', 'flow hard').attr('d', 'M 580 176 L 580 228').attr('marker-end', 'url(#arOchre)');
+  svg.append('text').attr('class', 'sublabel').attr('x', 588).attr('y', 205).style('fill', 'var(--color-ochre)').text('hard signal');
+  svg.append('path').attr('class', 'flow').attr('d', 'M 385 330 Q 440 330 500 298').attr('marker-end', 'url(#ar)');
+  svg.append('text').attr('class', 'sublabel').attr('x', 430).attr('y', 345).text('student prediction');
+
+  // gradient feedback
+  svg.append('path').attr('class', 'flow feedback').attr('d', 'M 580 330 Q 580 400 200 370').attr('marker-end', 'url(#ar)');
+  svg.append('text').attr('class', 'sublabel').attr('x', 400).attr('y', 405).attr('text-anchor', 'middle').style('font-style', 'italic').text('gradient update — only the student learns');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

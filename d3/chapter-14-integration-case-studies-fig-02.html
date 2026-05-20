@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 14.2 — Industrial three-architecture decision tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 460px; }
+  .node-rect { fill: var(--color-white); stroke: var(--color-secondary); stroke-width: 1; }
+  .node-rect.root { stroke: var(--color-ink); stroke-width: 1.25; }
+  .node-rect.win { stroke: var(--color-ink); stroke-width: 1.75; }
+  .node-rect.rejected { stroke: var(--color-secondary); stroke-width: 1; stroke-dasharray: 4 3; }
+  .accent-bar { fill: var(--color-ink); }
+  .accent-bar.muted { fill: var(--color-border); }
+  .accent-bar.win { fill: var(--color-red); }
+  .node-title { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: var(--color-ink); }
+  .node-title.muted { fill: var(--color-secondary); }
+  .node-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .verdict { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .verdict.muted { fill: var(--color-secondary); }
+  .branch { stroke: var(--color-ink); stroke-width: 1; fill: none; }
+  .branch.rejected { stroke: var(--color-secondary); stroke-dasharray: 4 3; }
+  .constraint-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ochre); font-weight: 700; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 14.2 — Industrial three-architecture decision tree</h1>
+<p class="subtitle">Three architectures considered. Two killed by deployment economics before the model class is chosen.</p>
+<div id="chart" role="img" aria-labelledby="t-tree d-tree"></div>
+<p class="caption">Fully on-device wins. Edge-gateway over RS-485 is killed by the cost of wiring 200 sensors. The hybrid threshold-plus-radio approach is killed by the $40 BOM ceiling. Hover any node for the reasoning.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const branches = [
+  {
+    id: 'on-device',
+    title: 'Fully on-device',
+    sub: 'classify on MCU, log locally, daily forward via wired gateway',
+    verdict: 'wins',
+    detail: 'random forest, 25 features · STM32L4R5 · infer every 2.5 s · $38 BOM · 16.5 mo battery',
+    constraint: '',
+    state: 'win'
+  },
+  {
+    id: 'gateway',
+    title: 'Edge-gateway (RS-485)',
+    sub: 'raw vibration streamed to industrial PC for ML processing',
+    verdict: 'rejected',
+    detail: 'wiring 200 sensors over RS-485 across the factory blows the deployment budget',
+    constraint: '↑ deployment cost',
+    state: 'rejected'
+  },
+  {
+    id: 'hybrid',
+    title: 'Hybrid threshold + radio',
+    sub: 'simple trigger on-device, forward 1 s window to gateway for classification',
+    verdict: 'rejected',
+    detail: 'sub-GHz radio per sensor adds $8–12 to the BOM, breaks the $40 ceiling',
+    constraint: '↑ BOM ceiling',
+    state: 'rejected'
+  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.title}</strong><br>${d.detail}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 460;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-tree d-tree');
+  svg.append('title').attr('id', 't-tree').text('Three-architecture decision tree for the industrial vibration case');
+  svg.append('desc').attr('id', 'd-tree').text('Root node with three branches. Fully on-device wins. Edge-gateway and hybrid are rejected on deployment cost and BOM grounds.');
+
+  const nodeWidth = Math.min(220, (totalWidth - 80) / 3 - 10);
+  const colCenters = [
+    totalWidth / 2 - (nodeWidth + 30),
+    totalWidth / 2,
+    totalWidth / 2 + (nodeWidth + 30)
+  ];
+
+  // Root
+  const rootX = totalWidth / 2 - nodeWidth / 2;
+  const rootY = 20;
+  const rootH = 56;
+  svg.append('rect').attr('class', 'node-rect root')
+    .attr('x', rootX).attr('y', rootY).attr('width', nodeWidth).attr('height', rootH);
+  svg.append('text').attr('class', 'node-title')
+    .attr('x', totalWidth / 2).attr('y', rootY + 22).attr('text-anchor', 'middle')
+    .text('Acceptance specs');
+  svg.append('text').attr('class', 'node-sub')
+    .attr('x', totalWidth / 2).attr('y', rootY + 40).attr('text-anchor', 'middle')
+    .text('≥95% sens · <5% FP · 10 s · $40 BOM');
+
+  // Branch lines from root midpoint to each child top
+  const childTop = 130;
+  const childH = 80;
+  const verdictTop = 240;
+  const verdictH = 92;
+
+  branches.forEach((b, i) => {
+    const cx = colCenters[i];
+    const x0 = cx - nodeWidth / 2;
+    const isRejected = b.state === 'rejected';
+    const branchClass = isRejected ? 'branch rejected' : 'branch';
+
+    // line root → child
+    svg.append('path').attr('class', branchClass)
+      .attr('d', `M ${totalWidth/2} ${rootY + rootH} L ${totalWidth/2} ${rootY + rootH + 24} L ${cx} ${rootY + rootH + 24} L ${cx} ${childTop}`);
+
+    // Child architecture node
+    svg.append('rect').attr('class', isRejected ? 'node-rect rejected' : 'node-rect win')
+      .attr('x', x0).attr('y', childTop).attr('width', nodeWidth).attr('height', childH);
+    svg.append('rect').attr('class', isRejected ? 'accent-bar muted' : 'accent-bar')
+      .attr('x', x0).attr('y', childTop).attr('width', 6).attr('height', childH);
+    svg.append('text').attr('class', isRejected ? 'node-title muted' : 'node-title')
+      .attr('x', x0 + 16).attr('y', childTop + 20).text(b.title);
+
+    // Wrap sub text into two lines
+    const subWords = b.sub.split(' ');
+    const half = Math.ceil(subWords.length / 2);
+    svg.append('text').attr('class', 'node-sub')
+      .attr('x', x0 + 16).attr('y', childTop + 40).text(subWords.slice(0, half).join(' '));
+    svg.append('text').attr('class', 'node-sub')
+      .attr('x', x0 + 16).attr('y', childTop + 56).text(subWords.slice(half).join(' '));
+
+    // Interaction zone (full child rect)
+    svg.append('rect')
+      .attr('x', x0).attr('y', childTop).attr('width', nodeWidth).attr('height', childH)
+      .attr('fill', 'transparent').attr('tabindex', 0)
+      .attr('aria-label', `${b.title}: ${b.detail}`)
+      .on('mouseover', (event) => showTip(event, b))
+      .on('mousemove', moveTip)
+      .on('mouseout', hideTip);
+
+    // Arrow line from child bottom to verdict top
+    svg.append('path').attr('class', branchClass)
+      .attr('d', `M ${cx} ${childTop + childH} L ${cx} ${verdictTop}`)
+      .attr('marker-end', isRejected ? 'url(#arx)' : 'url(#aro)');
+
+    // Verdict node
+    svg.append('rect').attr('class', isRejected ? 'node-rect rejected' : 'node-rect win')
+      .attr('x', x0).attr('y', verdictTop).attr('width', nodeWidth).attr('height', verdictH);
+    svg.append('text').attr('class', isRejected ? 'verdict muted' : 'verdict')
+      .attr('x', cx).attr('y', verdictTop + 22).attr('text-anchor', 'middle')
+      .text(b.verdict.toUpperCase());
+
+    const detailWords = b.detail.split(' ');
+    const lines = [];
+    let line = [];
+    let lineLen = 0;
+    detailWords.forEach(w => {
+      if (lineLen + w.length > 28 && line.length) {
+        lines.push(line.join(' '));
+        line = [w]; lineLen = w.length;
+      } else { line.push(w); lineLen += w.length + 1; }
+    });
+    if (line.length) lines.push(line.join(' '));
+    lines.slice(0, 3).forEach((ln, idx) => {
+      svg.append('text').attr('class', 'node-sub')
+        .attr('x', x0 + 16).attr('y', verdictTop + 42 + idx * 14).text(ln);
+    });
+
+    if (b.constraint) {
+      svg.append('text').attr('class', 'constraint-label')
+        .attr('x', cx).attr('y', verdictTop + verdictH - 8).attr('text-anchor', 'middle')
+        .text(b.constraint);
+    }
+  });
+
+  // Arrow markers
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id', 'aro').attr('markerWidth', 8).attr('markerHeight', 6)
+    .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+  defs.append('marker').attr('id', 'arx').attr('markerWidth', 8).attr('markerHeight', 6)
+    .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-secondary)');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 2.1 — nRF52840 memory map under inference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'EB Garamond', Georgia, serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 12px; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
+  .chart { width: 100%; height: 380px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .seg { stroke: var(--color-ink); stroke-width: 0.75; }
+  .seg-firmware { fill: var(--color-secondary); }
+  .seg-weights  { fill: var(--color-ink); }
+  .seg-overflow { fill: none; stroke: var(--color-red); stroke-dasharray: 4 3; }
+  .seg-ble      { fill: var(--color-secondary); }
+  .seg-arena    { fill: var(--color-ink); }
+  .seg-free     { fill: var(--color-border); }
+  .label-fg { fill: var(--color-white); font-family: 'Inter', sans-serif; font-size: 11px; }
+  .label-bg { fill: var(--color-secondary); font-family: 'Inter', sans-serif; font-size: 11px; }
+  .annotation { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); }
+  .annotation.alert { fill: var(--color-red); font-weight: 600; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; font-family: 'Inter', sans-serif; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 2.1 — nRF52840 memory map under inference</h1>
+<p class="subtitle">"Does the model fit" splits into two questions: weights in flash, activations in SRAM.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Flash · 1 MB (1024 KB)</div>
+    <div class="panel-sub">non-volatile · weights live here</div>
+    <div id="chartFlash" class="chart" role="img" aria-labelledby="t-flash d-flash"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">SRAM · 256 KB</div>
+    <div class="panel-sub">volatile · activations + system live here</div>
+    <div id="chartSram" class="chart" role="img" aria-labelledby="t-sram d-sram"></div>
+  </div>
+</div>
+<p class="caption">Total memory is not the question. Flash vs SRAM, with the right occupants in each, is.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const flashData = [
+  { name: 'firmware',     kb: 250, cls: 'seg-firmware' },
+  { name: 'int8 weights', kb: 300, cls: 'seg-weights'  },
+  { name: 'free flash',   kb: 474, cls: 'seg-free'     }
+];
+const flashCapacity = 1024;
+const flashOverflow = { name: 'float32 weights', kb: 1200 };
+
+const sramData = [
+  { name: 'BLE stack',    kb: 30,  cls: 'seg-ble'   },
+  { name: 'activations',  kb: 180, cls: 'seg-arena' },
+  { name: 'remaining',    kb: 46,  cls: 'seg-free'  }
+];
+const sramCapacity = 256;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawStack(selector, data, capacity, overflow, titleText, descText) {
+  d3.select(selector).selectAll('*').remove();
+  const container = document.querySelector(selector);
+  const totalWidth  = container.clientWidth  || 400;
+  const totalHeight = container.clientHeight || 380;
+  const margin = { top: 20, right: 100, bottom: 30, left: 50 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(selector).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', `${selector.slice(1)}-t ${selector.slice(1)}-d`);
+  svg.append('title').attr('id', `${selector.slice(1)}-t`).text(titleText);
+  svg.append('desc').attr('id', `${selector.slice(1)}-d`).text(descText);
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const yScaleLinear = d3.scaleLinear().domain([0, Math.max(capacity, overflow ? overflow.kb : 0)]).range([chartHeight, 0]);
+  const barWidth = Math.min(chartWidth * 0.5, 140);
+
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLinear).ticks(8).tickFormat(d => d + ' KB'));
+
+  // stacked segments — running offset from 0
+  let cumulative = 0;
+  gChart.selectAll('.bar-seg')
+    .data(data)
+    .join('rect')
+      .attr('class', d => `seg ${d.cls}`)
+      .attr('x', 10)
+      .attr('y', d => { const y0 = yScaleLinear(cumulative + d.kb); cumulative += d.kb; return y0; })
+      .attr('width', barWidth)
+      .attr('height', d => chartHeight - yScaleLinear(d.kb))
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.kb} KB`)
+      .on('mouseover', (event, d) => showTip(event, `<strong>${d.name}</strong><br>${d.kb} KB`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+
+  // labels next to each segment
+  cumulative = 0;
+  data.forEach(d => {
+    const yMid = yScaleLinear(cumulative + d.kb / 2);
+    cumulative += d.kb;
+    gChart.append('text')
+      .attr('class', d.cls === 'seg-free' ? 'label-bg' : 'label-fg')
+      .attr('x', 10 + barWidth / 2)
+      .attr('y', yMid + 4)
+      .attr('text-anchor', 'middle')
+      .text(`${d.name} · ${d.kb} KB`);
+  });
+
+  // overflow ghost bar
+  if (overflow) {
+    const ghostX = 10 + barWidth + 18;
+    gChart.append('rect')
+      .attr('class', 'seg seg-overflow')
+      .attr('x', ghostX)
+      .attr('y', yScaleLinear(overflow.kb))
+      .attr('width', 40)
+      .attr('height', chartHeight - yScaleLinear(overflow.kb));
+    gChart.append('text')
+      .attr('class', 'annotation alert')
+      .attr('x', ghostX + 20)
+      .attr('y', chartHeight / 2)
+      .attr('text-anchor', 'middle')
+      .attr('transform', `rotate(-90 ${ghostX + 20} ${chartHeight / 2})`)
+      .text(`${overflow.name} · ${(overflow.kb/1024).toFixed(1)} MB — over budget`);
+  }
+}
+
+function draw() {
+  drawStack('#chartFlash', flashData, flashCapacity, flashOverflow,
+    'nRF52840 flash memory map',
+    'Flash budget showing firmware, int8 weights, and remaining headroom with a ghost bar marking the over-budget float32 case.');
+  drawStack('#chartSram', sramData, sramCapacity, null,
+    'nRF52840 SRAM memory map',
+    'SRAM budget showing BLE stack, activation arena, and remaining headroom for heap, stack, and RTOS.');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chartFlash'));
+ro.observe(document.getElementById('chartSram'));
+</script>
+</body>
+</html>

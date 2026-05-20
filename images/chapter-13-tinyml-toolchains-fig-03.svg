@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="t03 d03">
+  <title id="t03">Toolchain feature matrix — six toolchains across six capabilities</title>
+  <desc id="d03">Heatmap-style matrix. Rows are TFLite Micro, Edge Impulse, STM32Cube.AI, Vela, Edge TPU compiler, ONNX Runtime. Columns are custom layers, intermediate artifacts, quantization control, vendor-tuned kernels, GUI workflow, debug access. Cells are shaded full, partial, or none.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .colhead { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #2a1a0e; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .cell-full { fill: #2a1a0e; }
+      .cell-partial { fill: #8a8480; }
+      .cell-none { fill: #e6e3df; }
+      .cell-mark { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; }
+    </style>
+  </defs>
+  <rect width="720" height="460" fill="#fdfcfb"/>
+
+  <text x="32" y="30" class="ti">Toolchain feature matrix</text>
+  <text x="32" y="48" class="sm">filled = first-class · half = partial / workaround · empty = not supported</text>
+
+  <!-- Column headers, rotated -45° -->
+  <!-- Row label x ends at 180; first col x starts at 200, width 76, gap 4 -->
+  <g class="colhead">
+    <text x="238" y="118" text-anchor="end" transform="rotate(-32 238 118)">Custom layers</text>
+    <text x="318" y="118" text-anchor="end" transform="rotate(-32 318 118)">Intermediate artifacts</text>
+    <text x="398" y="118" text-anchor="end" transform="rotate(-32 398 118)">Quantization control</text>
+    <text x="478" y="118" text-anchor="end" transform="rotate(-32 478 118)">Vendor-tuned kernels</text>
+    <text x="558" y="118" text-anchor="end" transform="rotate(-32 558 118)">GUI workflow</text>
+    <text x="638" y="118" text-anchor="end" transform="rotate(-32 638 118)">Debug access on fail</text>
+  </g>
+
+  <!-- Grid baseline -->
+  <line x1="200" y1="128" x2="680" y2="128" stroke="#8a8480"/>
+
+  <!-- Row labels and cells -->
+  <!-- Row y starts at 140, height 36, gap 4 -->
+  <!-- 6 rows -->
+  <!-- Data: 0=none, 1=partial, 2=full -->
+  <!-- TFLite Micro:    2, 2, 2, 1, 0, 2
+       Edge Impulse:    0, 0, 1, 2, 2, 0
+       STM32Cube.AI:    1, 2, 2, 2, 1, 2
+       Vela (Ethos-U):  0, 2, 1, 2, 0, 2
+       Edge TPU comp.:  0, 1, 1, 2, 0, 1
+       ONNX Runtime:    2, 2, 2, 1, 0, 2 -->
+
+  <g>
+    <!-- Row 1 — TFLite Micro -->
+    <text x="192" y="160" text-anchor="end" class="lb">TFLite Micro</text>
+    <text x="192" y="173" text-anchor="end" class="sm">C++ lib, no malloc</text>
+    <rect x="200" y="144" width="76" height="36" class="cell-full"/>
+    <rect x="280" y="144" width="76" height="36" class="cell-full"/>
+    <rect x="360" y="144" width="76" height="36" class="cell-full"/>
+    <rect x="440" y="144" width="76" height="36" class="cell-partial"/>
+    <rect x="520" y="144" width="76" height="36" class="cell-none"/>
+    <rect x="600" y="144" width="76" height="36" class="cell-full"/>
+
+    <!-- Row 2 — Edge Impulse -->
+    <text x="192" y="206" text-anchor="end" class="lb">Edge Impulse</text>
+    <text x="192" y="219" text-anchor="end" class="sm">web platform</text>
+    <rect x="200" y="190" width="76" height="36" class="cell-none"/>
+    <rect x="280" y="190" width="76" height="36" class="cell-none"/>
+    <rect x="360" y="190" width="76" height="36" class="cell-partial"/>
+    <rect x="440" y="190" width="76" height="36" class="cell-full"/>
+    <rect x="520" y="190" width="76" height="36" class="cell-full"/>
+    <rect x="600" y="190" width="76" height="36" class="cell-none"/>
+
+    <!-- Row 3 — STM32Cube.AI -->
+    <text x="192" y="252" text-anchor="end" class="lb">STM32Cube.AI</text>
+    <text x="192" y="265" text-anchor="end" class="sm">ST vendor compiler</text>
+    <rect x="200" y="236" width="76" height="36" class="cell-partial"/>
+    <rect x="280" y="236" width="76" height="36" class="cell-full"/>
+    <rect x="360" y="236" width="76" height="36" class="cell-full"/>
+    <rect x="440" y="236" width="76" height="36" class="cell-full"/>
+    <rect x="520" y="236" width="76" height="36" class="cell-partial"/>
+    <rect x="600" y="236" width="76" height="36" class="cell-full"/>
+
+    <!-- Row 4 — Vela -->
+    <text x="192" y="298" text-anchor="end" class="lb">Vela (Ethos-U)</text>
+    <text x="192" y="311" text-anchor="end" class="sm">int8 NPU compiler</text>
+    <rect x="200" y="282" width="76" height="36" class="cell-none"/>
+    <rect x="280" y="282" width="76" height="36" class="cell-full"/>
+    <rect x="360" y="282" width="76" height="36" class="cell-partial"/>
+    <rect x="440" y="282" width="76" height="36" class="cell-full"/>
+    <rect x="520" y="282" width="76" height="36" class="cell-none"/>
+    <rect x="600" y="282" width="76" height="36" class="cell-full"/>
+
+    <!-- Row 5 — Edge TPU compiler -->
+    <text x="192" y="344" text-anchor="end" class="lb">Edge TPU compiler</text>
+    <text x="192" y="357" text-anchor="end" class="sm">Coral / Google</text>
+    <rect x="200" y="328" width="76" height="36" class="cell-none"/>
+    <rect x="280" y="328" width="76" height="36" class="cell-partial"/>
+    <rect x="360" y="328" width="76" height="36" class="cell-partial"/>
+    <rect x="440" y="328" width="76" height="36" class="cell-full"/>
+    <rect x="520" y="328" width="76" height="36" class="cell-none"/>
+    <rect x="600" y="328" width="76" height="36" class="cell-partial"/>
+
+    <!-- Row 6 — ONNX Runtime -->
+    <text x="192" y="390" text-anchor="end" class="lb">ONNX Runtime</text>
+    <text x="192" y="403" text-anchor="end" class="sm">framework-agnostic</text>
+    <rect x="200" y="374" width="76" height="36" class="cell-full"/>
+    <rect x="280" y="374" width="76" height="36" class="cell-full"/>
+    <rect x="360" y="374" width="76" height="36" class="cell-full"/>
+    <rect x="440" y="374" width="76" height="36" class="cell-partial"/>
+    <rect x="520" y="374" width="76" height="36" class="cell-none"/>
+    <rect x="600" y="374" width="76" height="36" class="cell-full"/>
+  </g>
+
+  <!-- Legend -->
+  <g>
+    <rect x="200" y="425" width="14" height="14" class="cell-full"/>
+    <text x="220" y="436" class="sm">full · first-class support</text>
+    <rect x="350" y="425" width="14" height="14" class="cell-partial"/>
+    <text x="370" y="436" class="sm">partial · workaround</text>
+    <rect x="500" y="425" width="14" height="14" class="cell-none" stroke="#8a8480"/>
+    <text x="520" y="436" class="sm">none · not supported</text>
+  </g>
+</svg>

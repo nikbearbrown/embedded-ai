@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 2.5 — Radar comparison of three candidate platforms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #wrap { display: grid; grid-template-columns: 3fr 1fr; gap: 18px; }
+  #chart { width: 100%; height: 500px; border: 1px solid var(--color-border); padding: 18px; }
+  #legend { border: 1px solid var(--color-border); padding: 14px; font-family: 'EB Garamond', Georgia, serif; }
+  .legend-row { margin-bottom: 12px; }
+  .legend-row .name { font-weight: 700; font-size: 14px; }
+  .legend-row .meta { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--color-secondary); }
+  .legend-row .fail { color: var(--color-red); font-weight: 700; }
+  .swatch { display: inline-block; width: 14px; height: 10px; margin-right: 6px; vertical-align: middle; }
+  .axis-label { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); }
+  .ring { fill: none; stroke: var(--color-border); stroke-width: 0.75; }
+  .axis-line { stroke: var(--color-secondary); stroke-width: 0.75; }
+  .ring-tick { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .target-mark { fill: none; stroke: var(--color-red); stroke-width: 1.5; }
+  .target-label { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-weight: 700; fill: var(--color-red); }
+  .platform-poly { fill-opacity: 0.18; stroke-width: 1.75; }
+  .vertex { stroke: var(--color-white); stroke-width: 1; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; font-family: 'Inter', sans-serif; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 2.5 — Radar comparison of three candidate platforms</h1>
+<p class="subtitle">Four axes · 0 at center · 1.0 at outer ring · battery life on log scale with six-month target marked</p>
+<div id="wrap">
+  <div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+  <div id="legend">
+    <div class="legend-row"><span class="swatch" style="background: var(--color-red); opacity: 0.4;"></span><span class="name" style="color: var(--color-red)">ESP32-S3</span><div class="meta">$4.50 · 19 yr · viable</div></div>
+    <div class="legend-row"><span class="swatch" style="background: var(--color-ink); opacity: 0.4;"></span><span class="name">STM32L4R5</span><div class="meta">$6.00 · &gt;6 mo · viable</div></div>
+    <div class="legend-row"><span class="swatch" style="background: var(--color-secondary); opacity: 0.4;"></span><span class="name">RPi Zero 2 W</span><div class="meta fail">$15 · ~1.4 d · fails power</div></div>
+  </div>
+</div>
+<p class="caption">The Pi clears memory and compute by wide margins, then collapses on battery life. Constraints are conjunctive.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const axes = [
+  { id: 'memory',  label: 'memory headroom',     angle: -Math.PI/2 },
+  { id: 'compute', label: 'compute margin',       angle: 0 },
+  { id: 'battery', label: 'battery life (log, 6-mo)', angle: Math.PI/2 },
+  { id: 'cost',    label: 'cost score (inv)',     angle: Math.PI }
+];
+
+// Pre-normalized scores in [0,1] per axis.
+const platforms = [
+  { id: 'esp32',   name: 'ESP32-S3',     color: 'var(--color-red)',       scores: { memory: 0.90, compute: 0.95, battery: 0.99, cost: 0.78 }, life_days: 365*19, cost_usd: 4.50 },
+  { id: 'stm32',   name: 'STM32L4R5',    color: 'var(--color-ink)',       scores: { memory: 0.85, compute: 0.62, battery: 1.00, cost: 0.70 }, life_days: 365*40, cost_usd: 6.00 },
+  { id: 'rpi',     name: 'RPi Zero 2 W', color: 'var(--color-secondary)', scores: { memory: 1.00, compute: 1.00, battery: 0.05, cost: 0.25 }, life_days: 1.4,     cost_usd: 15.00 }
+];
+const sixMonthTarget = 0.88;   // log10(180)/log10(365) ≈ 0.880
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 600;
+  const totalHeight = container.clientHeight || 500;
+  const cx = totalWidth / 2, cy = totalHeight / 2;
+  const maxRadius = Math.min(cx, cy) - 70;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Radar comparison of three candidate platforms');
+  svg.append('desc').attr('id', 'chart-desc').text('Four-axis radar chart with memory, compute, battery life on log scale, and cost. ESP32-S3 and STM32L4R5 cover most of the area; RPi Zero 2 W collapses on the battery axis.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+  const ringValues = [0.25, 0.5, 0.75, 1.0];
+  ringValues.forEach(rv => {
+    const pts = axes.map(a => {
+      const r = rv * maxRadius;
+      return [Math.cos(a.angle) * r, Math.sin(a.angle) * r];
+    });
+    gChart.append('polygon').attr('class', 'ring').attr('points', pts.map(p => p.join(',')).join(' '));
+    gChart.append('text').attr('class', 'ring-tick')
+      .attr('x', 5).attr('y', -rv * maxRadius + 4)
+      .text(rv.toFixed(2));
+  });
+
+  // axes
+  axes.forEach(a => {
+    const x2 = Math.cos(a.angle) * maxRadius;
+    const y2 = Math.sin(a.angle) * maxRadius;
+    gChart.append('line').attr('class', 'axis-line').attr('x1', 0).attr('y1', 0).attr('x2', x2).attr('y2', y2);
+    const lx = Math.cos(a.angle) * (maxRadius + 26);
+    const ly = Math.sin(a.angle) * (maxRadius + 26);
+    gChart.append('text').attr('class', 'axis-label')
+      .attr('x', lx).attr('y', ly)
+      .attr('text-anchor', a.id === 'compute' ? 'start' : a.id === 'cost' ? 'end' : 'middle')
+      .attr('dominant-baseline', 'middle')
+      .text(a.label);
+  });
+
+  // six-month target marker on battery axis
+  const batteryAxis = axes.find(a => a.id === 'battery');
+  const tx = Math.cos(batteryAxis.angle) * sixMonthTarget * maxRadius;
+  const ty = Math.sin(batteryAxis.angle) * sixMonthTarget * maxRadius;
+  gChart.append('circle').attr('class', 'target-mark').attr('cx', tx).attr('cy', ty).attr('r', 5);
+  gChart.append('text').attr('class', 'target-label').attr('x', tx + 10).attr('y', ty + 4).text('6-mo target');
+
+  // platforms
+  platforms.forEach(p => {
+    const pts = axes.map(a => {
+      const v = p.scores[a.id];
+      return [Math.cos(a.angle) * v * maxRadius, Math.sin(a.angle) * v * maxRadius];
+    });
+    gChart.append('polygon')
+      .attr('class', 'platform-poly')
+      .attr('points', pts.map(pt => pt.join(',')).join(' '))
+      .attr('fill', p.color).attr('stroke', p.color)
+      .attr('stroke-dasharray', p.id === 'stm32' ? '5 3' : p.id === 'rpi' ? '2 2' : null);
+    pts.forEach((pt, i) => {
+      gChart.append('circle').attr('class', 'vertex')
+        .attr('cx', pt[0]).attr('cy', pt[1]).attr('r', 4)
+        .attr('fill', p.color)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${p.name} ${axes[i].label}: ${p.scores[axes[i].id].toFixed(2)}`)
+        .on('mouseover', (event) => showTip(event, `<strong>${p.name}</strong><br>${axes[i].label}: ${p.scores[axes[i].id].toFixed(2)}`))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+    });
+  });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

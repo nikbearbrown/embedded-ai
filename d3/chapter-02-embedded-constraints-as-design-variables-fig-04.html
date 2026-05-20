@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 2.4 — Four-constraint coupling diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 540px; border: 1px solid var(--color-border); padding: 18px; }
+  .node { fill: var(--color-ink); }
+  .node-label { font-family: 'EB Garamond', Georgia, serif; font-size: 15px; font-weight: 700; fill: var(--color-white); text-anchor: middle; }
+  .node-sub   { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-white); text-anchor: middle; opacity: 0.85; }
+  .edge { fill: none; stroke: var(--color-ink); stroke-width: 1.25; }
+  .edge.diag { stroke-dasharray: 4 2; }
+  .edge-label { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); text-anchor: middle; }
+  .edge.hi { stroke: var(--color-red); stroke-width: 2; }
+  .edge-label.hi { fill: var(--color-red); font-weight: 700; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; font-family: 'Inter', sans-serif; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 2.4 — Four-constraint coupling diagram</h1>
+<p class="subtitle">Memory, compute, power, real-time — connected, not independent. Hover any edge to highlight the trade-off.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Pick a corner to optimize and the arrows tell you what else moves. The deployment lives where all four agree.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const nodes = [
+  { id: 'memory',    label: 'memory',    sub: 'flash · SRAM · PSRAM',  x: 0.20, y: 0.22 },
+  { id: 'compute',   label: 'compute',   sub: 'MACs · clock · SIMD',   x: 0.80, y: 0.22 },
+  { id: 'power',     label: 'power',     sub: 'avg · peak · duty',     x: 0.20, y: 0.78 },
+  { id: 'realtime',  label: 'real-time', sub: 'WCET · jitter · deadline', x: 0.80, y: 0.78 }
+];
+const edges = [
+  { from: 'memory',   to: 'compute',  curve: 'top',    label: 'int8 quantize → −bytes, −cycles' },
+  { from: 'compute',  to: 'memory',   curve: 'topR',   label: 'larger model → more activation RAM' },
+  { from: 'memory',   to: 'power',    curve: 'left',   label: 'PSRAM → +energy/access' },
+  { from: 'power',    to: 'memory',   curve: 'leftR',  label: 'int8 weights → −flash, −energy' },
+  { from: 'compute',  to: 'realtime', curve: 'right',  label: 'dynamic graph → +WCET variance' },
+  { from: 'realtime', to: 'compute',  curve: 'rightR', label: 'deadline tight → forces faster code' },
+  { from: 'compute',  to: 'power',    curve: 'diag',   label: 'clock faster → +active current', hi: true },
+  { from: 'memory',   to: 'realtime', curve: 'diag2',  label: 'cache misses → +WCET variance' },
+  { from: 'power',    to: 'realtime', curve: 'bottom', label: 'peak current spike → brown-out reset' },
+  { from: 'realtime', to: 'power',    curve: 'botR',   label: 'lock to TCM → −WCET, +area' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 540;
+  const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Four-constraint coupling diagram');
+  svg.append('desc').attr('id', 'chart-desc').text('Memory, compute, power, and real-time at the corners; directed edges name the cross-constraint effects of common optimizations.');
+
+  // arrow marker
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id', 'arrow-ink').attr('markerWidth', 9).attr('markerHeight', 7)
+    .attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-ink)');
+  defs.append('marker').attr('id', 'arrow-red').attr('markerWidth', 9).attr('markerHeight', 7)
+    .attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-red)');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // resolve node positions
+  const nodeXY = {};
+  nodes.forEach(n => { nodeXY[n.id] = { x: n.x * chartWidth, y: n.y * chartHeight }; });
+
+  const rx = 88, ry = 44;
+
+  // draw edges first
+  edges.forEach(e => {
+    const a = nodeXY[e.from], b = nodeXY[e.to];
+    let path, labelX, labelY, labelTransform = null;
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+
+    switch (e.curve) {
+      case 'top':
+        path = `M ${a.x + rx} ${a.y - 10} Q ${mx} ${a.y - 50} ${b.x - rx} ${b.y - 10}`;
+        labelX = mx; labelY = a.y - 56; break;
+      case 'topR':
+        path = `M ${b.x - rx} ${b.y + 10} Q ${mx} ${b.y + 50} ${a.x + rx} ${a.y + 10}`;
+        labelX = mx; labelY = a.y + 65; break;
+      case 'left':
+        path = `M ${a.x - 12} ${a.y + ry} Q ${a.x - 50} ${my} ${a.x - 12} ${b.y - ry}`;
+        labelX = a.x - 62; labelY = my; labelTransform = `rotate(-90 ${labelX} ${labelY})`; break;
+      case 'leftR':
+        path = `M ${a.x + 12} ${b.y - ry} Q ${a.x + 24} ${my} ${a.x + 12} ${a.y + ry}`;
+        labelX = a.x + 44; labelY = my; labelTransform = `rotate(-90 ${labelX} ${labelY})`; break;
+      case 'right':
+        path = `M ${b.x - 12} ${a.y + ry} Q ${b.x - 24} ${my} ${b.x - 12} ${b.y - ry}`;
+        labelX = b.x - 44; labelY = my; labelTransform = `rotate(-90 ${labelX} ${labelY})`; break;
+      case 'rightR':
+        path = `M ${b.x + 12} ${b.y - ry} Q ${b.x + 50} ${my} ${b.x + 12} ${a.y + ry}`;
+        labelX = b.x + 62; labelY = my; labelTransform = `rotate(-90 ${labelX} ${labelY})`; break;
+      case 'bottom':
+        path = `M ${a.x + rx} ${a.y - 10} Q ${mx} ${a.y - 40} ${b.x - rx} ${b.y - 10}`;
+        labelX = mx; labelY = a.y - 46; break;
+      case 'botR':
+        path = `M ${b.x - rx} ${b.y + 10} Q ${mx} ${b.y + 40} ${a.x + rx} ${a.y + 10}`;
+        labelX = mx; labelY = a.y + 54; break;
+      case 'diag':
+        path = `M ${a.x - rx + 40} ${a.y + 30} Q ${mx} ${my} ${b.x - 50} ${b.y - 30}`;
+        labelX = mx; labelY = my - 15; break;
+      case 'diag2':
+        path = `M ${a.x + rx - 40} ${a.y + 30} Q ${mx} ${my} ${b.x + 50} ${b.y - 30}`;
+        labelX = mx; labelY = my + 18; break;
+    }
+
+    const edgePath = gChart.append('path')
+      .attr('class', `edge ${e.curve.startsWith('diag') ? 'diag' : ''} ${e.hi ? 'hi' : ''}`)
+      .attr('d', path)
+      .attr('marker-end', e.hi ? 'url(#arrow-red)' : 'url(#arrow-ink)');
+
+    const edgeLabel = gChart.append('text')
+      .attr('class', `edge-label ${e.hi ? 'hi' : ''}`)
+      .attr('x', labelX).attr('y', labelY)
+      .text(e.label);
+    if (labelTransform) edgeLabel.attr('transform', labelTransform);
+
+    // hover interaction
+    edgePath.style('cursor', 'pointer')
+      .on('mouseover', (event) => { edgePath.classed('hi', true); edgeLabel.classed('hi', true); showTip(event, `<strong>${e.from} → ${e.to}</strong><br>${e.label}`); })
+      .on('mousemove', moveTip)
+      .on('mouseout', () => { if (!e.hi) { edgePath.classed('hi', false); edgeLabel.classed('hi', false); } hideTip(); });
+  });
+
+  // draw nodes
+  nodes.forEach(n => {
+    const pos = nodeXY[n.id];
+    gChart.append('ellipse').attr('class', 'node').attr('cx', pos.x).attr('cy', pos.y).attr('rx', rx).attr('ry', ry);
+    gChart.append('text').attr('class', 'node-label').attr('x', pos.x).attr('y', pos.y - 2).text(n.label);
+    gChart.append('text').attr('class', 'node-sub').attr('x', pos.x).attr('y', pos.y + 16).text(n.sub);
+  });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

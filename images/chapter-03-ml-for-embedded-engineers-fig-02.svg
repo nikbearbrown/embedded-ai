@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t02 d02">
+  <title id="t02">Three-layer MLP — 784 to 128 to 10</title>
+  <desc id="d02">A small feedforward network with input layer of 784 neurons, hidden layer of 128, output layer of 10. Edges labeled with weight matrix sizes; nodes labeled with activation memory; totals shown for flash and peak RAM.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .em { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+    </style>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <!-- title -->
+  <text x="350" y="32" text-anchor="middle" class="ti">A small MLP — three layers, two cost columns</text>
+
+  <!-- LAYER 1 (input 784) — drawn as a stack/grid -->
+  <g>
+    <rect x="60" y="110" width="100" height="180" fill="#2a1a0e"/>
+    <text x="110" y="170" text-anchor="middle" class="sm" fill="#fdfcfb">input</text>
+    <text x="110" y="188" text-anchor="middle" class="sm" fill="#fdfcfb">28 × 28</text>
+    <text x="110" y="206" text-anchor="middle" class="sm" fill="#fdfcfb">784 neurons</text>
+    <text x="110" y="316" text-anchor="middle" class="lb">layer 0</text>
+    <text x="110" y="334" text-anchor="middle" class="sm">activation: 784 × 4 B = 3.1 KB</text>
+  </g>
+
+  <!-- Edge 1 -->
+  <line x1="162" y1="200" x2="298" y2="200" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+  <rect x="180" y="160" width="100" height="32" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="1"/>
+  <text x="230" y="174" text-anchor="middle" class="sm">W₁ · 784 × 128</text>
+  <text x="230" y="186" text-anchor="middle" class="sm">≈ 401 KB</text>
+
+  <!-- LAYER 2 (hidden 128) -->
+  <g>
+    <rect x="300" y="140" width="100" height="120" fill="#4a4540"/>
+    <text x="350" y="190" text-anchor="middle" class="sm" fill="#fdfcfb">hidden</text>
+    <text x="350" y="208" text-anchor="middle" class="sm" fill="#fdfcfb">128 neurons</text>
+    <text x="350" y="316" text-anchor="middle" class="lb">layer 1</text>
+    <text x="350" y="334" text-anchor="middle" class="sm">activation: 128 × 4 B = 512 B</text>
+  </g>
+
+  <!-- Edge 2 -->
+  <line x1="402" y1="200" x2="538" y2="200" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+  <rect x="420" y="160" width="100" height="32" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="1"/>
+  <text x="470" y="174" text-anchor="middle" class="sm">W₂ · 128 × 10</text>
+  <text x="470" y="186" text-anchor="middle" class="sm">≈ 5 KB</text>
+
+  <!-- LAYER 3 (output 10) -->
+  <g>
+    <rect x="540" y="180" width="100" height="40" fill="#8a8480"/>
+    <text x="590" y="195" text-anchor="middle" class="sm" fill="#fdfcfb">output</text>
+    <text x="590" y="211" text-anchor="middle" class="sm" fill="#fdfcfb">10 classes</text>
+    <text x="590" y="316" text-anchor="middle" class="lb">layer 2</text>
+    <text x="590" y="334" text-anchor="middle" class="sm">activation: 10 × 4 B = 40 B</text>
+  </g>
+
+  <!-- Side panel: totals -->
+  <line x1="40" y1="362" x2="660" y2="362" stroke="#c8c4c0" stroke-width="0.75"/>
+  <text x="60" y="384" class="em">Totals</text>
+  <text x="160" y="384" class="lb">flash: ~406 KB (W₁ + W₂ + biases)</text>
+  <text x="430" y="384" class="lb">peak RAM: &lt; 1 KB (one hidden layer)</text>
+
+  <!-- caption -->
+  <text x="350" y="408" text-anchor="middle" class="cap">Weights dominate flash by three orders of magnitude. Peak activation barely registers.</text>
+</svg>

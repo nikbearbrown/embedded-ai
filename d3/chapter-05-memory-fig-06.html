@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.6 — Three memory failure modes decision tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 520px; }
+  .node-root rect { fill: var(--color-ink); }
+  .node-branch rect { fill: #404040; }
+  .node-leaf rect { fill: var(--color-white); stroke: var(--color-border); }
+  .node-leaf rect.highlight { stroke: var(--color-ochre); stroke-width: 2; }
+  .node text { font-family: 'Inter', sans-serif; font-size: 12px; }
+  .node-root text, .node-branch text { fill: var(--color-white); font-weight: 700; }
+  .node-leaf text { fill: var(--color-ink); }
+  .savings { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-ochre); }
+  .link { fill: none; stroke: var(--color-secondary); stroke-width: 1; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 5.6 — When memory fails, it fails one of three ways</h1>
+<p class="subtitle">Each branch points at a different fix. Verdict drives mitigation.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Memory is binary — the model fits or it does not. The branch that fired tells you which mitigation to reach for.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const treeData = {
+  name: 'memory fails',
+  type: 'root',
+  trigger: 'any of three branches fires',
+  children: [
+    {
+      name: "doesn't fit in flash",
+      type: 'branch',
+      trigger: 'model_size > flash_kb',
+      children: [
+        { name: 'quantize f32 → int8', savings: '−75%',     type: 'leaf', detail: 'Largest single win for weights; check accuracy impact.' },
+        { name: 'prune layers',        savings: '−20–50%',  type: 'leaf', detail: 'Structured pruning preserves matmul friendliness.' },
+        { name: 'smaller architecture',savings: '−40–80%',  type: 'leaf', detail: 'MobileNet, EfficientNet-Lite, MCUNet families.' }
+      ]
+    },
+    {
+      name: "doesn't fit in SRAM",
+      type: 'branch',
+      trigger: 'arena init returns "required > provided"',
+      children: [
+        { name: 'reduce channels / res', savings: '−50–75%', type: 'leaf', detail: 'Drop input resolution + max channel count.' },
+        { name: 'swap to MobileNet',     savings: '−30–60%', type: 'leaf', detail: 'Depthwise-separable cuts activation memory.' },
+        { name: 'add PSRAM',             savings: '+10–50× latency', type: 'leaf', detail: 'Capacity in exchange for latency + power.' }
+      ]
+    },
+    {
+      name: 'insufficient margin',
+      type: 'branch',
+      trigger: 'measured peak / total_sram > 0.80',
+      children: [
+        { name: 'reduce model',        savings: 'target <70%', type: 'leaf', detail: 'Pull total back under 80% with margin.' },
+        { name: 'reduce app memory',   savings: 'comms, heap', type: 'leaf', detail: 'Shrink RTOS stacks, comms buffers, heap.' },
+        { name: 'upgrade hardware',    savings: 'BOM cost',    type: 'leaf', detail: 'Last resort — bigger SRAM, more flash.' }
+      ]
+    }
+  ]
+};
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 900;
+  const totalHeight = container.clientHeight || 520;
+  const margin = { top: 40, right: 24, bottom: 40, left: 24 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Three memory failure modes');
+  svg.append('desc').attr('id', 'chart-desc').text('Decision tree with three branches: flash, SRAM, and margin failure modes, each with mitigation leaves.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const root = d3.hierarchy(treeData);
+  const treeLayout = d3.tree().size([chartWidth, chartHeight - 40]);
+  treeLayout(root);
+
+  // links
+  gChart.append('g').selectAll('path').data(root.links()).enter().append('path')
+    .attr('class', 'link')
+    .attr('d', d3.linkVertical().x(d => d.x).y(d => d.y));
+
+  // nodes
+  const nodes = gChart.append('g').selectAll('g').data(root.descendants()).enter().append('g')
+    .attr('class', d => `node node-${d.data.type}`)
+    .attr('transform', d => `translate(${d.x},${d.y})`)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.data.name}${d.data.savings ? ', savings ' + d.data.savings : ''}`);
+
+  nodes.append('rect')
+    .attr('x', d => d.data.type === 'leaf' ? -70 : -90)
+    .attr('y', -20)
+    .attr('width', d => d.data.type === 'leaf' ? 140 : 180)
+    .attr('height', 40)
+    .style('cursor', 'pointer')
+    .on('mouseover', function(event, d) {
+      d3.select(this).classed('highlight', true);
+      tooltip.html(`<strong>${d.data.name}</strong><br>${d.data.detail || d.data.trigger || ''}`)
+        .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+        .transition().duration(150).style('opacity', 1);
+    })
+    .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+    .on('mouseout', function() {
+      d3.select(this).classed('highlight', false);
+      tooltip.transition().duration(100).style('opacity', 0);
+    });
+
+  nodes.append('text')
+    .attr('y', d => d.data.savings ? -2 : 4)
+    .attr('text-anchor', 'middle')
+    .text(d => d.data.name);
+
+  nodes.filter(d => d.data.savings).append('text')
+    .attr('class', 'savings')
+    .attr('y', 14)
+    .attr('text-anchor', 'middle')
+    .text(d => d.data.savings);
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

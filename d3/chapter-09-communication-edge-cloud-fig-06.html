@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 9.6 — Three predictive-maintenance strategies compared</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; max-width: 80ch; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 14px; position: relative; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .panel-sub   { color: var(--color-secondary); font-size: 12px; margin-bottom: 8px; }
+  .chart { width: 100%; height: 200px; }
+  .legend-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 13px; }
+  .legend-row .item { display: flex; align-items: center; gap: 8px; }
+  .legend-row .sw { display: inline-block; width: 12px; height: 12px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar-value { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; fill: var(--color-ink); }
+  .budget-line { stroke: var(--color-red); stroke-dasharray: 3 3; stroke-width: 0.8; }
+  .budget-text { font-family: 'EB Garamond', Georgia, serif; font-size: 10px; font-style: italic; fill: var(--color-red); }
+  .verdict { position: absolute; top: 14px; right: 14px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; }
+  .verdict.over { color: var(--color-red); }
+  .verdict.win  { color: var(--color-white); background: var(--color-ink); padding: 2px 8px; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 12px; max-width: 280px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  rect.bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 9.6 — Three strategies, four axes, one winner</h1>
+<p class="subtitle">Predictive maintenance, motor vibration. Target ≥ 90 % accuracy, ≤ 1 s latency, ≤ $10/device/mo on NB-IoT. Same problem, three architectures — read each axis independently.</p>
+
+<div class="legend-row">
+  <div class="item"><span class="sw" style="background:#787878"></span> Strategy 1 — full on-device · Model B</div>
+  <div class="item"><span class="sw" style="background:var(--color-border)"></span> Strategy 2 — full cloud · Model C</div>
+  <div class="item"><span class="sw" style="background:var(--color-ink)"></span> Strategy 3 — split · Model C</div>
+</div>
+
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Latency (ms)</div>
+    <div class="panel-sub">budget 1 000 ms</div>
+    <div id="chartLatency" class="chart"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Monthly data (MB)</div>
+    <div class="panel-sub">10 MB plan ceiling</div>
+    <div id="chartData" class="chart"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Monthly cost ($)</div>
+    <div class="panel-sub">budget ≤ $10/mo</div>
+    <div class="verdict over">S2 over budget</div>
+    <div id="chartCost" class="chart"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Accuracy (%)</div>
+    <div class="panel-sub">floor 90 %</div>
+    <div class="verdict win">S3 wins</div>
+    <div id="chartAcc" class="chart"></div>
+  </div>
+</div>
+
+<p class="caption">Strategy 3 (split inference) matches Model C accuracy at 4.5× lower monthly cost and stays inside the latency budget. Strategy 2 fails on cost; Strategy 1 sits at the accuracy floor.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const strategies = [
+  { id: 'S1', name: 'on-device',  color: '#787878' },
+  { id: 'S2', name: 'full cloud', color: 'var(--color-border)' },
+  { id: 'S3', name: 'split',      color: 'var(--color-ink)' }
+];
+const datasets = {
+  latency: [{ id: 'S1', v: 220 }, { id: 'S2', v: 250 }, { id: 'S3', v: 350 }],
+  data:    [{ id: 'S1', v: 0.00003 }, { id: 'S2', v: 129.6 }, { id: 'S3', v: 2.88 }],
+  cost:    [{ id: 'S1', v: 2 },   { id: 'S2', v: 25.72 }, { id: 'S3', v: 5.72 }],
+  acc:     [{ id: 'S1', v: 91 },  { id: 'S2', v: 96 }, { id: 'S3', v: 96 }]
+};
+const budgets = { latency: 1000, data: 10, cost: 10, acc: 90 };
+const yMax = { latency: 1000, data: 150, cost: 30, acc: 100 };
+const formatVal = {
+  latency: v => v + ' ms',
+  data:    v => v < 1 ? (v * 1024).toFixed(2) + ' KB' : v.toFixed(2) + ' MB',
+  cost:    v => '$' + v.toFixed(2),
+  acc:     v => v + ' %'
+};
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) { tooltip.html(html).style('left', (event.pageX + 12)+'px').style('top', (event.pageY - 28)+'px').style('opacity', 1); }
+function moveTip(event) { tooltip.style('left', (event.pageX + 12)+'px').style('top', (event.pageY - 28)+'px'); }
+function hideTip() { tooltip.style('opacity', 0); }
+
+function drawPanel(id, key) {
+  const container = document.getElementById(id);
+  d3.select(container).selectAll('*').remove();
+
+  const totalWidth = container.clientWidth || 360;
+  const totalHeight = 200;
+  const margin = { top: 16, right: 12, bottom: 28, left: 48 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(container)
+    .append('svg')
+      .attr('width', totalWidth).attr('height', totalHeight)
+      .attr('role', 'img');
+
+  svg.append('title').text(`${key} comparison`);
+  svg.append('desc').text(`Bar chart of three strategies on the ${key} axis with a budget reference line.`);
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand().domain(strategies.map(s => s.id)).range([0, chartWidth]).padding(0.25);
+  const yScaleLinear = d3.scaleLinear().domain([0, yMax[key]]).range([chartHeight, 0]);
+
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleBand));
+
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLinear).ticks(4));
+
+  // budget line
+  const b = budgets[key];
+  gChart.append('line')
+    .attr('class', 'budget-line')
+    .attr('x1', 0).attr('y1', yScaleLinear(b))
+    .attr('x2', chartWidth).attr('y2', yScaleLinear(b));
+  gChart.append('text').attr('class', 'budget-text')
+    .attr('x', chartWidth - 4).attr('y', yScaleLinear(b) - 4)
+    .attr('text-anchor', 'end')
+    .text(key === 'acc' ? `floor ${b} %` : (key === 'data' ? `${b} MB plan` : (key === 'cost' ? `≤ $${b}/mo` : `${b} ms budget`)));
+
+  // bars
+  gChart.selectAll('.bar')
+    .data(datasets[key])
+    .join('rect')
+      .attr('class', 'bar')
+      .attr('x', d => xScaleBand(d.id))
+      .attr('y', d => yScaleLinear(d.v))
+      .attr('width', xScaleBand.bandwidth())
+      .attr('height', d => Math.max(1, chartHeight - yScaleLinear(d.v)))
+      .attr('fill', d => strategies.find(s => s.id === d.id).color)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.id}: ${formatVal[key](d.v)}`)
+      .on('mouseover', (event, d) => {
+        const strat = strategies.find(s => s.id === d.id);
+        showTip(event, `<strong>${d.id} · ${strat.name}</strong><br>${formatVal[key](d.v)}`);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', hideTip);
+
+  // value labels
+  gChart.selectAll('.bar-value')
+    .data(datasets[key])
+    .join('text')
+      .attr('class', 'bar-value')
+      .attr('x', d => xScaleBand(d.id) + xScaleBand.bandwidth()/2)
+      .attr('y', d => yScaleLinear(d.v) - 4)
+      .attr('text-anchor', 'middle')
+      .text(d => formatVal[key](d.v));
+}
+
+function draw() {
+  drawPanel('chartLatency', 'latency');
+  drawPanel('chartData', 'data');
+  drawPanel('chartCost', 'cost');
+  drawPanel('chartAcc', 'acc');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+['chartLatency', 'chartData', 'chartCost', 'chartAcc'].forEach(id => ro.observe(document.getElementById(id)));
+</script>
+</body>
+</html>

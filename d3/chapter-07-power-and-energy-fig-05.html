@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 7.5 — Annotated power profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 480px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .trace { stroke: var(--color-ink); fill: none; stroke-width: 2; }
+  .region-sensor    { fill: var(--color-secondary); opacity: 0.22; }
+  .region-inference { fill: var(--color-ink);       opacity: 0.22; }
+  .region-radio     { fill: var(--color-red);       opacity: 0.18; }
+  .label-energy { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-ochre); }
+  .label-feature { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 7.5 — Annotated power profile</h1>
+<p class="subtitle">One full duty cycle. The radio dominates the energy bill — 85% of the total.</p>
+<div id="chart" role="img"></div>
+<p class="caption">Sleep floor at 10 µA, sensor acquisition at 15 mA for 30 ms, inference burst at 80 mA for 150 ms, return to sleep, then a 100 mA LoRa transmit envelope for 700 ms. Energy per feature is the area under the curve at 3.3 V.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const trace = [
+  { t: 0,     mA: 0.01 },
+  { t: 0.35,  mA: 0.01 },
+  { t: 0.35,  mA: 15   }, { t: 0.38, mA: 15 },
+  { t: 0.38,  mA: 0.01 }, { t: 0.55, mA: 0.01 },
+  { t: 0.55,  mA: 80   }, { t: 0.70, mA: 80 },
+  { t: 0.70,  mA: 0.01 }, { t: 0.95, mA: 0.01 },
+  { t: 0.95,  mA: 100  }, { t: 1.65, mA: 100 },
+  { t: 1.65,  mA: 0.01 }, { t: 2.0,  mA: 0.01 }
+];
+
+const features = [
+  { name: 'sleep',     start: 0,    end: 0.35, energy: '≈ 0',     peakMa: 0.01 },
+  { name: 'sensor',    start: 0.35, end: 0.38, energy: '1.5 mJ',  peakMa: 15 },
+  { name: 'inference', start: 0.55, end: 0.70, energy: '39.6 mJ', peakMa: 80 },
+  { name: 'LoRa tx',   start: 0.95, end: 1.65, energy: '231 mJ',  peakMa: 100 }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 480;
+  const margin = { top: 48, right: 40, bottom: 80, left: 72 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'ap-title ap-desc');
+  svg.append('title').attr('id', 'ap-title').text('Annotated current trace of one duty cycle.');
+  svg.append('desc').attr('id', 'ap-desc').text('A two-second oscilloscope trace showing sleep floor, sensor acquisition, inference burst, and a LoRa transmit envelope. Y-axis on a log scale from 1 microamp to 100 milliamps.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 2]).range([0, chartWidth]);
+  const yScaleLog    = d3.scaleLog().domain([0.001, 200]).range([chartHeight, 0]);
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(5).tickFormat(d => d + ' s'));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLog).tickValues([0.001, 0.01, 0.1, 1, 10, 100]).tickFormat(d => d + ' mA'));
+
+  // feature regions
+  features.slice(1).forEach(f => {
+    const className = f.name === 'sensor'    ? 'region-sensor' :
+                      f.name === 'inference' ? 'region-inference' :
+                                               'region-radio';
+    gChart.append('rect').attr('class', className)
+      .attr('x', xScaleLinear(f.start))
+      .attr('y', yScaleLog(f.peakMa))
+      .attr('width', xScaleLinear(f.end) - xScaleLinear(f.start))
+      .attr('height', chartHeight - yScaleLog(f.peakMa))
+      .attr('tabindex', 0)
+      .attr('aria-label', `${f.name}: ${f.energy}`)
+      .on('mouseover', (event) => showTip(event, `<strong>${f.name}</strong><br/>peak ${f.peakMa} mA<br/>energy ${f.energy}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // trace
+  const lineGen = d3.line().x(d => xScaleLinear(d.t)).y(d => yScaleLog(d.mA)).curve(d3.curveStepAfter);
+  gChart.append('path').datum(trace).attr('class', 'trace').attr('d', lineGen);
+
+  // feature labels
+  features.forEach(f => {
+    const cx = xScaleLinear((f.start + f.end) / 2);
+    gChart.append('text').attr('class', 'label-feature')
+      .attr('x', cx).attr('y', yScaleLog(f.peakMa) - 8)
+      .attr('text-anchor', 'middle').text(f.name);
+    gChart.append('text').attr('class', 'label-energy')
+      .attr('x', cx).attr('y', chartHeight + 24)
+      .attr('text-anchor', 'middle').text(f.energy);
+  });
+
+  // total label
+  gChart.append('text')
+    .attr('x', chartWidth).attr('y', -8).attr('text-anchor', 'end')
+    .style('font-family', "'Inter', sans-serif")
+    .style('font-size', '13px').style('font-weight', '700')
+    .style('fill', 'var(--color-red)')
+    .text('radio = 85% of energy bill · total ≈ 272 mJ');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

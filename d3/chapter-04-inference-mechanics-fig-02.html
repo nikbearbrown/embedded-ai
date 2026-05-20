@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 4.2 — Matrix multiply tiling: naive vs cache-blocked</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel.primary { border-color: var(--color-red); }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub   { color: var(--color-secondary); font-size: 13px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 280px; }
+  .cell { stroke: var(--color-secondary); stroke-width: 0.6; fill: var(--color-white); }
+  .cell.active { fill: var(--color-ochre); }
+  .cell.cached { fill: var(--color-border); }
+  .scan { stroke: var(--color-red); stroke-width: 0.6; opacity: 0.6; }
+  .glyph { font-family: 'EB Garamond', Georgia, serif; font-size: 24px; fill: var(--color-ink); }
+  .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .meta  { padding: 12px; border: 1px solid var(--color-border); margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .meta .alert { color: var(--color-red); font-weight: 600; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 4.2 — Matrix multiply tiling: naive vs cache-blocked</h1>
+<p class="subtitle">Identical MAC count. Different locality. Order-of-magnitude difference in time.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Naive — stream A once per output column</div>
+    <div class="panel-sub">Cortex-M4, no cache. Memory-bound.</div>
+    <div id="chartNaive" class="chart" role="img" aria-labelledby="t-naive d-naive"></div>
+    <div class="meta">
+      compute&nbsp;&nbsp;&nbsp;163,840 MAC × 1 cyc = 163,840 cyc<br>
+      <span class="alert">memory&nbsp;&nbsp;&nbsp;32,768 cyc (≈ 20% overhead)</span><br>
+      measured ≈ 3–5 ms on 100 MHz M4
+    </div>
+  </div>
+  <div class="panel primary">
+    <div class="panel-title">Tiled — 64×64 sub-blocks reused</div>
+    <div class="panel-sub">Cortex-M7 + 16 KB L1. Compute-bound.</div>
+    <div id="chartTiled" class="chart" role="img" aria-labelledby="t-tiled d-tiled"></div>
+    <div class="meta">
+      compute&nbsp;&nbsp;&nbsp;163,840 MAC × 1 cyc = 163,840 cyc<br>
+      memory&nbsp;&nbsp;&nbsp;≈ 500 cyc (negligible)<br>
+      measured ≈ 1.7 ms on 100 MHz M7
+    </div>
+  </div>
+</div>
+<p class="caption">Same matrices, same MACs. The cache-blocked pass keeps each sub-block of A in L1 while it is reused across many output elements; the naive pass streams every element from SRAM once per output column.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+function drawNaive() {
+  const sel = '#chartNaive';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.querySelector(sel);
+  const totalWidth = container.clientWidth || 380;
+  const totalHeight = container.clientHeight || 280;
+  const margin = { top: 16, right: 12, bottom: 16, left: 12 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-naive d-naive');
+  svg.append('title').attr('id', 't-naive').text('Naive matrix multiply — streamed reads');
+  svg.append('desc').attr('id', 'd-naive').text('A 128 by 128 matrix A multiplied by 128 by 10 matrix B, with horizontal scan lines across A indicating that every row is streamed from SRAM once per output column.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // A
+  const aSize = Math.min(chartWidth * 0.45, chartHeight * 0.7);
+  g.append('rect').attr('class', 'cell').attr('x', 0).attr('y', 12).attr('width', aSize).attr('height', aSize);
+  for (let i = 1; i < 10; i++) {
+    g.append('line').attr('class', 'scan')
+      .attr('x1', 0).attr('x2', aSize)
+      .attr('y1', 12 + (aSize * i / 10)).attr('y2', 12 + (aSize * i / 10));
+  }
+  g.append('text').attr('class', 'label').attr('x', 0).attr('y', 6).text('A  128×128');
+
+  // × glyph
+  g.append('text').attr('class', 'glyph').attr('x', aSize + 16).attr('y', 12 + aSize / 2 + 6).text('×');
+
+  // B (narrow)
+  const bW = aSize * 0.18;
+  const bX = aSize + 40;
+  g.append('rect').attr('class', 'cell').attr('x', bX).attr('y', 12).attr('width', bW).attr('height', aSize);
+  g.append('text').attr('class', 'label').attr('x', bX).attr('y', 6).text('B  128×10');
+
+  // = glyph
+  g.append('text').attr('class', 'glyph').attr('x', bX + bW + 14).attr('y', 12 + aSize / 2 + 6).text('=');
+
+  // C
+  const cX = bX + bW + 34;
+  g.append('rect').attr('class', 'cell').attr('x', cX).attr('y', 12).attr('width', bW).attr('height', aSize);
+  g.append('text').attr('class', 'label').attr('x', cX).attr('y', 6).text('C  128×10');
+
+  // annotation
+  g.append('text').attr('class', 'label').attr('x', 0).attr('y', 24 + aSize)
+    .text('A read 10× — once per output column');
+}
+
+function drawTiled() {
+  const sel = '#chartTiled';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.querySelector(sel);
+  const totalWidth = container.clientWidth || 380;
+  const totalHeight = container.clientHeight || 280;
+  const margin = { top: 16, right: 12, bottom: 16, left: 12 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-tiled d-tiled');
+  svg.append('title').attr('id', 't-tiled').text('Cache-blocked matrix multiply');
+  svg.append('desc').attr('id', 'd-tiled').text('The same matrices subdivided into 64 by 64 tiles. One tile of A and the corresponding tile of B are highlighted as resident in cache, reused for many output computations.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const aSize = Math.min(chartWidth * 0.45, chartHeight * 0.7);
+  const half = aSize / 2;
+
+  // A tiles
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < 2; c++) {
+      g.append('rect')
+        .attr('class', (r === 0 && c === 0) ? 'cell active' : 'cell')
+        .attr('x', c * half).attr('y', 12 + r * half)
+        .attr('width', half).attr('height', half);
+    }
+  }
+  g.append('text').attr('class', 'label').attr('x', 0).attr('y', 6).text('A  128×128, 64×64 tiles');
+  g.append('text').attr('class', 'label').attr('x', half / 2).attr('y', 12 + half / 2).attr('text-anchor', 'middle').text('in L1');
+
+  g.append('text').attr('class', 'glyph').attr('x', aSize + 16).attr('y', 12 + aSize / 2 + 6).text('×');
+
+  const bW = aSize * 0.18;
+  const bX = aSize + 40;
+  g.append('rect').attr('class', 'cell active')
+    .attr('x', bX).attr('y', 12).attr('width', bW).attr('height', half);
+  g.append('rect').attr('class', 'cell')
+    .attr('x', bX).attr('y', 12 + half).attr('width', bW).attr('height', half);
+  g.append('text').attr('class', 'label').attr('x', bX).attr('y', 6).text('B tile');
+
+  g.append('text').attr('class', 'glyph').attr('x', bX + bW + 14).attr('y', 12 + aSize / 2 + 6).text('=');
+
+  const cX = bX + bW + 34;
+  g.append('rect').attr('class', 'cell active')
+    .attr('x', cX).attr('y', 12).attr('width', bW).attr('height', half);
+  g.append('rect').attr('class', 'cell')
+    .attr('x', cX).attr('y', 12 + half).attr('width', bW).attr('height', half);
+  g.append('text').attr('class', 'label').attr('x', cX).attr('y', 6).text('C tile');
+
+  g.append('text').attr('class', 'label').attr('x', 0).attr('y', 24 + aSize)
+    .text('load each tile once, reuse 64×');
+}
+
+function draw() { drawNaive(); drawTiled(); }
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chartNaive'));
+ro.observe(document.getElementById('chartTiled'));
+</script>
+</body>
+</html>

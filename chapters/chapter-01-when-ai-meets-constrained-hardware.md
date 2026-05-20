@@ -10,6 +10,9 @@ To get there we have to start with what *embedded* actually means.
 
 The word is loose in casual usage. People reach for it as a synonym for *small*, or *low-cost*, or *IoT*. Those correlations exist, but they don't define the thing. A Raspberry Pi 4 is not constrained the way an Arduino Nano 33 is constrained, even though both get called embedded. A Tesla's autopilot computer has more compute than most laptops; it is also embedded. What makes a system embedded is not size. It is that the system has been purpose-built for a specific application, with its resources allocated to do that one thing, and there is no overhead left over for generality.
 
+![Hardware-class taxonomy ladder showing four tiers from desktop down to deeply embedded, with the embedded boundary drawn around the lower two tiers and each tier annotated with SRAM, power, and recovery behavior.](../images/chapter-01-when-ai-meets-constrained-hardware-fig-01.png)
+*Figure 1.1 — Hardware-class ladder and the embedded boundary*
+
 The operational consequence of that definition is the first principle you need: *resources are fixed, and exceeding them is not recoverable*. A laptop can swap memory to disk when RAM runs out. A cloud server can autoscale compute when demand spikes. A desktop GPU can pull three hundred watts from a wall socket without consequence. Embedded systems can do none of these things. They have the memory they shipped with. They have the processor they were designed around. They have a power budget set by a battery, an energy harvester, or a constrained supply rail. When you exceed those limits, the system does not slow down gracefully. It fails.
 
 Now bring AI into that environment. The thing that makes integration hard is not a lack of skill on either side. It is a mismatch in what the two artifacts assume.
@@ -28,9 +31,15 @@ Compute: at 64 MHz with no FPU, the processor can sustain about 64 million integ
 
 That duty cycle determines power. Suppose the processor draws 15 mA active and 5 µA asleep. Average current is roughly 1.7 mA. A 220 mAh coin cell will sustain that for about 130 hours — five days, not fourteen. The integration *fails the battery-life constraint*.
 
+![Cascading budget waterfall for the wristband arrhythmia case showing three stacked horizontal bars for memory, latency, and power. Memory and latency pass; battery life fails at 130 of 336 hours required.](../images/chapter-01-when-ai-meets-constrained-hardware-fig-02.png)
+*Figure 1.2 — Wristband constraint waterfall: power is the binding failure*
+
 Notice what just happened. The model did not crash. It produced correct results. The hardware did not malfunction. The system performed exactly as designed, and the design was wrong, because the design was made without doing the calculation we just did. This is what the doorbell story actually was.
 
 So why not just put the model in the cloud? That is the obvious move, and for a long time it was the dominant move. Alexa sends your voice to Amazon's servers. Google Photos runs recognition in the cloud. Early autonomous vehicles uploaded sensor data for post-processing. The cloud has unbounded memory and unbounded compute, and you do not have to fight any of the math we just did. So why does this book exist at all?
+
+![Topology map of three inference placements drawn as concentric rings around a sensor, with a cloud datacenter on the right. Each ring is annotated with latency, what physically leaves the device, and the trade it satisfies or violates.](../images/chapter-01-when-ai-meets-constrained-hardware-fig-03.png)
+*Figure 1.3 — Edge, fog, and cloud: three places inference can run*
 
 Because for an entire class of applications, the cloud architecture has stopped working — and the reasons it has stopped working are not engineering shortcomings that can be fixed by faster servers or better networks. They are properties of the application itself. Four of them, specifically.
 
@@ -52,6 +61,9 @@ These four — latency, privacy, connectivity, cost — define the boundary wher
 
 *Real-time performance* determines whether you can meet deadlines. Real-time is not a synonym for fast. A real-time system is one where correctness depends not just on producing the right result but on producing it *by* a specific time. Soft real-time can tolerate occasional misses; hard real-time cannot. Inference complicates this because execution time can vary with input data, cache state, memory contention, and scheduler decisions. For hard real-time deployment, worst-case execution time has to be bounded and provable, which is hard for models with attention or conditional branches.
 
+![Diamond graph with memory, compute, power, and real-time at the four vertices and six edges labeled with the named trade between each pair — quantize, lower clock, lower duty cycle, weights in flash, prune, accelerator.](../images/chapter-01-when-ai-meets-constrained-hardware-fig-04.png)
+*Figure 1.4 — Four constraints, six couplings: every lever costs something*
+
 These four are not independent. They couple in ways that matter. Quantizing weights from 32-bit float to 8-bit integer cuts memory and speeds up inference because there are fewer bytes to move, but it can degrade model accuracy. Offloading inference to a hardware accelerator cuts latency and power but adds cost and integration complexity. Running inference at a lower duty cycle reduces average power but increases response latency. Every design decision in embedded AI is a trade among these four, and the practitioner who cannot quantify the trade cannot make the decision.
 
 To make the coupling concrete, take a keyword-spotter — a wake-word model listening for *Hey, device*. The model is a small CNN trained on audio spectrograms. 42,000 parameters. 180 KB of memory between weights and activations. 1.8 million ops per pass. Inference must finish within 100 ms to feel responsive. The device runs on a 1000 mAh lithium-ion battery and has to last a week of continuous listening.
@@ -61,6 +73,9 @@ Two candidate processors. *Target A*: ARM Cortex-M4 at 80 MHz, 256 KB SRAM, hard
 Target A: the 180 KB fits in 256 KB SRAM. The FPU lets the processor sustain about 80 MFLOPS, so 1.8 million ops take roughly 22 ms — well inside the 100 ms latency budget. If inference runs once every 100 ms, the duty cycle is 22% and the average current is about 4.4 mA. A 1000 mAh cell at that draw lasts roughly 227 hours — about nine days. Tight on the one-week target, but workable.
 
 Target B: 180 KB does not fit in 32 KB SRAM. The model fails the memory check before you even reach compute. Even if you somehow compressed it, the absence of an FPU means floating-point ops are emulated, throughput drops by an order of magnitude, the inference takes 375 ms or longer, and latency fails too.
+
+![Side-by-side scorecard comparing Cortex-M4 Target A and Cortex-M0+ Target B against memory fit, latency, battery life, and unit cost. Target A passes all four; Target B fails memory and latency and blocks the rest.](../images/chapter-01-when-ai-meets-constrained-hardware-fig-05.png)
+*Figure 1.5 — Keyword-spotter feasibility scorecard: where the binding constraint moves*
 
 Target B is one-quarter the cost of Target A. For a consumer device with tight margins and high volume, that gap is decisive. So now you face a real engineering choice: accept the higher unit cost, or modify the model to fit. Modifying means quantizing weights to int8, pruning, switching to a depthwise-separable architecture — each of which changes accuracy. If accuracy drops below the application's threshold, the savings buy you a product that does not work. That is the design space. Two surfaces — what the model demands and what the hardware can supply — and the question is whether they overlap.
 
@@ -134,6 +149,90 @@ Where the model genuinely helps: explaining the architectural choices that disti
 Where the model does damage: producing specific recommendations about which neural architecture fits a given microcontroller. The recommendation depends on toolchain, vendor, and your specific application's latency budget — none of which the model knows.
 
 The rule: use the model for the architecture lecture, not the architecture choice.
+
+---
+
+## Prompts
+
+These are the prompts that produced the chapter's figures. Each is structural — it specifies what to compare and how the pieces fit, not which color or font. Visual styling is fixed by the brutalist constitution.
+
+### Figure 1.1 — Hardware-class taxonomy ladder
+
+```
+Build a four-row table-as-figure that ladders compute tiers from least to most constrained.
+Rows top-to-bottom: Desktop / server, Single-board computer, Application MCU, Deeply embedded MCU.
+Columns: Tier (with one example product, one example deployment), Typical SRAM, Typical power, When resources exceeded (recovery behavior).
+Use a left edge marker per row that darkens as the tier becomes more general-purpose.
+Draw a horizontal dashed line between row 2 and row 3 labeled "embedded boundary" — and a vertical bracket along the left side of the bottom two rows labeled "embedded region".
+Keep the row band tall enough to fit three lines of text (tier name, hardware, examples).
+Caption: "The word 'embedded' begins where the system can no longer rescue itself from exceeded resources."
+```
+
+> Reference implementation: `d3/chapter-01-when-ai-meets-constrained-hardware-fig-01.html`
+
+### Figure 1.2 — Wristband constraint waterfall
+
+```
+Render three horizontal stacked bars on a shared 0–100% budget axis.
+Row 1 — Memory: segments are weights (180 KB, 70.3%), activations (60 KB, 23.4%), headroom (16 KB, 6.3%); verdict PASS.
+Row 2 — Latency / duty: segments are active (3.4 s, 11.3%) and asleep (26.6 s, 88.7%); verdict PASS.
+Row 3 — Power / battery: segments are delivered (130 h, 38.7%) and shortfall (206 h, 61.3%); verdict FAIL.
+Each row has a left-side label naming the constraint and the underlying numbers, and a right-side verdict (PASS/FAIL plus one short reason). Mark the 100% budget line with a vertical dashed rule.
+Below the bars, add a thin summary band: "The model ran. The hardware worked. The design was wrong."
+Caption: "Memory fits. Latency fits. Power decides."
+```
+
+> Reference implementation: `d3/chapter-01-when-ai-meets-constrained-hardware-fig-02.html`
+
+### Figure 1.3 — Edge, fog, and cloud topology
+
+```
+Place a sensor node on the left and a cloud-datacenter node on the right of a wide canvas.
+Centered on the sensor, draw three concentric rings: edge (smallest, solid), fog/gateway (medium, dashed), cloud (largest, dashed). Use scaleSqrt so the rings encode reachable distance, not raw radius.
+Place a gateway node on the fog ring. Connect sensor → gateway with a solid arrow, gateway → cloud with a dashed arrow.
+Label each ring near its upper arc with the placement name and its latency band: edge (<10 ms, no network); fog (10–50 ms, LAN); cloud (50–500+ ms, WAN/cellular).
+Below the topology, three side-by-side annotation panels (edge / fog / cloud), each with: what physically leaves the device, what it satisfies, what it violates.
+Caption: "Placement is physics, not preference."
+```
+
+> Reference implementation: `d3/chapter-01-when-ai-meets-constrained-hardware-fig-03.html`
+
+### Figure 1.4 — Four-constraint coupling
+
+```
+Lay out four vertices in a diamond: memory (top), compute (right), power (bottom), real-time (left).
+Each vertex is a filled circle with the constraint name and a two-line subtitle (unit shorthand + the question it answers, e.g., compute / "MHz · FLOPS" / "how fast").
+Connect all six pairs with edges. The four outer edges are solid; the two diagonals are dashed.
+At each edge midpoint, place a small label box containing the named lever and the resulting trade:
+  memory↔compute: quantize int8 → bytes ↓ matmul ↑ accuracy ↓
+  compute↔power: lower clock → mA ↓ inference ↑
+  power↔real-time: lower duty cycle → avg current ↓ response ↑
+  memory↔real-time: weights in flash → SRAM ↓ fetch ↑ WCET harder
+  memory↔power (diagonal): prune weights → flash ↓ retraining cost
+  compute↔real-time (diagonal): NN accelerator → latency ↓ cost ↑
+On hover, highlight the two vertices an edge connects.
+Caption: "No edge is free."
+```
+
+> Reference implementation: `d3/chapter-01-when-ai-meets-constrained-hardware-fig-04.html`
+
+### Figure 1.5 — Keyword-spotter feasibility scorecard
+
+```
+Build a two-column scorecard. Top header band names the targets:
+  Target A — Cortex-M4 · 80 MHz · 256 KB · FPU · $3
+  Target B — Cortex-M0+ · 48 MHz · 32 KB · no FPU · $0.80
+Four rows underneath, each with a constraint label on the left and a result cell per target:
+  Memory fit: A 180/256 KB PASS (mini bar 70%) · B 180/32 KB FAIL (overflowing bar)
+  Latency: A 22/100 ms PASS · B 375/100 ms FAIL
+  Battery life: A 4.4 mA · 227 h PASS (with target marker at 168 h) · B n/a (model does not run)
+  Unit cost: A $3.00 · B $0.80 (3.75× cheaper)
+Each result cell shows the number large, a short pass/fail clause, and where applicable a tiny horizontal bar with the budget mark. Use the same x-scale for the bar within each row so comparison is direct.
+Final verdict band: A SHIPS, costs more; B DOES NOT RUN, needs model surgery.
+Caption: "Two surfaces — what the model demands and what the hardware can supply."
+```
+
+> Reference implementation: `d3/chapter-01-when-ai-meets-constrained-hardware-fig-05.html`
 
 ---
 

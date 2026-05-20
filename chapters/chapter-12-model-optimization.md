@@ -22,6 +22,9 @@ and the inverse approximates the original. If your weights span -1.5 to 1.5, the
 
 Now suppose one of your activations spans 0.001 to 0.01. The scale becomes 0.01 / 255 ≈ 0.000039, and a value of 0.001 sits at integer 25 — but every value within ±0.00002 of 0.001 maps to the same integer. The signal there is being mashed by the rounding. This is where quantization damages accuracy: not where the dynamic range is wide, but where the dynamic range is wide *and the small-magnitude part of the range carries information*.
 
+![Two number lines comparing float32-to-int8 quantization. The top case shows a symmetric weight tensor from minus 1.5 to 1.5 mapping cleanly across 256 integer bins. The bottom case shows a narrow activation tensor from 0.001 to 0.01 collapsing many distinct floats onto the same integers — the rounding mash zone.](../images/chapter-12-model-optimization-fig-01.png)
+*Figure 12.1 — Float32-to-int8 quantization mapping. The rounding damages small-magnitude values where the dynamic range is wide.*
+
 Two design decisions follow. The first is whether to use one scale per tensor or one per channel. Per-tensor quantization picks a single scale for an entire weight matrix; it is cheap but suboptimal when channels carry different magnitudes — some channels with weights in [-0.1, 0.1] sharing a scale with channels in [-2, 2] will see the small ones round to zero. Per-channel quantization gives each output channel its own scale and zero_point. It costs you N extra scalars per layer in flash, and almost always earns those back in accuracy. For embedded deployment, per-channel is the default.
 
 The second decision is symmetric versus asymmetric. Symmetric quantization fixes zero_point at 0 and assumes the float range is balanced around zero — which is fine for weights and disastrous for ReLU activations, which are non-negative and waste half the int8 range under symmetric quantization. Asymmetric uses a non-zero offset and tracks arbitrary [min, max] ranges. Most modern toolchains pick symmetric for weights and asymmetric for activations; some accelerators force the choice for you.
@@ -31,6 +34,9 @@ Then there is the question of when to do the rounding. Two paths.
 Post-training quantization takes a trained float32 model and converts it without retraining. You feed a calibration dataset of 100–1000 representative inputs through the network, record the range of weights and activations layer by layer, compute a scale per tensor, and rewrite the weights as int8. The whole process takes minutes. PTQ is the right tool when you don't have access to the training pipeline, when the model came from a third party, or when you need to ship by Friday. The damage to accuracy is usually 3–10%, depending on outliers, calibration set quality, and how many layers carry near-zero weights that the rounding kills.
 
 Quantization-aware training simulates rounding during training. The forward pass quantizes weights and activations to int8 and immediately dequantizes them back to float32 for the gradient. The optimizer can see the rounding noise and finds weights that survive it. After training, you strip the fake-quantization nodes and store true int8 values. QAT typically lands at 1–3% accuracy loss instead of 3–10%, but it costs you hours or days of training time and access to the original dataset.
+
+![Three small-multiple bar panels comparing FP32 baseline, post-training quantization, and quantization-aware training across accuracy drop, model size in megabytes, and engineering cost in hours. PTQ shows three to ten percent accuracy drop with minutes of cost. QAT shows one to three percent accuracy drop but days of cost. Both deliver the same one-quarter model size.](../images/chapter-12-model-optimization-fig-02.png)
+*Figure 12.2 — FP32 vs PTQ vs QAT. PTQ is the right tool unless the accuracy hit costs you more than the application can pay.*
 
 The rule is straightforward. Use PTQ unless it costs you more than the application can pay; then upgrade to QAT.
 
@@ -42,15 +48,24 @@ Embedded inference frameworks — TensorFlow Lite Micro, CMSIS-NN, the firmware 
 
 *Structured* pruning is the version that helps. Instead of zeroing individual weights, you remove entire structures: whole output channels in a convolutional layer, whole filters, whole layers. The matrix that remains is smaller but still dense. Every kernel works unchanged. Every metric improves: flash drops because there are fewer weights to store; SRAM drops because activation tensors carry fewer channels; latency drops because there are fewer multiply-accumulates per inference.
 
+![Two weight-matrix diagrams side by side. The left shows unstructured pruning with scattered zero cells throughout an eight-by-eight matrix at the same dimensions; storage shrinks but SRAM and latency are unchanged. The right shows structured pruning with three output channels removed, leaving a smaller five-by-eight dense matrix; storage, SRAM, and latency all shrink.](../images/chapter-12-model-optimization-fig-03.png)
+*Figure 12.3 — Unstructured vs structured pruning. Embedded inference assumes dense GEMM; only structured pruning shrinks the kernel.*
+
 The procedure is iterative. Train the model, score each channel by its L1 norm or by the accuracy hit when you ablate it, drop the bottom 20%, fine-tune to recover, score again. Both major frameworks ship this — TensorFlow Model Optimization Toolkit's `prune_low_magnitude`, PyTorch's structured-pruning utilities and the third-party libraries that wrap them.
 
 Accuracy versus pruning rate is non-linear. The first 20% of channels you remove cost less than 1% accuracy on most over-parameterized networks. The next 20% costs 2–4%. Sixty percent costs 5–10%. Beyond 70% the cliff arrives — accuracy collapses unless the network was wildly over-built to begin with. The sweet spot for embedded compression is 20–40%. If you need more, you stop pruning the architecture you have and switch to distillation.
+
+![An accuracy curve declining as the percentage of channels removed increases from zero to ninety percent. The slope is nearly flat through twenty percent, then steepens through forty and sixty percent, and collapses past seventy percent. A shaded band marks the twenty-to-forty-percent sweet spot for embedded compression and a second shaded band marks the past-seventy collapse zone.](../images/chapter-12-model-optimization-fig-04.png)
+*Figure 12.4 — Pruning accuracy curve. The cliff arrives past 70%; past 60% the right move is distillation onto a smaller architecture.*
 
 ## Distillation, and why soft labels are richer than hard ones
 
 Knowledge distillation trains a small *student* model to imitate a large *teacher* model. The student learns from both the ground-truth labels and the teacher's predictions. The teacher's predictions, it turns out, contain more signal than the labels.
 
 Imagine a ten-class classifier on an image of a cat. The hard label is a one-hot vector — cat is 1, everything else is 0. A trained teacher network looking at the same image outputs something like [0.01, 0.02, 0.85, 0.05, 0.01, 0.02, 0.01, 0.01, 0.01, 0.01]. The teacher is 85% confident it's a cat, 5% confident it's a dog, almost nothing on the other classes. That distribution carries information the hard label throws away: it tells the student which classes are visually similar, where the decision boundaries are blurry, and which mistakes are reasonable mistakes.
+
+![A pipeline diagram showing one input image flowing into both a large frozen teacher network and a small trainable student network. The teacher outputs a softened probability distribution with cat at 0.85 and dog at 0.05. The student outputs its own distribution. Both feed a mixed loss combining alpha times hard cross-entropy against a one-hot label with one-minus-alpha times KL divergence against the softened teacher distribution at temperature T. Gradient updates flow back into the student only.](../images/chapter-12-model-optimization-fig-05.png)
+*Figure 12.5 — Knowledge distillation pipeline. The teacher's 5% on "dog" is the part of the signal the one-hot label throws away.*
 
 You train the student with a mixed loss:
 
@@ -91,6 +106,9 @@ Pruning alone solved the problem. Flash is comfortable; latency is back inside t
 If you distill the pruned-architecture student against the original float32 MobileNetV2-0.5 as teacher, the student picks up about 0.8% accuracy: 90.6% instead of 89.8%. Latency, memory, and flash do not change — distillation does not alter the architecture. What it gives you is buffer against the threshold, so future quantization-aware re-tuning or further pruning has somewhere to take from.
 
 The model that ships: 1.125 M int8 parameters, 1.725 MB total flash, 290 KB total SRAM, 240 ms latency, 90.6% accuracy. Pruning earned the fit. Distillation earned the margin. Quantization, applied earlier in the pipeline, was the thing that made any of the rest possible by cutting weight memory by 75%.
+
+![Four small-multiple bar panels tracking the MobileNetV2-0.5 case study across four states: FP32 baseline, INT8 post-training quantization, plus 25 percent structured pruning, and plus distillation. The panels track flash in megabytes against a 2 MB ceiling, SRAM in kilobytes against a 1024 KB ceiling, latency in milliseconds against a 250 ms ceiling, and accuracy as a percentage against an 88 percent floor. Bars darken with each compression step. A summary panel at the bottom names the ship state: 1.725 megabyte flash, 290 kilobyte SRAM, 240 millisecond latency, 90.6 percent accuracy.](../images/chapter-12-model-optimization-fig-06.png)
+*Figure 12.6 — MobileNetV2-0.5 compression journey. Pruning earned the fit; distillation earned the margin.*
 
 ## What compression cannot fix
 
@@ -192,6 +210,66 @@ Where the model genuinely helps: explaining the mathematical intuition behind ea
 Where the model does damage: predicting how a specific technique will affect your model's accuracy on your task. The empirical effect is unpredictable from first principles in many cases.
 
 The rule: techniques from the model; effects from your measurements.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the
+figures in this chapter. Each produces a standalone HTML file you can open
+in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
+your Claude project context before using these prompts. They define the stack,
+naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 12.1 — Float32-to-int8 quantization mapping
+
+Build a two-panel figure showing the same int8 quantization scheme applied to two tensors of different shape. Top panel: a symmetric weight tensor with float domain `[-1.5, 1.5]`, mapping to int8 `[-128, 127]` with `scale ≈ 0.0118` and `zero_point = 0`. Bottom panel: an activation tensor with float domain `[0.001, 0.01]`, mapping with `scale ≈ 0.000039` and `zero_point = -128`. Each panel renders a paired float axis (top) and int8 axis (bottom) with dashed mapping arrows from sample float values to their integer landings. Highlight the "rounding mash zone" on the bottom panel where many distinct floats collapse onto the same integer — render the float-side overlay in `var(--color-red)` at 18% opacity and use red mapping arrows. Tooltips on each sample point show `float → int8 → error`. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive via ResizeObserver.
+
+> Reference implementation: `d3/chapter-12-model-optimization-fig-01.html`
+
+---
+
+### Figure 12.2 — FP32 vs PTQ vs QAT
+
+Build a three-panel small-multiples figure comparing FP32 baseline, post-training quantization, and quantization-aware training across three independent axes. Panel A — accuracy drop (%): FP32 = 0, PTQ = 3–10 range bar, QAT = 1–3 range bar. Panel B — model size (MB): FP32 = 4.0, PTQ = 1.0, QAT = 1.0. Panel C — engineering cost (hours, log scale): FP32 ≈ 0, PTQ ≈ 0.1, QAT ≈ 30. Each panel uses a vertical bar chart with shared color encoding: FP32 = neutral gray `#c8c4c0`, PTQ = mid-gray `#8a8480`, QAT = `var(--color-ink)`. Range bars render the worst case at lower opacity stacked beneath the best case. Value labels above each bar. Hover any bar for a tooltip naming the metric and value. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-12-model-optimization-fig-02.html`
+
+---
+
+### Figure 12.3 — Unstructured vs structured pruning
+
+Build a two-panel weight-matrix comparison. Left panel — unstructured pruning: render an 8×8 grid where roughly 30% of cells are zeroed (rendered as outlined empty squares in `var(--color-border)`) and the rest are filled in `var(--color-ink)`. The matrix dimensions stay the same. Right panel — structured pruning: render the same logical grid but with three full output channels removed, leaving a dense 5×8 matrix; show the three removed columns to the right as dashed outlines labeled "removed." Below each panel, render an effects table with three rows (Storage, SRAM, Latency) marked with verdict colors — red for "unchanged," ink for "shrinks." Tag the unstructured panel with a red "PAPER WIN, MCU LOSS" badge and the structured panel with an ink "WHAT EMBEDDED USES" badge. Hover any cell for index info. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-12-model-optimization-fig-03.html`
+
+---
+
+### Figure 12.4 — Accuracy vs structured pruning rate
+
+Build a single-panel line chart of accuracy retained (y, 0–100%) versus channels removed (x, 0–90%). Data points: `[(0, 100), (10, 99.5), (20, 99), (30, 97.5), (40, 96), (50, 93), (60, 90), (70, 83), (80, 50), (90, 20)]`. Use `d3.curveMonotoneX`. Overlay a shaded band in `var(--color-ochre)` at 12% opacity across x = 20–40 labeled "sweet spot for embedded." Overlay a second shaded band in `var(--color-red)` at 10% opacity across x = 70–90 labeled "accuracy collapse." Draw a dashed `var(--color-ochre)` horizontal line at y = 88 labeled "acceptance threshold (88%)." Annotate the 20%, 40%, 60%, and 70% points with leader lines and short cost callouts ("<1%", "2–4%", "5–10%", "cliff"). Hover any data point for an exact tooltip. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-12-model-optimization-fig-04.html`
+
+---
+
+### Figure 12.5 — Knowledge distillation pipeline
+
+Build a left-to-right pipeline diagram with five labeled nodes and three signal paths. Nodes: (1) input image box on the far left at y ≈ 220; (2) large "TEACHER" rectangle top center at y ≈ 100, header bar in `var(--color-ink)`; (3) small "STUDENT" rectangle bottom center at y ≈ 300, header bar in mid-gray; (4) "HARD LABEL" box top right at y ≈ 110 with header in `var(--color-ochre)`, body shows one-hot vector `[0,0,1,0,0,0,0,0,0,0]`; (5) "MIXED LOSS" box right-center at y ≈ 230, thicker border. Render two ten-bin distributions: the teacher's soft distribution `[0.01,0.02,0.85,0.05,0.01,0.02,0.01,0.01,0.01,0.01]` to the right of the teacher box, with the peak in `var(--color-red)`; the student's distribution beneath. Three signal paths into the loss: soft (red dashed) from teacher distribution, hard (ochre solid) from hard label, prediction (ink solid) from student. A dashed feedback arrow from the loss back to the student labeled "gradient update — only the student learns." Tooltips on distribution bars. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-12-model-optimization-fig-05.html`
+
+---
+
+### Figure 12.6 — MobileNetV2-0.5 compression case study
+
+Build a four-panel small-multiples bar chart tracking the MobileNetV2-0.5 case study across four ordered states: `FP32 baseline → +INT8 PTQ → +25% structured pruning → +distillation (ship)`. Encode the state ordinally by darkening fill: `#c8c4c0`, `#8a8480`, `#4a4540`, `var(--color-ink)`. Panel 1 — Flash (MB): `[4.6, 2.1, 1.725, 1.725]`, ceiling = 2 MB drawn as a dashed red horizontal line. Panel 2 — SRAM (KB): `[1120, 280, 210, 210]`, ceiling = 1024 KB. Panel 3 — Latency (ms): `[1200, 320, 240, 240]`, ceiling = 250 ms. Panel 4 — Accuracy (%): `[91.5, 89.2, 89.8, 90.6]`, floor = 88%, y-domain zoomed to 85–100. Value labels above each bar; bars that violate the threshold render their label in red. Below the panels, render a "SHIP STATE" summary card naming the final metrics and remaining margin. Hover any bar for a state-plus-metric tooltip. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-12-model-optimization-fig-06.html`
 
 ---
 

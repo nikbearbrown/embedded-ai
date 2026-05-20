@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 4.5 — Keyword-spotting latency waterfall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 420px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar { fill: var(--color-secondary); transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .bar.predict { fill: var(--color-border); stroke: var(--color-ink); stroke-width: 0.6; }
+  .bar.failure { fill: var(--color-red); }
+  .bar.final   { fill: var(--color-ink); }
+  .step-label  { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .step-note   { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .step-note.alert { fill: var(--color-red); }
+  .value-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: var(--color-ink); }
+  .target-line { stroke: var(--color-red); stroke-dasharray: 4 3; stroke-width: 1; }
+  .target-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-red); }
+  .axis-title  { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 4.5 — Keyword-spotting latency waterfall</h1>
+<p class="subtitle">Arduino Nano 33 BLE Sense (64 MHz Cortex-M4), TFLite Micro. Five steps from prediction to deployed.</p>
+<div id="chart" role="img" aria-labelledby="t-chart d-chart"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const stepData = [
+  { n: 1, label: 'theoretical prediction',             ms: 367,  kind: 'predict', note: '22 M MAC / 60 MMAC·s — naive throughput math' },
+  { n: 2, label: 'first deploy — reference kernels',   ms: 1200, kind: 'failure', note: 'reference C kernels — no FPU, no SIMD — 3× hit' },
+  { n: 3, label: 'swap to CMSIS-NN',                   ms: 420,  kind: 'bar',     note: 'DSP/SIMD path engaged; still over budget' },
+  { n: 4, label: 'shrink so activations fit on chip',  ms: 140,  kind: 'bar',     note: 'feature maps 32→16; activations drop to 28 KB' },
+  { n: 5, label: 'post-training int8 quantization',    ms: 45,   kind: 'final',   note: 'SIMD 4×; accuracy 94.2→92.8 (within budget)' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>${d.ms} ms`)
+    .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 900;
+  const totalHeight = container.clientHeight || 420;
+  const margin = { top: 40, right: 360, bottom: 56, left: 250 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-chart d-chart');
+  svg.append('title').attr('id', 't-chart').text('Latency waterfall for a keyword-spotting deployment');
+  svg.append('desc').attr('id', 'd-chart').text('Five horizontal bars showing latency at each step: 367 ms prediction, 1200 ms first deploy, 420 ms after CMSIS-NN, 140 ms after activations fit on chip, 45 ms after int8 quantization. A vertical dashed line marks the 100 ms target.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const yScaleBand = d3.scaleBand()
+    .domain(stepData.map(d => d.n))
+    .range([0, chartHeight])
+    .padding(0.32);
+
+  const xScaleLinear = d3.scaleLinear()
+    .domain([0, 1200])
+    .range([0, chartWidth]);
+
+  // bars
+  g.selectAll('.bar')
+    .data(stepData)
+    .join('rect')
+      .attr('class', d => `bar ${d.kind}`)
+      .attr('x', 0)
+      .attr('y', d => yScaleBand(d.n))
+      .attr('height', yScaleBand.bandwidth())
+      .attr('width', d => xScaleLinear(d.ms))
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `Step ${d.n}: ${d.label}, ${d.ms} ms`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  // step labels (left)
+  g.selectAll('.step-label')
+    .data(stepData)
+    .join('text')
+      .attr('class', 'step-label')
+      .attr('x', -10).attr('y', d => yScaleBand(d.n) + yScaleBand.bandwidth() / 2 - 4)
+      .attr('text-anchor', 'end')
+      .text(d => `${d.n}. ${d.label}`);
+
+  // value labels (right of bar)
+  g.selectAll('.value-label')
+    .data(stepData)
+    .join('text')
+      .attr('class', 'value-label')
+      .attr('x', d => xScaleLinear(d.ms) + 8)
+      .attr('y', d => yScaleBand(d.n) + yScaleBand.bandwidth() / 2 + 4)
+      .text(d => `${d.ms} ms`);
+
+  // notes
+  g.selectAll('.step-note')
+    .data(stepData)
+    .join('text')
+      .attr('class', d => 'step-note' + (d.kind === 'failure' ? ' alert' : ''))
+      .attr('x', -10).attr('y', d => yScaleBand(d.n) + yScaleBand.bandwidth() / 2 + 12)
+      .attr('text-anchor', 'end')
+      .text(d => d.note);
+
+  // 100 ms target line
+  const tx = xScaleLinear(100);
+  g.append('line').attr('class', 'target-line')
+    .attr('x1', tx).attr('x2', tx).attr('y1', -8).attr('y2', chartHeight);
+  g.append('text').attr('class', 'target-text')
+    .attr('x', tx).attr('y', -14).attr('text-anchor', 'middle')
+    .text('100 ms target');
+
+  // x axis
+  g.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(5));
+  g.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 40)
+    .attr('text-anchor', 'middle').text('milliseconds per inference');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 12.4 — Accuracy vs structured pruning rate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #2a1a0e; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  .panel { border: 1px solid var(--color-border); padding: 16px; }
+  .chart { width: 100%; height: 420px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .curve { fill: none; stroke: var(--color-ink); stroke-width: 2; }
+  .sweet-band { fill: var(--color-ochre); opacity: 0.12; }
+  .cliff-band { fill: var(--color-red); opacity: 0.10; }
+  .threshold { stroke: var(--color-ochre); stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .annotation.ochre { fill: var(--color-ochre); }
+  .annotation.red { fill: var(--color-red); }
+  .leader { stroke: var(--color-secondary); stroke-width: 0.8; stroke-dasharray: 2 2; fill: none; }
+  .leader.red { stroke: var(--color-red); }
+  .dot { fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 75ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 12.4 — Accuracy vs structured pruning rate</h1>
+<p class="subtitle">Gentle slope · sweet spot · cliff. Past 70% the network collapses unless it was wildly over-built.</p>
+<div class="panel">
+  <div id="chart" class="chart" role="img" aria-label="Accuracy curve over pruning percentage"></div>
+</div>
+<p class="caption">The sweet spot for embedded compression is 20–40%. If you need more, switch to distillation onto a smaller architecture.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.x}% pruned</strong><br/>${d.y}% accuracy retained`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+const data = [
+  { x: 0,  y: 100  },
+  { x: 10, y: 99.5 },
+  { x: 20, y: 99   },
+  { x: 30, y: 97.5 },
+  { x: 40, y: 96   },
+  { x: 50, y: 93   },
+  { x: 60, y: 90   },
+  { x: 70, y: 83   },
+  { x: 80, y: 50   },
+  { x: 90, y: 20   }
+];
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const w = container.clientWidth || 700;
+  const h = container.clientHeight || 420;
+  const m = { top: 60, right: 30, bottom: 60, left: 60 };
+  const innerW = w - m.left - m.right;
+  const innerH = h - m.top - m.bottom;
+  const svg = d3.select('#chart').append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+  const x = d3.scaleLinear().domain([0, 90]).range([0, innerW]);
+  const y = d3.scaleLinear().domain([0, 100]).range([innerH, 0]);
+
+  // sweet-spot band (20–40)
+  g.append('rect').attr('class', 'sweet-band')
+    .attr('x', x(20)).attr('y', 0).attr('width', x(40) - x(20)).attr('height', innerH);
+  g.append('text').attr('class', 'annotation ochre').attr('x', x(30)).attr('y', 16).attr('text-anchor', 'middle').text('sweet spot for embedded');
+  g.append('text').attr('class', 'annotation ochre').attr('x', x(30)).attr('y', 30).attr('text-anchor', 'middle').style('font-size', '11px').text('20–40% · barely-felt cost');
+
+  // cliff band (70–90)
+  g.append('rect').attr('class', 'cliff-band')
+    .attr('x', x(70)).attr('y', 0).attr('width', x(90) - x(70)).attr('height', innerH);
+  g.append('text').attr('class', 'annotation red').attr('x', x(80)).attr('y', 16).attr('text-anchor', 'middle').text('accuracy collapse');
+
+  // axes
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).tickFormat(d => d + '%'));
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y));
+
+  // axis labels
+  g.append('text').attr('x', innerW / 2).attr('y', innerH + 44).attr('text-anchor', 'middle').style('fill', 'var(--color-secondary)').style('font-size', '11px').text('channels removed');
+  g.append('text').attr('transform', 'rotate(-90)').attr('x', -innerH / 2).attr('y', -44).attr('text-anchor', 'middle').style('fill', 'var(--color-secondary)').style('font-size', '11px').text('accuracy retained (%)');
+
+  // 88% acceptance threshold
+  g.append('line').attr('class', 'threshold').attr('x1', 0).attr('y1', y(88)).attr('x2', innerW).attr('y2', y(88));
+  g.append('text').attr('class', 'annotation ochre').attr('x', innerW - 4).attr('y', y(88) - 4).attr('text-anchor', 'end').style('font-size', '11px').text('acceptance threshold (88%)');
+
+  // curve
+  const line = d3.line().x(d => x(d.x)).y(d => y(d.y)).curve(d3.curveMonotoneX);
+  g.append('path').attr('class', 'curve').attr('d', line(data));
+
+  // dots
+  g.selectAll('.dot').data(data).join('circle').attr('class', 'dot')
+    .attr('cx', d => x(d.x)).attr('cy', d => y(d.y)).attr('r', 4)
+    .style('cursor', 'pointer')
+    .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  // annotations
+  function annotate(xv, yv, ax, ay, text, cls) {
+    g.append('path').attr('class', 'leader' + (cls === 'red' ? ' red' : '')).attr('d', `M ${x(xv)} ${y(yv)} L ${x(ax)} ${y(ay)}`);
+    g.append('text').attr('class', 'annotation' + (cls ? ' ' + cls : '')).attr('x', x(ax) + 4).attr('y', y(ay) + 4).style('font-size', '11px').text(text);
+  }
+  annotate(20, 99, 25, 80, 'first 20% costs <1%');
+  annotate(40, 96, 45, 60, 'next 20% costs 2–4%');
+  annotate(60, 90, 65, 38, '60% costs 5–10%');
+  annotate(70, 83, 73, 18, 'cliff — switch to distillation', 'red');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

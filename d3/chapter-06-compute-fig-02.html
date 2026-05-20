@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 6.2 — Roofline model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; max-width: 65ch; }
+  #chart { width: 100%; height: 520px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .roof { fill: none; stroke: var(--color-ink); stroke-width: 2; }
+  .gridline { stroke: var(--color-border); stroke-opacity: 0.5; shape-rendering: crispEdges; }
+  .ridge { fill: var(--color-ink); }
+  .region-label { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 12px; fill: var(--color-secondary); }
+  .roof-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .pt { stroke: var(--color-white); stroke-width: 1.5; cursor: pointer; transition: r 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .pt-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; fill: var(--color-ink); pointer-events: none; }
+  .pt-sub { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); pointer-events: none; }
+  .drop { stroke: var(--color-secondary); stroke-width: 0.75; stroke-dasharray: 3 3; }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--color-ink); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 6.2 — Roofline model</h1>
+<p class="subtitle">Arithmetic intensity (operations per byte transferred) sets which ceiling binds each kernel — bandwidth on the left of the ridge, peak compute on the right. Cortex-M7 at 400 MHz, sustained 400 MMAC/s, bandwidth ≈ 100 MMAC/(s·byte).</p>
+<div id="chart" role="img" aria-labelledby="roof-t roof-d"></div>
+<p id="roof-t" style="display:none">Roofline diagram for Cortex-M7 at 400 MHz.</p>
+<p id="roof-d" style="display:none">Three kernels plotted: a 64x64 matmul sits near the compute roof, a 3x3 conv on 96x96x32 sits on the memory-bandwidth ceiling, and a 512x512 matmul sits far below the roof due to cache thrash.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const kernelData = [
+  { id: 'A', label: '64×64 matmul (in cache)', intensity: 8.0, perf: 350, kind: 'compute', note: 'Working set fits L1, ≈ 8 ops/byte — compute-bound, near the roof.' },
+  { id: 'B', label: '3×3 conv 96×96×32',       intensity: 1.5, perf: 100, kind: 'memory',  note: 'Working set exceeds cache; effective intensity drops to 1–3 ops/byte — memory-bound.' },
+  { id: 'C', label: '512×512 matmul (thrash)', intensity: 0.5, perf: 50,  kind: 'memory',  note: 'Both matrices total 2 MB; each element re-fetched. Bandwidth dominates.' }
+];
+
+const COMPUTE_PEAK = 400;     // MMAC/s sustained roof
+const BANDWIDTH    = 100;     // MMAC/(s·byte) — slope of memory ceiling on log-log = 1
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.id} — ${d.label}</strong><br>Intensity: ${d.intensity} ops/byte<br>Achieved: ${d.perf} MMAC/s<br><span style="opacity:0.85">${d.note}</span>`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const sel = '#chart';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 520;
+  const margin = { top: 56, right: 40, bottom: 64, left: 72 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'roof-t roof-d');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog().domain([0.25, 64]).range([0, chartWidth]);
+  const yScaleLog = d3.scaleLog().domain([10, 800]).range([chartHeight, 0]);
+
+  // Gridlines
+  const xTicks = [0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
+  const yTicks = [10, 20, 50, 100, 200, 400, 800];
+  gChart.selectAll('.gridline-x')
+    .data(xTicks).join('line').attr('class', 'gridline')
+    .attr('x1', d => xScaleLog(d)).attr('x2', d => xScaleLog(d))
+    .attr('y1', 0).attr('y2', chartHeight);
+  gChart.selectAll('.gridline-y')
+    .data(yTicks).join('line').attr('class', 'gridline')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', d => yScaleLog(d)).attr('y2', d => yScaleLog(d));
+
+  // Axes
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLog).tickValues([0.25, 1, 4, 16, 64]).tickFormat(d => d));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLog).tickValues([10, 100, 400, 800]).tickFormat(d => d));
+
+  // Axis titles
+  svg.append('text').attr('class', 'axis-title')
+    .attr('x', margin.left + chartWidth / 2).attr('y', totalHeight - 18).attr('text-anchor', 'middle')
+    .text('Arithmetic intensity (MACs per byte transferred, log)');
+  svg.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(20,${margin.top + chartHeight / 2}) rotate(-90)`)
+    .attr('text-anchor', 'middle')
+    .text('Achievable performance (MMAC/s, log)');
+
+  // Ridge point
+  const ridgeIntensity = COMPUTE_PEAK / BANDWIDTH;  // = 4 ops/byte
+  // Roofline: y = min(BANDWIDTH * x, COMPUTE_PEAK)
+  const roofPoints = [
+    { x: 0.25, y: BANDWIDTH * 0.25 },
+    { x: ridgeIntensity, y: COMPUTE_PEAK },
+    { x: 64, y: COMPUTE_PEAK }
+  ];
+  const lineGen = d3.line().x(p => xScaleLog(p.x)).y(p => yScaleLog(p.y));
+  gChart.append('path').datum(roofPoints).attr('class', 'roof').attr('d', lineGen);
+
+  // Ridge marker
+  gChart.append('circle').attr('class', 'ridge')
+    .attr('cx', xScaleLog(ridgeIntensity)).attr('cy', yScaleLog(COMPUTE_PEAK)).attr('r', 4);
+  gChart.append('text').attr('class', 'pt-sub')
+    .attr('x', xScaleLog(ridgeIntensity) + 8).attr('y', yScaleLog(COMPUTE_PEAK) - 10)
+    .text('ridge ≈ 4 ops/byte');
+
+  // Roof labels
+  gChart.append('text').attr('class', 'roof-label')
+    .attr('x', xScaleLog(0.7)).attr('y', yScaleLog(BANDWIDTH * 0.7) - 12)
+    .attr('transform', `rotate(-32 ${xScaleLog(0.7)} ${yScaleLog(BANDWIDTH * 0.7) - 12})`)
+    .text('memory-bandwidth ceiling');
+  gChart.append('text').attr('class', 'roof-label')
+    .attr('x', xScaleLog(16)).attr('y', yScaleLog(COMPUTE_PEAK) - 10).attr('text-anchor', 'middle')
+    .text('compute-bound plateau (400 MMAC/s sustained)');
+
+  // Region annotations above
+  gChart.append('line').attr('class', 'drop')
+    .attr('x1', xScaleLog(ridgeIntensity)).attr('x2', xScaleLog(ridgeIntensity))
+    .attr('y1', yScaleLog(COMPUTE_PEAK)).attr('y2', -8);
+  gChart.append('text').attr('class', 'region-label')
+    .attr('x', xScaleLog(1)).attr('y', -16).attr('text-anchor', 'middle')
+    .text('← memory-bound region');
+  gChart.append('text').attr('class', 'region-label')
+    .attr('x', xScaleLog(16)).attr('y', -16).attr('text-anchor', 'middle')
+    .text('compute-bound region →');
+
+  // Drop lines from each point
+  gChart.selectAll('.drop-pt').data(kernelData).join('line').attr('class', 'drop')
+    .attr('x1', d => xScaleLog(d.intensity)).attr('x2', d => xScaleLog(d.intensity))
+    .attr('y1', d => yScaleLog(d.perf)).attr('y2', chartHeight);
+
+  // Points
+  gChart.selectAll('.pt').data(kernelData).join('circle')
+    .attr('class', 'pt')
+    .attr('cx', d => xScaleLog(d.intensity))
+    .attr('cy', d => yScaleLog(d.perf))
+    .attr('r', 6)
+    .attr('fill', d => d.kind === 'compute' ? 'var(--color-ink)' : 'var(--color-red)')
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.id}: ${d.label}, ${d.intensity} ops per byte, ${d.perf} MMAC per second`)
+    .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  gChart.selectAll('.pt-label').data(kernelData).join('text')
+    .attr('class', 'pt-label')
+    .attr('x', d => xScaleLog(d.intensity) + 10)
+    .attr('y', d => yScaleLog(d.perf) - 4)
+    .text(d => `${d.id} — ${d.label}`);
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

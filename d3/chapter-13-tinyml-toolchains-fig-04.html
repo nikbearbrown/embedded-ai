@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 13.4 — Three-stage accuracy bisection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 440px; position: relative; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .gridline { stroke: var(--color-border); stroke-width: 0.5; }
+  .stage-bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .stage-bar.s1 { fill: var(--color-ink); }
+  .stage-bar.s2 { fill: var(--color-secondary); }
+  .stage-bar.s3 { fill: var(--color-border); stroke: var(--color-secondary); }
+  .stage-bar:hover, .stage-bar:focus { opacity: 0.8; outline: none; }
+  .stage-label { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 13px; fill: var(--color-ink); }
+  .stage-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .stage-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: var(--color-ink); font-weight: 700; }
+  .delta-bracket { stroke: var(--color-red); stroke-dasharray: 4 3; fill: none; }
+  .delta-label { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-red); }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .root-box { fill: none; stroke: var(--color-secondary); stroke-dasharray: 3 2; }
+  .root-head { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-ink); }
+  .root-list { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-style: italic; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 13px; margin-top: 16px; max-width: 70ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 13.4 — Three-stage accuracy bisection</h1>
+<p class="subtitle">Measure the same validation set at three points in the pipeline. The gap that appears first localizes the bug.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Hover any stage bar to see what it tells you about the toolchain.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const stages = [
+  { n: 1, label: 'Python source model',  sub: 'trained model in framework',     value: 94.2, cls: 's1',
+    body: 'Reference. If this is below threshold, nothing downstream can save it.' },
+  { n: 2, label: 'TFLite Python interpreter', sub: 'post-conversion · still in Python', value: 93.1, cls: 's2',
+    body: 'Same code path as the device, but on the host. Gap from stage 1 = conversion + optimization error.' },
+  { n: 3, label: 'On-device inference',  sub: 'measured on the MCU',            value: 92.8, cls: 's3',
+    body: 'The deployment. Gap from stage 2 = compile + runtime error.' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>Stage ${d.n} — ${d.label}</strong><br><span style="color:#aaa">${d.sub}</span><br><span style="font-family:JetBrains Mono,monospace">${d.value} %</span><br><br>${d.body}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 880;
+  const totalHeight = 440;
+  const margin = { top: 60, right: 80, bottom: 140, left: 200 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Three-stage accuracy bisection');
+  svg.append('desc').attr('id', 'chart-desc').text('Horizontal bar chart of model accuracy at three pipeline stages with the two deltas labelled and root causes mapped to each gap.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([90, 95]).range([0, chartWidth]);
+  const yScaleBand = d3.scaleBand().domain(stages.map(s => s.n)).range([0, chartHeight]).padding(0.18);
+
+  // gridlines
+  gChart.append('g').attr('class', 'gridlines').selectAll('line')
+    .data(xScaleLinear.ticks(5)).join('line')
+      .attr('class', 'gridline')
+      .attr('x1', d => xScaleLinear(d)).attr('x2', d => xScaleLinear(d))
+      .attr('y1', 0).attr('y2', chartHeight);
+
+  // x axis
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(5).tickFormat(d => d));
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 36).attr('text-anchor', 'middle')
+    .text('accuracy on validation set (%)');
+
+  // bars
+  gChart.selectAll('.stage-bar').data(stages).join('rect')
+    .attr('class', d => `stage-bar ${d.cls}`)
+    .attr('x', 0)
+    .attr('y', d => yScaleBand(d.n))
+    .attr('width', d => xScaleLinear(d.value))
+    .attr('height', yScaleBand.bandwidth())
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `Stage ${d.n}, ${d.label}: ${d.value} percent`)
+    .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip)
+    .on('focus', (event, d) => showTip(event, d)).on('blur', hideTip);
+
+  // stage labels (left)
+  gChart.selectAll('.stage-label-g').data(stages).join('g')
+    .attr('transform', d => `translate(-12,${yScaleBand(d.n) + yScaleBand.bandwidth() / 2})`)
+    .call(g => g.append('text').attr('class', 'stage-label').attr('x', 0).attr('y', -4).attr('text-anchor', 'end').text(d => `Stage ${d.n}`))
+    .call(g => g.append('text').attr('class', 'stage-sub').attr('x', 0).attr('y', 10).attr('text-anchor', 'end').text(d => d.label));
+
+  // value labels (right of bar end)
+  gChart.selectAll('.stage-value').data(stages).join('text')
+    .attr('class', 'stage-value')
+    .attr('x', d => xScaleLinear(d.value) + 8)
+    .attr('y', d => yScaleBand(d.n) + yScaleBand.bandwidth() / 2 + 5)
+    .text(d => `${d.value} %`);
+
+  // delta brackets
+  function bracket(x1, x2, y, label) {
+    gChart.append('path').attr('class', 'delta-bracket')
+      .attr('d', `M ${x1} ${y} L ${x1} ${y - 8} L ${x2} ${y - 8} L ${x2} ${y}`);
+    gChart.append('text').attr('class', 'delta-label')
+      .attr('x', (x1 + x2) / 2).attr('y', y - 14).attr('text-anchor', 'middle')
+      .text(label);
+  }
+  const y1 = yScaleBand(1) - 4;
+  bracket(xScaleLinear(stages[1].value), xScaleLinear(stages[0].value), y1, 'Δ 1.1 pp — conversion + optimization');
+  const y2 = yScaleBand(2) - 4;
+  bracket(xScaleLinear(stages[2].value), xScaleLinear(stages[1].value), y2, 'Δ 0.3 pp — compile + runtime');
+
+  // Root causes panels
+  const causeY = chartHeight + 64;
+  gChart.append('rect').attr('class', 'root-box')
+    .attr('x', 0).attr('y', causeY).attr('width', chartWidth / 2 - 8).attr('height', 48);
+  gChart.append('text').attr('class', 'root-head').attr('x', 8).attr('y', causeY + 16).text('Gap 1 — conversion + optimization');
+  gChart.append('text').attr('class', 'root-list').attr('x', 8).attr('y', causeY + 36)
+    .text('calibration set · layer fusion · operator mismatch');
+
+  gChart.append('rect').attr('class', 'root-box')
+    .attr('x', chartWidth / 2 + 8).attr('y', causeY).attr('width', chartWidth / 2 - 8).attr('height', 48);
+  gChart.append('text').attr('class', 'root-head').attr('x', chartWidth / 2 + 16).attr('y', causeY + 16).text('Gap 2 — compile + runtime');
+  gChart.append('text').attr('class', 'root-list').attr('x', chartWidth / 2 + 16).attr('y', causeY + 36)
+    .text('float-precision drift · alignment fault · kernel bug');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 12.6 — MobileNetV2-0.5 compression case study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #2a1a0e; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  .legend { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-secondary); }
+  .swatch { width: 14px; height: 10px; display: inline-block; }
+  .swatch.fp32 { background: #c8c4c0; }
+  .swatch.ptq  { background: #8a8480; }
+  .swatch.prune { background: #4a4540; }
+  .swatch.ship { background: var(--color-ink); }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .panel { border: 1px solid var(--color-border); padding: 12px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 11px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+  .chart { width: 100%; height: 260px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar.fp32 { fill: #c8c4c0; }
+  .bar.ptq  { fill: #8a8480; }
+  .bar.prune { fill: #4a4540; }
+  .bar.ship { fill: var(--color-ink); }
+  .threshold { stroke: var(--color-red); stroke-width: 1; stroke-dasharray: 3 2; fill: none; }
+  .threshold-label { fill: var(--color-red); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; }
+  .vlabel { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-ink); font-weight: 700; }
+  .vlabel.over { fill: var(--color-red); }
+  .ship-state { margin-top: 16px; border: 1px solid var(--color-ink); padding: 12px; }
+  .ship-state-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; }
+  .ship-state-body { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 4px; }
+  .ship-state-note { font-size: 12px; color: var(--color-secondary); margin-top: 4px; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 12.6 — MobileNetV2-0.5 on the STM32H7</h1>
+<p class="subtitle">Four metrics · four states · thresholds drawn in red. Pruning earns the fit. Distillation earns the margin.</p>
+<div class="legend">
+  <div class="legend-item"><span class="swatch fp32"></span> FP32 baseline</div>
+  <div class="legend-item"><span class="swatch ptq"></span> + INT8 PTQ</div>
+  <div class="legend-item"><span class="swatch prune"></span> + 25% structured pruning</div>
+  <div class="legend-item"><span class="swatch ship"></span> + distillation (ship)</div>
+</div>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Flash (MB)</div>
+    <div class="panel-sub">ceiling 2 MB</div>
+    <div id="chartFlash" class="chart" role="img" aria-label="Flash usage across compression stages"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">SRAM (KB)</div>
+    <div class="panel-sub">ceiling 1024 KB</div>
+    <div id="chartSram" class="chart" role="img" aria-label="SRAM activations across compression stages"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Latency (ms)</div>
+    <div class="panel-sub">ceiling 250 ms</div>
+    <div id="chartLat" class="chart" role="img" aria-label="Latency across compression stages"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Accuracy (%)</div>
+    <div class="panel-sub">floor 88% (zoomed 85–100)</div>
+    <div id="chartAcc" class="chart" role="img" aria-label="Accuracy across compression stages"></div>
+  </div>
+</div>
+<div class="ship-state">
+  <div class="ship-state-title">SHIP STATE</div>
+  <div class="ship-state-body">1.125 M int8 params · 1.725 MB flash · 290 KB SRAM · 240 ms latency · 90.6% accuracy</div>
+  <div class="ship-state-note">all four constraints met · 10 ms latency margin · 2.6 percentage points above accuracy floor</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(d.html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px').transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+const stages = [
+  { key: 'FP32', cls: 'fp32' },
+  { key: 'PTQ',  cls: 'ptq' },
+  { key: 'Prune', cls: 'prune' },
+  { key: 'Ship', cls: 'ship' }
+];
+
+function drawMetric(selector, values, opts) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 180;
+  const h = container.clientHeight || 260;
+  const m = { top: 24, right: 12, bottom: 32, left: 44 };
+  const innerW = w - m.left - m.right;
+  const innerH = h - m.top - m.bottom;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+  const x = d3.scaleBand().domain(stages.map(s => s.key)).range([0, innerW]).padding(0.2);
+  const y = d3.scaleLinear().domain(opts.yDomain).range([innerH, 0]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x));
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(5).tickFormat(opts.fmt || (d => d)));
+
+  // threshold
+  if (opts.threshold != null) {
+    g.append('line').attr('class', 'threshold')
+      .attr('x1', 0).attr('y1', y(opts.threshold))
+      .attr('x2', innerW).attr('y2', y(opts.threshold));
+    g.append('text').attr('class', 'threshold-label')
+      .attr('x', innerW).attr('y', y(opts.threshold) - 4).attr('text-anchor', 'end')
+      .text(opts.thresholdLabel);
+  }
+
+  stages.forEach((s, i) => {
+    const v = values[i];
+    const capped = Math.min(v, opts.yDomain[1]);
+    const over = opts.thresholdSense === 'ceiling' ? (v > opts.threshold) : (v < opts.threshold);
+    g.append('rect').attr('class', `bar ${s.cls}`)
+      .attr('x', x(s.key)).attr('y', y(capped))
+      .attr('width', x.bandwidth()).attr('height', innerH - y(capped))
+      .style('cursor', 'pointer')
+      .on('mouseover', (e) => showTip(e, { html: `<strong>${s.key}</strong><br/>${opts.metric}: ${v}` }))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+    g.append('text').attr('class', 'vlabel' + (over ? ' over' : ''))
+      .attr('x', x(s.key) + x.bandwidth() / 2).attr('y', y(capped) - 4)
+      .attr('text-anchor', 'middle').text(opts.format ? opts.format(v) : v);
+  });
+}
+
+function draw() {
+  drawMetric('#chartFlash', [4.6, 2.1, 1.725, 1.725], {
+    yDomain: [0, 5], threshold: 2, thresholdLabel: '2 MB ceiling', thresholdSense: 'ceiling', metric: 'flash', format: v => v.toFixed(v >= 10 ? 0 : 2) + ' MB'
+  });
+  drawMetric('#chartSram', [1120, 280, 210, 210], {
+    yDomain: [0, 1200], threshold: 1024, thresholdLabel: '1024 KB ceiling', thresholdSense: 'ceiling', metric: 'sram', format: v => v + ' KB'
+  });
+  drawMetric('#chartLat', [1200, 320, 240, 240], {
+    yDomain: [0, 1400], threshold: 250, thresholdLabel: '250 ms ceiling', thresholdSense: 'ceiling', metric: 'latency', format: v => v + ' ms'
+  });
+  drawMetric('#chartAcc', [91.5, 89.2, 89.8, 90.6], {
+    yDomain: [85, 100], threshold: 88, thresholdLabel: '88% floor', thresholdSense: 'floor', metric: 'accuracy', format: v => v.toFixed(1) + '%'
+  });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+['#chartFlash', '#chartSram', '#chartLat', '#chartAcc'].forEach(s => ro.observe(document.querySelector(s)));
+</script>
+</body>
+</html>

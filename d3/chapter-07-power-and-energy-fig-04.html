@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 7.4 — Three scheduling patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 460px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .lane-line { stroke: var(--color-secondary); stroke-width: 1; }
+  .spike { fill: var(--color-ink); }
+  .spike-wake { fill: var(--color-red); }
+  .activity-band { fill: var(--color-ochre); opacity: 0.18; }
+  .lane-label { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .lane-sub   { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .lane-avg   { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-ochre); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 7.4 — Three scheduling patterns</h1>
+<p class="subtitle">Same 60-second window, three different inference schedules — and three different averages.</p>
+<div id="chart" role="img"></div>
+<p class="caption">Periodic is the safe default; event-driven wins when the events of interest are sparse; adaptive wins when they cluster.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const lanes = [
+  {
+    id: 'periodic',
+    label: 'Periodic',
+    sub:   'fixed-interval inference · every 10 s',
+    avg:   'average ≈ 0.85 mA',
+    spikes: [5, 15, 25, 35, 45, 55].map(t => ({ t, kind: 'fixed' })),
+    band: null
+  },
+  {
+    id: 'event',
+    label: 'Event-driven',
+    sub:   'PIR wakes the system on motion',
+    avg:   'average ≈ 0.06 mA',
+    spikes: [{ t: 28, kind: 'wake' }],
+    band: null
+  },
+  {
+    id: 'adaptive',
+    label: 'Adaptive',
+    sub:   'denser during high-activity windows',
+    avg:   'average ≈ 0.35 mA',
+    spikes: [6, 22, 25, 28, 31, 34, 37, 50].map(t => ({ t, kind: 'fixed' })),
+    band: { start: 20, end: 40 }
+  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 24, right: 24, bottom: 56, left: 160 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 's-title s-desc');
+  svg.append('title').attr('id', 's-title').text('Three scheduling patterns over a sixty-second window.');
+  svg.append('desc').attr('id', 's-desc').text('Periodic shows evenly spaced inference spikes. Event-driven shows a single wake-up burst triggered by a PIR sensor. Adaptive shows dense spikes during a high-activity band and sparse spikes elsewhere.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 60]).range([0, chartWidth]);
+  const yScaleBand   = d3.scaleBand().domain(lanes.map(l => l.id)).range([0, chartHeight]).padding(0.25);
+
+  // x axis
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(7).tickFormat(d => d + ' s'));
+
+  // lanes
+  const gLanes = gChart.append('g').attr('class', 'g-lanes');
+  lanes.forEach(lane => {
+    const y = yScaleBand(lane.id);
+    const laneHeight = yScaleBand.bandwidth();
+    const g = gLanes.append('g').attr('transform', `translate(0, ${y})`);
+
+    // activity band
+    if (lane.band) {
+      g.append('rect').attr('class', 'activity-band')
+        .attr('x', xScaleLinear(lane.band.start))
+        .attr('y', 0)
+        .attr('width', xScaleLinear(lane.band.end) - xScaleLinear(lane.band.start))
+        .attr('height', laneHeight);
+      g.append('text').attr('x', xScaleLinear((lane.band.start + lane.band.end) / 2))
+        .attr('y', -6).attr('text-anchor', 'middle')
+        .style('font-family', "'Inter', sans-serif").style('font-size', '11px').style('fill', 'var(--color-ochre)')
+        .text('high-activity window');
+    }
+
+    // baseline
+    g.append('line').attr('class', 'lane-line')
+      .attr('x1', 0).attr('x2', chartWidth).attr('y1', laneHeight - 4).attr('y2', laneHeight - 4);
+
+    // spikes
+    g.selectAll('.spike').data(lane.spikes).join('rect')
+      .attr('class', d => d.kind === 'wake' ? 'spike-wake' : 'spike')
+      .attr('x', d => xScaleLinear(d.t) - 2)
+      .attr('y', 8)
+      .attr('width', 4)
+      .attr('height', laneHeight - 12)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${lane.label} inference at ${d.t} seconds`)
+      .on('mouseover', (event, d) => showTip(event, `<strong>${lane.label}</strong><br/>t = ${d.t} s${d.kind === 'wake' ? '<br/>PIR wake event' : ''}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+
+    // labels in left margin
+    svg.append('text').attr('class', 'lane-label')
+      .attr('x', margin.left - 12).attr('y', margin.top + y + 18)
+      .attr('text-anchor', 'end').text(lane.label);
+    svg.append('text').attr('class', 'lane-sub')
+      .attr('x', margin.left - 12).attr('y', margin.top + y + 34)
+      .attr('text-anchor', 'end').text(lane.sub);
+    svg.append('text').attr('class', 'lane-avg')
+      .attr('x', margin.left - 12).attr('y', margin.top + y + 52)
+      .attr('text-anchor', 'end').text(lane.avg);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t03 d03">
+  <title id="t03">Race to sleep — faster clock wins on average power</title>
+  <desc id="d03">Two overlaid current-vs-time traces over a 10-second window. Trace A at 64 MHz draws 20 mA for 400 ms then returns to a 5 microamp sleep floor. Trace B at 128 MHz draws 35 mA for only 200 ms then returns to the same floor. Trace B has 12% lower average current.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .legA { fill: #2a1a0e; }
+      .legB { fill: #8a6a3e; }
+    </style>
+    <marker id="ar3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+  <text x="350" y="28" text-anchor="middle" class="ti">Race to sleep — same model, two clocks</text>
+  <text x="350" y="44" text-anchor="middle" class="sm">10-second duty cycle · sleep floor 5 µA</text>
+
+  <!-- chart area: x 70..660, y 70..340 -->
+  <!-- y axis: 0 at 340, scale top at y=80 represents 40 mA -->
+  <line x1="70" y1="70" x2="70" y2="340" stroke="#8a8480"/>
+  <line x1="70" y1="340" x2="660" y2="340" stroke="#8a8480"/>
+  <!-- y ticks 0,10,20,30,40 mA -->
+  <text x="64" y="343" text-anchor="end" class="sm">0</text>
+  <line x1="68" y1="340" x2="70" y2="340" stroke="#4a4540"/>
+  <text x="64" y="278" text-anchor="end" class="sm">10</text>
+  <line x1="68" y1="275" x2="70" y2="275" stroke="#4a4540"/>
+  <text x="64" y="213" text-anchor="end" class="sm">20</text>
+  <line x1="68" y1="210" x2="70" y2="210" stroke="#4a4540"/>
+  <text x="64" y="148" text-anchor="end" class="sm">30</text>
+  <line x1="68" y1="145" x2="70" y2="145" stroke="#4a4540"/>
+  <text x="64" y="83" text-anchor="end" class="sm">40</text>
+  <line x1="68" y1="80" x2="70" y2="80" stroke="#4a4540"/>
+  <text x="28" y="200" class="sm" transform="rotate(-90 28 200)">current (mA)</text>
+
+  <!-- x ticks: 0, 0.5, 1, 2 s; 10 s scale -->
+  <text x="70"  y="356" text-anchor="middle" class="sm">0</text>
+  <text x="129" y="356" text-anchor="middle" class="sm">0.5</text>
+  <text x="188" y="356" text-anchor="middle" class="sm">1.0</text>
+  <text x="365" y="356" text-anchor="middle" class="sm">5.0</text>
+  <text x="660" y="356" text-anchor="middle" class="sm">10.0 s</text>
+  <text x="365" y="370" text-anchor="middle" class="sm">time</text>
+
+  <!-- Trace A: 64 MHz, 20 mA for 400 ms → width 47.2 px starting at x=70 -->
+  <!-- 20 mA → y = 340 - 20*6.5 = 210 -->
+  <rect x="70" y="210" width="47.2" height="130" fill="#2a1a0e" fill-opacity="0.5"/>
+  <line x1="70"   y1="210" x2="117.2" y2="210" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="117.2" y1="210" x2="117.2" y2="338" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="117.2" y1="338" x2="660"   y2="338" stroke="#2a1a0e" stroke-width="2"/>
+
+  <!-- Trace B: 128 MHz, 35 mA for 200 ms → width 23.6 px -->
+  <!-- 35 mA → y = 340 - 35*6.5 = 112.5 -->
+  <rect x="70" y="112.5" width="23.6" height="227.5" fill="#8a6a3e" fill-opacity="0.35"/>
+  <line x1="70"   y1="112.5" x2="93.6"  y2="112.5" stroke="#8a6a3e" stroke-width="2"/>
+  <line x1="93.6"  y1="112.5" x2="93.6"  y2="338"  stroke="#8a6a3e" stroke-width="2"/>
+  <line x1="93.6"  y1="338"  x2="660"   y2="338"  stroke="#8a6a3e" stroke-width="2"/>
+
+  <!-- annotations -->
+  <path d="M 120 220 L 200 175" fill="none" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar3)"/>
+  <text x="206" y="178" class="lb">64 MHz · 20 mA · 400 ms · 8.0 mJ</text>
+  <text x="206" y="192" class="sm">average ≈ 0.85 mA</text>
+
+  <path d="M 96 130 L 200 105" fill="none" stroke="#8a6a3e" stroke-width="1" marker-end="url(#ar3)"/>
+  <text x="206" y="108" class="lb">128 MHz · 35 mA · 200 ms · 7.0 mJ</text>
+  <text x="206" y="122" class="sm">average ≈ 0.75 mA — 12% lower</text>
+
+  <!-- legend -->
+  <rect x="500" y="80" width="14" height="10" class="legA"/>
+  <text x="520" y="89" class="sm">Trace A · 64 MHz</text>
+  <rect x="500" y="98" width="14" height="10" class="legB"/>
+  <text x="520" y="107" class="sm">Trace B · 128 MHz</text>
+
+  <!-- caption -->
+  <text x="350" y="395" text-anchor="middle" class="cap">Shorter and taller wins because sleep is so much cheaper than slowed-down activity. Race to sleep is the dominant rule when duty cycles are low.</text>
+</svg>

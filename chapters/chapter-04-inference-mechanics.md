@@ -4,6 +4,9 @@ You have a trained model. You have selected hardware. The model fits in flash, t
 
 This is not a rare failure. It is the *default* outcome the first time you deploy on constrained hardware, because the theoretical analysis from the previous two chapters is necessary but not sufficient. The numbers from the spec sheet are upper bounds on what the hardware can do. Whether your specific model, compiled by your specific toolchain, on your specific configuration of cache and clock and memory layout, achieves anything like those upper bounds is an empirical question. This chapter is about how to ask and answer that question, and how to recognize what the answer is telling you when the gap between prediction and reality is large.
 
+![A four-stage horizontal flow showing Stage 1 Input Preparation, Stage 2 Inference Execution highlighted in red, Stage 3 Output Interpretation, and Stage 4 Result Delivery, with a profiler bracket under Stage 2 only and an end-to-end application bracket spanning all four.](../images/chapter-04-inference-mechanics-fig-01.png)
+*Figure 4.1 — Four-stage inference pipeline*
+
 When you call the inference function, a sequence of stages runs in a specific order. Stage 1 is *input preparation* — sensor data arrives raw (ADC samples, pixel values, raw register reads), and you have to normalize it to whatever range the model was trained on, reshape it into the right tensor dimensions, and convert it to the right numeric type. If preprocessing includes an FFT for audio features or image rescaling, this stage can dominate. Stage 2 is *inference execution* — the computational graph runs layer by layer, each layer reading its weights from flash or a cached copy in SRAM, reading its input activations, computing convolutions or matmuls or activations, and writing output activations to the next layer's input buffer. This is where most of the time goes. Stage 3 is *output interpretation* — applying softmax, non-max suppression, threshold logic, anything that turns the model's raw output into something actionable. Stage 4 is *result delivery* — setting a GPIO, writing a flash log, sending a LoRaWAN packet. When you measure *inference latency* from a profiler, you are usually measuring Stage 2 only. When the application has a hard deadline, what matters is Stages 1 through 4 end to end. A 50 ms inference can become a 150 ms application latency if you forgot to count the FFT and the network transmission.
 
 On a bare-metal system — your firmware running directly on the processor with no operating system — the pipeline is deterministic. You allocate memory once at startup, the processor runs at a fixed clock with no other tasks competing for it, and inference takes the same time on every pass barring cache effects or thermal events. On an RTOS like FreeRTOS or Zephyr, inference runs as a task and can be preempted. The 200 ms inference might spread across 250 ms of wall-clock time when a higher-priority task interrupts. Most embedded AI deployments end up using bare-metal for latency-critical paths and an RTOS for systems where AI is one of several concurrent functions, with the inference task running at a priority chosen to match the real-time requirement.
@@ -12,6 +15,12 @@ The reason theoretical FLOP-based latency predictions fail is that operations ar
 
 A Cortex-M7 with 16 KB of L1 data cache, running the same operation with cache-aware blocking — multiplying in 64 × 64 sub-blocks so each sub-block stays in cache while it is reused across multiple output elements — gets back to something close to the theoretical limit. Same operation count. Different memory locality. Order-of-magnitude difference in actual time.
 
+![Two panels of the same 128 by 128 by 10 matrix multiply: the naive panel streams every row of A from SRAM with horizontal scan lines, the tiled panel highlights a 64 by 64 sub-block resident in cache and reused across many output elements. Cycle counts beneath each panel quantify the memory-bound versus compute-bound regimes.](../images/chapter-04-inference-mechanics-fig-02.png)
+*Figure 4.2 — Matrix multiply tiling: naive vs cache-blocked*
+
+![A horizontal bar chart with one row per memory tier — registers, L1 cache, on-chip SRAM, external PSRAM, flash — bar widths show cycles per access growing from near zero to 10 to 20, with the PSRAM row highlighted in red and a side column listing accesses per MAC for a 3 by 3 convolution layer.](../images/chapter-04-inference-mechanics-fig-03.png)
+*Figure 4.3 — Memory hierarchy access cost*
+
 Convolution is even more memory-intensive than matmul. A 2D convolution with a 3 × 3 kernel requires loading 9 input pixels for every output pixel; for a 96 × 96 input with 32 channels convolved into 32 output channels, that's 96 × 96 × 32 × 9 × 32 ≈ 84 million memory accesses. If those activations are in external PSRAM rather than on-chip SRAM, each access costs roughly 10–20 cycles instead of 1–2, and inference latency can grow by an order of magnitude. The compute did not change. The memory pattern did, and the memory pattern is what dominated.
 
 Activation functions are the cheap end of compute, but they can be memory-bound too if you do not fuse them with the layer that produced the input. ReLU is conceptually one comparison and a conditional write per element; on a pipelined processor the conditional branch can mispredict and flush the pipeline. SIMD-vectorized implementations process 4 or 8 elements per instruction without branches, eliminating the issue. CMSIS-NN's optimized kernels do this; the reference C implementation in TFLite Micro does not, and that gap alone can be a 3–5× latency difference.
@@ -19,6 +28,9 @@ Activation functions are the cheap end of compute, but they can be memory-bound 
 Hardware accelerators — neural processing units, vector engines — change the execution model again. An NPU includes dedicated matrix-multiply hardware that does hundreds of MACs per cycle. An operation that takes 100,000 CPU cycles can take 1,000 NPU cycles, *but only if it maps to the accelerator's supported primitives*. Standard 3 × 3 convolutions usually map well. Depthwise convolutions might map poorly if the accelerator does not natively support channel-wise operations. Attention mechanisms or dynamic control flow rarely map at all and fall back to the CPU.
 
 Memory allocation strategy is the second big determinant of whether deployment works. *Dynamic* allocation during inference — `malloc()` calls inside the inference path — is a failure mode on embedded systems, not a feature. The heap is a fixed region of SRAM. Allocations come out of it, and freed memory returns to it, but fragmentation can leave you unable to satisfy a future allocation even when total free memory is sufficient. There is no swap. There is no other process to terminate. Failed allocation either crashes or returns null. And `malloc()` itself is not free — it can spend hundreds of microseconds searching the heap, which becomes milliseconds if you call it inside a per-layer loop.
+
+![Two panels comparing tensor arena strategies: the left panel shows a single contiguous SRAM block with weights, scratch, time-sliced activations where Layer 1 and Layer 3 outputs share the same bytes, and I/O tensors; the right panel stacks every layer's output separately, making the peak roughly an order of magnitude larger.](../images/chapter-04-inference-mechanics-fig-04.png)
+*Figure 4.4 — Tensor arena: reuse vs. no reuse*
 
 The right pattern for embedded inference is *static pre-allocation*. All inference memory is allocated once during initialization, before the first inference runs. That includes the model weights (loaded from flash into SRAM if needed, or accessed directly from flash), the activation buffers for every layer's intermediate results, scratch buffers for things like im2col transformations, and the input and output tensors. The total goes into one contiguous block of SRAM — TensorFlow Lite Micro calls it a *tensor arena* — and the inference engine manages it internally. With buffer reuse, peak memory is the size of the largest layer's output plus whatever buffers have to coexist. Without buffer reuse, peak is the sum of all of them, which is wasteful by an order of magnitude for moderately deep networks. Static allocation also lets you fail at *compile time* rather than at runtime: if your activation memory needs 250 KB and your part has 200 KB of SRAM, the build tells you immediately, and you do not waste time debugging mysterious runtime crashes that turn out to be heap exhaustion.
 
@@ -76,6 +88,9 @@ Now identify the bottleneck. Enable per-operator profiling. Two depthwise convol
 Still over the 100 ms target. Quantize. Post-training int8 quantization. Model size drops to 80 KB, activation memory stays at 28 KB, and SIMD does its 4× thing. **45 ms.** Accuracy goes from 94.2% before quantization to 92.8% after — a 1.4% loss, well within tolerance for the application. Memory: 80 KB flash, 28 KB RAM. Latency: 45 ms. Power: separate measurement.
 
 Theoretical analysis predicted 367 ms. Deployment measured 1,200 ms. Profiling identified the bottleneck twice — first kernels, then memory layout. Optimization brought it to 45 ms. The theoretical prediction was directionally correct and quantitatively wrong by 25×, and only target-hardware profiling revealed why. *That gap is not unusual. It is the work this chapter was written about.*
+
+![A latency waterfall of five horizontal bars labelled by optimization step: 367 ms theoretical prediction, 1200 ms first deploy with reference kernels in red, 420 ms after CMSIS-NN, 140 ms after activations fit in on-chip SRAM, and 45 ms after int8 quantization in dark ink. A vertical dashed line marks the 100 ms target.](../images/chapter-04-inference-mechanics-fig-05.png)
+*Figure 4.5 — Keyword-spotting latency waterfall*
 
 When inference fails on a real target, the four categories of failure are crashes, wrong output, slow latency, and excessive power. *Crashes* — a HardFault or memory exception during inference — usually mean a buffer overrun. The tensor arena is too small and the engine is writing past the end, or the stack is overflowing because the call chain is deeper than allocated. Increase the arena, increase the stack, retest. *Wrong output* — NaN, Inf, predictions that miss accuracy by a wide margin — usually means precision or preprocessing. Check that the quantization scale and zero-point parameters match between training and inference. Check that the input is normalized to the range the model expects (a model trained on inputs in [0, 1] will produce nonsense if you feed it raw 12-bit ADC values from 0 to 4095). Check tensor layout — NHWC versus NCHW — matches what the model was exported with. *Slow latency* — 10× slower than predicted — usually means non-optimized kernels, or activations spilled into external memory, or the clock running at a different speed than you think. *Excessive power* — battery draining at twice the duty-cycle math — usually means busy-waiting (the processor stays active polling instead of sleeping while inference completes), or peripherals left on (LEDs, sensors, communication modules drawing current you forgot to count), or the part not entering its lowest-power sleep mode because something is keeping it awake.
 
@@ -149,6 +164,58 @@ Where the model genuinely helps: walking through how a forward pass actually exe
 Where the model does damage: producing inference latency estimates without flagging that the estimates depend on the toolchain's optimizer, the operator coverage of the runtime, and the specific quantization scheme. The numbers will sound precise and be wrong by an order of magnitude.
 
 The rule: the model is useful for the mechanics. The numbers come from your profiler.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the
+figures in this chapter. Each produces a standalone HTML file you can open
+in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
+your Claude project context before using these prompts. They define the stack,
+naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 4.1 — Four-stage inference pipeline
+
+Build a horizontal four-stage flow diagram in D3 v7. Data: four stages with `id`, `label`, `headline`, `detail` — Stage 1 Input Prep (FFT, normalize, reshape), Stage 2 Inference (layer-by-layer execution; this stage is `primary`), Stage 3 Output (softmax, NMS, threshold), Stage 4 Delivery (GPIO, log, LoRaWAN). Render each stage as a rounded-corner-less rectangle with a coloured header strip; primary stage uses `var(--color-red)` for both header fill and body stroke, others use `var(--color-secondary)`. Use `d3.scaleBand()` across the four stage ids for horizontal placement. Connect stages with short arrow segments using SVG `<marker>` arrowheads. Draw two brackets below the boxes: a red bracket spanning only Stage 2 labelled "what the profiler reports" with "≈ 50 ms" beneath; a neutral bracket spanning all four stages labelled "end-to-end application latency" with "≈ 150 ms" beneath. Standalone HTML, D3 7.9.0 cdnjs CDN, inline CSS/JS, role="img", title, desc, ResizeObserver redraw, prefers-reduced-motion suppression, tooltips on stage hover.
+
+> Reference implementation: `d3/chapter-04-inference-mechanics-fig-01.html`
+
+---
+
+### Figure 4.2 — Matrix multiply tiling: naive vs cache-blocked
+
+Build a two-panel D3 v7 figure comparing matrix-multiply memory patterns. Each panel renders the matrices A (128×128), B (128×10), and C (128×10) as `<rect>` cells with `× =` glyphs between them. Panel A (naive): plain A, B, C rectangles with red horizontal scan lines overlaid on A indicating that every row is streamed from SRAM once per output column. Panel B (tiled, `primary` border): A subdivided into four 64×64 sub-blocks; one sub-block of A, one tile of B, and the corresponding tile of C all highlighted in `var(--color-ochre)` to indicate cache residency. Beneath each panel render a monospace meta block summarising compute cycles, memory cycles (red in panel A), and measured time. Use a shared `draw()` redraw on ResizeObserver. Standalone HTML, D3 v7 cdnjs, inline CSS/JS, accessible.
+
+> Reference implementation: `d3/chapter-04-inference-mechanics-fig-02.html`
+
+---
+
+### Figure 4.3 — Memory hierarchy access cost
+
+Build a horizontal bar chart in D3 v7. Data: five tiers — registers (0.3 cyc), L1 cache (1.5), on-chip SRAM (3), external PSRAM (15, `primary`), flash XIP (12, `muted`) — each with a `perMac` string and a one-line `note`. Channels: y is tier (`d3.scaleBand()`), x is cycles per access (`d3.scaleLinear()` zero baseline, domain [0, 20]). PSRAM bar uses `var(--color-red)`; flash uses `var(--color-border)`; others use `var(--color-secondary)`. Tier labels render in the left margin (160px), accesses-per-MAC and note render in the right margin (280px) with PSRAM row coloured red. Add a 5-tick bottom axis labelled "cycles per access". Tooltips on bar hover; tabindex and aria-label on each bar. Standalone HTML, D3 7.9.0 cdnjs, inline CSS/JS, ResizeObserver, prefers-reduced-motion.
+
+> Reference implementation: `d3/chapter-04-inference-mechanics-fig-03.html`
+
+---
+
+### Figure 4.4 — Tensor arena: reuse vs. no reuse
+
+Build a two-panel D3 v7 figure of tensor-arena layouts. Panel A (reuse, `primary` border): four rows along a shared byte-offset x-axis [0, 800] — row 0 weights+scratch, row 1 Layer 1 output (t=1) in `var(--color-secondary)`, row 2 Layer 3 output (t=3) in `var(--color-red)` occupying the *same* byte range, row 3 I/O tensors. Each row gets a left label ("t = 1", "t = 3", "I/O"). Panel B (no reuse): vertical stack with `d3.scaleLinear()` mapping cumulative bytes onto chart height; eight regions stacked — weights, Layers 1–6 outputs each retained, I/O. Each region's `<rect>` labelled inside with white text (weights label uses ink colour against the border-grey fill). Tooltips on hover show region label and byte count. Below each chart render a peak-memory text — neutral ink for the reuse panel (≈ 28 KB), red for the no-reuse panel ("8–10× larger; does not fit"). Standalone HTML, D3 7.9.0 cdnjs, inline CSS/JS, ResizeObserver, accessible.
+
+> Reference implementation: `d3/chapter-04-inference-mechanics-fig-04.html`
+
+---
+
+### Figure 4.5 — Keyword-spotting latency waterfall
+
+Build a horizontal-bar waterfall in D3 v7. Data: five steps with `n`, `label`, `ms`, `kind`, `note` — (1) 367 ms theoretical prediction `kind=predict` (border-grey with ink stroke), (2) 1200 ms first deploy `kind=failure` (`var(--color-red)`), (3) 420 ms CMSIS-NN `kind=bar`, (4) 140 ms activations on chip `kind=bar`, (5) 45 ms int8 quantization `kind=final` (`var(--color-ink)`). Channels: y is step number (`d3.scaleBand()`), x is milliseconds (`d3.scaleLinear()` zero baseline, domain [0, 1200]). Step label and note render in a 250px left margin; value label in monospace renders to the right of each bar. Draw a vertical dashed `var(--color-red)` line at x = 100 ms labelled "100 ms target" above the plot. Bottom axis with 5 ticks labelled "milliseconds per inference". Tooltips on bar hover. Standalone HTML, D3 7.9.0 cdnjs, inline CSS/JS, ResizeObserver, accessible, prefers-reduced-motion suppression.
+
+> Reference implementation: `d3/chapter-04-inference-mechanics-fig-05.html`
 
 ---
 

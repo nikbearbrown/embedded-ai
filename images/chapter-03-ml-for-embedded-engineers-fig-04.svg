@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t04 d04">
+  <title id="t04">Standard convolution versus depthwise separable convolution</title>
+  <desc id="d04">Top diagram: a single block taking 32-channel input to 64-channel output, labeled 18432 multiplications per output pixel. Bottom diagram: two boxes in sequence, depthwise then pointwise, labeled 288 plus 2048 equals 2336 multiplications. The depthwise separable path is roughly eight times cheaper.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .em { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .tag { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #fdfcfb; }
+    </style>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <text x="350" y="30" text-anchor="middle" class="ti">Split spatial filtering from channel mixing — and pay less for both.</text>
+
+  <!-- ============ ROW 1: STANDARD CONVOLUTION ============ -->
+  <text x="32" y="68" class="em">Standard 3×3 convolution</text>
+  <text x="32" y="84" class="sm">one operation does spatial filtering and channel mixing together</text>
+
+  <!-- Input tensor (32 channels) -->
+  <g>
+    <rect x="60" y="100" width="80" height="56" fill="#f2ede6" stroke="#c8c4c0"/>
+    <text x="100" y="124" text-anchor="middle" class="sm">input</text>
+    <text x="100" y="140" text-anchor="middle" class="sm">32 channels</text>
+  </g>
+
+  <line x1="142" y1="128" x2="218" y2="128" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- Standard conv block -->
+  <g>
+    <rect x="220" y="96" width="160" height="64" fill="#2a1a0e"/>
+    <text x="300" y="118" text-anchor="middle" class="tag">3×3 conv</text>
+    <text x="300" y="134" text-anchor="middle" class="tag">32 in · 64 out</text>
+    <text x="300" y="150" text-anchor="middle" class="tag">spatial + channel mix</text>
+  </g>
+
+  <line x1="382" y1="128" x2="458" y2="128" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- Output tensor -->
+  <g>
+    <rect x="460" y="100" width="80" height="56" fill="#f2ede6" stroke="#c8c4c0"/>
+    <text x="500" y="124" text-anchor="middle" class="sm">output</text>
+    <text x="500" y="140" text-anchor="middle" class="sm">64 channels</text>
+  </g>
+
+  <!-- Cost callout right -->
+  <g>
+    <text x="560" y="120" class="lb">3 · 3 · 32 · 64</text>
+    <text x="560" y="138" class="em">= 18,432 mults / px</text>
+  </g>
+
+  <!-- divider -->
+  <line x1="40" y1="200" x2="660" y2="200" stroke="#c8c4c0" stroke-width="0.75"/>
+
+  <!-- ============ ROW 2: DEPTHWISE SEPARABLE ============ -->
+  <text x="32" y="228" class="em">Depthwise separable</text>
+  <text x="32" y="244" class="sm">step one filters per channel · step two mixes channels</text>
+
+  <!-- input tensor -->
+  <g>
+    <rect x="60" y="266" width="68" height="56" fill="#f2ede6" stroke="#c8c4c0"/>
+    <text x="94" y="290" text-anchor="middle" class="sm">input</text>
+    <text x="94" y="306" text-anchor="middle" class="sm">32 ch</text>
+  </g>
+
+  <line x1="130" y1="294" x2="186" y2="294" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- Depthwise block -->
+  <g>
+    <rect x="188" y="262" width="146" height="64" fill="#4a4540"/>
+    <text x="261" y="284" text-anchor="middle" class="tag">depthwise 3×3</text>
+    <text x="261" y="300" text-anchor="middle" class="tag">per-channel filter</text>
+    <text x="261" y="316" text-anchor="middle" class="tag">3 · 3 · 32 = 288</text>
+  </g>
+
+  <line x1="336" y1="294" x2="376" y2="294" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- intermediate -->
+  <g>
+    <rect x="378" y="266" width="50" height="56" fill="#f2ede6" stroke="#c8c4c0"/>
+    <text x="403" y="298" text-anchor="middle" class="sm">32 ch</text>
+  </g>
+
+  <line x1="430" y1="294" x2="470" y2="294" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- Pointwise block -->
+  <g>
+    <rect x="472" y="262" width="146" height="64" fill="#8a8480"/>
+    <text x="545" y="284" text-anchor="middle" class="tag">pointwise 1×1</text>
+    <text x="545" y="300" text-anchor="middle" class="tag">channel mix</text>
+    <text x="545" y="316" text-anchor="middle" class="tag">1 · 1 · 32 · 64 = 2,048</text>
+  </g>
+
+  <!-- output -->
+  <g>
+    <rect x="620" y="266" width="40" height="56" fill="#f2ede6" stroke="#c8c4c0"/>
+    <text x="640" y="298" text-anchor="middle" class="sm">64 ch</text>
+  </g>
+  <line x1="618" y1="294" x2="620" y2="294" stroke="#2a1a0e" stroke-width="1.4"/>
+
+  <!-- Total cost callout -->
+  <rect x="60" y="350" width="600" height="36" fill="#2a1a0e"/>
+  <text x="180" y="372" text-anchor="middle" class="em" fill="#fdfcfb">288 + 2,048 = 2,336 mults / px</text>
+  <text x="450" y="372" text-anchor="middle" class="em" fill="#fdfcfb">≈ 8× cheaper than standard</text>
+
+  <!-- caption -->
+  <text x="350" y="408" text-anchor="middle" class="cap">MobileNet's central trick: the same job in two cheaper steps.</text>
+</svg>

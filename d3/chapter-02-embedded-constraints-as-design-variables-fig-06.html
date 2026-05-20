@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 2.6 — Deployment decision flowchart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 560px; border: 1px solid var(--color-border); padding: 18px; }
+  .gate { fill: var(--color-ink); stroke: var(--color-ink); stroke-width: 1.5; cursor: pointer; transition: fill 200ms; }
+  .gate.active { fill: var(--color-red); stroke: var(--color-red); }
+  .gate-label { fill: var(--color-white); font-family: 'EB Garamond', Georgia, serif; font-weight: 700; font-size: 13px; pointer-events: none; }
+  .gate-sub { fill: var(--color-white); font-family: 'Inter', sans-serif; font-size: 10px; pointer-events: none; opacity: 0.9; }
+  .edge-yes { stroke: var(--color-ink); stroke-width: 1.5; fill: none; }
+  .edge-no  { stroke: var(--color-red); stroke-width: 1.5; fill: none; }
+  .branch-label { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-weight: 700; }
+  .branch-yes { fill: var(--color-ink); }
+  .branch-no  { fill: var(--color-red); }
+  .iterate-box { fill: var(--color-white); stroke: var(--color-red); stroke-width: 1.25; }
+  .iterate-title { font-family: 'EB Garamond', Georgia, serif; font-weight: 700; font-size: 12px; fill: var(--color-ink); }
+  .iterate-item { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--color-secondary); }
+  .viable-box { fill: var(--color-border); stroke: var(--color-ink); stroke-width: 1.25; }
+  .viable-label { font-family: 'EB Garamond', Georgia, serif; font-weight: 700; font-size: 13px; fill: var(--color-ink); }
+  .viable-sub { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--color-secondary); }
+  .footer-box { fill: var(--color-border); stroke: var(--color-ink); stroke-width: 1; }
+  .footer-text { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); }
+  .footer-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; font-family: 'Inter', sans-serif; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 2.6 — Deployment decision flowchart</h1>
+<p class="subtitle">Four sequential gates. Click any gate to see the iteration loop it triggers.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Constraints define the viable set; secondary factors choose within it.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const gates = [
+  { id: 'memory',   title: 'memory',   q1: 'weights fit flash?',          q2: 'arena+system < SRAM?',
+    iterate_title: 'iterate model',    items: ['quantize weights', 'prune layers', 'shrink activations'] },
+  { id: 'compute',  title: 'compute',  q1: 'ops / throughput',            q2: '< latency budget?',
+    iterate_title: 'iterate compute',  items: ['raise clock', 'int8 + SIMD', 'shrink model'] },
+  { id: 'power',    title: 'power',    q1: 'avg I within battery?',       q2: 'peak I within supply?',
+    iterate_title: 'iterate power',    items: ['stretch duty cycle', 'bulk cap for peak', 'larger battery'] },
+  { id: 'realtime', title: 'real-time', q1: 'WCET + margin',              q2: '< deadline?',
+    iterate_title: 'iterate real-time', items: ['lock to TCM', 'integer-only graph', 'raise priority'] }
+];
+
+let activeGate = null;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 900;
+  const totalHeight = container.clientHeight || 560;
+  const margin = { top: 24, right: 24, bottom: 24, left: 24 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Deployment decision flowchart');
+  svg.append('desc').attr('id', 'chart-desc').text('Sequential gates for memory, compute, power, and real-time. Each gate routes failure to a model-side iteration loop.');
+
+  const defs = svg.append('defs');
+  ['ink', 'red'].forEach(c => {
+    defs.append('marker').attr('id', `arrow-${c}`).attr('markerWidth', 9).attr('markerHeight', 7)
+      .attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+      .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', c === 'ink' ? 'var(--color-ink)' : 'var(--color-red)');
+  });
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const gateRow = 130;
+  const gateW = 140;
+  const gateH = 90;
+  const gapX = (chartWidth - gates.length * gateW) / (gates.length + 1);
+  const gatePositions = gates.map((g, i) => ({ x: gapX + i * (gateW + gapX) + gateW / 2, y: gateRow }));
+
+  // Inlet
+  gChart.append('text').attr('class', 'iterate-item').attr('x', 4).attr('y', gateRow - 6).text('candidate');
+  gChart.append('text').attr('class', 'iterate-item').attr('x', 4).attr('y', gateRow + 8).text('model + part');
+  gChart.append('line').attr('class', 'edge-yes').attr('x1', 60).attr('y1', gateRow).attr('x2', gatePositions[0].x - gateW/2 - 4).attr('y2', gateRow).attr('marker-end', 'url(#arrow-ink)');
+
+  // Yes-chain arrows between gates
+  for (let i = 0; i < gates.length - 1; i++) {
+    const a = gatePositions[i];
+    const b = gatePositions[i + 1];
+    gChart.append('line').attr('class', 'edge-yes')
+      .attr('x1', a.x + gateW/2).attr('y1', gateRow).attr('x2', b.x - gateW/2 - 4).attr('y2', gateRow)
+      .attr('marker-end', 'url(#arrow-ink)');
+    const midX = (a.x + b.x) / 2;
+    gChart.append('text').attr('class', 'branch-label branch-yes').attr('x', midX).attr('y', gateRow - 6).attr('text-anchor', 'middle').text('yes');
+  }
+
+  // Final viable terminal off the last gate's yes
+  const lastGate = gatePositions[gates.length - 1];
+  gChart.append('rect').attr('class', 'viable-box')
+    .attr('x', lastGate.x - 50).attr('y', gateRow + gateH + 30).attr('width', 100).attr('height', 50);
+  gChart.append('text').attr('class', 'viable-label').attr('x', lastGate.x).attr('y', gateRow + gateH + 50).attr('text-anchor', 'middle').text('VIABLE');
+  gChart.append('text').attr('class', 'viable-sub').attr('x', lastGate.x).attr('y', gateRow + gateH + 66).attr('text-anchor', 'middle').text('deploy');
+  // arrow from last gate side to viable box
+  gChart.append('path').attr('class', 'edge-yes')
+    .attr('d', `M ${lastGate.x + gateW/2} ${gateRow} Q ${lastGate.x + gateW/2 + 30} ${gateRow + 30} ${lastGate.x} ${gateRow + gateH + 26}`)
+    .attr('marker-end', 'url(#arrow-ink)');
+
+  // Iterate boxes below each gate
+  const iterY = gateRow + gateH + 70;
+  const iterH = 100;
+
+  gates.forEach((g, i) => {
+    const pos = gatePositions[i];
+
+    // No-arrow downward
+    gChart.append('line').attr('class', 'edge-no')
+      .attr('x1', pos.x).attr('y1', gateRow + gateH/2 + 4).attr('x2', pos.x).attr('y2', iterY - 4)
+      .attr('marker-end', 'url(#arrow-red)');
+    gChart.append('text').attr('class', 'branch-label branch-no')
+      .attr('x', pos.x + 14).attr('y', iterY - 22).text('no');
+
+    // Iterate box
+    gChart.append('rect').attr('class', 'iterate-box')
+      .attr('x', pos.x - gateW/2).attr('y', iterY).attr('width', gateW).attr('height', iterH);
+    gChart.append('text').attr('class', 'iterate-title')
+      .attr('x', pos.x).attr('y', iterY + 16).attr('text-anchor', 'middle').text(g.iterate_title);
+    g.items.forEach((item, k) => {
+      gChart.append('text').attr('class', 'iterate-item')
+        .attr('x', pos.x).attr('y', iterY + 34 + k * 14).attr('text-anchor', 'middle').text('· ' + item);
+    });
+    gChart.append('text').attr('class', 'iterate-item')
+      .attr('x', pos.x).attr('y', iterY + iterH - 6).attr('text-anchor', 'middle')
+      .attr('fill', 'var(--color-ink)').style('font-weight', '700').text(`→ retry from gate ${i+1}`);
+  });
+
+  // Gate diamonds last (on top)
+  gates.forEach((g, i) => {
+    const pos = gatePositions[i];
+    const pts = `${pos.x},${gateRow - gateH/2} ${pos.x + gateW/2},${gateRow} ${pos.x},${gateRow + gateH/2} ${pos.x - gateW/2},${gateRow}`;
+    const gateEl = gChart.append('polygon')
+      .attr('class', 'gate')
+      .attr('points', pts)
+      .attr('tabindex', 0)
+      .attr('aria-label', `${g.title} gate`);
+    gChart.append('text').attr('class', 'gate-label').attr('x', pos.x).attr('y', gateRow - 14).attr('text-anchor', 'middle').text(g.title);
+    gChart.append('text').attr('class', 'gate-sub').attr('x', pos.x).attr('y', gateRow + 4).attr('text-anchor', 'middle').text(g.q1);
+    gChart.append('text').attr('class', 'gate-sub').attr('x', pos.x).attr('y', gateRow + 18).attr('text-anchor', 'middle').text(g.q2);
+
+    gateEl
+      .on('click', (event) => {
+        activeGate = (activeGate === g.id) ? null : g.id;
+        d3.selectAll('.gate').classed('active', false);
+        if (activeGate) d3.select(event.currentTarget).classed('active', true);
+      })
+      .on('mouseover', (event) => showTip(event, `<strong>${g.title}</strong><br>${g.q1} ${g.q2}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // Bail-out footer
+  const footY = iterY + iterH + 26;
+  gChart.append('rect').attr('class', 'footer-box').attr('x', 0).attr('y', footY).attr('width', chartWidth).attr('height', 44);
+  gChart.append('text').attr('class', 'footer-text').attr('x', chartWidth / 2).attr('y', footY + 18).attr('text-anchor', 'middle')
+    .text('if no iteration closes the gap — change the part, change the model class, or change the requirement');
+  gChart.append('text').attr('class', 'footer-sub').attr('x', chartWidth / 2).attr('y', footY + 34).attr('text-anchor', 'middle')
+    .text('a constraint that cannot be loosened is the constraint that selects a different platform');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

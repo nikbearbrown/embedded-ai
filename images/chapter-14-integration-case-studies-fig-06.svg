@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t06 d06">
+  <title id="t06">Three case studies, three different binding constraints — power, accuracy/regulation, bandwidth</title>
+  <desc id="d06">A grouped-bar comparison across the industrial vibration sensor, medical ECG wearable, and agricultural vineyard sensor. For each case the chart shows four normalized budgets: average power, memory, latency budget, and BOM cost. The binding constraint in each column is marked with a heavier outline so the reader can see at a glance that the tightest axis differs by case.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .bd { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #2a1a0e; }
+    </style>
+    <marker id="ar6" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="460" fill="#fdfcfb"/>
+
+  <text x="32" y="30" class="ti">What the three cases share — the framework. What differs — which constraint binds.</text>
+  <text x="32" y="48" class="sm">budgets per case, with the tightest axis (binding constraint) emphasized in each column</text>
+
+  <!-- Headers across columns -->
+  <text x="180" y="80" text-anchor="middle" class="nm">Industrial vibration</text>
+  <text x="180" y="94" text-anchor="middle" class="sm">CNC bearing pre-failure</text>
+  <text x="350" y="80" text-anchor="middle" class="nm">Medical wearable</text>
+  <text x="350" y="94" text-anchor="middle" class="sm">single-lead ECG</text>
+  <text x="520" y="80" text-anchor="middle" class="nm">Agricultural sensor</text>
+  <text x="520" y="94" text-anchor="middle" class="sm">grape-leaf disease</text>
+
+  <!-- Column dividers -->
+  <line x1="265" y1="68" x2="265" y2="420" stroke="#c8c4c0" stroke-width="0.75"/>
+  <line x1="435" y1="68" x2="435" y2="420" stroke="#c8c4c0" stroke-width="0.75"/>
+
+  <!-- Row labels (left margin) -->
+  <text x="48" y="138" class="nm">Power</text>
+  <text x="48" y="200" class="nm">Memory</text>
+  <text x="48" y="262" class="nm">Latency</text>
+  <text x="48" y="324" class="nm">BOM cost</text>
+  <text x="48" y="386" class="nm">Binding</text>
+
+  <!-- Each cell: bar with normalized width. Max bar width 140 px, centered around column center.
+       Bars start at column-center - 70, fixed y. -->
+
+  <!-- POWER ROW (y = 124-148) — normalized: tightest = lowest budget = longest bar of "constraint" (we'll just label values).
+       Use bar = log-scaled "tightness": industrial 0.28 mW (tightest, full bar), medical 11 mW (mid), agricultural 500 mW (loose). -->
+  <!-- Industrial: 0.28 mW → tight → bar width 130 (binding) -->
+  <rect x="115" y="124" width="130" height="24" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="2"/>
+  <text x="180" y="140" text-anchor="middle" class="lb" fill="#fdfcfb">0.28 mW avg</text>
+  <text x="180" y="166" text-anchor="middle" class="sm">18 mo on coin cell</text>
+  <!-- Medical: 11 mW → bar width 70 -->
+  <rect x="315" y="124" width="70" height="24" fill="#8a8480"/>
+  <text x="350" y="140" text-anchor="middle" class="lb" fill="#fdfcfb">11 mW avg</text>
+  <text x="350" y="166" text-anchor="middle" class="sm">7 days, 500 mAh</text>
+  <!-- Agricultural: 500 mW → bar width 30 -->
+  <rect x="505" y="124" width="30" height="24" fill="#c8c4c0"/>
+  <text x="540" y="140" class="lb">500 mW</text>
+  <text x="520" y="166" text-anchor="middle" class="sm">solar-buffered</text>
+
+  <!-- MEMORY ROW (y = 186-210). Industrial 200 KB tight; medical 980 KB; agricultural 4.6 MB -->
+  <rect x="115" y="186" width="120" height="24" fill="#4a4540"/>
+  <text x="175" y="202" text-anchor="middle" class="lb" fill="#fdfcfb">200 KB flash</text>
+  <text x="180" y="228" text-anchor="middle" class="sm">random forest model</text>
+  <rect x="315" y="186" width="90" height="24" fill="#4a4540" stroke="#2a1a0e" stroke-width="2"/>
+  <text x="360" y="202" text-anchor="middle" class="lb" fill="#fdfcfb">980 KB / 2 MB</text>
+  <text x="350" y="228" text-anchor="middle" class="sm">int8 1D CNN, tight in flash</text>
+  <rect x="505" y="186" width="50" height="24" fill="#c8c4c0"/>
+  <text x="530" y="202" class="lb">4.6 MB</text>
+  <text x="520" y="228" text-anchor="middle" class="sm">EfficientNet-Lite0</text>
+
+  <!-- LATENCY ROW (y=248-272). Industrial 10 s; medical 30 s; agricultural event-driven -->
+  <rect x="115" y="248" width="100" height="24" fill="#8a8480"/>
+  <text x="165" y="264" text-anchor="middle" class="lb" fill="#fdfcfb">10 s soft</text>
+  <text x="180" y="290" text-anchor="middle" class="sm">2.5 s schedule</text>
+  <rect x="315" y="248" width="70" height="24" fill="#8a8480"/>
+  <text x="350" y="264" text-anchor="middle" class="lb" fill="#fdfcfb">30 s alert</text>
+  <text x="350" y="290" text-anchor="middle" class="sm">1.2% duty cycle</text>
+  <rect x="505" y="248" width="30" height="24" fill="#c8c4c0"/>
+  <text x="540" y="264" class="lb">event-driven</text>
+  <text x="520" y="290" text-anchor="middle" class="sm">4× per day</text>
+
+  <!-- BOM ROW (y=310-334). Industrial $40 tight; medical $200; agricultural $150 -->
+  <rect x="115" y="310" width="130" height="24" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="2"/>
+  <text x="180" y="326" text-anchor="middle" class="lb" fill="#fdfcfb">$40 ceiling</text>
+  <text x="180" y="352" text-anchor="middle" class="sm">200 sensors deployed</text>
+  <rect x="315" y="310" width="40" height="24" fill="#c8c4c0"/>
+  <text x="360" y="326" class="lb">$200</text>
+  <text x="350" y="352" text-anchor="middle" class="sm">soft ceiling</text>
+  <rect x="505" y="310" width="50" height="24" fill="#c8c4c0"/>
+  <text x="560" y="326" class="lb">$150</text>
+  <text x="520" y="352" text-anchor="middle" class="sm">per-vineyard cap</text>
+
+  <!-- Binding constraint row -->
+  <line x1="32" y1="368" x2="668" y2="368" stroke="#8a8480" stroke-width="0.5"/>
+  <rect x="115" y="378" width="130" height="28" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="180" y="396" text-anchor="middle" class="bd">power</text>
+  <rect x="285" y="378" width="130" height="28" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="350" y="396" text-anchor="middle" class="bd">accuracy + regulation</text>
+  <rect x="455" y="378" width="130" height="28" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <text x="520" y="396" text-anchor="middle" class="bd">bandwidth</text>
+
+  <!-- Bottom caption -->
+  <text x="350" y="430" text-anchor="middle" class="cap">Same framework, three different binding constraints — and three completely different deployments fall out.</text>
+  <text x="350" y="446" text-anchor="middle" class="cap">"On-device vs cloud" is not a preference; it is what the binding constraint will permit.</text>
+</svg>

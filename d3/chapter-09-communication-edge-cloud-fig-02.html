@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 9.2 — Tier-selection decision flowchart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 20px; max-width: 80ch; }
+  #chart { width: 100%; min-height: 540px; }
+  .gate { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-ink); }
+  .gate-sub { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 12px; fill: var(--color-secondary); }
+  .answer { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); font-weight: 700; }
+  .outcome { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-white); }
+  .offload  { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-red); }
+  .caption  { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; }
+  .gate-shape { cursor: pointer; transition: fill 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .gate-shape:hover { fill: #F0EBE3; }
+  @media (prefers-color-scheme: dark) { .gate-shape:hover { fill: #1c1c1c; } }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 12px; max-width: 280px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 9.2 — Tier-selection decision flowchart</h1>
+<p class="subtitle">Pick a tier by elimination, not by aspiration. The first gate that says yes wins; only a clean fall-through to the bottom unlocks an offload.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Each gate enforces a one-way constraint. Latency, privacy, connectivity, and model fit each forbid certain tiers individually; survive all four and the four-cost check chooses how to split.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const gates = [
+  { id: 'latency',      y: 60,  label: 'Latency budget < 100 ms?',                   sub: 'hard real-time, control loop, closed-loop',     yes: 'on-device or near-edge', tip: 'Hard real-time below 100 ms means no network. Below 10 ms means no shared OS either.' },
+  { id: 'privacy',      y: 170, label: 'Privacy or regulation forbids exfiltration?', sub: 'HIPAA, GDPR, PCI-DSS, on-prem mandate',         yes: 'on-device only',         tip: 'If raw data cannot leave, the cloud is off the table even when bandwidth and latency permit it.' },
+  { id: 'connectivity', y: 280, label: 'Connectivity intermittent or absent?',        sub: 'remote, maritime, jamming, drop-tolerant',      yes: 'on-device only',         tip: 'Designing for the network you usually have is not enough; the answer is what happens during the outage.' },
+  { id: 'fit',          y: 390, label: 'Model fits on device?',                       sub: 'parameters, MACs, SRAM, latency budget',        yes: 'prefer on-device',       tip: 'If the model fits, the only reason to offload is to gain accuracy worth the four communication costs.' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .style('opacity', 1);
+}
+function moveTip(event) {
+  tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px');
+}
+function hideTip() { tooltip.style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth = container.clientWidth || 760;
+  const totalHeight = 540;
+
+  const svg = d3.select('#chart')
+    .append('svg')
+      .attr('width', totalWidth)
+      .attr('height', totalHeight)
+      .attr('role', 'img')
+      .attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Tier-selection decision flowchart');
+  svg.append('desc').attr('id', 'chart-desc').text('Four diamond gates ask about latency, privacy, connectivity, and model fit. Each yes ends the search; falling through to the bottom triggers an offload check.');
+
+  // marker
+  const defs = svg.append('defs');
+  defs.append('marker')
+      .attr('id', 'ar2-arrow')
+      .attr('markerWidth', 9).attr('markerHeight', 7)
+      .attr('refX', 8).attr('refY', 3.5)
+      .attr('orient', 'auto')
+    .append('polygon')
+      .attr('points', '0 0, 9 3.5, 0 7')
+      .attr('fill', 'var(--color-ink)');
+
+  // gate diamonds, centered ~ x=270, width 200, height 60
+  const gateX = 200, gateY = (gy) => gy, gateW = 180, gateH = 60;
+
+  gates.forEach((gate, i) => {
+    const cx = gateX + gateW/2;
+    const cy = gate.y + gateH/2;
+    const points = `${gateX},${cy} ${gateX+18},${gate.y} ${gateX+gateW-18},${gate.y} ${gateX+gateW},${cy} ${gateX+gateW-18},${gate.y+gateH} ${gateX+18},${gate.y+gateH}`;
+
+    svg.append('polygon')
+        .attr('class', 'gate-shape')
+        .attr('points', points)
+        .attr('fill', 'var(--color-white)')
+        .attr('stroke', 'var(--color-ink)')
+        .attr('stroke-width', 1.5)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${gate.label} If yes, ${gate.yes}.`)
+        .on('mouseover', (event) => showTip(event, `<strong>${gate.label}</strong><br>${gate.tip}`))
+        .on('mousemove', moveTip)
+        .on('mouseout', hideTip);
+
+    svg.append('text').attr('class', 'gate').attr('x', cx).attr('y', cy - 4).attr('text-anchor', 'middle').text(gate.label);
+    svg.append('text').attr('class', 'gate-sub').attr('x', cx).attr('y', cy + 14).attr('text-anchor', 'middle').text(gate.sub);
+
+    // YES arrow → right outcome
+    svg.append('line')
+        .attr('x1', gateX + gateW).attr('y1', cy)
+        .attr('x2', gateX + gateW + 140).attr('y2', cy)
+        .attr('stroke', 'var(--color-ink)').attr('stroke-width', 1)
+        .attr('marker-end', 'url(#ar2-arrow)');
+    svg.append('text').attr('class', 'answer').attr('x', gateX + gateW + 60).attr('y', cy - 8).attr('text-anchor', 'middle').text('YES');
+
+    // outcome chip
+    svg.append('rect')
+        .attr('x', gateX + gateW + 152).attr('y', cy - 16)
+        .attr('width', 180).attr('height', 32)
+        .attr('fill', 'var(--color-ink)');
+    svg.append('text').attr('class', 'outcome').attr('x', gateX + gateW + 152 + 90).attr('y', cy + 5).attr('text-anchor', 'middle').text(gate.yes);
+
+    // NO arrow → next gate (down)
+    if (i < gates.length - 1) {
+      svg.append('line')
+          .attr('x1', cx).attr('y1', gate.y + gateH)
+          .attr('x2', cx).attr('y2', gates[i+1].y - 2)
+          .attr('stroke', 'var(--color-ink)').attr('stroke-width', 1)
+          .attr('marker-end', 'url(#ar2-arrow)');
+      svg.append('text').attr('class', 'answer').attr('x', cx + 12).attr('y', gate.y + gateH + 14).text('NO');
+    }
+  });
+
+  // Final NO → offload box
+  const last = gates[gates.length - 1];
+  const lastCx = gateX + gateW/2;
+  svg.append('line')
+      .attr('x1', lastCx).attr('y1', last.y + gateH)
+      .attr('x2', lastCx).attr('y2', last.y + gateH + 32)
+      .attr('stroke', 'var(--color-ink)').attr('stroke-width', 1)
+      .attr('marker-end', 'url(#ar2-arrow)');
+  svg.append('text').attr('class', 'answer').attr('x', lastCx + 12).attr('y', last.y + gateH + 18).text('NO');
+
+  svg.append('rect')
+      .attr('x', 40).attr('y', last.y + gateH + 40)
+      .attr('width', 560).attr('height', 38)
+      .attr('fill', 'var(--color-white)')
+      .attr('stroke', 'var(--color-red)').attr('stroke-width', 1.5);
+  svg.append('text').attr('class', 'offload').attr('x', 320).attr('y', last.y + gateH + 64).attr('text-anchor', 'middle').text('offload — run the four-cost check: latency, bandwidth, energy, money');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

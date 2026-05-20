@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 14.4 — Medical wearable compression cascade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 480px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .line-size { fill: none; stroke: var(--color-ink); stroke-width: 2.25; }
+  .line-sens { fill: none; stroke: var(--color-red); stroke-width: 2.25; stroke-dasharray: 5 3; }
+  .pt-size { fill: var(--color-ink); }
+  .pt-sens { fill: var(--color-red); }
+  .pt-size:focus, .pt-sens:focus { outline: 2px solid var(--color-red); outline-offset: 2px; }
+  .ref-line { stroke: var(--color-secondary); stroke-width: 1; stroke-dasharray: 6 3; }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ochre); font-weight: 600; }
+  .stage-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--color-ink); }
+  .stage-sub { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--color-secondary); }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .pt-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .legend-text { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 14.4 — Medical wearable compression cascade</h1>
+<p class="subtitle">Model size and VT/VF sensitivity across four optimization stages: float32, pruned, distilled, QAT int8.</p>
+<div id="chart" role="img" aria-labelledby="t-cmp d-cmp"></div>
+<p class="caption">Prune first, distill second, quantize last. The only sequence that fits a 10 MB ECG CNN inside 2 MB of flash without losing the 98% regulatory floor.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const stages = [
+  { label: 'float32',     sub: 'baseline',     size: 10.0, sens: 98.5, status: 'overflows flash' },
+  { label: 'pruned 40%',  sub: '1.5M params',  size: 6.0,  sens: 97.2, status: 'below floor' },
+  { label: 'distilled',   sub: '800K student', size: 3.2,  sens: 98.1, status: 'above floor' },
+  { label: 'QAT int8',    sub: '800 KB',       size: 0.8,  sens: 97.8, status: '0.2 pt gap accepted' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>size ${d.size} MB · sensitivity ${d.sens}%<br>${d.status}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 480;
+  const margin = { top: 32, right: 96, bottom: 88, left: 80 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-cmp d-cmp');
+  svg.append('title').attr('id', 't-cmp').text('Compression cascade dual-axis chart');
+  svg.append('desc').attr('id', 'd-cmp').text('Model size and sensitivity tracked across four optimization stages with reference lines for the flash ceiling and the regulatory sensitivity floor.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scalePoint().domain(stages.map(s => s.label)).range([0, chartWidth]).padding(0.5);
+  const ySize = d3.scaleLinear().domain([0, 10.5]).range([chartHeight, 0]);
+  const ySens = d3.scaleLinear().domain([92, 99]).range([chartHeight, 0]);
+
+  // Axes
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(x).tickSize(0).tickPadding(12))
+    .selectAll('text')
+      .style('font-family', "'Inter', sans-serif")
+      .style('font-size', '12px').style('font-weight', '700')
+      .style('fill', 'var(--color-ink)');
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(ySize).ticks(6).tickFormat(d => d + ' MB'));
+  g.append('g').attr('class', 'axis').attr('transform', `translate(${chartWidth},0)`)
+    .call(d3.axisRight(ySens).ticks(5).tickFormat(d => d + '%'));
+
+  svg.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(${margin.left - 60},${margin.top + chartHeight/2}) rotate(-90)`)
+    .attr('text-anchor', 'middle').text('model size');
+  svg.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(${margin.left + chartWidth + 60},${margin.top + chartHeight/2}) rotate(90)`)
+    .attr('text-anchor', 'middle').text('VT/VF sensitivity');
+
+  // Reference lines
+  g.append('line').attr('class', 'ref-line')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', ySize(2.0)).attr('y2', ySize(2.0));
+  g.append('text').attr('class', 'annotation')
+    .attr('x', 6).attr('y', ySize(2.0) - 6).text('2 MB flash ceiling');
+
+  g.append('line').attr('class', 'ref-line')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', ySens(98)).attr('y2', ySens(98));
+  g.append('text').attr('class', 'annotation')
+    .attr('x', chartWidth - 6).attr('y', ySens(98) - 6)
+    .attr('text-anchor', 'end').text('98% regulatory floor');
+
+  // Lines
+  const sizeLine = d3.line().x(d => x(d.label)).y(d => ySize(d.size));
+  const sensLine = d3.line().x(d => x(d.label)).y(d => ySens(d.sens));
+
+  g.append('path').datum(stages).attr('class', 'line-size').attr('d', sizeLine);
+  g.append('path').datum(stages).attr('class', 'line-sens').attr('d', sensLine);
+
+  // Points
+  g.selectAll('.pt-size').data(stages).join('circle')
+    .attr('class', 'pt-size')
+    .attr('cx', d => x(d.label)).attr('cy', d => ySize(d.size)).attr('r', 5)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label} size ${d.size} megabytes`)
+    .on('mouseover', (event, d) => showTip(event, d))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.selectAll('.pt-size-label').data(stages).join('text')
+    .attr('class', 'pt-label')
+    .attr('x', d => x(d.label)).attr('y', d => ySize(d.size) - 10)
+    .attr('text-anchor', 'middle').text(d => d.size + ' MB');
+
+  g.selectAll('.pt-sens').data(stages).join('circle')
+    .attr('class', 'pt-sens')
+    .attr('cx', d => x(d.label)).attr('cy', d => ySens(d.sens)).attr('r', 5)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label} sensitivity ${d.sens} percent`)
+    .on('mouseover', (event, d) => showTip(event, d))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.selectAll('.pt-sens-label').data(stages).join('text')
+    .attr('class', 'pt-label').style('fill', 'var(--color-red)')
+    .attr('x', d => x(d.label)).attr('y', d => ySens(d.sens) + 18)
+    .attr('text-anchor', 'middle').text(d => d.sens + '%');
+
+  // Stage status row
+  g.selectAll('.stage-status').data(stages).join('text')
+    .attr('class', 'stage-sub')
+    .attr('x', d => x(d.label)).attr('y', chartHeight + 56)
+    .attr('text-anchor', 'middle').text(d => d.status);
+
+  // Legend
+  const legend = svg.append('g').attr('transform', `translate(${margin.left}, ${totalHeight - 16})`);
+  legend.append('line').attr('x1', 0).attr('x2', 24).attr('y1', 0).attr('y2', 0)
+    .attr('stroke', 'var(--color-ink)').attr('stroke-width', 2);
+  legend.append('text').attr('class', 'legend-text').attr('x', 30).attr('y', 4).text('model size');
+  legend.append('line').attr('x1', 120).attr('x2', 144).attr('y1', 0).attr('y2', 0)
+    .attr('stroke', 'var(--color-red)').attr('stroke-width', 2).attr('stroke-dasharray', '5 3');
+  legend.append('text').attr('class', 'legend-text').attr('x', 150).attr('y', 4).text('VT/VF sensitivity');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

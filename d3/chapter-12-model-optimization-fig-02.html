@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 12.2 — FP32 vs PTQ vs QAT trade-offs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 12px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 280px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar.fp32 { fill: #c8c4c0; }
+  .bar.ptq  { fill: #8a8480; }
+  .bar.qat  { fill: var(--color-ink); }
+  .bar.range { opacity: 0.45; }
+  .vlabel { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 75ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 12.2 — FP32 vs PTQ vs QAT</h1>
+<p class="subtitle">Same model, three deployment paths. Accuracy cost buys you shipping speed.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Accuracy drop (%)</div>
+    <div class="panel-sub">lower is better</div>
+    <div id="chartAcc" class="chart" role="img" aria-label="Accuracy drop by quantization mode"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Model size (MB)</div>
+    <div class="panel-sub">int8 weights are one quarter of float32</div>
+    <div id="chartSize" class="chart" role="img" aria-label="Model size by quantization mode"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Engineering cost (hours, log)</div>
+    <div class="panel-sub">QAT pays in compute and dataset access</div>
+    <div id="chartCost" class="chart" role="img" aria-label="Engineering cost by quantization mode"></div>
+  </div>
+</div>
+<p class="caption">PTQ is the right tool when you can pay the accuracy hit. QAT is the right tool when you cannot.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(d.html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawLinear(selector, data, opts) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 200;
+  const h = container.clientHeight || 280;
+  const m = { top: 24, right: 16, bottom: 36, left: 44 };
+  const innerW = w - m.left - m.right;
+  const innerH = h - m.top - m.bottom;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+  const x = d3.scaleBand().domain(data.map(d => d.key)).range([0, innerW]).padding(0.25);
+  const y = d3.scaleLinear().domain(opts.yDomain).range([innerH, 0]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x));
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(5).tickFormat(opts.tickFormat || (d => d)));
+  // bars (range: low solid, high faded)
+  data.forEach(d => {
+    if (d.range) {
+      g.append('rect').attr('class', `bar ${d.cls}`)
+        .attr('x', x(d.key)).attr('y', y(d.range[1]))
+        .attr('width', x.bandwidth()).attr('height', y(d.range[0]) - y(d.range[1]))
+        .on('mouseover', (e) => showTip(e, { html: `<strong>${d.key}</strong><br/>${d.label}` }))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+      g.append('rect').attr('class', `bar ${d.cls} range`)
+        .attr('x', x(d.key)).attr('y', y(d.range[0]))
+        .attr('width', x.bandwidth()).attr('height', y(0) - y(d.range[0]));
+    } else {
+      g.append('rect').attr('class', `bar ${d.cls}`)
+        .attr('x', x(d.key)).attr('y', y(d.value))
+        .attr('width', x.bandwidth()).attr('height', innerH - y(d.value))
+        .on('mouseover', (e) => showTip(e, { html: `<strong>${d.key}</strong><br/>${d.label}` }))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+    }
+    const top = d.range ? d.range[1] : d.value;
+    g.append('text').attr('class', 'vlabel').attr('x', x(d.key) + x.bandwidth() / 2).attr('y', y(top) - 6).attr('text-anchor', 'middle').text(d.label);
+  });
+}
+
+function drawLog(selector, data) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 200;
+  const h = container.clientHeight || 280;
+  const m = { top: 24, right: 16, bottom: 36, left: 56 };
+  const innerW = w - m.left - m.right;
+  const innerH = h - m.top - m.bottom;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+  const x = d3.scaleBand().domain(data.map(d => d.key)).range([0, innerW]).padding(0.25);
+  const y = d3.scaleLog().domain([0.01, 100]).range([innerH, 0]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x));
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(3, '~s').tickFormat(d => d + 'h'));
+  data.forEach(d => {
+    g.append('rect').attr('class', `bar ${d.cls}`)
+      .attr('x', x(d.key)).attr('y', y(d.value))
+      .attr('width', x.bandwidth()).attr('height', innerH - y(d.value))
+      .on('mouseover', (e) => showTip(e, { html: `<strong>${d.key}</strong><br/>${d.label}` }))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+    g.append('text').attr('class', 'vlabel').attr('x', x(d.key) + x.bandwidth() / 2).attr('y', y(d.value) - 6).attr('text-anchor', 'middle').text(d.label);
+  });
+}
+
+function draw() {
+  drawLinear('#chartAcc', [
+    { key: 'FP32', value: 0, label: '0', cls: 'fp32' },
+    { key: 'PTQ',  range: [3, 10], label: '3–10', cls: 'ptq' },
+    { key: 'QAT',  range: [1, 3], label: '1–3', cls: 'qat' }
+  ], { yDomain: [0, 12] });
+  drawLinear('#chartSize', [
+    { key: 'FP32', value: 4.0, label: '4.0', cls: 'fp32' },
+    { key: 'PTQ',  value: 1.0, label: '1.0', cls: 'ptq' },
+    { key: 'QAT',  value: 1.0, label: '1.0', cls: 'qat' }
+  ], { yDomain: [0, 5] });
+  drawLog('#chartCost', [
+    { key: 'FP32', value: 0.01, label: '~0', cls: 'fp32' },
+    { key: 'PTQ',  value: 0.1,  label: 'min', cls: 'ptq' },
+    { key: 'QAT',  value: 30,   label: 'days', cls: 'qat' }
+  ]);
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+['#chartAcc', '#chartSize', '#chartCost'].forEach(s => ro.observe(document.querySelector(s)));
+</script>
+</body>
+</html>

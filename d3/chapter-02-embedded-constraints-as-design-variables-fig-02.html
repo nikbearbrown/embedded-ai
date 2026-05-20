@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 2.2 — Inference latency across three embedded targets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 440px; border: 1px solid var(--color-border); padding: 18px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .bar.pass-pi   { fill: var(--color-ink); }
+  .bar.pass-h7   { fill: var(--color-secondary); }
+  .bar.fail-f4   { fill: var(--color-red); }
+  .target-label { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .target-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .budget-line { stroke: var(--color-ochre); stroke-width: 1.5; stroke-dasharray: 5 3; }
+  .budget-label { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-weight: 700; fill: var(--color-ochre); }
+  .value-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; }
+  .verdict { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-style: italic; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; font-family: 'Inter', sans-serif; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 2.2 — Inference latency across three embedded targets</h1>
+<p class="subtitle">50 M MACs · log-scale latency · sustained throughput, not peak</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">A model that runs in 25 ms on one target runs in 830 ms on another. Memory was never the question here.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const latencyData = [
+  { target: 'RPi Zero 2 W', sub: 'A53 · NEON · int8',      latency_ms: 25,  cls: 'pass-pi', verdict: 'comfortable' },
+  { target: 'STM32H7A3',    sub: 'M7 · 280 MHz · FPU',     latency_ms: 250, cls: 'pass-h7', verdict: 'plausible with int8/SIMD' },
+  { target: 'STM32F411',    sub: 'M4 · 100 MHz · FPU',     latency_ms: 830, cls: 'fail-f4', verdict: 'misses budget by 8×' }
+];
+const budgetMs = 100;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.target}</strong><br>${d.latency_ms} ms · ${d.verdict}`)
+    .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 440;
+  const margin = { top: 40, right: 180, bottom: 56, left: 160 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Inference latency for a 50 M-MAC model across three embedded targets');
+  svg.append('desc').attr('id', 'chart-desc').text('Horizontal bar chart on a log-spaced latency axis comparing RPi Zero 2 W, STM32H7A3, and STM32F411 against a 100 ms budget.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog().domain([10, 1000]).range([0, chartWidth]);
+  const yScaleBand = d3.scaleBand().domain(latencyData.map(d => d.target)).range([0, chartHeight]).padding(0.25);
+
+  // budget line
+  gChart.append('line').attr('class', 'budget-line')
+    .attr('x1', xScaleLog(budgetMs)).attr('x2', xScaleLog(budgetMs))
+    .attr('y1', -10).attr('y2', chartHeight);
+  gChart.append('text').attr('class', 'budget-label')
+    .attr('x', xScaleLog(budgetMs)).attr('y', -18).attr('text-anchor', 'middle')
+    .text('100 ms budget');
+
+  // bars
+  gChart.selectAll('.bar')
+    .data(latencyData)
+    .join('rect')
+      .attr('class', d => `bar ${d.cls}`)
+      .attr('x', 0)
+      .attr('y', d => yScaleBand(d.target))
+      .attr('width', d => xScaleLog(d.latency_ms))
+      .attr('height', yScaleBand.bandwidth())
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.target}: ${d.latency_ms} milliseconds`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  // value labels at bar end
+  gChart.selectAll('.value-label')
+    .data(latencyData)
+    .join('text')
+      .attr('class', 'value-label')
+      .attr('x', d => xScaleLog(d.latency_ms) + 8)
+      .attr('y', d => yScaleBand(d.target) + yScaleBand.bandwidth() / 2 - 2)
+      .attr('fill', d => d.cls === 'fail-f4' ? 'var(--color-red)' : 'var(--color-ink)')
+      .text(d => `~${d.latency_ms} ms`);
+
+  // verdict beneath value
+  gChart.selectAll('.verdict')
+    .data(latencyData)
+    .join('text')
+      .attr('class', 'verdict')
+      .attr('x', d => xScaleLog(d.latency_ms) + 8)
+      .attr('y', d => yScaleBand(d.target) + yScaleBand.bandwidth() / 2 + 14)
+      .attr('fill', 'var(--color-secondary)')
+      .text(d => d.verdict);
+
+  // target labels at left
+  gChart.selectAll('.target-label')
+    .data(latencyData)
+    .join('text')
+      .attr('class', 'target-label')
+      .attr('x', -12).attr('y', d => yScaleBand(d.target) + yScaleBand.bandwidth() / 2 - 2)
+      .attr('text-anchor', 'end').text(d => d.target);
+  gChart.selectAll('.target-sub')
+    .data(latencyData)
+    .join('text')
+      .attr('class', 'target-sub')
+      .attr('x', -12).attr('y', d => yScaleBand(d.target) + yScaleBand.bandwidth() / 2 + 14)
+      .attr('text-anchor', 'end').text(d => d.sub);
+
+  // x axis (log)
+  const xAxis = d3.axisBottom(xScaleLog).tickValues([10, 30, 100, 300, 1000]).tickFormat(d => d + ' ms');
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`).call(xAxis);
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 12.1 — Float32-to-int8 quantization mapping</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-top: 12px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 13px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+  .chart { width: 100%; height: 140px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .tick-mash { fill: var(--color-red); opacity: 0.18; }
+  .map-arrow { stroke: var(--color-ink); stroke-width: 1; fill: none; stroke-dasharray: 3 3; }
+  .map-arrow.mash { stroke: var(--color-red); }
+  .bin { fill: var(--color-ink); }
+  .badge { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-white); }
+  .verdict-good { fill: var(--color-ink); }
+  .verdict-bad { fill: var(--color-red); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 75ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 12.1 — Float32-to-int8 quantization mapping</h1>
+<p class="subtitle">Two cases. The rounding only damages accuracy where small-magnitude values carry information.</p>
+<div id="wrap">
+  <div class="panel-title">Case A — Weight tensor [−1.5, 1.5]</div>
+  <div class="panel-sub">scale ≈ 0.0118 · zero_point = 0 · clean mapping</div>
+  <div id="chartA" class="chart" role="img" aria-label="Number line mapping for symmetric weights"></div>
+  <div class="panel-title">Case B — Activation tensor [0.001, 0.01]</div>
+  <div class="panel-sub">scale ≈ 0.000039 · zero_point = −128 · rounding mash zone</div>
+  <div id="chartB" class="chart" role="img" aria-label="Number line mapping for narrow activation range"></div>
+</div>
+<p class="caption">Quantization damages accuracy where small-magnitude values carry information — not where dynamic range is wide. Hover any bin to see its float interval.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(d.html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawMapping(selector, opts) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 700;
+  const h = container.clientHeight || 140;
+  const m = { top: 20, right: 30, bottom: 30, left: 60 };
+  const innerW = w - m.left - m.right;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g').attr('transform', `translate(${m.left},${m.top})`);
+
+  const floatY = 20;
+  const intY = 80;
+
+  // float axis
+  const fx = d3.scaleLinear().domain(opts.floatDomain).range([0, innerW]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${floatY})`).call(d3.axisTop(fx).ticks(5));
+  g.append('text').attr('x', -10).attr('y', floatY + 4).attr('text-anchor', 'end').style('fill', 'var(--color-secondary)').style('font-family', 'JetBrains Mono').style('font-size', '11px').text('float');
+
+  // int8 axis
+  const ix = d3.scaleLinear().domain([-128, 127]).range([0, innerW]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${intY})`).call(d3.axisBottom(ix).ticks(5));
+  g.append('text').attr('x', -10).attr('y', intY + 4).attr('text-anchor', 'end').style('fill', 'var(--color-secondary)').style('font-family', 'JetBrains Mono').style('font-size', '11px').text('int8');
+
+  // bins on int axis (dense ticks)
+  const bins = d3.range(-128, 128, opts.binStep || 16);
+  g.selectAll('.bin-tick').data(bins).join('line').attr('class', 'bin-tick')
+    .attr('x1', d => ix(d)).attr('x2', d => ix(d))
+    .attr('y1', intY - 4).attr('y2', intY + 4)
+    .attr('stroke', 'var(--color-secondary)').attr('stroke-width', 0.5);
+
+  // mapping arrows
+  opts.maps.forEach(p => {
+    g.append('path')
+      .attr('class', 'map-arrow' + (opts.mash ? ' mash' : ''))
+      .attr('d', `M ${fx(p.f)} ${floatY + 4} L ${ix(p.q)} ${intY - 4}`);
+    g.append('circle').attr('cx', fx(p.f)).attr('cy', floatY + 4).attr('r', 3).attr('fill', opts.mash ? 'var(--color-red)' : 'var(--color-ink)')
+      .style('cursor', 'pointer')
+      .on('mouseover', (e) => showTip(e, { html: `<strong>float ${p.f}</strong><br/>int8 ${p.q}<br/>${p.note || ''}` }))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // mash zone overlay on Case B
+  if (opts.mash) {
+    g.append('rect')
+      .attr('class', 'tick-mash')
+      .attr('x', fx(opts.floatDomain[0]))
+      .attr('y', floatY - 4)
+      .attr('width', fx(opts.floatDomain[0] + (opts.floatDomain[1] - opts.floatDomain[0]) * 0.15) - fx(opts.floatDomain[0]))
+      .attr('height', 14);
+  }
+}
+
+function draw() {
+  drawMapping('#chartA', {
+    floatDomain: [-1.5, 1.5],
+    binStep: 16,
+    maps: [
+      { f: 0.5, q: 42, note: 'error 0.005 · harmless' },
+      { f: -1.0, q: -85 },
+      { f: 1.2, q: 102 }
+    ],
+    mash: false
+  });
+  drawMapping('#chartB', {
+    floatDomain: [0.001, 0.01],
+    binStep: 16,
+    maps: [
+      { f: 0.001, q: -128, note: 'whole tensor maps to a narrow band' },
+      { f: 0.003, q: -77 },
+      { f: 0.005, q: -25 },
+      { f: 0.008, q: 50 }
+    ],
+    mash: true
+  });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chartA'));
+ro.observe(document.getElementById('chartB'));
+</script>
+</body>
+</html>

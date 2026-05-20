@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 1.4 — Four-constraint coupling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 560px; position: relative; }
+  .edge { stroke: var(--color-secondary); stroke-width: 1.25; fill: none; transition: stroke 200ms ease, stroke-width 200ms ease; }
+  .edge.diag { stroke: var(--color-border); stroke-dasharray: 3 3; }
+  .edge.highlight { stroke: var(--color-red); stroke-width: 2; }
+  .vertex { transition: opacity 200ms ease; }
+  .vertex circle { fill: var(--color-ink); stroke: none; }
+  .vertex.secondary circle { fill: var(--color-secondary); }
+  .vertex text.title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; fill: var(--color-white); }
+  .vertex text.detail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-border); }
+  .edge-box { fill: var(--color-white); stroke: var(--color-border); stroke-width: 0.5; }
+  .edge-label { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 11px; fill: var(--color-ink); }
+  .edge-effect { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--color-secondary); font-style: italic; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 70ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 1.4 — Four-constraint coupling</h1>
+<p class="subtitle">Memory, compute, power, real-time. Six edges, six trades. Pull one lever; name what it costs the others.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Hover an edge to highlight the two budgets it links. No edge is free.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const vertexData = [
+  { id: 'memory',    label: 'memory',    detail1: 'SRAM · flash',  detail2: 'what you store', secondary: false },
+  { id: 'compute',   label: 'compute',   detail1: 'MHz · FLOPS',   detail2: 'how fast',       secondary: true  },
+  { id: 'power',     label: 'power',     detail1: 'mW · mAh',      detail2: 'how long',       secondary: false },
+  { id: 'real-time', label: 'real-time', detail1: 'WCET · jitter', detail2: 'by when',        secondary: true  }
+];
+
+const edgeData = [
+  { a: 'memory',    b: 'compute',   label: 'quantize int8',     effect: 'bytes ↓ · matmul ↑ · accuracy ↓', diag: false },
+  { a: 'compute',   b: 'power',     label: 'lower clock',       effect: 'mA ↓ · inference time ↑',         diag: false },
+  { a: 'power',     b: 'real-time', label: 'lower duty cycle',  effect: 'avg current ↓ · response ↑',      diag: false },
+  { a: 'real-time', b: 'memory',    label: 'weights in flash',  effect: 'SRAM ↓ · fetch ↑ · WCET harder',  diag: false },
+  { a: 'memory',    b: 'power',     label: 'prune weights',     effect: 'flash ↓ · retraining cost',        diag: true  },
+  { a: 'compute',   b: 'real-time', label: 'NN accelerator',    effect: 'latency ↓ · cost ↑',              diag: true  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 800;
+  const totalHeight = 560;
+  const margin = { top: 24, right: 24, bottom: 24, left: 24 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Four-constraint coupling diagram');
+  svg.append('desc').attr('id', 'chart-desc').text('A diamond of four budget vertices connected by six labeled trade edges showing how one lever affects the others.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // Vertex positions
+  const cx = chartWidth / 2;
+  const cy = chartHeight / 2;
+  const r = Math.min(chartWidth, chartHeight) * 0.38;
+  const positions = {
+    'memory':    { x: cx, y: cy - r },
+    'compute':   { x: cx + r, y: cy },
+    'power':     { x: cx, y: cy + r },
+    'real-time': { x: cx - r, y: cy }
+  };
+
+  // Draw edges
+  const edges = gChart.selectAll('.edge-line')
+    .data(edgeData)
+    .join('line')
+      .attr('class', d => d.diag ? 'edge diag' : 'edge')
+      .attr('x1', d => positions[d.a].x)
+      .attr('y1', d => positions[d.a].y)
+      .attr('x2', d => positions[d.b].x)
+      .attr('y2', d => positions[d.b].y);
+
+  // Edge labels at midpoints
+  const edgeGroups = gChart.selectAll('.edge-group')
+    .data(edgeData)
+    .join('g')
+      .attr('class', 'edge-group')
+      .attr('transform', d => {
+        const mx = (positions[d.a].x + positions[d.b].x) / 2;
+        const my = (positions[d.a].y + positions[d.b].y) / 2;
+        return `translate(${mx},${my})`;
+      })
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.a} to ${d.b}: ${d.label} — ${d.effect}`)
+      .style('cursor', 'pointer')
+      .on('mouseover', function(event, d) {
+        edges.classed('highlight', e => e === d);
+        showTip(event, `<strong>${d.a} ↔ ${d.b}</strong><br>${d.label}<br><em>${d.effect}</em>`);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', function() {
+        edges.classed('highlight', false);
+        hideTip();
+      });
+
+  edgeGroups.append('rect').attr('class', 'edge-box')
+    .attr('x', -75).attr('y', -22)
+    .attr('width', 150).attr('height', 44);
+  edgeGroups.append('text').attr('class', 'edge-label')
+    .attr('x', 0).attr('y', -6).attr('text-anchor', 'middle')
+    .text(d => d.label);
+  edgeGroups.append('text').attr('class', 'edge-effect')
+    .attr('x', 0).attr('y', 10).attr('text-anchor', 'middle')
+    .text(d => d.effect);
+
+  // Vertices
+  const vertices = gChart.selectAll('.vertex')
+    .data(vertexData)
+    .join('g')
+      .attr('class', d => d.secondary ? 'vertex secondary' : 'vertex')
+      .attr('transform', d => `translate(${positions[d.id].x},${positions[d.id].y})`)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.label}: ${d.detail1}, ${d.detail2}`)
+      .on('mouseover', (event, d) => {
+        edges.classed('highlight', e => e.a === d.id || e.b === d.id);
+        showTip(event, `<strong>${d.label}</strong><br>${d.detail1}<br><em>${d.detail2}</em>`);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', () => { edges.classed('highlight', false); hideTip(); });
+
+  vertices.append('circle').attr('r', 50);
+  vertices.append('text').attr('class', 'title').attr('y', -4).attr('text-anchor', 'middle').text(d => d.label);
+  vertices.append('text').attr('class', 'detail').attr('y', 12).attr('text-anchor', 'middle').text(d => d.detail1);
+  vertices.append('text').attr('class', 'detail').attr('y', 26).attr('text-anchor', 'middle').text(d => d.detail2);
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

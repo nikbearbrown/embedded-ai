@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t04 d04">
+  <title id="t04">Cortex-M55 plus Ethos-U55 — supported ops accelerate, the rest fall back</title>
+  <desc id="d04">Block diagram. A Cortex-M55 host CPU and an Ethos-U55 NPU share an SRAM pool over an AXI bus. Above the bus, an operation router splits incoming model ops into two streams. The left stream (conv2d, depthwise, fully connected, pooling, element-wise) flows to the NPU and is labeled accelerated. The right stream (attention, custom activations, sparse, dynamic control flow) flows back to the CPU and is labeled CPU fallback. A callout below names this routing as the speedup constraint.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .blk { fill: #fdfcfb; stroke: #2a1a0e; stroke-width: 1.25; }
+      .blk-em { fill: #fdfcfb; stroke: #2a1a0e; stroke-width: 2; }
+      .blk-host { fill: #f0ece6; stroke: #2a1a0e; stroke-width: 1.25; }
+      .blk-npu { fill: #e6dcd0; stroke: #2a1a0e; stroke-width: 1.25; }
+      .blk-mem { fill: #d8d0c4; stroke: #2a1a0e; stroke-width: 1.25; }
+    </style>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+    <marker id="ar-fb" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#8a8480"/>
+    </marker>
+  </defs>
+  <rect width="700" height="440" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">Cortex-M55 + Ethos-U55 — the speedup is the routing</text>
+  <text x="32" y="48" class="sm">supported ops accelerate; the rest fall back to the host CPU</text>
+
+  <!-- Op router (top) -->
+  <rect x="280" y="78" width="140" height="50" class="blk-em"/>
+  <text x="350" y="100" text-anchor="middle" class="lb">Operation router</text>
+  <text x="350" y="116" text-anchor="middle" class="sm">Vela compiler, TFLM delegate</text>
+
+  <!-- Incoming model arrow -->
+  <line x1="350" y1="50" x2="350" y2="74" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="350" y="44" text-anchor="middle" class="sm">model graph</text>
+
+  <!-- NPU (left lower) -->
+  <rect x="60" y="190" width="220" height="110" class="blk-npu"/>
+  <text x="170" y="214" text-anchor="middle" class="lb">Ethos-U55 microNPU</text>
+  <text x="170" y="232" text-anchor="middle" class="sm">32 / 64 / 128 / 256 MACs</text>
+  <text x="170" y="252" text-anchor="middle" class="sm">accelerated:</text>
+  <text x="170" y="268" text-anchor="middle" class="sm">conv2d · depthwise · FC</text>
+  <text x="170" y="284" text-anchor="middle" class="sm">pooling · element-wise</text>
+
+  <!-- Host CPU (right lower) -->
+  <rect x="420" y="190" width="220" height="110" class="blk-host"/>
+  <text x="530" y="214" text-anchor="middle" class="lb">Cortex-M55 host</text>
+  <text x="530" y="232" text-anchor="middle" class="sm">scalar + Helium SIMD</text>
+  <text x="530" y="252" text-anchor="middle" class="sm">fallback:</text>
+  <text x="530" y="268" text-anchor="middle" class="sm">attention · custom activations</text>
+  <text x="530" y="284" text-anchor="middle" class="sm">sparse · dynamic control flow</text>
+
+  <!-- Router → NPU (accelerated) -->
+  <path d="M 290 128 L 180 186" fill="none" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="200" y="160" text-anchor="middle" class="lb">accelerated</text>
+  <!-- Router → CPU (fallback) -->
+  <path d="M 410 128 L 520 186" fill="none" stroke="#8a8480" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar-fb)"/>
+  <text x="500" y="160" text-anchor="middle" class="lb">fallback</text>
+
+  <!-- AXI bus -->
+  <rect x="60" y="320" width="580" height="22" class="blk"/>
+  <text x="350" y="335" text-anchor="middle" class="sm">AXI bus</text>
+
+  <!-- Shared SRAM pool -->
+  <rect x="240" y="358" width="220" height="42" class="blk-mem"/>
+  <text x="350" y="378" text-anchor="middle" class="lb">Shared SRAM pool</text>
+  <text x="350" y="392" text-anchor="middle" class="sm">128 KB – 2 MB · weights, activations</text>
+
+  <!-- Connections to bus and memory -->
+  <line x1="170" y1="300" x2="170" y2="320" stroke="#2a1a0e" stroke-width="1"/>
+  <line x1="530" y1="300" x2="530" y2="320" stroke="#2a1a0e" stroke-width="1"/>
+  <line x1="350" y1="342" x2="350" y2="358" stroke="#2a1a0e" stroke-width="1"/>
+
+  <!-- Speedup callout (right) -->
+  <text x="635" y="118" text-anchor="end" class="lb">80% accelerated → only 3–5×</text>
+  <text x="635" y="132" text-anchor="end" class="sm">CPU fallback dominates unaccelerated %</text>
+
+  <!-- Caption -->
+  <text x="350" y="425" text-anchor="middle" class="cap">The mapping of model ops to accelerator decides realised speedup. Peak throughput is the ceiling, not the floor.</text>
+</svg>

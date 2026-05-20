@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 3.3 — Fully connected vs convolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 13px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 360px; }
+  .controls { display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--color-secondary); margin-top: 12px; }
+  .controls input { flex: 1; }
+  .controls .val { font-family: 'JetBrains Mono', monospace; color: var(--color-ink); }
+  .pixel { fill: color-mix(in srgb, var(--color-ink) 6%, var(--color-white)); stroke: var(--color-border); }
+  .filter-tile { fill: none; stroke: var(--color-ink); stroke-width: 1.4; }
+  .filter-tile.ghost { stroke: var(--color-secondary); stroke-dasharray: 3 3; stroke-width: 1; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); }
+  .dense-line { stroke: var(--color-secondary); stroke-width: 0.4; opacity: 0.5; }
+  .node { fill: var(--color-ink); }
+  .cost-callout { fill: var(--color-ink); }
+  .cost-text { fill: var(--color-white); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; }
+  .cost-sub  { fill: var(--color-white); font-family: 'Inter', sans-serif; font-size: 11px; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 3.3 — Fully connected vs convolution</h1>
+<p class="subtitle">Same image, two encodings. Weight sharing collapses the parameter count.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Fully connected</div>
+    <div class="panel-sub">Flatten · dense · one weight per pixel-output pair</div>
+    <div id="chartFC" class="chart" role="img"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Convolution</div>
+    <div class="panel-sub">2D filter · slide · share weights across positions</div>
+    <div id="chartConv" class="chart" role="img"></div>
+    <div class="controls">
+      <label for="kernelSize">kernel</label>
+      <input id="kernelSize" type="range" min="1" max="5" step="1" value="3">
+      <span class="val" id="kernelVal">3</span>
+    </div>
+  </div>
+</div>
+<p class="caption">Weight sharing preserves 2D structure and collapses parameter count.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip()      { tooltip.transition().duration(100).style('opacity', 0); }
+
+const fmt = d3.format(',');
+
+function drawFC() {
+  const sel = '#chartFC';
+  const container = document.querySelector(sel);
+  d3.select(sel).selectAll('*').remove();
+  const w = container.clientWidth || 400;
+  const h = container.clientHeight || 360;
+  const svg = d3.select(sel).append('svg').attr('width', w).attr('height', h)
+    .attr('role','img').attr('aria-labelledby','t-fc d-fc');
+  svg.append('title').attr('id','t-fc').text('Fully connected layer cost');
+  svg.append('desc').attr('id','d-fc').text('Flattened pixel vector connected densely to 128 output neurons.');
+
+  // input column
+  const inX = 60, inY = 40, inH = h - 110;
+  svg.append('rect').attr('class','pixel').attr('x', inX-10).attr('y', inY).attr('width', 20).attr('height', inH);
+  svg.append('text').attr('x', inX).attr('y', inY-8).attr('text-anchor','middle')
+    .attr('fill','var(--color-secondary)').attr('font-size',11).text('150,528 inputs');
+  for (let i=0;i<12;i++) {
+    svg.append('circle').attr('class','node').attr('cx', inX).attr('cy', inY+10+i*((inH-20)/11)).attr('r', 2);
+  }
+
+  // output column
+  const outX = w-80, outY = h/2 - 60, outH = 100;
+  svg.append('rect').attr('class','pixel').attr('x', outX-10).attr('y', outY).attr('width', 20).attr('height', outH);
+  svg.append('text').attr('x', outX).attr('y', outY-8).attr('text-anchor','middle')
+    .attr('fill','var(--color-secondary)').attr('font-size',11).text('128');
+  for (let i=0;i<4;i++) {
+    svg.append('circle').attr('class','node').attr('cx', outX).attr('cy', outY+15+i*22).attr('r', 2);
+  }
+
+  // dense connections
+  for (let i=0;i<12;i++) {
+    for (let j=0;j<4;j++) {
+      svg.append('line').attr('class','dense-line')
+        .attr('x1', inX+10).attr('y1', inY+10+i*((inH-20)/11))
+        .attr('x2', outX-10).attr('y2', outY+15+j*22);
+    }
+  }
+
+  // cost callout
+  svg.append('rect').attr('class','cost-callout').attr('x', 30).attr('y', h-56).attr('width', w-60).attr('height', 40);
+  svg.append('text').attr('class','cost-text').attr('x', w/2).attr('y', h-36).attr('text-anchor','middle').text('19,267,584 weights');
+  svg.append('text').attr('class','cost-sub').attr('x', w/2).attr('y', h-22).attr('text-anchor','middle').text('≈ 76 MB float32 — dead on arrival');
+}
+
+let kernelSize = 3;
+
+function drawConv() {
+  const sel = '#chartConv';
+  const container = document.querySelector(sel);
+  d3.select(sel).selectAll('*').remove();
+  const w = container.clientWidth || 400;
+  const h = container.clientHeight || 360;
+  const svg = d3.select(sel).append('svg').attr('width', w).attr('height', h)
+    .attr('role','img').attr('aria-labelledby','t-conv d-conv');
+  svg.append('title').attr('id','t-conv').text('Convolution with weight sharing');
+  svg.append('desc').attr('id','d-conv').text('A small filter slides across an image grid; the same weights are reused at every spatial position.');
+
+  // grid
+  const cells = 8, cell = Math.min(28, (w - 120) / cells);
+  const gx = 30, gy = 40;
+  for (let r=0;r<cells;r++) {
+    for (let c=0;c<cells;c++) {
+      svg.append('rect').attr('class','pixel')
+        .attr('x', gx+c*cell).attr('y', gy+r*cell)
+        .attr('width', cell).attr('height', cell);
+    }
+  }
+  // filter tiles at four positions
+  const k = kernelSize;
+  const positions = [ [0,0], [2,1], [4,2], [2,3] ];
+  positions.forEach((p, i) => {
+    svg.append('rect').attr('class', i===0 ? 'filter-tile' : 'filter-tile ghost')
+      .attr('x', gx+p[0]*cell).attr('y', gy+p[1]*cell)
+      .attr('width', k*cell).attr('height', k*cell)
+      .attr('tabindex', 0)
+      .attr('aria-label', `${k}x${k} filter at position ${p[0]},${p[1]}`)
+      .on('mouseover', (e) => showTip(e, `<strong>${k}×${k} filter</strong><br>same ${k*k} weights, ${i===0 ? 'anchor' : 'subsequent'} position`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // weight palette below
+  const wx = 30, wy = gy + cells*cell + 24;
+  svg.append('text').attr('x', wx).attr('y', wy-6).attr('fill','var(--color-ink)').attr('font-size',12)
+    .attr('font-family',"'Inter', sans-serif").attr('font-weight',600).text(`${k*k} shared weights`);
+  for (let r=0;r<k;r++) {
+    for (let c=0;c<k;c++) {
+      svg.append('rect').attr('fill','var(--color-ink)')
+        .attr('x', wx + c*14).attr('y', wy + r*14)
+        .attr('width', 12).attr('height', 12);
+    }
+  }
+
+  // cost callout
+  svg.append('rect').attr('class','cost-callout').attr('x', 30).attr('y', h-56).attr('width', w-60).attr('height', 40);
+  svg.append('text').attr('class','cost-text').attr('x', w/2).attr('y', h-36).attr('text-anchor','middle').text(`${k*k} weights per filter`);
+  svg.append('text').attr('class','cost-sub').attr('x', w/2).attr('y', h-22).attr('text-anchor','middle').text('× number of filters — orders of magnitude cheaper');
+}
+
+document.getElementById('kernelSize').addEventListener('input', (e) => {
+  kernelSize = +e.target.value;
+  document.getElementById('kernelVal').textContent = kernelSize;
+  drawConv();
+});
+
+function drawAll() { drawFC(); drawConv(); }
+drawAll();
+const ro = new ResizeObserver(() => drawAll());
+ro.observe(document.getElementById('chartFC'));
+ro.observe(document.getElementById('chartConv'));
+</script>
+</body>
+</html>

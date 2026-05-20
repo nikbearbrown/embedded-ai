@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 14.6 — Cross-case comparative budget bars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 520px; }
+  .case-title { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: var(--color-ink); }
+  .case-sub   { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .row-label  { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .bar-loose  { fill: var(--color-border); }
+  .bar-mid    { fill: var(--color-secondary); }
+  .bar-tight  { fill: var(--color-ink); }
+  .bar-binding{ fill: var(--color-red); }
+  .value-label{ font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-white); font-weight: 700; }
+  .sub-label  { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .divider    { stroke: var(--color-border); stroke-width: 0.75; }
+  .binding-box{ fill: none; stroke: var(--color-ink); stroke-width: 1.5; }
+  .binding-text{ font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 14.6 — Cross-case comparative budgets</h1>
+<p class="subtitle">Power, memory, latency, and BOM budgets across three case studies. The tightest axis in each column is the binding constraint.</p>
+<div id="chart" role="img" aria-labelledby="t-cmp d-cmp"></div>
+<p class="caption">Same framework, three different binding constraints — three completely different deployments fall out. The on-device-vs-cloud decision is not a preference; it is what the binding constraint will permit.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const cases = [
+  { id: 'industrial',  title: 'Industrial vibration', sub: 'CNC bearing pre-failure', binding: 'power' },
+  { id: 'medical',     title: 'Medical wearable',    sub: 'single-lead ECG',         binding: 'accuracy + regulation' },
+  { id: 'agricultural',title: 'Agricultural sensor',  sub: 'grape-leaf disease',      binding: 'bandwidth' }
+];
+
+const rows = [
+  { key: 'power', label: 'Power', cells: [
+    { val: 0.28, unit: 'mW avg', sub: '18 mo on coin cell',    tight: 'tight',  binding: true  },
+    { val: 11,   unit: 'mW avg', sub: '7 days, 500 mAh',       tight: 'mid',    binding: false },
+    { val: 500,  unit: 'mW',     sub: 'solar-buffered',         tight: 'loose',  binding: false }
+  ] },
+  { key: 'memory', label: 'Memory', cells: [
+    { val: '200 KB',    unit: 'flash',   sub: 'random forest model',     tight: 'mid',   binding: false },
+    { val: '980 KB',    unit: '/ 2 MB',  sub: 'int8 1D CNN, tight in flash', tight: 'tight', binding: true  },
+    { val: '4.6 MB',    unit: '',        sub: 'EfficientNet-Lite0',         tight: 'loose', binding: false }
+  ] },
+  { key: 'latency', label: 'Latency', cells: [
+    { val: '10 s',          unit: 'soft',   sub: '2.5 s schedule', tight: 'mid',   binding: false },
+    { val: '30 s',          unit: 'alert',  sub: '1.2% duty cycle', tight: 'mid',   binding: false },
+    { val: 'event-driven',  unit: '',       sub: '4× per day',     tight: 'loose', binding: false }
+  ] },
+  { key: 'bom', label: 'BOM cost', cells: [
+    { val: '$40',  unit: 'ceiling',     sub: '200 sensors deployed', tight: 'tight', binding: true  },
+    { val: '$200', unit: '',            sub: 'soft ceiling',          tight: 'loose', binding: false },
+    { val: '$150', unit: '',            sub: 'per-vineyard cap',      tight: 'loose', binding: false }
+  ] }
+];
+
+const tightWidth = { tight: 130, mid: 80, loose: 40 };
+const tightClass = { tight: 'bar-tight', mid: 'bar-mid', loose: 'bar-loose' };
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.caseTitle} — ${d.rowLabel}</strong><br>${d.val} ${d.unit}<br>${d.sub}${d.binding ? '<br><em>binding constraint</em>' : ''}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 520;
+  const leftLabelW = 100;
+  const rightPad = 24;
+  const availW = totalWidth - leftLabelW - rightPad;
+  const colW = availW / 3;
+  const headerH = 56;
+  const rowH = 76;
+  const bindingH = 56;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-cmp d-cmp');
+  svg.append('title').attr('id', 't-cmp').text('Cross-case comparative budget bars');
+  svg.append('desc').attr('id', 'd-cmp').text('Grouped bars across power, memory, latency, and BOM, with the binding constraint per case marked.');
+
+  // Column headers
+  cases.forEach((c, i) => {
+    const cx = leftLabelW + colW * (i + 0.5);
+    svg.append('text').attr('class', 'case-title').attr('x', cx).attr('y', 24).attr('text-anchor', 'middle').text(c.title);
+    svg.append('text').attr('class', 'case-sub').attr('x', cx).attr('y', 42).attr('text-anchor', 'middle').text(c.sub);
+  });
+
+  // Column dividers
+  [1, 2].forEach(i => {
+    svg.append('line').attr('class', 'divider')
+      .attr('x1', leftLabelW + colW * i).attr('x2', leftLabelW + colW * i)
+      .attr('y1', 56).attr('y2', headerH + rowH * rows.length + bindingH);
+  });
+
+  // Rows
+  rows.forEach((row, r) => {
+    const rowTop = headerH + rowH * r;
+    svg.append('text').attr('class', 'row-label')
+      .attr('x', 24).attr('y', rowTop + rowH / 2 + 4).text(row.label);
+
+    row.cells.forEach((cell, i) => {
+      const cx = leftLabelW + colW * (i + 0.5);
+      const w = tightWidth[cell.tight];
+      const barX = cx - w / 2;
+      const barY = rowTop + 14;
+      const barH = 26;
+      const cls = cell.binding ? 'bar-tight' : tightClass[cell.tight];
+      const datum = {
+        caseTitle: cases[i].title, rowLabel: row.label,
+        val: cell.val, unit: cell.unit, sub: cell.sub, binding: cell.binding
+      };
+
+      svg.append('rect').attr('class', cls)
+        .attr('x', barX).attr('y', barY).attr('width', w).attr('height', barH)
+        .attr('stroke', cell.binding ? 'var(--color-ink)' : 'none')
+        .attr('stroke-width', cell.binding ? 2 : 0)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${cases[i].title} ${row.label}: ${cell.val} ${cell.unit} — ${cell.sub}`)
+        .on('mouseover', (event) => showTip(event, datum))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+
+      const valTextClass = (cell.tight === 'loose') ? 'sub-label' : 'value-label';
+      const valX = cell.tight === 'loose' ? barX + w + 8 : cx;
+      const valAnchor = cell.tight === 'loose' ? 'start' : 'middle';
+      svg.append('text').attr('class', valTextClass)
+        .attr('x', valX).attr('y', barY + 17)
+        .attr('text-anchor', valAnchor).text(`${cell.val} ${cell.unit}`.trim());
+      svg.append('text').attr('class', 'sub-label')
+        .attr('x', cx).attr('y', barY + barH + 16)
+        .attr('text-anchor', 'middle').text(cell.sub);
+    });
+  });
+
+  // Binding constraint row
+  const bRowY = headerH + rowH * rows.length + 8;
+  svg.append('text').attr('class', 'row-label').attr('x', 24).attr('y', bRowY + 26).text('Binding');
+  cases.forEach((c, i) => {
+    const cx = leftLabelW + colW * (i + 0.5);
+    svg.append('rect').attr('class', 'binding-box')
+      .attr('x', cx - 90).attr('y', bRowY).attr('width', 180).attr('height', 36);
+    svg.append('text').attr('class', 'binding-text')
+      .attr('x', cx).attr('y', bRowY + 23).attr('text-anchor', 'middle').text(c.binding);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

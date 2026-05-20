@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t10f1 d10f1">
+  <title id="t10f1">Real-time taxonomy — hard, firm, and soft, by deadline tolerance and consequence of miss</title>
+  <desc id="d10f1">Three columns compare hard, firm, and soft real-time across deadline tolerance, example application, and consequence of a missed deadline. Hard tolerates no misses with catastrophic consequence; firm tolerates rare misses but the late output is useless; soft prefers deadlines but degrades gracefully.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-weight: bold; fill: #2a1a0e; }
+      .eb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9px; letter-spacing: 0.6px; fill: #4a4540; }
+    </style>
+    <marker id="ar1f1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="460" fill="#fdfcfb"/>
+
+  <text x="32" y="30" class="ti">Real-time taxonomy — three classes, three deadlines, three different consequences of a miss</text>
+  <text x="32" y="48" class="sm">A neural network can live happily inside one of these and break the others. Pick the class before you pick the model.</text>
+
+  <!-- Column axis label -->
+  <line x1="32" y1="68" x2="668" y2="68" stroke="#8a8480" stroke-width="0.75"/>
+  <text x="44"  y="86" class="eb">CLASS</text>
+  <text x="44"  y="170" class="eb">DEADLINE TOLERANCE</text>
+  <text x="44"  y="252" class="eb">EXAMPLE APPLICATION</text>
+  <text x="44"  y="334" class="eb">CONSEQUENCE OF MISS</text>
+  <line x1="180" y1="68" x2="180" y2="400" stroke="#c8c4c0" stroke-width="0.75"/>
+
+  <!-- Hard column -->
+  <rect x="196" y="80" width="148" height="32" fill="#2a1a0e"/>
+  <text x="270" y="100" text-anchor="middle" class="nm" fill="#fdfcfb">HARD</text>
+  <text x="270" y="110" text-anchor="middle" class="sm" fill="#c8c4c0">no misses allowed</text>
+
+  <rect x="196" y="124" width="148" height="60" fill="#fdfcfb" stroke="#8a8480"/>
+  <text x="270" y="144" text-anchor="middle" class="lb">zero tolerance</text>
+  <text x="270" y="160" text-anchor="middle" class="sm">a missed deadline is</text>
+  <text x="270" y="174" text-anchor="middle" class="sm">a system failure</text>
+
+  <rect x="196" y="196" width="148" height="60" fill="#fdfcfb" stroke="#8a8480"/>
+  <text x="270" y="216" text-anchor="middle" class="lb">airbag controller</text>
+  <text x="270" y="232" text-anchor="middle" class="sm">deploy within 10–20 ms</text>
+  <text x="270" y="246" text-anchor="middle" class="sm">of crash detection</text>
+
+  <rect x="196" y="268" width="148" height="60" fill="#f5f2ee" stroke="#2a1a0e"/>
+  <text x="270" y="288" text-anchor="middle" class="lb">catastrophic</text>
+  <text x="270" y="304" text-anchor="middle" class="sm">physical harm,</text>
+  <text x="270" y="318" text-anchor="middle" class="sm">certification failure</text>
+
+  <!-- Firm column -->
+  <rect x="360" y="80" width="148" height="32" fill="#4a4540"/>
+  <text x="434" y="100" text-anchor="middle" class="nm" fill="#fdfcfb">FIRM</text>
+  <text x="434" y="110" text-anchor="middle" class="sm" fill="#c8c4c0">rare misses, useless if late</text>
+
+  <rect x="360" y="124" width="148" height="60" fill="#fdfcfb" stroke="#8a8480"/>
+  <text x="434" y="144" text-anchor="middle" class="lb">&lt; 0.1% miss budget</text>
+  <text x="434" y="160" text-anchor="middle" class="sm">correct but late =</text>
+  <text x="434" y="174" text-anchor="middle" class="sm">discard the result</text>
+
+  <rect x="360" y="196" width="148" height="60" fill="#fdfcfb" stroke="#8a8480"/>
+  <text x="434" y="216" text-anchor="middle" class="lb">radar sweep processor</text>
+  <text x="434" y="232" text-anchor="middle" class="sm">output stale after next</text>
+  <text x="434" y="246" text-anchor="middle" class="sm">sweep arrives</text>
+
+  <rect x="360" y="268" width="148" height="60" fill="#f5f2ee" stroke="#4a4540"/>
+  <text x="434" y="288" text-anchor="middle" class="lb">useless output</text>
+  <text x="434" y="304" text-anchor="middle" class="sm">no harm, but the</text>
+  <text x="434" y="318" text-anchor="middle" class="sm">computation was wasted</text>
+
+  <!-- Soft column -->
+  <rect x="524" y="80" width="148" height="32" fill="#8a8480"/>
+  <text x="598" y="100" text-anchor="middle" class="nm" fill="#fdfcfb">SOFT</text>
+  <text x="598" y="110" text-anchor="middle" class="sm" fill="#fdfcfb">preferred, graceful slip</text>
+
+  <rect x="524" y="124" width="148" height="60" fill="#fdfcfb" stroke="#8a8480"/>
+  <text x="598" y="144" text-anchor="middle" class="lb">missed = still useful</text>
+  <text x="598" y="160" text-anchor="middle" class="sm">UX degrades, system</text>
+  <text x="598" y="174" text-anchor="middle" class="sm">continues running</text>
+
+  <rect x="524" y="196" width="148" height="60" fill="#fdfcfb" stroke="#8a8480"/>
+  <text x="598" y="216" text-anchor="middle" class="lb">gesture thermostat</text>
+  <text x="598" y="232" text-anchor="middle" class="sm">200 ms inference where</text>
+  <text x="598" y="246" text-anchor="middle" class="sm">100 ms was the budget</text>
+
+  <rect x="524" y="268" width="148" height="60" fill="#f5f2ee" stroke="#8a8480"/>
+  <text x="598" y="288" text-anchor="middle" class="lb">sluggish, not deadly</text>
+  <text x="598" y="304" text-anchor="middle" class="sm">user notices,</text>
+  <text x="598" y="318" text-anchor="middle" class="sm">nobody dies</text>
+
+  <!-- Strictness arrow on the left -->
+  <path d="M 14 92 L 14 320" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar1f1)"/>
+  <text x="10" y="208" text-anchor="middle" transform="rotate(-90 10 208)" class="sm">↑ strictest constraints   loosest ↓</text>
+
+  <!-- Footer band: where AI lives -->
+  <line x1="32" y1="356" x2="668" y2="356" stroke="#c8c4c0" stroke-width="0.75"/>
+  <text x="44" y="376" class="eb">WHERE NON-DETERMINISTIC AI CAN LIVE</text>
+  <text x="270" y="396" text-anchor="middle" class="sm">advisory only — never on the critical path</text>
+  <text x="434" y="396" text-anchor="middle" class="sm">with rejection + confidence gating</text>
+  <text x="598" y="396" text-anchor="middle" class="sm">native — variability is acceptable</text>
+
+  <text x="350" y="438" text-anchor="middle" class="cap">The Uber Tempe case was a hard real-time problem solved with a soft real-time architecture. The deadline class is the design.</text>
+</svg>

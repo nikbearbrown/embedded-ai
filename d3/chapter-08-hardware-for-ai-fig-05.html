@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 8.5 — Same YOLO model on three platforms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FDFCFB;
+    --color-ink:       #2A1A0E;
+    --color-red:       #C8102E;
+    --color-secondary: #4A4540;
+    --color-border:    #C8C4C0;
+    --color-ochre:     #C8860E;
+    --color-mid:       #8A8480;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #14110D;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2A24;
+      --color-ochre:     #D49A30;
+      --color-mid:       #6E665F;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .panel { border: 1px solid var(--color-border); padding: 16px; }
+  .panel.sweet { border: 2px solid var(--color-ink); }
+  .panel-title { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; font-weight: 600; }
+  .panel-sub { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--color-secondary); margin-bottom: 16px; }
+  .chart { width: 100%; height: 220px; }
+  .row-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .row-value { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .row-track { stroke: var(--color-border); stroke-width: 0.5; }
+  .bar-cost { fill: var(--color-border); }
+  .bar-power { fill: var(--color-mid); }
+  .bar-latency { fill: var(--color-ink); }
+  .verdict { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; color: var(--color-secondary); text-align: center; margin-top: 16px; }
+  .verdict.sweet { font-weight: 700; color: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 8.5 — Same YOLO, three platforms</h1>
+<p class="subtitle">Cost, power, and latency per frame on a CPU-only Pi, a Coral Edge TPU, and a Zynq FPGA.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Raspberry Pi Zero 2 W</div>
+    <div class="panel-sub">CPU-only · quad A53 1 GHz</div>
+    <div id="chart-pi" class="chart" role="img" aria-labelledby="t-pi d-pi"></div>
+    <div class="verdict">fails real-time · cheapest, slowest</div>
+  </div>
+  <div class="panel sweet">
+    <div class="panel-title">Coral Edge TPU + A53</div>
+    <div class="panel-sub">NPU · dedicated inference engine</div>
+    <div id="chart-coral" class="chart" role="img" aria-labelledby="t-coral d-coral"></div>
+    <div class="verdict sweet">commercial sweet spot · 100× CPU at 4× cost</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Xilinx Zynq-7020 FPGA</div>
+    <div class="panel-sub">custom YOLO accelerator in fabric</div>
+    <div id="chart-zynq" class="chart" role="img" aria-labelledby="t-zynq d-zynq"></div>
+    <div class="verdict">1.7× faster than TPU · 2.5× cost · 6 months HDL</div>
+  </div>
+</div>
+<p class="caption">The FPGA wins on latency. The Coral TPU wins on every other dimension. The constraint shape chooses the answer.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const platforms = [
+  { sel: '#chart-pi',    cost: 15,  power: 1.5, latency: 2500, name: 'Pi Zero 2 W' },
+  { sel: '#chart-coral', cost: 60,  power: 2,   latency: 25,   name: 'Coral Edge TPU' },
+  { sel: '#chart-zynq',  cost: 150, power: 3,   latency: 15,   name: 'Zynq-7020' }
+];
+const MAX_COST = 200, MAX_POWER = 3.5;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, txt) {
+  tooltip.html(txt)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawPanel(p) {
+  const container = document.querySelector(p.sel);
+  d3.select(p.sel).selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 240;
+  const totalHeight = container.clientHeight || 220;
+  const margin = { top: 12, right: 12, bottom: 12, left: 56 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(p.sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img');
+  svg.append('title').text(`${p.name} — cost, power, latency`);
+  svg.append('desc').text(`${p.name}: cost $${p.cost}, power ${p.power} W, latency ${p.latency} ms.`);
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const rows = [
+    { label: 'cost',    value: p.cost,    display: `$${p.cost}`,        max: MAX_COST, format: 'lin', cls: 'bar-cost' },
+    { label: 'power',   value: p.power,   display: `${p.power} W`,      max: MAX_POWER, format: 'lin', cls: 'bar-power' },
+    { label: 'latency', value: p.latency, display: `${p.latency} ms`,   max: 10000, format: 'log', cls: 'bar-latency' }
+  ];
+
+  const yScale = d3.scaleBand().domain(rows.map(r => r.label)).range([0, chartHeight]).padding(0.5);
+
+  rows.forEach(r => {
+    const y = yScale(r.label);
+    let w;
+    if (r.format === 'log') {
+      const logScale = d3.scaleLog().domain([10, 10000]).range([0, chartWidth]);
+      w = logScale(Math.max(10, r.value));
+    } else {
+      w = (r.value / r.max) * chartWidth;
+    }
+    gChart.append('line').attr('class', 'row-track')
+      .attr('x1', 0).attr('x2', chartWidth).attr('y1', y + yScale.bandwidth()/2).attr('y2', y + yScale.bandwidth()/2);
+    gChart.append('rect').attr('class', r.cls)
+      .attr('x', 0).attr('y', y).attr('width', w).attr('height', yScale.bandwidth())
+      .attr('tabindex', 0)
+      .attr('aria-label', `${p.name} ${r.label}: ${r.display}`)
+      .on('mouseover', (e) => showTip(e, `<strong>${p.name}</strong><br/>${r.label}: ${r.display}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+    gChart.append('text').attr('class', 'row-label')
+      .attr('x', -8).attr('y', y + yScale.bandwidth()/2 + 4).attr('text-anchor', 'end').text(r.label);
+    gChart.append('text').attr('class', 'row-value')
+      .attr('x', chartWidth).attr('y', y - 4).attr('text-anchor', 'end').text(r.display);
+  });
+}
+
+function draw() { platforms.forEach(drawPanel); }
+draw();
+const ro = new ResizeObserver(() => draw());
+platforms.forEach(p => ro.observe(document.querySelector(p.sel)));
+</script>
+</body>
+</html>

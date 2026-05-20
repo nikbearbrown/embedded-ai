@@ -32,11 +32,17 @@ So the metrics that actually predict embedded deployment success are different f
 
 These are five empirical questions. None of them can be answered from a paper or a datasheet. You profile each candidate, on your hardware, with your data, before you choose.
 
+![Hub-and-spoke infographic with a central candidate-model node and five metric cards: latency on target hardware, int8 memory footprint, energy per inference, accuracy on your dataset, and accuracy under quantization. Each card names how to measure and the failure mode if skipped.](../images/chapter-11-model-selection-fig-01.png)
+*Figure 11.1 — Five deployment-aware metrics. None of them can be answered from a paper or a datasheet.*
+
 ## What makes an efficient architecture efficient
 
 Once you accept that efficiency matters, you start asking what architectural choices buy efficiency. The answer is not "smaller everything." The answer is that some operations cost a lot less than others for almost the same expressive power, and that the architectures designed for embedded targets are the ones that figured out which operations to substitute.
 
 The clearest example is depthwise separable convolution, the trick at the heart of MobileNet. A standard 3×3 convolution with C input channels and C output channels does 9C² multiplications per output pixel — every output channel is a weighted combination of every input channel, filtered spatially. Depthwise separable convolution splits this into two cheaper operations. First a depthwise step that filters each channel independently with a 3×3 kernel: 9C multiplications. Then a pointwise step, a 1×1 convolution that mixes channels: C² multiplications. Total cost is 9C + C², which for any reasonable channel count is dominated by C² — about a factor of nine cheaper than the standard convolution it replaced.
+
+![Side-by-side block diagram. The left panel shows a standard 3×3 convolution as one dense block costing 9C² multiplications per output pixel. The right panel shows depthwise-separable convolution as a per-channel 3×3 depthwise filter at 9C mults followed by a 1×1 pointwise mix at C² mults, with cost equations and the ~9× ratio annotated at C=64.](../images/chapter-11-model-selection-fig-02.png)
+*Figure 11.2 — Standard vs depthwise-separable convolution. Substitute a cheap op for an expensive one; lose a little expressiveness; save roughly nine times the cost at C = 64.*
 
 You lose a little expressiveness. Channels can no longer mix during the spatial filter; they only mix afterwards. For most vision tasks the loss is small, and MobileNetV2 patches it further with inverted residual blocks and linear bottlenecks. MobileNetV3 ran neural architecture search on top to tune layer widths and activation choices for mobile CPUs. The whole MobileNet family is parameterized: a width multiplier (0.25, 0.35, 0.5, 0.75, 1.0) shrinks every layer's channel count, and a resolution multiplier shrinks the input. You can dial a MobileNet down to fit almost any memory or latency budget at the cost of accuracy.
 
@@ -50,6 +56,9 @@ And then, often forgotten, the non-neural option. Decision trees and random fore
 
 The lesson generalizes. Each of these architectures earned its efficiency by substituting a cheap operation for an expensive one, or by exploiting structure in a way the generic dense network did not. There is no such thing as "small without trade-off." There is only "small in the dimensions that mattered for the design."
 
+![Grouped horizontal bar chart comparing MobileNetV2-1.0, MobileNetV3-Small, EfficientNet-Lite0, SqueezeNet, Tiny-YOLOv3, and a random forest baseline. Each row stacks three bars normalized to 0–1: flash (params), compute (GFLOPs), and accuracy. No architecture wins on every axis.](../images/chapter-11-model-selection-fig-03.png)
+*Figure 11.3 — Architecture family comparison. "Small" lives on a different axis for each candidate.*
+
 ## The Pareto frontier and how to read it
 
 For a fixed task, models trace out a curve in accuracy-versus-cost space. Some models are dominated — there's another model that's both more accurate *and* faster, or smaller, or lower-power. Those models are not contenders. The remaining models, where you cannot improve one axis without sacrificing another, form the Pareto frontier. Selection is the act of picking a point on that frontier.
@@ -57,6 +66,9 @@ For a fixed task, models trace out a curve in accuracy-versus-cost space. Some m
 Suppose you profile six face-detection models on your custom dataset and your target hardware. TinyFace runs in 45 ms at 84% accuracy with 120 KB. MobileNetV2-0.25 runs in 80 ms at 88% with 250 KB. MobileNetV3-Small runs in 95 ms at 90% with 380 KB. MobileNetV2-0.35 runs in 110 ms at 91% with 420 KB. EfficientNet-Lite0 runs in 180 ms at 94% with 1.8 MB. ResNet18 runs in 450 ms at 96% with 11 MB.
 
 Plot accuracy against latency and the Pareto frontier emerges. MobileNetV2-0.25 is dominated — MobileNetV3-Small is faster *or* more accurate at almost the same cost. ResNet18 is dominated by EfficientNet-Lite0, which gets to 94% accuracy in less than half the latency. The frontier is TinyFace, MobileNetV3-Small, MobileNetV2-0.35, EfficientNet-Lite0. Which point you choose depends on which constraint is binding. If you must fit in 50 ms, only TinyFace works. If you need 90% accuracy in 100 ms, MobileNetV3-Small. If you need 94% accuracy and you have 200 ms, EfficientNet-Lite0.
+
+![Scatter plot of latency (ms) on the x-axis and accuracy (%) on the y-axis with six face-detection candidates. Bubble size encodes memory. The Pareto frontier connects TinyFace, MobileNetV3-Small, MobileNetV2-0.35, and EfficientNet-Lite0. MobileNetV2-0.25 and ResNet18 are marked dominated. Vertical dashed budget lines sit at 50, 100, and 200 milliseconds.](../images/chapter-11-model-selection-fig-04.png)
+*Figure 11.4 — Pareto frontier for six face-detection candidates. Each budget picks a different winner; the frontier names the choices that aren't dominated.*
 
 The frontier doesn't tell you which model to pick. It tells you which choices are even available, and which models you can stop considering.
 
@@ -78,6 +90,9 @@ Model D is a larger 1D CNN: six convolutional layers, three fully connected, 180
 
 Model E is a two-layer LSTM, 32 units per layer, 60,000 parameters. 120 ms latency, 150 KB of memory, 1.8 mJ per inference. 97.5% true positives, 0.5% false positives. Meets every constraint. But it's five times slower than Model C and consumes nearly five times the energy for half a percentage point of accuracy.
 
+![Constraint matrix of five fall-detector candidates (A threshold, B random forest, C small 1D CNN, D large 1D CNN, E LSTM) against four columns: latency vs 500 ms, SRAM vs 256 KB, energy vs 2 mA average draw, and TPR/FPR vs the 95% / 1% thresholds. Cells are marked FIT, TIGHT, or FAILS. Model C is the only fully FIT row and is outlined as the chosen candidate.](../images/chapter-11-model-selection-fig-05.png)
+*Figure 11.5 — Fall-detector candidates against the constraint matrix. Model D looks best on paper and fails on memory by four kilobytes; Model C is the only row that survives every gate.*
+
 Model C wins. Twenty-nine percent of SRAM, leaving the rest for firmware. Latency twenty times under budget. Power well inside the coin-cell budget. Accuracy past the threshold. Model E is viable but pays for accuracy that the acceptance test does not require, in latency and energy that the application does need to keep margin in.
 
 The selection only works because every candidate was profiled on the actual hardware with the actual dataset. Model D looked best on paper. Model A worked on previous-generation devices when the accuracy bar was lower. Neither survived contact with the constraints.
@@ -85,6 +100,9 @@ The selection only works because every candidate was profiled on the actual hard
 What would change my mind: if a single profiling run on target hardware produced a result inconsistent with a model's measured accuracy and latency on the bench — that would tell me the deployment-aware metric I trusted (latency, memory, accuracy under quantization) was being measured wrong, and the whole frontier I plotted was off.
 
 Still puzzling: how to compare two candidates that lie on the Pareto frontier of accuracy versus latency but differ in robustness to distribution shift — the dataset I profiled on is rarely the deployment distribution, and "margin against constraint" is not the same as "margin against drift."
+
+![Decision flowchart. The flow starts at "profile candidate on target," then runs four gates in order — memory, latency, quantized accuracy, power. Each failure routes to a reject lane that loops back to "try smaller width multiplier or different architecture family." Survivors converge on "plot survivors on Pareto frontier, pick highest-accuracy point with margin."](../images/chapter-11-model-selection-fig-06.png)
+*Figure 11.6 — Model-selection decision flow. Selection is the last act; profiling has four gates ahead of the frontier.*
 
 ---
 
@@ -161,6 +179,66 @@ Where the model genuinely helps: producing a structured comparison of candidate 
 Where the model does damage: ranking the candidates as if accuracy were the only constraint that mattered. In embedded contexts, accuracy is rarely the binding constraint.
 
 The rule: you set the constraints; the model lays out the trade-offs against those constraints.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the
+figures in this chapter. Each produces a standalone HTML file you can open
+in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
+your Claude project context before using these prompts. They define the
+stack, naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 11.1 — Five deployment-aware metrics
+
+Build a single-panel hub-and-spoke infographic in D3 v7. The central node is a dark filled rectangle labelled "candidate model · on target hardware." Five metric cards sit around it on radial spokes: (1) "Latency on target hardware" — how-to "ms wall-clock; mean / p95 / max over 100 runs," skip-cost "trust FLOPs, miss the WCET deadline"; (2) "Memory footprint (int8)" — how-to "flash from linker map; SRAM from tensor arena"; (3) "Energy per inference" — how-to "mJ via sense resistor + scope, full cycle"; (4) "Accuracy on your dataset" — how-to "your camera, your lighting, your noise"; (5) "Accuracy under quantization" — how-to "float32 → int8 gap on your validation set." Each card has a 4-px left rule (use var(--color-red) for the highlighted card, var(--color-ink) elsewhere), an Inter 700 13-px name, a JetBrains Mono 11-px "how to measure" line, and an italic Inter 11-px "skip → failure mode" line. Hovering a card highlights its border in var(--color-red) and shows a tooltip with the full failure note. Standalone HTML, D3 7.9.0, ResizeObserver, role="img", `<title>`/`<desc>`, prefers-reduced-motion respected.
+
+> Reference implementation: `d3/chapter-11-model-selection-fig-01.html`
+
+---
+
+### Figure 11.2 — Standard vs depthwise-separable convolution
+
+Build a two-panel D3 v7 diagram with an interactive C-channel slider. Left panel: input channel stack, one dense 3×3 block, output channel stack, with cost equation `cost = 9·C² mults/pixel` under the panel. Right panel: input rectangle, depthwise block ("3×3 per ch"), intermediate rectangle, pointwise block ("1×1 mix"), output rectangle, with cost equation `cost = 9·C + C² mults/pixel`. A range slider above the chart sets C from 8 to 256; both equations update live, and a centred callout box (red border) reads `9·C² / (9·C + C²) ≈ <ratio>×  cheaper` at the current C. Blocks fill dark (var(--color-ink)), channel rectangles outline-only. Hover any block to tooltip its current operation cost. Inter 13-px panel titles in EB Garamond display weight; JetBrains Mono axis-style equations; ResizeObserver, accessible markup, prefers-reduced-motion.
+
+> Reference implementation: `d3/chapter-11-model-selection-fig-02.html`
+
+---
+
+### Figure 11.3 — Architecture family comparison
+
+Build a grouped horizontal bar chart in D3 v7. Six rows, one per architecture: MobileNetV2-1.0, MobileNetV3-Small, EfficientNet-Lite0, SqueezeNet, Tiny-YOLOv3, Random forest. Each row contains three sub-bars stacked vertically — flash (params, dark ink), compute (GFLOPs, secondary gray), accuracy top-1 (light gray). Values are normalized 0–1 within each axis using the global max so the visual cost ordering is consistent. Raw values (e.g. "3.4 M params", "0.30 GFLOPs", "72%") appear at the end of each bar in JetBrains Mono. Above the chart, a small inline legend with three swatches. Bars respond to hover with a tooltip showing the model name and the raw metric value for that bar. Margins large enough for left-side row labels in Inter 600 12-px. Standalone HTML, D3 7.9.0, ResizeObserver, role="img", accessible event signature `(event, d)`.
+
+> Reference implementation: `d3/chapter-11-model-selection-fig-03.html`
+
+---
+
+### Figure 11.4 — Pareto frontier of face-detection candidates
+
+Build a D3 v7 scatter plot. X-axis: latency in milliseconds, domain 0–500. Y-axis: accuracy in percent, domain 80–100. Six points: TinyFace (45, 84, 120 KB), MobileNetV2-0.25 (80, 88, 250 KB), MobileNetV3-Small (95, 90, 380 KB), MobileNetV2-0.35 (110, 91, 420 KB), EfficientNet-Lite0 (180, 94, 1800 KB), ResNet18 (450, 96, 11000 KB). Bubble radius uses `d3.scaleSqrt()` on memory. Frontier-line connects TinyFace → MNv3-Small → MNv2-0.35 → ENLite0 in var(--color-ink). Dominated points (MNv2-0.25, ResNet18) render with white fill, dashed gray stroke; frontier points render filled dark. EfficientNet-Lite0 gets a red 2-px stroke as the "recommended at 200 ms budget" mark. Vertical dashed budget lines at 50, 100, 200 ms with JetBrains Mono labels. Each point hover-tooltips "name · latency · accuracy · memory · frontier/dominated." Axis titles in Inter 12-px; ResizeObserver; prefers-reduced-motion.
+
+> Reference implementation: `d3/chapter-11-model-selection-fig-04.html`
+
+---
+
+### Figure 11.5 — Fall-detector candidate matrix
+
+Build a constraint matrix in D3 v7. Rows are five candidates: A (Threshold detector), B (Random forest, 50 trees), C (Small 1D CNN, 45k int8), D (Large 1D CNN, 180k), E (2-layer LSTM, 32u). Columns are four constraints: "Latency vs 500 ms," "SRAM vs 256 KB," "Energy vs 2 mA avg," "TPR / FPR." Each cell holds a verdict (FIT / TIGHT / FAILS) and a one-line detail (e.g. "75 KB (29%)" or "260 KB · 4 KB over"). Cell visual styling: FIT = white fill, ink 1.5-px stroke; TIGHT = light border-gray fill, secondary stroke; FAILS = solid ink fill with white text. The row for Model C is wrapped in a red 2-px stroke to mark the chosen candidate. A legend chip row sits above the chart. Hovering any cell tooltips the row name, column name, verdict, and detail. EB Garamond bold for the verdict glyph, JetBrains Mono for the numerical detail. ResizeObserver, accessible labels per cell.
+
+> Reference implementation: `d3/chapter-11-model-selection-fig-05.html`
+
+---
+
+### Figure 11.6 — Model-selection decision flowchart
+
+Build a vertical decision flowchart in D3 v7. Top: a dark "profile candidate on target" node. Below it, four gate boxes in order — memory, latency, quantized accuracy, power — each a white box with ink 1.5-px stroke, Inter 700 title, and JetBrains Mono subtitle stating the gate question. Each pass connects to the next gate by an ink arrow labelled "pass." Each fail emits a dashed gray arrow rightward to a shared "reject candidate" lane that contains the loopback note "try smaller width multiplier or different architecture." A curved dashed loopback arrow runs from the reject lane back to the start node. Bottom: a dark end node "plot survivors on Pareto frontier → pick highest-accuracy point with margin." Clicking or hovering any gate shows a tooltip describing a realistic failure cause for that gate. ResizeObserver, accessible role/title/desc, prefers-reduced-motion suppresses transitions.
+
+> Reference implementation: `d3/chapter-11-model-selection-fig-06.html`
 
 ---
 

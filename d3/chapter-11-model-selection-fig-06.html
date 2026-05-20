@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 11.6 — Model-selection decision flowchart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; }
+  #chart { width: 100%; height: 540px; }
+  .node-start, .node-end { fill: var(--color-ink); }
+  .node-start text, .node-end text { fill: var(--color-white); }
+  .gate { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.5; cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .gate.active { stroke: var(--color-red); stroke-width: 2; }
+  .gate-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-ink); }
+  .gate-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .flow-arrow { stroke: var(--color-ink); fill: none; stroke-width: 1.5; }
+  .fail-arrow { stroke: var(--color-secondary); fill: none; stroke-width: 1; stroke-dasharray: 3 2; }
+  .reject-box { fill: var(--color-border); fill-opacity: 0.3; stroke: var(--color-secondary); stroke-width: 0.75; }
+  .pass-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .fail-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .end-title { font-family: 'EB Garamond', serif; font-weight: 700; font-size: 14px; fill: var(--color-white); }
+  .end-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-white); opacity: 0.8; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 11.6 — Model-selection decision flowchart</h1>
+<p class="subtitle">Click any gate to read its failure condition. Each fail loops back to a smaller candidate.</p>
+<div id="chart" role="img" aria-labelledby="t-fig6 d-fig6"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const gateData = [
+  { id: 'mem',   title: 'memory check',             sub: 'flash + SRAM ≤ board limits?',  fail: 'compressed weights still overflow flash, or arena exceeds SRAM after linker map review' },
+  { id: 'lat',   title: 'latency check',            sub: 'p95 + max within deadline?',    fail: 'max-time on real hardware blows the WCET — CPU SIMD utilization is the usual culprit' },
+  { id: 'quant', title: 'quantized accuracy check', sub: 'float32 → int8 gap ≤ 3–5%?',    fail: 'unrepresentative calibration set, or activations spanning four orders of magnitude' },
+  { id: 'pow',   title: 'power check',              sub: 'avg current ≤ battery budget?', fail: 'duty cycle × per-inference energy exceeds the cell budget over the deployment window' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const w = container.clientWidth || 800;
+  const h = 540;
+  const cx = w / 2;
+  const gateW = 280, gateH = 50;
+  const gapY = 18;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', w).attr('height', h)
+    .attr('role', 'img').attr('aria-labelledby', 't-fig6 d-fig6');
+
+  svg.append('title').attr('id', 't-fig6').text('Model-selection decision flowchart');
+  svg.append('desc').attr('id', 'd-fig6').text('Profile then run four gates in order: memory, latency, quantized accuracy, power. Each failure routes to a reject lane that loops back. Survivors converge on a Pareto frontier and final selection.');
+
+  // Arrow markers
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id', 'aMain').attr('markerWidth', 8).attr('markerHeight', 6)
+    .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+  defs.append('marker').attr('id', 'aFail').attr('markerWidth', 8).attr('markerHeight', 6)
+    .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-secondary)');
+
+  // Reject lane background
+  const rejX = cx + 200;
+  svg.append('rect').attr('class', 'reject-box')
+    .attr('x', rejX - 90).attr('y', 80)
+    .attr('width', 180).attr('height', gateData.length * (gateH + gapY) + 20);
+  svg.append('text').attr('class', 'gate-title')
+    .attr('x', rejX).attr('y', 102).attr('text-anchor', 'middle')
+    .text('reject candidate');
+  svg.append('text').attr('class', 'gate-sub')
+    .attr('x', rejX).attr('y', 122).attr('text-anchor', 'middle')
+    .text('try smaller width multiplier');
+  svg.append('text').attr('class', 'gate-sub')
+    .attr('x', rejX).attr('y', 138).attr('text-anchor', 'middle')
+    .text('or different architecture');
+
+  // Start node
+  const startY = 22;
+  svg.append('rect').attr('class', 'node-start')
+    .attr('x', cx - 140).attr('y', startY).attr('width', 280).attr('height', 40);
+  svg.append('text').attr('class', 'end-title')
+    .attr('x', cx).attr('y', startY + 18).attr('text-anchor', 'middle')
+    .text('profile candidate on target');
+  svg.append('text').attr('class', 'end-sub')
+    .attr('x', cx).attr('y', startY + 33).attr('text-anchor', 'middle')
+    .text('your hardware · your data · int8');
+
+  // Down arrow to first gate
+  svg.append('line').attr('class', 'flow-arrow')
+    .attr('x1', cx).attr('y1', startY + 40).attr('x2', cx).attr('y2', 80)
+    .attr('marker-end', 'url(#aMain)');
+
+  // Gates
+  gateData.forEach((gd, i) => {
+    const gy = 80 + i * (gateH + gapY);
+    const node = svg.append('g')
+      .attr('tabindex', 0)
+      .attr('aria-label', `${gd.title} — ${gd.sub}. Failure: ${gd.fail}`)
+      .on('mouseover', function (event) {
+        d3.select(this).select('rect.gate').classed('active', true);
+        tooltip.html(`<strong>${gd.title}</strong><br>${gd.sub}<br><em>fail when: ${gd.fail}</em>`)
+          .style('opacity', 1)
+          .style('left', (event.pageX + 12) + 'px')
+          .style('top', (event.pageY - 28) + 'px');
+      })
+      .on('mousemove', (event) => tooltip
+        .style('left', (event.pageX + 12) + 'px')
+        .style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', function () {
+        d3.select(this).select('rect.gate').classed('active', false);
+        tooltip.style('opacity', 0);
+      });
+
+    node.append('rect').attr('class', 'gate')
+      .attr('x', cx - gateW / 2).attr('y', gy).attr('width', gateW).attr('height', gateH);
+    node.append('text').attr('class', 'gate-title')
+      .attr('x', cx).attr('y', gy + 21).attr('text-anchor', 'middle').text(gd.title);
+    node.append('text').attr('class', 'gate-sub')
+      .attr('x', cx).attr('y', gy + 38).attr('text-anchor', 'middle').text(gd.sub);
+
+    // Pass arrow to next
+    const nextY = gy + gateH + gapY;
+    if (i < gateData.length - 1) {
+      svg.append('line').attr('class', 'flow-arrow')
+        .attr('x1', cx).attr('y1', gy + gateH).attr('x2', cx).attr('y2', nextY)
+        .attr('marker-end', 'url(#aMain)');
+      svg.append('text').attr('class', 'pass-label')
+        .attr('x', cx + 10).attr('y', gy + gateH + 12).text('pass');
+    }
+
+    // Fail arrow to reject lane
+    svg.append('line').attr('class', 'fail-arrow')
+      .attr('x1', cx + gateW / 2).attr('y1', gy + gateH / 2)
+      .attr('x2', rejX - 90).attr('y2', gy + gateH / 2)
+      .attr('marker-end', 'url(#aFail)');
+    svg.append('text').attr('class', 'fail-label')
+      .attr('x', cx + gateW / 2 + 30).attr('y', gy + gateH / 2 - 4).text('FAILS');
+  });
+
+  // Loop-back arrow from reject lane to top
+  const rejBottom = 80 + gateData.length * (gateH + gapY) + 20;
+  svg.append('path').attr('class', 'fail-arrow')
+    .attr('d', `M ${rejX + 90} ${rejBottom - 20} C ${rejX + 160} ${rejBottom - 60}, ${cx + gateW/2 + 60} 30, ${cx + 30} ${startY + 40}`)
+    .attr('marker-end', 'url(#aFail)');
+  svg.append('text').attr('class', 'fail-label')
+    .attr('x', rejX + 80).attr('y', startY + 12).attr('text-anchor', 'end')
+    .text('retry with smaller candidate');
+
+  // End node (Pareto)
+  const endY = 80 + gateData.length * (gateH + gapY);
+  svg.append('rect').attr('class', 'node-end')
+    .attr('x', cx - 180).attr('y', endY).attr('width', 360).attr('height', 50);
+  svg.append('text').attr('class', 'end-title')
+    .attr('x', cx).attr('y', endY + 22).attr('text-anchor', 'middle')
+    .text('plot survivors on Pareto frontier');
+  svg.append('text').attr('class', 'end-sub')
+    .attr('x', cx).attr('y', endY + 40).attr('text-anchor', 'middle')
+    .text('→ pick highest-accuracy point with margin');
+
+  // Arrow from last gate to end
+  const lastY = 80 + (gateData.length - 1) * (gateH + gapY) + gateH;
+  svg.append('line').attr('class', 'flow-arrow')
+    .attr('x1', cx).attr('y1', lastY).attr('x2', cx).attr('y2', endY)
+    .attr('marker-end', 'url(#aMain)');
+  svg.append('text').attr('class', 'pass-label')
+    .attr('x', cx + 10).attr('y', lastY + 12).text('pass');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

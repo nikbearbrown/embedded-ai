@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 11.5 — Fall-detector candidate matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; }
+  .legend { display: flex; gap: 18px; margin-bottom: 12px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--color-secondary); align-items: center; }
+  .chip { display: inline-block; padding: 2px 8px; border: 1px solid var(--color-secondary); margin-right: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .chip.fit   { border-color: var(--color-ink); color: var(--color-ink); background: var(--color-white); }
+  .chip.tight { border-color: var(--color-secondary); color: var(--color-secondary); background: var(--color-border); }
+  .chip.fails { border-color: var(--color-ink); color: var(--color-white); background: var(--color-ink); }
+  #chart { width: 100%; height: 480px; }
+  .row-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; fill: var(--color-ink); }
+  .row-sub   { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .col-header { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; fill: var(--color-secondary); }
+  .cell { cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .cell.fit   { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.5; }
+  .cell.tight { fill: var(--color-border); stroke: var(--color-secondary); }
+  .cell.fails { fill: var(--color-ink); }
+  .verdict { font-family: 'EB Garamond', serif; font-weight: 700; font-size: 12px; }
+  .verdict.fit   { fill: var(--color-ink); }
+  .verdict.tight { fill: var(--color-ink); }
+  .verdict.fails { fill: var(--color-white); }
+  .detail { font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+  .detail.fit, .detail.tight { fill: var(--color-secondary); }
+  .detail.fails { fill: var(--color-border); }
+  .winner-mark { fill: none; stroke: var(--color-red); stroke-width: 2; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 11.5 — Fall-detector candidate matrix</h1>
+<p class="subtitle">nRF52840 · 256 KB SRAM · 500 ms deadline · 2 mA budget · ≥95% TPR / ≤1% FPR.</p>
+<div class="legend">
+  <span class="chip fit">FIT</span><span>margin</span>
+  <span class="chip tight">TIGHT</span><span>close to limit</span>
+  <span class="chip fails">FAILS</span><span>out of budget</span>
+</div>
+<div id="chart" role="img" aria-labelledby="t-fig5 d-fig5"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const matrixData = [
+  {
+    name: 'A · Threshold detector', sub: 'hand-tuned peak + duration', winner: false,
+    cells: [
+      { col: 'Latency vs 500 ms',  v: 'fit',   short: 'FIT',   detail: '< 1 ms' },
+      { col: 'SRAM vs 256 KB',     v: 'fit',   short: 'FIT',   detail: '~1 KB' },
+      { col: 'Energy vs 2 mA avg', v: 'fit',   short: 'FIT',   detail: 'negligible' },
+      { col: 'TPR / FPR',          v: 'fails', short: 'FAILS', detail: '78% / 8%' }
+    ]
+  },
+  {
+    name: 'B · Random forest (50)', sub: '15 features, 1-s window', winner: false,
+    cells: [
+      { col: 'Latency vs 500 ms',  v: 'fit',   short: 'FIT',   detail: '3.5 ms' },
+      { col: 'SRAM vs 256 KB',     v: 'tight', short: 'TIGHT', detail: '200 KB (78%)' },
+      { col: 'Energy vs 2 mA avg', v: 'fit',   short: 'FIT',   detail: 'low' },
+      { col: 'TPR / FPR',          v: 'fails', short: 'FAILS', detail: '92% / 2%' }
+    ]
+  },
+  {
+    name: 'C · Small 1D CNN', sub: '4 conv + 2 FC, 45k int8', winner: true,
+    cells: [
+      { col: 'Latency vs 500 ms',  v: 'fit',   short: 'FIT',   detail: '25 ms · 20× under' },
+      { col: 'SRAM vs 256 KB',     v: 'fit',   short: 'FIT',   detail: '75 KB (29%)' },
+      { col: 'Energy vs 2 mA avg', v: 'fit',   short: 'FIT',   detail: '0.12 mA avg' },
+      { col: 'TPR / FPR',          v: 'fit',   short: 'FIT',   detail: '96% / 0.8%' }
+    ]
+  },
+  {
+    name: 'D · Large 1D CNN', sub: '6 conv + 3 FC, 180k', winner: false,
+    cells: [
+      { col: 'Latency vs 500 ms',  v: 'fit',   short: 'FIT',   detail: '85 ms' },
+      { col: 'SRAM vs 256 KB',     v: 'fails', short: 'FAILS', detail: '260 KB · 4 KB over' },
+      { col: 'Energy vs 2 mA avg', v: 'tight', short: '—',     detail: 'won\'t load' },
+      { col: 'TPR / FPR',          v: 'tight', short: '—',     detail: '98% (paper only)' }
+    ]
+  },
+  {
+    name: 'E · 2-layer LSTM (32u)', sub: '60k params, sequential', winner: false,
+    cells: [
+      { col: 'Latency vs 500 ms',  v: 'tight', short: 'TIGHT', detail: '120 ms · 5× C' },
+      { col: 'SRAM vs 256 KB',     v: 'fit',   short: 'FIT',   detail: '150 KB' },
+      { col: 'Energy vs 2 mA avg', v: 'tight', short: 'TIGHT', detail: '5× C\'s energy' },
+      { col: 'TPR / FPR',          v: 'fit',   short: 'FIT',   detail: '97.5% / 0.5%' }
+    ]
+  }
+];
+const columns = ['Latency vs 500 ms', 'SRAM vs 256 KB', 'Energy vs 2 mA avg', 'TPR / FPR'];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const w = container.clientWidth || 800;
+  const h = 480;
+  const margin = { top: 60, right: 20, bottom: 40, left: 200 };
+  const innerW = w - margin.left - margin.right;
+  const innerH = h - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', w).attr('height', h)
+    .attr('role', 'img').attr('aria-labelledby', 't-fig5 d-fig5');
+  svg.append('title').attr('id', 't-fig5').text('Fall-detector candidate matrix — five models, four constraints');
+  svg.append('desc').attr('id', 'd-fig5').text('Cells marked FIT, TIGHT or FAILS against latency, SRAM, energy and accuracy constraints. Model C is the only fully FIT row.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand().domain(columns).range([0, innerW]).padding(0.08);
+  const yScaleBand = d3.scaleBand().domain(matrixData.map(d => d.name)).range([0, innerH]).padding(0.12);
+
+  // Column headers
+  g.selectAll('text.col-header')
+    .data(columns)
+    .join('text')
+      .attr('class', 'col-header')
+      .attr('x', d => xScaleBand(d) + xScaleBand.bandwidth() / 2)
+      .attr('y', -16).attr('text-anchor', 'middle')
+      .text(d => d);
+
+  // Row labels
+  matrixData.forEach(r => {
+    g.append('text').attr('class', 'row-label')
+      .attr('x', -10).attr('y', yScaleBand(r.name) + 18).attr('text-anchor', 'end')
+      .text(r.name);
+    g.append('text').attr('class', 'row-sub')
+      .attr('x', -10).attr('y', yScaleBand(r.name) + 32).attr('text-anchor', 'end')
+      .text(r.sub);
+
+    // Winner mark
+    if (r.winner) {
+      g.append('rect').attr('class', 'winner-mark')
+        .attr('x', -2).attr('y', yScaleBand(r.name) - 2)
+        .attr('width', innerW + 4).attr('height', yScaleBand.bandwidth() + 4);
+    }
+
+    // Cells
+    r.cells.forEach(c => {
+      const cw = xScaleBand.bandwidth(), ch = yScaleBand.bandwidth();
+      const cx = xScaleBand(c.col), cy = yScaleBand(r.name);
+
+      g.append('rect').attr('class', 'cell ' + c.v)
+        .attr('x', cx).attr('y', cy).attr('width', cw).attr('height', ch)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${r.name}, ${c.col}: ${c.short}, ${c.detail}`)
+        .on('mouseover', (event) => tooltip
+          .html(`<strong>${r.name}</strong><br>${c.col}: <b>${c.short}</b><br>${c.detail}`)
+          .style('opacity', 1)
+          .style('left', (event.pageX + 12) + 'px')
+          .style('top', (event.pageY - 28) + 'px'))
+        .on('mousemove', (event) => tooltip
+          .style('left', (event.pageX + 12) + 'px')
+          .style('top', (event.pageY - 28) + 'px'))
+        .on('mouseout', () => tooltip.style('opacity', 0));
+
+      g.append('text').attr('class', 'verdict ' + c.v)
+        .attr('x', cx + cw / 2).attr('y', cy + ch / 2 - 2).attr('text-anchor', 'middle')
+        .text(c.short);
+      g.append('text').attr('class', 'detail ' + c.v)
+        .attr('x', cx + cw / 2).attr('y', cy + ch / 2 + 14).attr('text-anchor', 'middle')
+        .text(c.detail);
+    });
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

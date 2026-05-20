@@ -4,6 +4,9 @@ A precision-agriculture company wants to detect grape diseases in vineyards seve
 
 The plan dies on a single arithmetic check. A 224×224 RGB image is 150 KB raw. Compressed to a JPEG it's around 20 KB. LoRaWAN's payload at the lowest spreading factor caps around 50 kbps and at the longest range delivers maybe 1 kbps; either way, transmitting one 20 KB image takes between three and five minutes, and the duty-cycle limits in the regulatory band restrict you to about 30 seconds of airtime per hour per device. Cloud processing, the architecture that worked for every other ML product the team has shipped, is *physically impossible* on this radio. The image must be classified before transmission. On-device inference is not the cheap design choice — it is the only design that fits the bandwidth budget.
 
+![Bandwidth-vs-payload arithmetic — one JPEG against LoRaWAN's per-hour airtime ceiling at SF7 and SF12](../images/chapter-14-integration-case-studies-fig-01.png)
+*Figure 14.1 — Bandwidth-vs-payload arithmetic*
+
 This is what the framework does. Constraints — power, memory, latency, bandwidth, cost, regulatory — narrow the design space until usually one or two architectures survive. The same framework, applied to three different problems with three different binding constraints, produces three completely different deployments. That is the point of this chapter. You have learned the moves separately. Here are three problems where every move runs at once.
 
 ## Industrial vibration monitoring — when power is the binding constraint
@@ -16,6 +19,9 @@ Eighteen months on a 1,000 mAh Li-ion cell at 3.7 V is 13,320 J of total energy.
 
 Three architectures get considered. Fully on-device, with results stored locally and transmitted once a day to a wired gateway. An edge-gateway architecture with raw vibration streaming to an industrial PC over RS-485. And a hybrid where a simple threshold on the device wakes a radio and forwards a one-second window to the gateway for ML classification.
 
+![Industrial vibration case — three-architecture decision tree with two branches killed on deployment economics](../images/chapter-14-integration-case-studies-fig-02.png)
+*Figure 14.2 — Industrial three-architecture decision tree*
+
 On-device wins. The gateway architecture demands wiring 200 sensors, which exceeds the deployment budget. The hybrid demands a sub-GHz radio per sensor, which exceeds the BOM. The challenge is putting all the ML on a microcontroller and still hitting the 18-month battery target.
 
 The model decision then collapses. A 1D CNN on raw vibration is too expensive in memory and power for the duty cycle the energy budget allows. An autoencoder is hard to threshold reliably. A threshold-only detector tops out around 70% sensitivity, well below requirement. A random forest on engineered vibration features (RMS, spectral peaks, kurtosis, zero-crossing rate, harmonic ratios, FFT dominant frequencies — 25 features in the second iteration) gets to 94% sensitivity at 4% false-positive rate, fits in 200 KB of flash, and runs in 5 ms.
@@ -23,6 +29,9 @@ The model decision then collapses. A 1D CNN on raw vibration is too expensive in
 Hardware: STM32L4R5 at 120 MHz, 640 KB SRAM, 2 MB flash, 0.4 µA sleep current. Sleep current is the deciding number. The nRF52840 sits at 2.8 µA, the ESP32-S3 at 10 µA. Multiplied across 18 months those differences crater the battery life. At $6 the L4R5 leaves $34 for the accelerometer, enclosure, battery, and PCB.
 
 The inference schedule comes out of an energy-balance equation. Each inference burns about 0.66 mJ — 0.44 mJ for feature extraction plus 0.22 mJ for the random forest evaluation. Sleep dissipates 0.00148 mW continuously. Setting the average against the 0.28 mW budget gives an inference interval of about 2.4 seconds. The system runs inference every 2.5 seconds, which provides 1,500 detection opportunities per hour against degradation that develops over hours to days.
+
+![Industrial energy budget — random forest fits the 0.28 mW envelope; 1D CNN overflows by 5×](../images/chapter-14-integration-case-studies-fig-03.png)
+*Figure 14.3 — Industrial energy budget stack*
 
 Field trial across five units for one month. Battery extrapolation: 16.5 months — short of the 18-month target by about 8%, livable. Sensitivity 91% on three actual faults observed (small sample). False-positive rate 8%, almost double the validation number. Root cause: vibration from adjacent machines triggering false alarms. Firmware fix: spatial filtering — if only one sensor in a cluster triggers, treat it as suspect. False-positive rate drops to 4.5%. Final BOM: $38 per unit. Sensitivity below the 95% target but accepted by the product team given the cost constraints.
 
@@ -39,6 +48,9 @@ Architecture choice closes immediately. Streaming raw ECG to a paired smartphone
 Model selection runs into the regulatory floor. Rule-based detectors, the way Holter monitors work, top out around 92% sensitivity in published studies — not enough for VT/VF. LSTMs on RR intervals depend on QRS detection quality, which fails on noisy ECG. Hybrid CNN-plus-classifier sits at 95–97%, just shy. Only a 1D CNN on raw ECG hits 98%+ sensitivity for VT/VF in the literature.
 
 The state-of-the-art ResNet-flavored 1D CNN comes in at 18 layers, 2.5 million parameters, 10 MB at float32. The wearable SoC has 2 MB of flash and 512 KB of SRAM. The compression sequence runs as the previous chapter prescribed: prune first, distill second, quantize last. Forty percent structured pruning brings the parameter count to 1.5 million and recovers VT/VF sensitivity to 97.2% after fine-tuning — below threshold. Distillation onto a smaller 8-layer student against the pruned teacher: 800,000 parameters, sensitivity back up to 98.1%. QAT to int8: 800 KB of weights, 180 KB of activations, sensitivity 97.8%. The post-quantization number sits 0.2 percentage points below the 98% acceptance bar; the product team accepts the gap with a plan to close it through post-market data and updates.
+
+![Medical wearable compression cascade — model size and VT/VF sensitivity across float32, pruned, distilled, and QAT stages](../images/chapter-14-integration-case-studies-fig-04.png)
+*Figure 14.4 — Medical wearable compression cascade*
 
 Hardware: STM32U5 at 160 MHz, 2 MB flash, 786 KB SRAM, TrustZone for secure boot and signed firmware updates. Three dollars more expensive than the nRF5340 alternative, and the TrustZone is exactly what the FDA cybersecurity guidance asks for in a connected medical device. Total BOM $180 inside the $200 ceiling.
 
@@ -60,6 +72,9 @@ Hardware: Raspberry Pi Zero 2 W. The ESP32-S3 alternative is cheaper and lower-p
 
 Inference scheduling is event-driven by daylight. A photoresistor wakes the system at sunrise; captures and inferences run at 7 AM (after dew evaporates — the field trial taught us this), 10 AM, 2 PM, and 6 PM. Each event burns about 4.3 J. Daily total around 12,900 J including sleep. Energy balance positive on average; battery covers the variance.
 
+![Vineyard 24-hour energy timeline — solar harvest curve, four inference spikes, sleep baseline, and battery state-of-charge](../images/chapter-14-integration-case-studies-fig-05.png)
+*Figure 14.5 — Vineyard 24-hour energy timeline*
+
 Training: 5,000 grape-leaf images split across the three classes, captured in actual vineyards across the growing season. EfficientNet-Lite0 fine-tuned from ImageNet weights. Validation accuracy 91.2% at float32, 89.8% int8 PTQ — both above threshold. Deployment via TFLite for Python, picamera, pyLoRa, cron-driven scheduling.
 
 Field trial across ten sensors in two vineyards for three months. On-device accuracy 87.3% — lower than the validation number because field images carry more variation than training data. Eight percent false negatives, five percent false positives. Battery life indefinite through the trial including a five-consecutive-day overcast stretch. Two issues found: morning dew degraded accuracy (fixed by shifting first capture to 7 AM); LoRaWAN coverage gaps required one repeater per vineyard.
@@ -71,6 +86,9 @@ What rejection looks like here: cloud processing was eliminated by physics, not 
 The framework was the same in all three. Quantify constraints. Choose the processing architecture. Choose the model class. Choose the hardware. Optimize the model. Schedule inference inside the energy budget. Validate on target. Document the rejected alternatives and the constraints that killed them.
 
 The outputs differ because the *binding* constraint differs. In the industrial case it was power — 0.28 mW average across 18 months drove the hardware choice (lowest sleep current), the model choice (random forest, not CNN), and the inference schedule (every 2.5 seconds, no faster). In the medical case it was the regulatory floor on sensitivity — 98% for VT/VF drove the model class (1D CNN on raw ECG, not anything cheaper), the optimization sequence (aggressive pruning followed by distillation followed by QAT), and even the hardware (TrustZone for FDA cybersecurity expectations). In the agricultural case it was bandwidth — LoRaWAN's data rate forced on-device inference, which forced a model that fits, which forced an SoC big enough to run it, which forced a solar-and-buffer power architecture to support that SoC.
+
+![Three case studies, three different binding constraints — power, accuracy plus regulation, and bandwidth](../images/chapter-14-integration-case-studies-fig-06.png)
+*Figure 14.6 — Cross-case comparative budget bars*
 
 There is no universal answer to "should this run on-device or in the cloud" or "which model architecture should we use." There are only constraints and the architectures those constraints permit. The framework's job is not to produce a recommendation. It is to make the binding constraint visible early, so that the architecture which survives is the one the application actually permits, not the one the team is most comfortable building.
 
@@ -150,6 +168,22 @@ Run pytest. All unit tests + all three integration tests pass before you stop.
 **Preview of next chapter:** None — this is the capstone. Use the toolkit on a real application of your choosing as your final project.
 
 ---
+
+## Prompts
+
+The six figures in this chapter were built from short structural prompts. Each prompt fixes the encoding, the comparison, and the reader's takeaway — not the styling, which the brutalist design system already constrains.
+
+**Figure 14.1 — Bandwidth-vs-payload arithmetic.** Horizontal-bar chart, three rows on a single kilobytes-per-hour axis: one 20 KB JPEG payload, LoRaWAN SF7 ceiling at ~50 KB/hr, LoRaWAN SF12 ceiling at ~3.75 KB/hr. Vertical dashed reference at one-image width. Annotation: at long range, one image takes more than five hours of airtime. Box: 30 s/hr regulatory ceiling. Reader takeaway: cloud is physically impossible — bytes are wider than the pipe.
+
+**Figure 14.2 — Industrial three-architecture decision tree.** Root node (acceptance specs) branches to three sibling nodes: fully on-device, edge-gateway over RS-485, hybrid threshold-plus-radio. Each branch terminates in a verdict node. Two rejected branches use dashed strokes plus an ochre constraint label naming what killed them ("↑ deployment cost", "↑ BOM ceiling"). Winning branch uses a heavier outline and full accent bar. Reader takeaway: two viable-looking architectures die on deployment economics, not technical grounds.
+
+**Figure 14.3 — Industrial energy budget stack.** Two stacked bars on a 0–1.6 mW axis: random forest at 2.5 s cadence (sleep + inference inside envelope), 1D CNN at same cadence (overflows envelope 5×). Dashed horizontal line at 0.28 mW envelope crossing both bars. Annotation on overflow bar: battery dies in 3 months. Headroom callout on RF bar. Reader takeaway: model-rejection arithmetic is visible.
+
+**Figure 14.4 — Medical wearable compression cascade.** Dual-axis line chart across four stages on the x-axis (float32 → pruned → distilled → QAT). Left y-axis tracks model size (ink solid line); right y-axis tracks VT/VF sensitivity (red dashed line). Two reference lines: 2 MB flash ceiling, 98% regulatory floor. Stage status row beneath the x-axis names each stage's pass/fail state. Reader takeaway: prune → distill → QAT is the only sequence that clears both lines.
+
+**Figure 14.5 — Vineyard 24-hour energy timeline.** Two stacked panels sharing a 0–24 hour x-axis. Top panel: solar harvest area (bell curve, peak 2 W at noon), 150 mW sleep baseline (dashed), four inference spikes at 07:00 / 10:00 / 14:00 / 18:00 with hover detail (4.3 J each). Bottom panel: battery state-of-charge trace, ride-through annotation spanning hours 0–8. Reader takeaway: harvest covers daily load; buffer covers variance.
+
+**Figure 14.6 — Cross-case comparative budgets.** Grid: four rows (power, memory, latency, BOM) × three columns (industrial, medical, agricultural) of horizontal bars whose width encodes tightness, not absolute magnitude. The binding-constraint cell in each column carries a 2 px ink outline; remaining cells fade to gray. Final row beneath the grid names the binding constraint per case in boxed text. Reader takeaway: same framework, three different binding constraints, three different deployments.
 
 ## AI Wayback Machine
 

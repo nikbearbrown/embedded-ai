@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 7.3 — Race to sleep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 420px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .trace-a { stroke: var(--color-ink); fill: none; stroke-width: 2; }
+  .trace-b { stroke: var(--color-red); fill: none; stroke-width: 2; }
+  .area-a { fill: var(--color-ink); opacity: 0.18; }
+  .area-b { fill: var(--color-red); opacity: 0.18; }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .legend { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 7.3 — Race to sleep</h1>
+<p class="subtitle">Same model, two clocks. Faster clock means shorter active window means lower average current.</p>
+<div id="chart" role="img"></div>
+<p class="caption">Trace A (64 MHz, 20 mA for 400 ms) and Trace B (128 MHz, 35 mA for 200 ms) both wake every 10 s. The taller, shorter burst integrates to less energy because sleep is so much cheaper than slowed-down activity.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const traceA = [
+  { t: 0,    mA: 20 },
+  { t: 0.4,  mA: 20 },
+  { t: 0.4,  mA: 0.005 },
+  { t: 10,   mA: 0.005 }
+];
+const traceB = [
+  { t: 0,    mA: 35 },
+  { t: 0.2,  mA: 35 },
+  { t: 0.2,  mA: 0.005 },
+  { t: 10,   mA: 0.005 }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 420;
+  const margin = { top: 48, right: 40, bottom: 56, left: 72 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'rt-title rt-desc');
+  svg.append('title').attr('id', 'rt-title').text('Two current traces — same duty cycle, different clocks.');
+  svg.append('desc').attr('id', 'rt-desc').text('Trace A shows a 64 MHz clock running inference for 400 ms at 20 milliamps; trace B shows a 128 MHz clock running inference for 200 ms at 35 milliamps. Both return to a 5 microamp sleep floor.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 1.2]).range([0, chartWidth]);
+  const yScaleLog    = d3.scaleLog().domain([0.001, 50]).range([chartHeight, 0]);
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).tickFormat(d => d + ' s'));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLog).tickValues([0.001, 0.01, 0.1, 1, 10]).tickFormat(d => d + ' mA'));
+
+  const lineGen = d3.line().x(d => xScaleLinear(d.t)).y(d => yScaleLog(d.mA)).curve(d3.curveStepAfter);
+  const areaGen = d3.area().x(d => xScaleLinear(d.t)).y0(chartHeight).y1(d => yScaleLog(d.mA)).curve(d3.curveStepAfter);
+
+  gChart.append('path').datum(traceA).attr('class', 'area-a').attr('d', areaGen);
+  gChart.append('path').datum(traceB).attr('class', 'area-b').attr('d', areaGen);
+  gChart.append('path').datum(traceA).attr('class', 'trace-a').attr('d', lineGen);
+  gChart.append('path').datum(traceB).attr('class', 'trace-b').attr('d', lineGen);
+
+  // legend
+  const gLegend = gChart.append('g').attr('class', 'g-legend').attr('transform', `translate(${chartWidth - 220}, 0)`);
+  gLegend.append('rect').attr('width', 14).attr('height', 10).attr('fill', 'var(--color-ink)');
+  gLegend.append('text').attr('class', 'legend').attr('x', 20).attr('y', 9).text('Trace A · 64 MHz · 8.0 mJ');
+  gLegend.append('rect').attr('y', 18).attr('width', 14).attr('height', 10).attr('fill', 'var(--color-red)');
+  gLegend.append('text').attr('class', 'legend').attr('x', 20).attr('y', 27).text('Trace B · 128 MHz · 7.0 mJ');
+
+  // annotation
+  gChart.append('text').attr('class', 'annotation')
+    .attr('x', 12).attr('y', yScaleLog(35) - 8)
+    .text('shorter and taller wins — 12% lower average current');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 9.1 — Four-tier processing topology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 20px; max-width: 80ch; }
+  #chart { width: 100%; min-height: 460px; }
+  .tier-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: var(--color-white); }
+  .tier-name  { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; font-weight: 500; fill: var(--color-ink); }
+  .tier-spec  { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .tier-note  { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .axis-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .alert      { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; fill: var(--color-red); }
+  .caption    { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; }
+  .tooltip    { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 12px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); max-width: 240px; }
+  .tier-card { cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .tier-card:hover { opacity: 1; }
+  .tier-card.dimmed { opacity: 0.35; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 9.1 — Four-tier processing topology</h1>
+<p class="subtitle">On-device, near-edge, far-edge, cloud. Hover any tier to see the round-trip cost profile. The decision is which prefix of these four tiers your application can afford.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Latency, money, and bandwidth ceiling all rise as you move right. Privacy and local control fall.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tierData = [
+  { id: 'on-device',  title: 'TIER 1 — ON-DEVICE',  name: 'Endpoint MCU',     latency: '1 – 80 ms', bandwidth: 'n/a', compute: '~ 100 M MACs', strength: 'privacy, no net',     limit: 'memory, energy',         example: 'ESP32, STM32',     barColor: 'var(--color-ink)' },
+  { id: 'near-edge',  title: 'TIER 2 — NEAR-EDGE',  name: 'Local gateway',    latency: '1 – 50 ms', bandwidth: '1 – 100 Mbps', compute: '~ 10 G MACs', strength: 'low jitter, mains',  limit: 'extra hardware on-site', example: 'Raspberry Pi, Jetson', barColor: 'var(--color-secondary)' },
+  { id: 'far-edge',   title: 'TIER 3 — FAR-EDGE',   name: 'Regional server',  latency: '50 – 500 ms', bandwidth: '1 k – 1 M bps', compute: '~ 1 T MACs', strength: 'roaming devices', limit: 'variable, costly',       example: 'NB-IoT, LTE-M, MEC', barColor: '#787878' },
+  { id: 'cloud',      title: 'TIER 4 — CLOUD',      name: 'Centralized DC',   latency: '0.1 – 5 s',   bandwidth: '1 – 1 000 Mbps', compute: 'unlimited',  strength: 'scale, fresh models', limit: 'privacy, recurring $',  example: 'AWS, Azure, GCP',     barColor: 'var(--color-border)' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip
+    .html(`<strong>${d.name}</strong><br>round-trip: ${d.latency}<br>bandwidth: ${d.bandwidth}<br>compute: ${d.compute}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top',  (event.pageY - 28) + 'px')
+    .style('opacity', 1);
+}
+function moveTip(event) {
+  tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px');
+}
+function hideTip() { tooltip.style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = 500;
+  const margin = { top: 60, right: 32, bottom: 80, left: 32 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart')
+    .append('svg')
+      .attr('width',  totalWidth)
+      .attr('height', totalHeight)
+      .attr('role', 'img')
+      .attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Four-tier processing topology');
+  svg.append('desc').attr('id',  'chart-desc').text('Four columns for on-device, near-edge, far-edge, and cloud, each annotated with latency, bandwidth, and compute ceiling.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand()
+    .domain(tierData.map(d => d.id))
+    .range([0, chartWidth])
+    .padding(0.12);
+
+  // tier cards
+  const cardHeight = chartHeight - 80;
+  const gCards = gChart.append('g').attr('class', 'g-cards');
+
+  const cards = gCards.selectAll('.tier-card')
+    .data(tierData)
+    .join('g')
+      .attr('class', 'tier-card')
+      .attr('transform', d => `translate(${xScaleBand(d.id)},0)`)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.latency} round-trip, bandwidth ${d.bandwidth}`)
+      .on('mouseover', (event, d) => {
+        showTip(event, d);
+        cards.classed('dimmed', e => e.id !== d.id);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', () => { hideTip(); cards.classed('dimmed', false); });
+
+  // header strip
+  cards.append('rect')
+      .attr('width', xScaleBand.bandwidth())
+      .attr('height', 24)
+      .attr('fill', d => d.barColor);
+
+  cards.append('text')
+      .attr('class', 'tier-title')
+      .attr('x', 10).attr('y', 16)
+      .attr('fill', d => d.id === 'cloud' ? 'var(--color-ink)' : 'var(--color-white)')
+      .text(d => d.title);
+
+  // body
+  cards.append('rect')
+      .attr('y', 24)
+      .attr('width', xScaleBand.bandwidth())
+      .attr('height', cardHeight - 24)
+      .attr('fill', 'var(--color-white)')
+      .attr('stroke', d => d.barColor)
+      .attr('stroke-width', 1.5);
+
+  cards.append('text').attr('class', 'tier-name').attr('x', 10).attr('y', 54).text(d => d.name);
+  cards.append('text').attr('class', 'tier-spec').attr('x', 10).attr('y', 84).text(d => 'latency:    ' + d.latency);
+  cards.append('text').attr('class', 'tier-spec').attr('x', 10).attr('y', 102).text(d => 'bandwidth: ' + d.bandwidth);
+  cards.append('text').attr('class', 'tier-spec').attr('x', 10).attr('y', 120).text(d => 'compute:   ' + d.compute);
+  cards.append('text').attr('class', 'tier-note').attr('x', 10).attr('y', 152).text(d => '+ ' + d.strength);
+  cards.append('text').attr('class', 'tier-note').attr('x', 10).attr('y', 170).text(d => '− ' + d.limit);
+  cards.append('text').attr('class', 'tier-note').attr('x', 10).attr('y', 200).text(d => 'e.g. ' + d.example);
+
+  // gradient axis arrow at bottom
+  const gAxis = gChart.append('g').attr('transform', `translate(0,${cardHeight + 24})`);
+  gAxis.append('line')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', chartWidth).attr('y2', 0)
+      .attr('stroke', 'var(--color-ink)')
+      .attr('stroke-width', 1);
+  gAxis.append('polygon')
+      .attr('points', `${chartWidth-1},-5 ${chartWidth+9},0 ${chartWidth-1},5`)
+      .attr('fill', 'var(--color-ink)');
+
+  gAxis.append('text').attr('class', 'axis-label').attr('x', 0).attr('y', -6).text('fast · private · constrained');
+  gAxis.append('text').attr('class', 'axis-label').attr('x', chartWidth).attr('y', -6).attr('text-anchor', 'end').text('scalable · costly · always-online');
+  gAxis.append('text').attr('class', 'axis-label').attr('x', chartWidth/2).attr('y', 20).attr('text-anchor', 'middle').text('latency · money · bandwidth ceiling →');
+
+  // privacy alert under cloud + far-edge
+  const alertX = xScaleBand('far-edge');
+  const alertW = xScaleBand.bandwidth() * 2 + xScaleBand.step() * 0.12;
+  gChart.append('rect')
+      .attr('x', alertX).attr('y', cardHeight + 48)
+      .attr('width', alertW).attr('height', 20)
+      .attr('fill', 'none')
+      .attr('stroke', 'var(--color-red)')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '4 3');
+  gChart.append('text').attr('class', 'alert').attr('x', alertX + 8).attr('y', cardHeight + 62).text('data leaves the device — HIPAA, GDPR, PCI-DSS can forbid these hops');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

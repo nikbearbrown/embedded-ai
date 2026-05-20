@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t05 d05">
+  <title id="t05">Knowledge distillation pipeline — soft labels carry the dark knowledge</title>
+  <desc id="d05">A pipeline diagram showing one input image flowing into both a large teacher network and a small student network. The teacher outputs a softened probability distribution over ten classes; the student outputs its own distribution. Both feed a mixed loss that combines hard-label cross-entropy with soft-label KL divergence using a temperature parameter.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .badge { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #fdfcfb; }
+      .mono { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #2a1a0e; }
+    </style>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+    <marker id="arSoft" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#8a1f1f"/>
+    </marker>
+  </defs>
+  <rect width="700" height="440" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">Distillation: the teacher's distribution is richer than the one-hot label</text>
+  <text x="32" y="50" class="nm">student loss = α · hard cross-entropy + (1 − α) · soft KL divergence at temperature T</text>
+
+  <!-- ============ INPUT image (left) ============ -->
+  <rect x="32" y="190" width="60" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <!-- stylized cat icon: just a square with text -->
+  <text x="62" y="216" text-anchor="middle" class="sm">[image]</text>
+  <text x="62" y="232" text-anchor="middle" class="sm">cat</text>
+  <text x="62" y="270" text-anchor="middle" class="sm">input</text>
+
+  <!-- branch to teacher (top) -->
+  <path d="M 92 210 L 130 130" fill="none" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+  <!-- branch to student (bottom) -->
+  <path d="M 92 240 L 130 310" fill="none" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <!-- ============ TEACHER (top row) ============ -->
+  <rect x="140" y="90" width="140" height="80" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <rect x="140" y="90" width="140" height="20" fill="#2a1a0e"/>
+  <text x="210" y="105" text-anchor="middle" class="badge">TEACHER — LARGE</text>
+  <text x="210" y="135" text-anchor="middle" class="lb">trained float32</text>
+  <text x="210" y="152" text-anchor="middle" class="sm">frozen during distillation</text>
+
+  <!-- teacher → soft distribution -->
+  <path d="M 280 130 L 320 130" fill="none" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <!-- soft distribution: small bars showing [0.01, 0.02, 0.85, 0.05, 0.01, 0.02, 0.01, 0.01, 0.01, 0.01] -->
+  <g>
+    <text x="395" y="84" text-anchor="middle" class="lb">soft labels (T &gt; 1)</text>
+    <!-- 10 bars at x=325, gap 8, width 8 -->
+    <!-- max bar height 50, values normalized: max=0.85 -->
+    <rect x="325" y="166" width="8" height="0.6"  fill="#2a1a0e"/>
+    <rect x="335" y="165" width="8" height="1.2"  fill="#2a1a0e"/>
+    <rect x="345" y="116" width="8" height="50"   fill="#8a1f1f"/>
+    <rect x="355" y="163" width="8" height="3"    fill="#2a1a0e"/>
+    <rect x="365" y="166" width="8" height="0.6"  fill="#2a1a0e"/>
+    <rect x="375" y="165" width="8" height="1.2"  fill="#2a1a0e"/>
+    <rect x="385" y="166" width="8" height="0.6"  fill="#2a1a0e"/>
+    <rect x="395" y="166" width="8" height="0.6"  fill="#2a1a0e"/>
+    <rect x="405" y="166" width="8" height="0.6"  fill="#2a1a0e"/>
+    <rect x="415" y="166" width="8" height="0.6"  fill="#2a1a0e"/>
+    <line x1="325" y1="167" x2="423" y2="167" stroke="#2a1a0e" stroke-width="0.8"/>
+    <!-- annotations on key bars -->
+    <text x="349" y="110" text-anchor="middle" class="sm">cat 0.85</text>
+    <text x="359" y="158" text-anchor="middle" class="sm">dog 0.05</text>
+  </g>
+
+  <!-- ============ HARD LABEL (right top) ============ -->
+  <rect x="500" y="98" width="160" height="68" fill="#fdfcfb" stroke="#C8860E" stroke-width="1.5"/>
+  <rect x="500" y="98" width="160" height="20" fill="#C8860E"/>
+  <text x="580" y="113" text-anchor="middle" class="badge">HARD LABEL</text>
+  <text x="580" y="135" text-anchor="middle" class="lb">[0, 0, 1, 0, 0, 0, 0, 0, 0, 0]</text>
+  <text x="580" y="152" text-anchor="middle" class="sm">one-hot · "it's a cat"</text>
+
+  <!-- ============ STUDENT (bottom row) ============ -->
+  <rect x="140" y="290" width="100" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <rect x="140" y="290" width="100" height="20" fill="#4a4540"/>
+  <text x="190" y="305" text-anchor="middle" class="badge">STUDENT</text>
+  <text x="190" y="328" text-anchor="middle" class="lb">small int8-ready</text>
+  <text x="190" y="344" text-anchor="middle" class="sm">trainable</text>
+
+  <!-- student → its own distribution -->
+  <path d="M 240 320 L 280 320" fill="none" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <!-- student distribution -->
+  <g>
+    <text x="335" y="284" text-anchor="middle" class="lb">student output</text>
+    <rect x="285" y="346" width="8" height="2"   fill="#2a1a0e"/>
+    <rect x="295" y="343" width="8" height="5"   fill="#2a1a0e"/>
+    <rect x="305" y="306" width="8" height="42"  fill="#2a1a0e"/>
+    <rect x="315" y="340" width="8" height="8"   fill="#2a1a0e"/>
+    <rect x="325" y="345" width="8" height="3"   fill="#2a1a0e"/>
+    <rect x="335" y="346" width="8" height="2"   fill="#2a1a0e"/>
+    <rect x="345" y="347" width="8" height="1"   fill="#2a1a0e"/>
+    <rect x="355" y="347" width="8" height="1"   fill="#2a1a0e"/>
+    <rect x="365" y="347" width="8" height="1"   fill="#2a1a0e"/>
+    <rect x="375" y="347" width="8" height="1"   fill="#2a1a0e"/>
+    <line x1="285" y1="349" x2="383" y2="349" stroke="#2a1a0e" stroke-width="0.8"/>
+  </g>
+
+  <!-- ============ MIXED LOSS (right center) ============ -->
+  <rect x="500" y="220" width="160" height="100" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="2"/>
+  <rect x="500" y="220" width="160" height="22" fill="#2a1a0e"/>
+  <text x="580" y="236" text-anchor="middle" class="badge">MIXED LOSS</text>
+  <text x="510" y="262" class="mono">α · L_hard</text>
+  <text x="510" y="281" class="sm">cross-entropy vs one-hot</text>
+  <text x="510" y="300" class="mono" fill="#8a1f1f">(1 − α) · L_soft</text>
+  <text x="510" y="316" class="sm" fill="#8a1f1f">KL divergence at T</text>
+
+  <!-- arrows from each label source into the loss -->
+  <!-- soft distribution → loss -->
+  <path d="M 423 145 Q 470 220 500 252" fill="none" stroke="#8a1f1f" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arSoft)"/>
+  <text x="445" y="208" class="sm" fill="#8a1f1f">soft signal</text>
+  <!-- hard label → loss -->
+  <path d="M 580 166 L 580 218" fill="none" stroke="#C8860E" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="588" y="195" class="sm" fill="#C8860E">hard signal</text>
+  <!-- student dist → loss -->
+  <path d="M 385 320 Q 440 320 500 290" fill="none" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="430" y="335" class="sm">student prediction</text>
+
+  <!-- loss → student (gradient feedback) -->
+  <path d="M 580 320 Q 580 388 200 360" fill="none" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#ar)"/>
+  <text x="400" y="390" text-anchor="middle" class="nm">gradient update — only the student learns</text>
+
+  <text x="350" y="420" text-anchor="middle" class="cap">The teacher's 5% on "dog" tells the student which mistakes are reasonable. The one-hot label throws that away.</text>
+</svg>

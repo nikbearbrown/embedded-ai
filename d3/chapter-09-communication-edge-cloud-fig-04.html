@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 9.4 — Battery life vs transmission interval</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 20px; max-width: 80ch; }
+  #chart { width: 100%; min-height: 480px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .grid line { stroke: var(--color-border); stroke-width: 0.6; }
+  .grid path { display: none; }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .radio-line { fill: none; stroke-width: 2; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .radio-line.dim { opacity: 0.2; }
+  .legend text { font-family: 'Inter', sans-serif; font-size: 11px; }
+  .legend .name { font-weight: 700; fill: var(--color-ink); }
+  .legend .spec { fill: var(--color-secondary); }
+  .budget-line { stroke: var(--color-ink); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .budget-text { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); }
+  .region { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-secondary); }
+  .alert { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-red); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 12px; max-width: 280px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 9.4 — Battery years or battery hours</h1>
+<p class="subtitle">Log-log. Days on a 2 000 mAh coin cell as a function of seconds between transmissions, for four radio choices. The 1 mW reference line marks where field deployments fall off the cliff.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Halve the interval, halve the lifetime. Halve the per-event energy, double it. Both levers live on this plane.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const radios = [
+  { name: 'BLE',      mj: 0.1, color: 'var(--color-secondary)', dash: '6 3', note: '≈ 4 mW peak, ms bursts' },
+  { name: 'LoRaWAN',  mj: 21,  color: 'var(--color-ink)',       dash: '',    note: '≈ 132 mW TX, 160 ms' },
+  { name: 'WiFi',     mj: 50,  color: '#787878',                dash: '',    note: '≈ 1 W TX, 50 ms' },
+  { name: 'NB-IoT',   mj: 150, color: 'var(--color-red)',       dash: '',    note: '≈ 600 mW TX, 250 ms' }
+];
+
+const cellJoules = 2000 / 1000 * 3.6 * 3.3;  // ≈ 23 760 J
+// days(T_seconds, mj_per_event) = cellJoules * T / (86400 * mj/1000)
+const intervals = d3.range(0, 5.05, 0.05).map(l => Math.pow(10, l));  // 1 s to 1 day
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) { tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px').style('opacity', 1); }
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.style('opacity', 0); }
+
+function daysFor(T, mj) { return Math.max(0.1, cellJoules * T / (86400 * mj / 1000)); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+
+  const totalWidth = container.clientWidth || 760;
+  const totalHeight = 480;
+  const margin = { top: 32, right: 200, bottom: 70, left: 70 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart')
+    .append('svg')
+      .attr('width', totalWidth).attr('height', totalHeight)
+      .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Battery life vs transmission interval');
+  svg.append('desc').attr('id', 'chart-desc').text('Log-log line chart for four radios. The x axis is interval between transmissions; the y axis is days of battery life on a 2 000 mAh, 3.3 V cell.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog().domain([1, 86400]).range([0, chartWidth]);
+  const yScaleLog = d3.scaleLog().domain([0.1, 10000]).range([chartHeight, 0]).clamp(true);
+
+  // gridlines
+  gChart.append('g').attr('class', 'grid')
+    .call(d3.axisBottom(xScaleLog).ticks(6).tickSize(chartHeight).tickFormat(''));
+  gChart.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(yScaleLog).ticks(6).tickSize(-chartWidth).tickFormat(''));
+
+  // x axis with labelled values
+  const xTickVals = [1, 10, 60, 600, 3600, 86400];
+  const xTickLabels = { 1: '1 s', 10: '10 s', 60: '1 min', 600: '10 min', 3600: '1 hr', 86400: '1 day' };
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLog).tickValues(xTickVals).tickFormat(d => xTickLabels[d]));
+
+  // y axis
+  const yTickVals = [0.1, 1, 10, 100, 1000, 10000];
+  const yTickLabels = { 0.1: '0.1 d', 1: '1 d', 10: '10 d', 100: '100 d', 1000: '1 k d', 10000: '10 k d' };
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLog).tickValues(yTickVals).tickFormat(d => yTickLabels[d]));
+
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 38)
+    .attr('text-anchor', 'middle').text('interval between transmissions');
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(-50,${chartHeight/2}) rotate(-90)`)
+    .attr('text-anchor', 'middle').text('battery life · 2 000 mAh × 3.3 V');
+
+  // 1 mW budget reference: lifetime = 23760 / 86.4 ≈ 275 d
+  const budgetDays = cellJoules / (1e-3 * 86400);
+  gChart.append('line').attr('class', 'budget-line')
+    .attr('x1', 0).attr('y1', yScaleLog(budgetDays))
+    .attr('x2', chartWidth).attr('y2', yScaleLog(budgetDays));
+  gChart.append('text').attr('class', 'budget-text')
+    .attr('x', 6).attr('y', yScaleLog(budgetDays) - 4)
+    .text(`1 mW average power · ≈ ${Math.round(budgetDays)} d`);
+
+  // line generator
+  const lineGen = d3.line()
+    .x(d => xScaleLog(d.T))
+    .y(d => yScaleLog(d.days));
+
+  const radioLines = gChart.selectAll('.radio-line')
+    .data(radios)
+    .join('path')
+      .attr('class', 'radio-line')
+      .attr('stroke', d => d.color)
+      .attr('stroke-dasharray', d => d.dash)
+      .attr('d', d => lineGen(intervals.map(T => ({ T, days: daysFor(T, d.mj) }))))
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.mj} mJ per event`)
+      .on('mouseover', (event, d) => {
+        showTip(event, `<strong>${d.name}</strong><br>${d.mj} mJ / event<br>at 1 min interval: ≈ ${daysFor(60, d.mj).toFixed(1)} days<br>at 1 hr interval: ≈ ${daysFor(3600, d.mj).toFixed(0)} days`);
+        radioLines.classed('dim', e => e.name !== d.name);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', () => { hideTip(); radioLines.classed('dim', false); });
+
+  // legend on the right
+  const legendX = chartWidth + 12;
+  const legendG = gChart.append('g').attr('class', 'legend').attr('transform', `translate(${legendX},0)`);
+  radios.forEach((r, i) => {
+    const T_label = 60;  // anchor at 1 min for legend value
+    const yPos = yScaleLog(daysFor(T_label, r.mj));
+    legendG.append('line')
+      .attr('x1', -4).attr('y1', yPos)
+      .attr('x2', 12).attr('y2', yPos)
+      .attr('stroke', r.color).attr('stroke-width', 2)
+      .attr('stroke-dasharray', r.dash);
+    legendG.append('text').attr('class', 'name')
+      .attr('x', 18).attr('y', yPos - 2).text(`${r.name} (${r.mj} mJ)`);
+    legendG.append('text').attr('class', 'spec')
+      .attr('x', 18).attr('y', yPos + 12).text(r.note);
+  });
+
+  // annotations
+  gChart.append('text').attr('class', 'region').attr('x', 12).attr('y', yScaleLog(5000)).text('years on a coin cell');
+  gChart.append('text').attr('class', 'alert').attr('x', chartWidth - 8).attr('y', chartHeight - 10).attr('text-anchor', 'end').text('hours, not days');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

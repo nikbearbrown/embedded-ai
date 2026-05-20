@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 13.3 — Toolchain feature matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 480px; position: relative; }
+  .row-name { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 13px; fill: var(--color-ink); }
+  .row-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .col-head { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; fill: var(--color-ink); }
+  .cell { stroke: var(--color-border); stroke-width: 0.5; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .cell.full { fill: var(--color-ink); }
+  .cell.partial { fill: var(--color-secondary); }
+  .cell.none { fill: var(--color-border); fill-opacity: 0.35; }
+  .cell:hover, .cell:focus { opacity: 0.7; outline: none; }
+  .legend-text { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 13px; margin-top: 16px; max-width: 70ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 13.3 — Toolchain feature matrix</h1>
+<p class="subtitle">Six toolchains across six capabilities. Filled cells are first-class support; half cells are partial or require a workaround; empty cells are unsupported.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Pick by the column that matters most. Edge Impulse wins on GUI; TFLite Micro and ONNX Runtime win on visibility.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const cols = [
+  { key: 'custom',    label: 'Custom layers' },
+  { key: 'inter',     label: 'Intermediate artifacts' },
+  { key: 'quant',     label: 'Quantization control' },
+  { key: 'kernels',   label: 'Vendor-tuned kernels' },
+  { key: 'gui',       label: 'GUI workflow' },
+  { key: 'debug',     label: 'Debug access on fail' }
+];
+
+// 0 = none, 1 = partial, 2 = full
+const rows = [
+  { name: 'TFLite Micro',      sub: 'C++ lib, no malloc',     vals: { custom: 2, inter: 2, quant: 2, kernels: 1, gui: 0, debug: 2 } },
+  { name: 'Edge Impulse',      sub: 'web platform',           vals: { custom: 0, inter: 0, quant: 1, kernels: 2, gui: 2, debug: 0 } },
+  { name: 'STM32Cube.AI',      sub: 'ST vendor compiler',     vals: { custom: 1, inter: 2, quant: 2, kernels: 2, gui: 1, debug: 2 } },
+  { name: 'Vela (Ethos-U)',    sub: 'int8 NPU compiler',      vals: { custom: 0, inter: 2, quant: 1, kernels: 2, gui: 0, debug: 2 } },
+  { name: 'Edge TPU compiler', sub: 'Coral / Google',         vals: { custom: 0, inter: 1, quant: 1, kernels: 2, gui: 0, debug: 1 } },
+  { name: 'ONNX Runtime',      sub: 'framework-agnostic',     vals: { custom: 2, inter: 2, quant: 2, kernels: 1, gui: 0, debug: 2 } }
+];
+
+const valueClass = v => v === 2 ? 'full' : v === 1 ? 'partial' : 'none';
+const valueLabel = v => v === 2 ? 'full · first-class support' : v === 1 ? 'partial · workaround required' : 'none · not supported';
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 880;
+  const totalHeight = 480;
+  const margin = { top: 120, right: 24, bottom: 60, left: 200 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Toolchain feature matrix');
+  svg.append('desc').attr('id', 'chart-desc').text('Heatmap of six toolchains across six capabilities. Cells are shaded full, partial, or none.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand().domain(cols.map(c => c.key)).range([0, chartWidth]).padding(0.05);
+  const yScaleBand = d3.scaleBand().domain(rows.map(r => r.name)).range([0, chartHeight]).padding(0.08);
+
+  // column headers (rotated)
+  svg.append('g').attr('transform', `translate(${margin.left},${margin.top - 8})`)
+    .selectAll('text').data(cols).join('text')
+      .attr('class', 'col-head')
+      .attr('x', d => xScaleBand(d.key) + xScaleBand.bandwidth() / 2)
+      .attr('y', 0)
+      .attr('text-anchor', 'end')
+      .attr('transform', d => `rotate(-32 ${xScaleBand(d.key) + xScaleBand.bandwidth() / 2} 0)`)
+      .text(d => d.label);
+
+  // row labels
+  svg.append('g').attr('transform', `translate(${margin.left - 12},${margin.top})`)
+    .selectAll('g').data(rows).join('g')
+      .attr('transform', d => `translate(0,${yScaleBand(d.name) + yScaleBand.bandwidth() / 2})`)
+      .call(g => g.append('text').attr('class', 'row-name').attr('x', 0).attr('y', -4).attr('text-anchor', 'end').text(d => d.name))
+      .call(g => g.append('text').attr('class', 'row-sub').attr('x', 0).attr('y', 10).attr('text-anchor', 'end').text(d => d.sub));
+
+  // cells
+  const cellData = [];
+  rows.forEach(r => cols.forEach(c => cellData.push({ row: r.name, sub: r.sub, col: c.label, val: r.vals[c.key], colKey: c.key })));
+
+  gChart.selectAll('.cell').data(cellData).join('rect')
+    .attr('class', d => `cell ${valueClass(d.val)}`)
+    .attr('x', d => xScaleBand(d.colKey))
+    .attr('y', d => yScaleBand(d.row))
+    .attr('width', xScaleBand.bandwidth())
+    .attr('height', yScaleBand.bandwidth())
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.row} · ${d.col}: ${valueLabel(d.val)}`)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.row}</strong><br><span style="color:#aaa">${d.col}</span><br><br>${valueLabel(d.val)}`))
+    .on('mousemove', moveTip).on('mouseout', hideTip)
+    .on('focus', function (event, d) { showTip(event, `<strong>${d.row}</strong><br><span style="color:#aaa">${d.col}</span><br><br>${valueLabel(d.val)}`); })
+    .on('blur', hideTip);
+
+  // legend
+  const legendY = margin.top + chartHeight + 28;
+  const legend = svg.append('g').attr('transform', `translate(${margin.left},${legendY})`);
+  const items = [
+    { cls: 'full', label: 'full · first-class support' },
+    { cls: 'partial', label: 'partial · workaround' },
+    { cls: 'none', label: 'none · not supported' }
+  ];
+  items.forEach((it, i) => {
+    legend.append('rect').attr('class', `cell ${it.cls}`).attr('x', i * 200).attr('y', 0).attr('width', 16).attr('height', 16);
+    legend.append('text').attr('class', 'legend-text').attr('x', i * 200 + 24).attr('y', 12).text(it.label);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

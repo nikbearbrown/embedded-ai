@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.1 — Embedded memory hierarchy pyramid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 460px; }
+  .tier text { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-white); }
+  .tier .name { font-weight: 700; font-size: 14px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 5.1 — Embedded memory hierarchy</h1>
+<p class="subtitle">Four tiers · faster, smaller, more expensive per byte at the top.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Each tier trades latency and cost for capacity. The embedded-AI question is which artifact lives in which tier.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tierData = [
+  { name: 'REGISTERS', size: '— ',            latency: '1 cy',        volatility: 'volatile',     contents: 'working set',                fill: 'var(--color-ink)' },
+  { name: 'SRAM',      size: '64 KB – 2 MB',  latency: '1–2 cy',      volatility: 'volatile',     contents: 'stack · heap · activations', fill: '#404040' },
+  { name: 'FLASH',     size: '512 KB – 2 MB', latency: '10–50 cy',    volatility: 'non-volatile', contents: 'firmware · weights · LUTs',  fill: '#787878' },
+  { name: 'EXTERNAL',  size: 'MB – GB',       latency: '100s cy',     volatility: 'depends',      contents: 'overflow weights / buffers', fill: '#ADADAD' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 40, right: 240, bottom: 40, left: 100 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Embedded memory hierarchy pyramid');
+  svg.append('desc').attr('id', 'chart-desc').text('Four tiers from registers down to external memory, each labeled with size, latency, volatility, and what lives there.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const tierHeight = chartHeight / tierData.length;
+  const centerX = chartWidth / 2;
+  const topWidth = chartWidth * 0.18;
+  const bottomWidth = chartWidth * 0.90;
+
+  tierData.forEach((d, i) => {
+    const yTop = i * tierHeight;
+    const yBot = yTop + tierHeight;
+    const wTop = topWidth + (bottomWidth - topWidth) * (i / tierData.length);
+    const wBot = topWidth + (bottomWidth - topWidth) * ((i + 1) / tierData.length);
+
+    const tier = gChart.append('g').attr('class', 'tier').attr('tabindex', 0).attr('aria-label', `${d.name}: ${d.size}, latency ${d.latency}, ${d.contents}`);
+    tier.append('polygon')
+      .attr('points', [
+        [centerX - wTop / 2, yTop],
+        [centerX + wTop / 2, yTop],
+        [centerX + wBot / 2, yBot],
+        [centerX - wBot / 2, yBot]
+      ].map(p => p.join(',')).join(' '))
+      .attr('fill', d.fill)
+      .style('cursor', 'pointer')
+      .on('mouseover', (event) => {
+        tooltip.html(`<strong>${d.name}</strong><br>${d.size} · ${d.latency} · ${d.volatility}<br>${d.contents}`)
+          .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+          .transition().duration(150).style('opacity', 1);
+      })
+      .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+
+    tier.append('text').attr('class', 'name')
+      .attr('x', centerX).attr('y', yTop + tierHeight / 2 - 8)
+      .attr('text-anchor', 'middle').text(d.name);
+    tier.append('text')
+      .attr('x', centerX).attr('y', yTop + tierHeight / 2 + 10)
+      .attr('text-anchor', 'middle').text(`${d.size} · ${d.latency}`);
+  });
+
+  // right-side annotations
+  const annotations = gChart.append('g').attr('class', 'annotations')
+    .attr('transform', `translate(${chartWidth + 24},0)`);
+  tierData.forEach((d, i) => {
+    annotations.append('text').attr('class', 'annotation')
+      .attr('x', 0).attr('y', i * tierHeight + tierHeight / 2)
+      .text(d.contents);
+  });
+
+  // left-side latency axis
+  const latencyAxis = gChart.append('g').attr('transform', `translate(-24,0)`);
+  latencyAxis.append('text').attr('class', 'axis')
+    .attr('x', 0).attr('y', -16).attr('text-anchor', 'end').text('latency →');
+  tierData.forEach((d, i) => {
+    latencyAxis.append('text').attr('class', 'axis')
+      .attr('x', 0).attr('y', i * tierHeight + tierHeight / 2)
+      .attr('text-anchor', 'end').text(d.latency);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -6,7 +6,13 @@ That decision — when a hardware accelerator is the right answer, and when it i
 
 The reason CPUs are inefficient for inference is structural. A general-purpose CPU is designed to execute arbitrary instruction sequences with maximum flexibility — complex pipelines, branch prediction, out-of-order execution, caches to handle unpredictable workloads. That flexibility costs energy and silicon area on control logic instead of arithmetic. Neural-network inference is the *opposite* of arbitrary: a regular computation, millions of multiply-accumulates with predictable data flow and almost no branching. A CPU executing inference spends most of its energy fetching instructions, managing the cache, and shepherding the pipeline, not doing arithmetic. On a Cortex-M7 at 400 MHz running a 128 × 128 matmul (about 2.1 M MACs), roughly 30% of cycles are arithmetic, 50% are memory access, 15% are instruction fetch and decode, and 5% are pipeline stalls and cache misses. *Two-thirds of the CPU's time is overhead.* A specialized accelerator removes most of that overhead.
 
+![Two stacked horizontal bars comparing how a Cortex-M7 CPU and a 16x16 NPU MAC array spend each cycle running a 128x128 int8 matmul. The CPU bar splits 30% arithmetic, 50% memory access, 15% instruction fetch and decode, 5% pipeline stalls; an overhead bracket spans the right 70%. The NPU bar is roughly 92% arithmetic with a thin sliver of data movement.](../images/chapter-08-hardware-for-ai-fig-01.png)
+*Figure 8.1 — Where each cycle goes on a 128×128 matmul. A CPU spends two-thirds of its cycles on overhead. An NPU's silicon is the arithmetic.*
+
 An NPU designed for matmul has dedicated MAC units arranged in a 2D array (commonly 8 × 8, 16 × 16, or 32 × 32 MACs in parallel), local scratchpad memory close to the compute (no cache, no arbitrary access patterns), and a simple controller that sequences operations without per-cycle instruction fetch. The same 128 × 128 matmul on a 16 × 16 MAC array does the arithmetic in $(128/16)^3 = 512$ cycles plus memory transfer, which at 400 MHz lands around 1.3 ms — about 8× faster than the CPU. The speedup comes from parallelism (256 MACs per cycle versus 1) and the absence of control overhead. The cost: the NPU is not a general processor, it executes only what its MAC array and memory architecture support, and any operation it cannot run falls back to the CPU. *That fallback is where most of the disappointment with NPU performance comes from.*
+
+![Block diagram of a microNPU. External memory on the left connects through a DMA engine to a local SRAM scratchpad. The scratchpad feeds a 16x16 grid of MAC processing elements. The MAC array writes back to an accumulator and then to the scratchpad. A thin sequencer on the right issues control signals (dashed) to the DMA, scratchpad, and MAC array.](../images/chapter-08-hardware-for-ai-fig-02.png)
+*Figure 8.2 — microNPU dataflow. Local scratchpad feeds a parallel MAC grid; a thin sequencer replaces the CPU's fetch/decode machine.*
 
 Three classes of accelerator matter for embedded AI: DSPs, NPUs, and FPGAs.
 
@@ -14,13 +20,22 @@ DSPs are signal-processing CPUs — TI's C674x, ARM's Cortex-M55, parts purpose-
 
 NPUs are domain-specific accelerators built only for inference. They divide into three size classes. *Datacenter NPUs* (Google TPU, NVIDIA TensorRT) have thousands of MACs and gigabytes of on-chip memory; not relevant for embedded. *Edge NPUs* (Coral Edge TPU, Hailo-8, Intel Movidius) carry 100–1,000 MACs and megabytes of memory at 0.5–5 W; designed for cameras, drones, edge gateways. *MicroNPUs* (ARM Ethos-U55, STM32 AI core, Syntiant NDP120) sit at the microcontroller scale — 8–256 MACs, kilobytes to a couple of megabytes of memory, 10–200 mW. The microNPU is the class that integrates with or pairs with an MCU.
 
+![Log-log scatter plot of NPU MAC count against active power. Three clusters appear. Bottom-left: microNPUs including Syntiant NDP120, Ethos-U55, STM32N6, and K210 at 64 to 512 MACs and 0.2 to 300 mW. Middle: edge NPUs including Coral Edge TPU, Hailo-8, and Movidius at hundreds to thousands of MACs and 1.5 to 2.5 W. Top-right: datacenter NPUs including TPU v4 and H100 / TensorRT at over 100,000 MACs and 200 to 350 W. A box highlights the microNPU cluster as the embedded class.](../images/chapter-08-hardware-for-ai-fig-03.png)
+*Figure 8.3 — NPU classes by MAC count vs power. Embedded AI lives in the bottom-left cluster; the other two are different planets.*
+
 The ARM Ethos-U55, paired with Cortex-M55 or Cortex-M85 cores, is representative. It comes configured with 32, 64, 128, or 256 MACs (chosen at SoC design time), supports int8 and int16 quantized models, and ships with 128 KB to 2 MB of on-chip SRAM. At 500 MHz with 256 MACs, peak throughput is 128 G int8 MACs/s. For a 50 M MAC model, theoretical latency is about 390 ms — but real performance depends on whether the model's operations map onto the accelerator. The Ethos-U55 accelerates 2D convolution (standard and depthwise), fully connected layers, pooling, and element-wise operations (add, multiply, ReLU). It does not accelerate attention mechanisms, custom activation functions, sparse operations, or dynamic control flow — those fall back to the CPU. A model that is 80% accelerated operations and 20% non-accelerated operations does not get the full 10× speedup; it gets more like 3–5× because the CPU bottleneck dominates the unaccelerated portions. *The mapping of model to accelerator is the constraint, not the accelerator's peak throughput.*
+
+![Block diagram. An operation router at the top splits incoming model ops into two streams. Solid arrows route supported ops (conv2d, depthwise, fully connected, pooling, element-wise) to an Ethos-U55 microNPU on the left. Dashed arrows route unsupported ops (attention, custom activations, sparse, dynamic control flow) to a Cortex-M55 host CPU on the right. Both blocks share an SRAM pool over an AXI bus. A callout notes that 80 percent accelerated yields only 3 to 5x realised speedup because CPU fallback dominates.](../images/chapter-08-hardware-for-ai-fig-04.png)
+*Figure 8.4 — Cortex-M55 + Ethos-U55 routing. The mapping of model ops to accelerator decides realised speedup; peak throughput is the ceiling, not the floor.*
 
 The STM32N6 takes the integrated approach further: an 800 MHz Cortex-M55 plus a proprietary NPU rated at 3 TOPS for int8, with 2.5 MB SRAM and 4 MB flash. A 40 M MAC MobileNetV2 runs in about 180 ms CPU-only on this part, and 45 ms with the NPU active — a measured 4× speedup that is real and transformative for vision applications with hard latency targets. The trade is BOM cost: $12–15 per part versus $4–6 for an STM32H7 without NPU. At 100,000 units per year, that gap is $800,000.
 
 FPGAs are the third option, and they answer a different question. Where a CPU is flexible-but-slow and an NPU is fast-but-rigid, an FPGA is *configurable* — you design exactly the circuit you need (custom MAC array sizes, custom data paths for unusual operations, bit-level precision options, pipelined execution with no instruction fetch overhead) and program it onto reconfigurable hardware. They make sense when your model has operations CPUs and NPUs do not support, when latency requirements exceed even what an NPU can deliver, or when you genuinely need to update accelerator logic in the field. The downside is cost ($20–200 for embedded-grade parts), power (500 mW to several watts during inference), and development effort. FPGA design requires HDL expertise (Verilog or VHDL) most embedded software engineers do not have, and development time is months rather than weeks.
 
 A concrete comparison: deploying a YOLO object-detection model. CPU-only on a Raspberry Pi Zero 2 W at quad-core 1 GHz costs $15, draws 1.5 W, takes 2,500 ms per frame. A Coral Edge TPU paired with the same A53 host costs $60, draws 2 W combined, takes 25 ms per frame — a 100× speedup from the dedicated NPU. A Xilinx Zynq-7020 with a custom YOLO accelerator in fabric costs $150, draws 3 W, takes 15 ms per frame, and required six months of FPGA design and verification to bring up. The Edge TPU is the right answer for almost every commercial deployment of this kind: large speedup over CPU, reasonable power, off-the-shelf availability. The FPGA is faster, but only 1.7× faster than the TPU, at 2.5× the cost, 50% more power, and a development timeline that kills the project's economics. FPGAs are the right answer for research prototypes, niche low-volume applications where NPUs are insufficient and ASIC NRE is unjustifiable, or applications where field-reconfigurable accelerator logic is genuinely required. For most embedded AI deployments, FPGAs are overkill.
+
+![Three small-multiples panels comparing the same YOLO object-detection model on three platforms. Each panel plots three bars: cost in dollars, power in watts, latency in milliseconds per frame on a log axis. Raspberry Pi Zero 2 W CPU-only sits at $15, 1.5 W, 2500 ms (fails real-time). Coral Edge TPU plus A53 host sits at $60, 2 W, 25 ms (marked as the commercial sweet spot with a bold border). Xilinx Zynq-7020 FPGA sits at $150, 3 W, 15 ms (1.7x faster than TPU at 2.5x the cost).](../images/chapter-08-hardware-for-ai-fig-05.png)
+*Figure 8.5 — Same YOLO, three platforms. The FPGA wins on latency; the Coral TPU wins on every other dimension. The constraint shape chooses the answer.*
 
 Several integrated AI hardware options are worth knowing by name and rough specification. Cortex-M55 + Ethos-U55 (NXP, ST, Renesas) — microNPU paired with the M55 CPU, 256 KB to 2 MB SRAM, 50–150 mW during inference, $8–15 per unit, mature toolchain (TFLite Micro with the Ethos-U delegate, the Vela optimizer for quantization and graph transformation), best for keyword spotting, gesture recognition, and small-image classification at 96 × 96 or below. STM32N6 — Cortex-M55 at 800 MHz plus a proprietary NPU at 3 TOPS, 2.5 MB SRAM, 180 mW measured during inference, $12–18 per unit, STM32Cube.AI toolchain, best for vision on MCU including defect detection and gesture recognition. Syntiant NDP120 — an 8-core neural processing array, 1.5 MB on-chip, no general-purpose CPU, designed exclusively for always-on audio AI at under 200 µW, $3–5 per unit, proprietary toolchain (Syntiant Core 2), runs continuously on a coin cell for years but cannot do anything other than audio. Kendryte K210 — RISC-V dual-core at 400 MHz with a 64-MAC convolution accelerator (KPU), 8 MB SRAM, 300 mW during inference, $6–8 per unit, hobbyist-grade tooling and limited TensorFlow support, popular in education and prototyping but not for commercial products.
 
@@ -32,6 +47,9 @@ Several integrated AI hardware options are worth knowing by name and rough speci
 | Kendryte K210 | vision NPU | hobbyist vision | 300 mW | $6–8 | low |
 
 The decision matrix is a few lines: always-on voice at ultra-low power → Syntiant. General-purpose inference on MCU with mature tooling → Cortex-M55 + Ethos-U55. Vision on MCU with the highest performance → STM32N6. Cost-sensitive hobbyist or educational vision → K210. None of these is universal.
+
+![Log-log scatter of effective int8 throughput in GOPS against active power in mW. Six labeled points: a CMSIS-NN Cortex-M7 baseline at 50 mW and 0.2 GOPS, Syntiant NDP120 at 0.2 mW and 0.6 GOPS, K210 at 300 mW and 0.5 GOPS, four Ethos-U55 variants tracing a dashed line at 50 to 150 mW and 32 to 256 GOPS, and STM32N6 at 180 mW and 3000 GOPS. Three diagonal dashed iso-efficiency lines mark 0.01, 1, and 100 TOPS per watt.](../images/chapter-08-hardware-for-ai-fig-06.png)
+*Figure 8.6 — TOPS/W efficiency. Move up the chart by adding MACs; move left by killing overhead. Diagonals are constant efficiency.*
 
 The harder skill is knowing when *not* to use an accelerator. There are five recurring cases. *The model is too small to benefit*: a 10,000-parameter model running in 5 ms on a Cortex-M4 will not get faster from an NPU because the overhead of moving data to the accelerator, configuring it, and moving results back exceeds the time saved. *The operations don't map*: if your model is mostly custom layers, dynamic control flow, or sparse operations, the accelerator handles maybe 20–30% of the workload, the CPU runs the rest, and the speedup is negligible. Profile the model first; if the bottleneck is in unaccelerated operations, the accelerator is wasted silicon. *The CPU is fast enough*: if a Cortex-M7 at 480 MHz with CMSIS-NN already meets your latency, adding an NPU is cost without benefit — the simpler CPU solution wins. *The accelerator's power exceeds the CPU's for short workloads*: an NPU drawing 150 mW for 10 ms uses 1.5 mJ; a CPU drawing 30 mW for 40 ms uses 1.2 mJ. The CPU uses less *energy* despite being slower, and for battery-powered low-duty-cycle systems, energy-per-inference is what determines battery life. *Toolchain immaturity*: a proprietary accelerator with poor documentation, limited model support, and buggy code generation can cost more in debugging time than it saves in inference time. Unless the performance gain is transformative — 10× or more — stick with the CPU and standard tools.
 
@@ -98,6 +116,62 @@ Tests:
 **Connection to previous chapters:** Aggregates verdicts from chapters 5 (memory), 6 (compute), 7 (power) and decides at the system level. Begins the cross-cutting integration that Chapter 14 will close.
 
 **Preview of next chapter:** Chapter 9 adds `comms.py` — when does inference belong on-device, on a gateway, or in the cloud? Computes the four communication costs (latency, bandwidth, energy, money) per tier.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the figures in this chapter. Each produces a standalone HTML file you can open in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into your Claude project context before using these prompts. They define the stack, naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 8.1 — Where each cycle goes
+
+Build a two-row stacked horizontal bar chart comparing how a Cortex-M7 CPU and a 16×16 NPU MAC array spend their cycles on a 128×128 int8 matmul. Row 1 (Cortex-M7, CMSIS-NN): four segments — arithmetic 30%, memory access 50%, fetch/decode 15%, stalls 5%. Row 2 (16×16 NPU, 256 MACs/cycle): two segments — arithmetic 92%, data movement 8%. Each row is a single full-width bar segmented by percent; x-axis runs 0% to 100%. Label segments inline where width allows; otherwise label outside. Draw an overhead bracket above the CPU row spanning the right 70% with the label "70% overhead." Below the chart, place a centered callout: "~8× faster — parallelism + no control overhead." Use var(--color-ink) for arithmetic, var(--color-secondary) for memory, var(--color-mid) for fetch/data movement, var(--color-border) for stalls. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-08-hardware-for-ai-fig-01.html`
+
+---
+
+### Figure 8.2 — microNPU dataflow
+
+Build a left-to-right block diagram of a microNPU. Five blocks in sequence: External memory (flash / DRAM), DMA engine, SRAM scratchpad (emphasised border), MAC array (emphasised border, rendered as an 8×8 visual grid of small PE squares representing the 16×16 logical array), and a thin Sequencer block on the right. Solid arrows connect External → DMA → Scratchpad → MAC. A dashed curved writeback arrow loops from the top of the MAC array back to the top of the Scratchpad, labelled "accumulator writeback." Dashed gray control arrows fan out from the Sequencer to the DMA, Scratchpad, and MAC array; label below sequencer "no per-cycle instruction fetch." Each block carries a one-line subtitle. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-08-hardware-for-ai-fig-02.html`
+
+---
+
+### Figure 8.3 — NPU classes by MAC count vs power
+
+Build a log-log scatter plot with MAC count on the x-axis (10 to 1,000,000) and active power on the y-axis (0.1 mW to 1,000,000 mW). Plot nine parts grouped into three clusters. microNPUs: Syntiant NDP120 (128 MACs, 0.2 mW), Ethos-U55 (256, 100 mW), STM32N6 (512, 180 mW), K210 (64, 300 mW). edge NPUs: Coral Edge TPU (512, 2,000 mW), Hailo-8 (8,000, 2,500 mW), Movidius Myriad X (1,024, 1,500 mW). datacenter NPUs: TPU v4 (200,000, 200,000 mW), H100 / TensorRT (150,000, 350,000 mW). Wrap each cluster in a dashed ellipse computed from member extents, with the cluster name and a one-line subtitle above each ellipse. Draw a solid rectangle around the microNPU cluster labelled "the embedded class." Each dot is interactive (tooltip with name, MAC count, power). Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-08-hardware-for-ai-fig-03.html`
+
+---
+
+### Figure 8.4 — Cortex-M55 + Ethos-U55 routing
+
+Build a block diagram showing how an operation router splits model graph ops between an NPU and a CPU. Top: an Operation router block (Vela compiler · TFLM delegate). Two lower blocks: Ethos-U55 microNPU on the left (lists accelerated ops: conv2d, depthwise, fully connected, pooling, element-wise) and Cortex-M55 host on the right (lists fallback ops: attention, custom activations, sparse ops, dynamic control flow). A solid arrow labelled "accelerated" connects router → NPU; a dashed gray arrow labelled "fallback" connects router → CPU. Below both blocks, an AXI bus strip runs full-width; below that, a Shared SRAM pool (128 KB to 2 MB) connects to the bus. Vertical lines drop from each block to the bus. Top-right callout: "80% accelerated → only 3–5× realised" and "CPU fallback dominates unaccelerated %." Tint the NPU and host blocks with var(--color-npu) and var(--color-host). Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-08-hardware-for-ai-fig-04.html`
+
+---
+
+### Figure 8.5 — Same YOLO, three platforms
+
+Build a three-panel small-multiples figure comparing the same YOLO object-detection model on three platforms. Each panel renders three horizontal bars stacked vertically: cost ($, linear scale to $200), power (W, linear scale to 3.5 W), and latency (ms, log scale 10 to 10,000). Panel 1 — Raspberry Pi Zero 2 W (CPU-only, quad A53 1 GHz): $15, 1.5 W, 2,500 ms. Panel 2 — Coral Edge TPU + A53 (NPU): $60, 2 W, 25 ms — render with a bold 2-px border and the verdict "commercial sweet spot · 100× CPU at 4× cost." Panel 3 — Xilinx Zynq-7020 FPGA (custom YOLO accelerator in fabric): $150, 3 W, 15 ms — verdict "1.7× faster than TPU · 2.5× cost · 6 months HDL." Value labels above each bar; row label to the left. Use var(--color-border) for cost, var(--color-mid) for power, var(--color-ink) for latency. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-08-hardware-for-ai-fig-05.html`
+
+---
+
+### Figure 8.6 — TOPS/W efficiency scatter
+
+Build a log-log scatter plot of effective int8 throughput (GOPS, y) against active power (mW, x), with three dashed iso-efficiency diagonals at 0.01, 1, and 100 TOPS/W (formula: GOPS = TOPS/W × mW; clip lines to the plot area). Plot eight parts: Cortex-M7 + CMSIS-NN (50 mW, 0.2 GOPS), Syntiant NDP120 (0.2 mW, 0.6 GOPS), K210 (300 mW, 0.5 GOPS), Ethos-U55 at 32 / 64 / 128 / 256 MAC variants (50/70/100/150 mW; 32/64/128/256 GOPS), STM32N6 (180 mW, 3,000 GOPS). Connect the four Ethos-U55 points with a dashed line marking the family scaling. Dots are interactive (tooltip shows name, GOPS, mW, derived TOPS/W). Two annotations: "always-on at µW" near Syntiant, and "vision at 100 TOPS/W" near STM32N6. Standalone HTML, D3 v7, inline CSS/JS, accessible, responsive.
+
+> Reference implementation: `d3/chapter-08-hardware-for-ai-fig-06.html`
 
 ---
 

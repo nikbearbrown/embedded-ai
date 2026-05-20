@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 3.2 — A small MLP: 784 → 128 → 10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  .controls { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; font-size: 13px; color: var(--color-secondary); }
+  .controls input { width: 220px; }
+  .controls .val { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--color-ink); }
+  #chart { width: 100%; height: 460px; }
+  .layer-box { stroke: var(--color-ink); stroke-width: 1; cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .layer-box.primary { fill: var(--color-red); }
+  .layer-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-white); font-weight: 600; }
+  .layer-sub   { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-white); }
+  .edge { stroke: var(--color-ink); stroke-width: 1.4; fill: none; }
+  .edge-card { fill: var(--color-white); stroke: var(--color-border); stroke-width: 1; }
+  .edge-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .meta { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .totals-row { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 12px; max-width: 65ch; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 3.2 — A small MLP: 784 → 128 → 10</h1>
+<p class="subtitle">Drag the hidden layer width to see flash and RAM move together.</p>
+<div class="controls">
+  <label for="hidden">hidden width</label>
+  <input id="hidden" type="range" min="8" max="512" value="128" step="8">
+  <span class="val" id="hiddenVal">128</span>
+</div>
+<div id="chart" role="img" aria-labelledby="t-fig02 d-fig02"></div>
+<p class="caption">Weights dominate flash by three orders of magnitude. Peak activation barely registers.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip()      { tooltip.transition().duration(100).style('opacity', 0); }
+
+const fmtBytes = n => n < 1024 ? `${n} B` : n < 1024*1024 ? `${(n/1024).toFixed(1)} KB` : `${(n/1024/1024).toFixed(2)} MB`;
+
+let hidden = 128;
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = container.clientHeight || 460;
+
+  const input = 784, output = 10;
+  const W1 = input * hidden * 4;       // float32
+  const W2 = hidden * output * 4;
+  const biases = (hidden + output) * 4;
+  const flashTotal = W1 + W2 + biases;
+  const peakRam    = Math.max(input, hidden, output) * 4;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-fig02 d-fig02');
+  svg.append('title').attr('id','t-fig02').text('Small MLP — 784 to hidden to 10');
+  svg.append('desc').attr('id','d-fig02').text('Three-layer fully connected network with edges labeled by weight matrix size and totals for flash and peak RAM.');
+
+  svg.append('defs').append('marker').attr('id','ar02')
+    .attr('markerWidth',8).attr('markerHeight',6).attr('refX',7).attr('refY',3).attr('orient','auto')
+    .append('polygon').attr('points','0 0, 8 3, 0 6').attr('fill','var(--color-ink)');
+
+  // layer rectangles sized by neuron count (sqrt for height)
+  const maxH = 220;
+  const rScale = d3.scaleSqrt().domain([1, 784]).range([16, maxH]);
+
+  const layers = [
+    { x: 0.16, count: input,  label: 'input',  bytes: input*4,  primary: false, fill: '#2a1a0e' },
+    { x: 0.50, count: hidden, label: 'hidden', bytes: hidden*4, primary: true,  fill: 'var(--color-red)' },
+    { x: 0.84, count: output, label: 'output', bytes: output*4, primary: false, fill: '#8a8480' }
+  ];
+
+  const centerY = totalHeight/2 - 20;
+
+  layers.forEach((L, i) => {
+    const h = rScale(L.count);
+    const w = 110;
+    const xL = L.x*totalWidth - w/2;
+    const yL = centerY - h/2;
+
+    svg.append('rect').attr('class','layer-box')
+      .attr('x', xL).attr('y', yL).attr('width', w).attr('height', h)
+      .attr('fill', L.fill)
+      .attr('tabindex', 0)
+      .attr('aria-label', `${L.label}: ${L.count} neurons, activation ${fmtBytes(L.bytes)}`)
+      .on('mouseover', (e) => showTip(e, `<strong>${L.label}</strong><br>${L.count} neurons<br>activation: ${fmtBytes(L.bytes)}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+
+    svg.append('text').attr('class','layer-label')
+      .attr('x', L.x*totalWidth).attr('y', centerY-6)
+      .attr('text-anchor','middle').text(L.label);
+    svg.append('text').attr('class','layer-sub')
+      .attr('x', L.x*totalWidth).attr('y', centerY+10)
+      .attr('text-anchor','middle').text(`${L.count} neurons`);
+    svg.append('text').attr('class','layer-sub')
+      .attr('x', L.x*totalWidth).attr('y', centerY+24)
+      .attr('text-anchor','middle').text(fmtBytes(L.bytes));
+
+    L.right = xL + w;
+    L.left  = xL;
+  });
+
+  // edges
+  const edges = [
+    { src: 0, dst: 1, weights: input*hidden,  bytes: W1, label: `W₁ · ${input} × ${hidden}` },
+    { src: 1, dst: 2, weights: hidden*output, bytes: W2, label: `W₂ · ${hidden} × ${output}` }
+  ];
+
+  edges.forEach(e => {
+    const a = layers[e.src], b = layers[e.dst];
+    svg.append('path').attr('class','edge')
+      .attr('d', `M ${a.right} ${centerY} L ${b.left} ${centerY}`)
+      .attr('marker-end','url(#ar02)');
+
+    const midX = (a.right + b.left)/2;
+    svg.append('rect').attr('class','edge-card')
+      .attr('x', midX-58).attr('y', centerY-32).attr('width', 116).attr('height', 30);
+    svg.append('text').attr('class','edge-text')
+      .attr('x', midX).attr('y', centerY-18).attr('text-anchor','middle').text(e.label);
+    svg.append('text').attr('class','edge-text')
+      .attr('x', midX).attr('y', centerY-6).attr('text-anchor','middle').text(`≈ ${fmtBytes(e.bytes)}`);
+  });
+
+  // totals strip
+  const stripY = totalHeight - 56;
+  svg.append('line').attr('x1',40).attr('y1',stripY-14).attr('x2',totalWidth-40).attr('y2',stripY-14)
+    .attr('stroke','var(--color-border)').attr('stroke-width',0.75);
+  svg.append('text').attr('class','totals-row').attr('x',60).attr('y',stripY+6).attr('font-weight','600').text('Totals');
+  svg.append('text').attr('class','totals-row').attr('x',160).attr('y',stripY+6).text(`flash: ${fmtBytes(flashTotal)} (W₁ + W₂ + biases)`);
+  svg.append('text').attr('class','totals-row').attr('x',totalWidth-260).attr('y',stripY+6).text(`peak RAM: ${fmtBytes(peakRam)} (one hidden layer)`);
+}
+
+document.getElementById('hidden').addEventListener('input', (e) => {
+  hidden = +e.target.value;
+  document.getElementById('hiddenVal').textContent = hidden;
+  draw();
+});
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

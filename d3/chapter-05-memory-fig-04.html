@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.4 — Three activation-layout strategies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .panel { border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 12px; margin-bottom: 16px; }
+  .panel-chart { width: 100%; height: 260px; }
+  .panel-cost { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; color: var(--color-ochre); margin-top: 12px; }
+  .buffer-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-white); }
+  .buffer-note  { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 5.4 — Three ways to lay out activation memory</h1>
+<p class="subtitle">Each strategy applies to a different operator class; a real engine combines all three.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">1 · in-place</div>
+    <div class="panel-sub">ReLU, BN, residual-add</div>
+    <div id="chartInPlace" class="panel-chart" role="img" aria-label="In-place computation diagram"></div>
+    <div class="panel-cost">cost: 0 extra buffer</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">2 · buffer reuse</div>
+    <div class="panel-sub">feedforward layers, ping-pong</div>
+    <div id="chartReuse" class="panel-chart" role="img" aria-label="Buffer reuse ping-pong diagram"></div>
+    <div class="panel-cost">cost: 2× largest tensor</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">3 · scratch pad</div>
+    <div class="panel-sub">im2col tiles, GEMM workspace</div>
+    <div id="chartScratch" class="panel-chart" role="img" aria-label="Scratch pad diagram"></div>
+    <div class="panel-cost">cost: arena + tile budget</div>
+  </div>
+</div>
+<p class="caption">In-place is free when shapes match; reuse halves arena; scratch is the silent killer when kernels assume desktop matmul.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function tip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function tipMove(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function tipHide() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function addArrowMarker(svg, id) {
+  svg.append('defs').append('marker')
+    .attr('id', id).attr('markerWidth', 8).attr('markerHeight', 6)
+    .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+}
+
+function drawInPlace(selector) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 260, h = container.clientHeight || 260;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  addArrowMarker(svg, 'arrow-inplace');
+  const g = svg.append('g');
+  g.append('rect').attr('x', 20).attr('y', 60).attr('width', w - 40).attr('height', 50).attr('fill', '#404040')
+    .attr('tabindex', 0).attr('aria-label', 'Single buffer holds both input and output')
+    .on('mouseover', e => tip(e, '<strong>buffer B</strong><br>read in[i] → write back to in[i]'))
+    .on('mousemove', tipMove).on('mouseout', tipHide);
+  g.append('text').attr('class', 'buffer-label').attr('x', w / 2).attr('y', 80).attr('text-anchor', 'middle').text('buffer B');
+  g.append('text').attr('class', 'buffer-label').attr('x', w / 2).attr('y', 98).attr('text-anchor', 'middle').text('read in[i] → write in[i]');
+  g.append('path').attr('d', `M 40 130 Q ${w/2} 170 ${w-40} 130`).attr('fill', 'none').attr('stroke', 'var(--color-ink)').attr('marker-end', 'url(#arrow-inplace)');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 200).attr('text-anchor', 'middle').text('output dimensions = input');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 218).attr('text-anchor', 'middle').text('one read, one write, same address');
+}
+
+function drawReuse(selector) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 260, h = container.clientHeight || 260;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  addArrowMarker(svg, 'arrow-reuse');
+  const g = svg.append('g');
+  const bw = (w - 60) / 2;
+  // top row
+  g.append('rect').attr('x', 20).attr('y', 40).attr('width', bw).attr('height', 50).attr('fill', 'var(--color-ink)')
+    .attr('tabindex', 0).attr('aria-label', 'Buffer A holds L1 input')
+    .on('mouseover', e => tip(e, '<strong>buffer A</strong><br>L1 in')).on('mousemove', tipMove).on('mouseout', tipHide);
+  g.append('text').attr('class', 'buffer-label').attr('x', 20 + bw / 2).attr('y', 68).attr('text-anchor', 'middle').text('A · L1 in');
+  g.append('rect').attr('x', 40 + bw).attr('y', 40).attr('width', bw).attr('height', 50).attr('fill', '#787878')
+    .attr('tabindex', 0).attr('aria-label', 'Buffer B holds L1 output')
+    .on('mouseover', e => tip(e, '<strong>buffer B</strong><br>L1 out')).on('mousemove', tipMove).on('mouseout', tipHide);
+  g.append('text').attr('class', 'buffer-label').attr('x', 40 + bw + bw / 2).attr('y', 68).attr('text-anchor', 'middle').text('B · L1 out');
+  g.append('line').attr('x1', 20 + bw + 2).attr('x2', 38 + bw).attr('y1', 65).attr('y2', 65)
+    .attr('stroke', 'var(--color-ink)').attr('marker-end', 'url(#arrow-reuse)');
+  // bottom row
+  g.append('rect').attr('x', 20).attr('y', 120).attr('width', bw).attr('height', 50).attr('fill', '#787878');
+  g.append('text').attr('class', 'buffer-label').attr('x', 20 + bw / 2).attr('y', 148).attr('text-anchor', 'middle').text('A reused · L2 out');
+  g.append('rect').attr('x', 40 + bw).attr('y', 120).attr('width', bw).attr('height', 50).attr('fill', 'var(--color-ink)');
+  g.append('text').attr('class', 'buffer-label').attr('x', 40 + bw + bw / 2).attr('y', 148).attr('text-anchor', 'middle').text('B · L2 in');
+  g.append('line').attr('x1', 38 + bw).attr('x2', 22 + bw).attr('y1', 145).attr('y2', 145)
+    .attr('stroke', 'var(--color-ink)').attr('marker-end', 'url(#arrow-reuse)');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 200).attr('text-anchor', 'middle').text('peak = max(layer outputs)');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 218).attr('text-anchor', 'middle').text('two buffers ping-pong');
+}
+
+function drawScratch(selector) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 260, h = container.clientHeight || 260;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g');
+  g.append('rect').attr('x', 20).attr('y', 40).attr('width', w - 40).attr('height', 60).attr('fill', 'var(--color-ink)')
+    .attr('tabindex', 0).attr('aria-label', 'Main activation arena')
+    .on('mouseover', e => tip(e, '<strong>main arena</strong><br>layer inputs + outputs'))
+    .on('mousemove', tipMove).on('mouseout', tipHide);
+  g.append('text').attr('class', 'buffer-label').attr('x', w / 2).attr('y', 64).attr('text-anchor', 'middle').text('main activation arena');
+  g.append('text').attr('class', 'buffer-label').attr('x', w / 2).attr('y', 82).attr('text-anchor', 'middle').text('layer inputs + outputs');
+  // scratch tile
+  g.append('rect').attr('x', 20).attr('y', 120).attr('width', 80).attr('height', 32).attr('fill', 'var(--color-ochre)')
+    .attr('tabindex', 0).attr('aria-label', 'Scratch tile sized to fit in cache')
+    .on('mouseover', e => tip(e, '<strong>scratch tile</strong><br>im2col workspace, cache-sized'))
+    .on('mousemove', tipMove).on('mouseout', tipHide);
+  g.append('text').attr('class', 'buffer-label').attr('x', 60).attr('y', 140).attr('text-anchor', 'middle').text('scratch');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 180).attr('text-anchor', 'middle').text('tile sized to fit in cache');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 198).attr('text-anchor', 'middle').text('CMSIS-NN, TFLite Micro');
+  g.append('text').attr('class', 'buffer-note').attr('x', w / 2).attr('y', 216).attr('text-anchor', 'middle').text('keep this tiny or it eats SRAM');
+}
+
+function drawAll() {
+  drawInPlace('#chartInPlace');
+  drawReuse('#chartReuse');
+  drawScratch('#chartScratch');
+}
+drawAll();
+const ro = new ResizeObserver(() => drawAll());
+ro.observe(document.getElementById('chartInPlace'));
+</script>
+</body>
+</html>

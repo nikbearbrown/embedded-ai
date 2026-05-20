@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 6.5 — Latency–accuracy Pareto plot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; max-width: 65ch; }
+  #chart { width: 100%; height: 520px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--color-ink); }
+  .gridline { stroke: var(--color-border); stroke-opacity: 0.5; shape-rendering: crispEdges; }
+  .feas { fill: var(--color-red); fill-opacity: 0.08; stroke: var(--color-red); stroke-opacity: 0.4; stroke-dasharray: 4 4; }
+  .feas-label { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 12px; fill: var(--color-red); }
+  .threshold { stroke: var(--color-ink); stroke-width: 1.25; stroke-dasharray: 5 4; }
+  .threshold-label { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); }
+  .frontier { stroke: var(--color-secondary); stroke-width: 1; stroke-dasharray: 2 3; fill: none; }
+  .pt { stroke: var(--color-white); stroke-width: 1.5; cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .pt-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; fill: var(--color-ink); pointer-events: none; }
+  .pt-sub { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); pointer-events: none; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 6.5 — Latency–accuracy Pareto plot</h1>
+<p class="subtitle">Three gesture-recognition variants on a Cortex-M4 sustaining 60 MMAC/s for int8. Feasible region: latency ≤ 250 ms AND accuracy ≥ 88%. None of A, B, C lands inside it.</p>
+<div id="chart" role="img" aria-labelledby="pareto-t pareto-d"></div>
+<p id="pareto-t" style="display:none">Latency-accuracy Pareto frontier with feasibility region.</p>
+<p id="pareto-d" style="display:none">Three model variants A (1333 ms, 92%), B (583 ms, 89%), and C (200 ms, 84%) plotted against a 250 ms deadline and 88% accuracy floor.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const modelData = [
+  { id: 'A', label: '80 M MAC, 92%', latency: 1333, accuracy: 92, status: 'fails deadline', kind: 'over-deadline', note: '2 M params · accurate but slow' },
+  { id: 'B', label: '35 M MAC, 89%', latency: 583,  accuracy: 89, status: 'fails deadline', kind: 'over-deadline', note: '800 K params · still above 250 ms' },
+  { id: 'C', label: '12 M MAC, 84%', latency: 200,  accuracy: 84, status: 'fails accuracy',  kind: 'under-floor',   note: '300 K params · fast enough but below 88% floor' }
+];
+
+const DEADLINE = 250;
+const FLOOR = 88;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.id} — ${d.label}</strong><br>Latency: ${d.latency.toLocaleString()} ms<br>Accuracy: ${d.accuracy}%<br><span style="color:var(--color-red)">${d.status}</span><br><span style="opacity:0.85">${d.note}</span>`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const sel = '#chart';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 520;
+  const margin = { top: 56, right: 40, bottom: 64, left: 72 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'pareto-t pareto-d');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog().domain([100, 3000]).range([0, chartWidth]);
+  const yScaleLinear = d3.scaleLinear().domain([80, 96]).range([chartHeight, 0]);
+
+  // Gridlines
+  const xTicks = [100, 200, 500, 1000, 2000];
+  const yTicks = [80, 84, 88, 92, 96];
+  gChart.selectAll('.gridline-x').data(xTicks).join('line').attr('class', 'gridline')
+    .attr('x1', d => xScaleLog(d)).attr('x2', d => xScaleLog(d)).attr('y1', 0).attr('y2', chartHeight);
+  gChart.selectAll('.gridline-y').data(yTicks).join('line').attr('class', 'gridline')
+    .attr('x1', 0).attr('x2', chartWidth).attr('y1', d => yScaleLinear(d)).attr('y2', d => yScaleLinear(d));
+
+  // Feasibility region (upper-left of intersection)
+  gChart.append('rect').attr('class', 'feas')
+    .attr('x', 0).attr('y', 0)
+    .attr('width', xScaleLog(DEADLINE))
+    .attr('height', yScaleLinear(FLOOR));
+  gChart.append('text').attr('class', 'feas-label')
+    .attr('x', xScaleLog(DEADLINE) / 2)
+    .attr('y', yScaleLinear(FLOOR) / 2 - 8)
+    .attr('text-anchor', 'middle').text('feasible region');
+  gChart.append('text').attr('class', 'feas-label')
+    .attr('x', xScaleLog(DEADLINE) / 2)
+    .attr('y', yScaleLinear(FLOOR) / 2 + 8)
+    .attr('text-anchor', 'middle').text('(≤ 250 ms AND ≥ 88%)');
+
+  // Threshold lines
+  gChart.append('line').attr('class', 'threshold')
+    .attr('x1', xScaleLog(DEADLINE)).attr('x2', xScaleLog(DEADLINE)).attr('y1', 0).attr('y2', chartHeight);
+  gChart.append('text').attr('class', 'threshold-label')
+    .attr('x', xScaleLog(DEADLINE) + 4).attr('y', 12).text('250 ms deadline');
+  gChart.append('line').attr('class', 'threshold')
+    .attr('x1', 0).attr('x2', chartWidth).attr('y1', yScaleLinear(FLOOR)).attr('y2', yScaleLinear(FLOOR));
+  gChart.append('text').attr('class', 'threshold-label')
+    .attr('x', chartWidth - 4).attr('y', yScaleLinear(FLOOR) - 6).attr('text-anchor', 'end').text('88% accuracy floor');
+
+  // Axes
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLog).tickValues(xTicks).tickFormat(d => d));
+  gChart.append('g').attr('class', 'axis').call(d3.axisLeft(yScaleLinear).tickValues(yTicks).tickFormat(d => d));
+
+  // Axis titles
+  svg.append('text').attr('class', 'axis-title')
+    .attr('x', margin.left + chartWidth / 2).attr('y', totalHeight - 18).attr('text-anchor', 'middle')
+    .text('Inference latency (ms, log scale)');
+  svg.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(20,${margin.top + chartHeight / 2}) rotate(-90)`)
+    .attr('text-anchor', 'middle').text('Accuracy (%)');
+
+  // Pareto frontier (sorted by latency)
+  const frontier = [...modelData].sort((a, b) => a.latency - b.latency);
+  const lineGen = d3.line().x(d => xScaleLog(d.latency)).y(d => yScaleLinear(d.accuracy));
+  gChart.append('path').datum(frontier).attr('class', 'frontier').attr('d', lineGen);
+
+  // Points
+  gChart.selectAll('.pt').data(modelData).join('circle')
+    .attr('class', 'pt')
+    .attr('cx', d => xScaleLog(d.latency))
+    .attr('cy', d => yScaleLinear(d.accuracy))
+    .attr('r', 7)
+    .attr('fill', d => d.kind === 'under-floor' ? 'var(--color-red)' : 'var(--color-ink)')
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.id}: ${d.label}, ${d.latency} ms, ${d.accuracy}%, ${d.status}`)
+    .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  gChart.selectAll('.pt-label').data(modelData).join('text')
+    .attr('class', 'pt-label')
+    .attr('x', d => xScaleLog(d.latency) + 12)
+    .attr('y', d => yScaleLinear(d.accuracy) - 4)
+    .text(d => `${d.id} — ${d.label}`);
+  gChart.selectAll('.pt-sub').data(modelData).join('text')
+    .attr('class', 'pt-sub')
+    .attr('x', d => xScaleLog(d.latency) + 12)
+    .attr('y', d => yScaleLinear(d.accuracy) + 12)
+    .text(d => `${d.latency.toLocaleString()} ms — ${d.status}`);
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

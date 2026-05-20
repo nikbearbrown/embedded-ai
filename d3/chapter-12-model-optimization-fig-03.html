@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 12.3 — Unstructured vs structured pruning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #2a1a0e; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 13px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 240px; }
+  .cell-on  { fill: var(--color-ink); }
+  .cell-off { fill: var(--color-white); stroke: var(--color-border); stroke-width: 0.6; }
+  .cell-ghost { fill: none; stroke: var(--color-border); stroke-width: 0.6; stroke-dasharray: 3 2; }
+  .verdict { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .verdict-good { color: var(--color-ink); font-weight: 700; }
+  .verdict-bad { color: var(--color-red); font-weight: 700; }
+  .badge { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; color: var(--color-white); padding: 4px 10px; display: inline-block; margin-top: 12px; }
+  .badge.bad { background: var(--color-red); }
+  .badge.good { background: var(--color-ink); }
+  table.effects { width: 100%; margin-top: 12px; border-collapse: collapse; }
+  table.effects td { padding: 4px 0; font-size: 12px; font-family: 'Inter', sans-serif; }
+  table.effects td:last-child { text-align: right; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 75ch; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 12.3 — Unstructured vs structured pruning</h1>
+<p class="subtitle">Embedded inference assumes dense GEMM. Only one of these versions shrinks the kernel.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Unstructured pruning</div>
+    <div class="panel-sub">drop individual weights below threshold</div>
+    <div id="chartUnstruct" class="chart" role="img" aria-label="Weight matrix with scattered zeros"></div>
+    <table class="effects">
+      <tr><td>Storage</td><td class="verdict-good">shrinks (non-zeros + indices)</td></tr>
+      <tr><td>SRAM</td><td class="verdict-bad">unchanged</td></tr>
+      <tr><td>Latency</td><td class="verdict-bad">unchanged</td></tr>
+    </table>
+    <span class="badge bad">PAPER WIN, MCU LOSS</span>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Structured pruning</div>
+    <div class="panel-sub">drop whole output channels</div>
+    <div id="chartStruct" class="chart" role="img" aria-label="Smaller dense weight matrix"></div>
+    <table class="effects">
+      <tr><td>Storage</td><td class="verdict-good">shrinks</td></tr>
+      <tr><td>SRAM</td><td class="verdict-good">shrinks (fewer channels)</td></tr>
+      <tr><td>Latency</td><td class="verdict-good">shrinks (fewer MACs)</td></tr>
+    </table>
+    <span class="badge good">WHAT EMBEDDED USES</span>
+  </div>
+</div>
+<p class="caption">Sparse matrices live in papers. Dense smaller matrices live in firmware. Hover any cell to see its index.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').style('position', 'absolute').style('pointer-events', 'none').style('opacity', 0).style('background', 'var(--color-ink)').style('color', 'var(--color-white)').style('padding', '6px 10px').style('font-size', '12px');
+function showTip(event, d) {
+  tooltip.html(d.html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px').transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function buildMatrix(rows, cols, zeroProbOrCutCols) {
+  const data = [];
+  if (Array.isArray(zeroProbOrCutCols)) {
+    const cut = new Set(zeroProbOrCutCols);
+    for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+      data.push({ i, j, on: !cut.has(j), ghost: cut.has(j) });
+    }
+  } else {
+    // deterministic pseudo-random by hash
+    for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+      const h = (i * 31 + j * 17 + 13) % 100;
+      data.push({ i, j, on: h / 100 >= zeroProbOrCutCols });
+    }
+  }
+  return data;
+}
+
+function drawMatrix(selector, rows, cols, cells, opts) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('*').remove();
+  const w = container.clientWidth || 280;
+  const h = container.clientHeight || 240;
+  const cellW = Math.min(20, (w - 40) / cols);
+  const cellH = Math.min(20, (h - 40) / rows);
+  const startX = (w - cellW * cols) / 2;
+  const startY = 20;
+  const svg = d3.select(selector).append('svg').attr('width', w).attr('height', h);
+  svg.selectAll('rect.cell').data(cells).join('rect')
+    .attr('class', d => d.ghost ? 'cell-ghost' : (d.on ? 'cell-on' : 'cell-off'))
+    .attr('x', d => startX + d.j * cellW)
+    .attr('y', d => startY + d.i * cellH)
+    .attr('width', cellW - 1).attr('height', cellH - 1)
+    .style('cursor', 'pointer')
+    .on('mouseover', (event, d) => showTip(event, { html: `<strong>[${d.i}, ${d.j}]</strong><br/>${d.ghost ? 'removed channel' : (d.on ? 'weight present' : 'zeroed')}` }))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  svg.append('text').attr('x', w / 2).attr('y', h - 12).attr('text-anchor', 'middle').style('font-family', 'JetBrains Mono').style('font-size', '11px').style('fill', 'var(--color-secondary)').text(opts.label);
+}
+
+function draw() {
+  drawMatrix('#chartUnstruct', 8, 8, buildMatrix(8, 8, 0.3), { label: '8 columns × 8 rows · scattered zeros' });
+  drawMatrix('#chartStruct', 8, 8, buildMatrix(8, 8, [5, 6, 7]), { label: '5 columns × 8 rows · channels 5, 6, 7 removed' });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+['#chartUnstruct', '#chartStruct'].forEach(s => ro.observe(document.querySelector(s)));
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 2.3 — Duty cycle decides battery life</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .panel { border: 1px solid var(--color-border); padding: 14px; }
+  .panel-title { font-family: 'EB Garamond', Georgia, serif; font-weight: 700; font-size: 15px; }
+  .panel-sub { color: var(--color-secondary); font-size: 11px; margin-bottom: 8px; font-family: 'Inter', sans-serif; }
+  .strip { width: 100%; height: 160px; }
+  .summary { margin-top: 8px; font-family: 'EB Garamond', Georgia, serif; }
+  .summary .iavg { font-weight: 700; font-size: 14px; }
+  .summary .life { font-size: 14px; font-weight: 700; }
+  .summary .pass { color: var(--color-ink); }
+  .summary .fail { color: var(--color-red); }
+  .summary .verdict { font-size: 11px; font-style: italic; color: var(--color-secondary); font-family: 'Inter', sans-serif; }
+  #scale-wrap { margin-top: 24px; border: 1px solid var(--color-border); padding: 16px; }
+  #scaleStrip { width: 100%; height: 100px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .pulse-pass { fill: var(--color-ink); }
+  .pulse-fail { fill: var(--color-red); }
+  .idle-line  { stroke: var(--color-secondary); stroke-width: 2; }
+  .threshold-line { stroke: var(--color-red); stroke-width: 1.5; stroke-dasharray: 4 2; }
+  .threshold-label { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-weight: 700; fill: var(--color-red); }
+  .scale-dot { stroke: var(--color-white); stroke-width: 2; }
+  .scale-label { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-weight: 700; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; font-family: 'Inter', sans-serif; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 2.3 — Duty cycle decides battery life</h1>
+<p class="subtitle">nRF52840 wearable · 5.3 mA active · 2.8 µA idle · 220 mAh coin cell · two-week target</p>
+<div id="grid">
+  <div class="panel">
+    <div class="panel-title">Case A</div>
+    <div class="panel-sub">80 ms inference every 5 s</div>
+    <div id="stripA" class="strip" role="img" aria-labelledby="t-A d-A"></div>
+    <div class="summary">
+      <div class="iavg">I<sub>avg</sub> ≈ 0.088 mA</div>
+      <div class="life pass">~104 days</div>
+      <div class="verdict">passes two-week target</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Case B</div>
+    <div class="panel-sub">160 ms inference every 5 s</div>
+    <div id="stripB" class="strip" role="img" aria-labelledby="t-B d-B"></div>
+    <div class="summary">
+      <div class="iavg">I<sub>avg</sub> ≈ 0.172 mA</div>
+      <div class="life pass">~53 days</div>
+      <div class="verdict">still passes</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Case C</div>
+    <div class="panel-sub">160 ms inference every 1 s</div>
+    <div id="stripC" class="strip" role="img" aria-labelledby="t-C d-C"></div>
+    <div class="summary">
+      <div class="iavg">I<sub>avg</sub> ≈ 0.85 mA</div>
+      <div class="life fail">~11 days</div>
+      <div class="verdict">misses two-week threshold</div>
+    </div>
+  </div>
+</div>
+<div id="scale-wrap">
+  <div class="panel-title">Battery life · log scale</div>
+  <div id="scaleStrip" role="img" aria-labelledby="t-scale d-scale"></div>
+</div>
+<p class="caption">Nothing about the model, hardware, or firmware changed. The duty cycle alone took the device out of spec.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const cases = [
+  { id: 'A', selector: '#stripA', activeMs: 80,  periodMs: 5000, fail: false, days: 104, label: 'A · 104 d' },
+  { id: 'B', selector: '#stripB', activeMs: 160, periodMs: 5000, fail: false, days: 53,  label: 'B · 53 d'  },
+  { id: 'C', selector: '#stripC', activeMs: 160, periodMs: 1000, fail: true,  days: 11,  label: 'C · 11 d'  }
+];
+const thresholdDays = 14;
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function drawStrip(c) {
+  d3.select(c.selector).selectAll('*').remove();
+  const container = document.querySelector(c.selector);
+  const totalWidth  = container.clientWidth  || 240;
+  const totalHeight = container.clientHeight || 160;
+  const margin = { top: 16, right: 12, bottom: 24, left: 38 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(c.selector).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', `t-${c.id} d-${c.id}`);
+  svg.append('title').attr('id', `t-${c.id}`).text(`Case ${c.id} duty-cycle profile`);
+  svg.append('desc').attr('id', `d-${c.id}`).text(`Active current pulse of ${c.activeMs} ms inside a ${c.periodMs} ms period.`);
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, c.periodMs]).range([0, chartWidth]);
+  const yScaleLinear = d3.scaleLinear().domain([0, 5.3]).range([chartHeight, 0]);
+
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLinear).tickValues([0, 5.3]).tickFormat(d => d === 0 ? 'idle' : '5.3 mA'));
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).tickValues([0, c.periodMs]).tickFormat(d => d === 0 ? '0' : (c.periodMs/1000) + ' s'));
+
+  // idle baseline
+  gChart.append('line').attr('class', 'idle-line')
+    .attr('x1', xScaleLinear(c.activeMs)).attr('x2', xScaleLinear(c.periodMs))
+    .attr('y1', chartHeight - 1).attr('y2', chartHeight - 1);
+
+  // active pulse
+  gChart.append('rect')
+    .attr('class', c.fail ? 'pulse-fail' : 'pulse-pass')
+    .attr('x', xScaleLinear(0))
+    .attr('y', yScaleLinear(5.3))
+    .attr('width', Math.max(2, xScaleLinear(c.activeMs) - xScaleLinear(0)))
+    .attr('height', chartHeight)
+    .attr('tabindex', 0)
+    .attr('aria-label', `Active pulse ${c.activeMs} milliseconds`)
+    .on('mouseover', (event) => showTip(event, `Case ${c.id}<br>${c.activeMs} ms active / ${c.periodMs/1000} s period`))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+}
+
+function drawScale() {
+  d3.select('#scaleStrip').selectAll('*').remove();
+  const container = document.getElementById('scaleStrip');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 100;
+  const margin = { top: 30, right: 30, bottom: 36, left: 30 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+
+  const svg = d3.select('#scaleStrip').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-scale d-scale');
+  svg.append('title').attr('id', 't-scale').text('Battery life log-scale comparison');
+  svg.append('desc').attr('id', 'd-scale').text('Three dots along a log-scaled days axis showing Case A at 104 days, Case B at 53 days, and Case C at 11 days, against a 14-day threshold line.');
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog().domain([1, 1000]).range([0, chartWidth]);
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,16)`)
+    .call(d3.axisBottom(xScaleLog).tickValues([1, 10, 100, 1000]).tickFormat(d => d + ' d'));
+
+  // threshold
+  gChart.append('line').attr('class', 'threshold-line')
+    .attr('x1', xScaleLog(thresholdDays)).attr('x2', xScaleLog(thresholdDays))
+    .attr('y1', -4).attr('y2', 30);
+  gChart.append('text').attr('class', 'threshold-label')
+    .attr('x', xScaleLog(thresholdDays)).attr('y', -10).attr('text-anchor', 'middle')
+    .text('2-week threshold');
+
+  // dots
+  gChart.selectAll('.scale-dot')
+    .data(cases)
+    .join('circle')
+      .attr('class', 'scale-dot')
+      .attr('cx', d => xScaleLog(d.days)).attr('cy', 12).attr('r', 6)
+      .attr('fill', d => d.fail ? 'var(--color-red)' : 'var(--color-ink)')
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `Case ${d.id}: ${d.days} days`)
+      .on('mouseover', (event, d) => showTip(event, `Case ${d.id}<br>${d.days} days`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  gChart.selectAll('.scale-label')
+    .data(cases)
+    .join('text')
+      .attr('class', 'scale-label')
+      .attr('x', d => xScaleLog(d.days)).attr('y', -10).attr('text-anchor', 'middle')
+      .attr('fill', d => d.fail ? 'var(--color-red)' : 'var(--color-ink)')
+      .text(d => d.label)
+      .filter(d => d.days === thresholdDays).remove();
+}
+
+function draw() {
+  cases.forEach(drawStrip);
+  drawScale();
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+cases.forEach(c => ro.observe(document.querySelector(c.selector)));
+ro.observe(document.getElementById('scaleStrip'));
+</script>
+</body>
+</html>

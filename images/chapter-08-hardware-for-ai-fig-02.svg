@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t02 d02">
+  <title id="t02">NPU block diagram — MAC array, scratchpad, DMA, sequencer</title>
+  <desc id="d02">Block diagram of a microNPU. External memory on the left connects through a DMA engine to a local SRAM scratchpad. The scratchpad feeds a 16-by-16 grid of MAC processing elements. The MAC array writes back to an accumulator and then to the scratchpad. A thin sequencer block on the right issues control signals to all four blocks.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .blk { fill: #fdfcfb; stroke: #2a1a0e; stroke-width: 1.25; }
+      .blk-em { fill: #fdfcfb; stroke: #2a1a0e; stroke-width: 2; }
+      .pe { fill: #c8c4c0; stroke: #4a4540; stroke-width: 0.5; }
+    </style>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+    <marker id="ar-ctrl" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#8a8480"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">microNPU dataflow — weights and activations to MACs, back to memory</text>
+  <text x="32" y="48" class="sm">representative 16×16 MAC array with on-chip scratchpad and DMA</text>
+
+  <!-- External memory (off-chip) -->
+  <rect x="40" y="160" width="100" height="100" class="blk"/>
+  <text x="90" y="200" text-anchor="middle" class="lb">External</text>
+  <text x="90" y="216" text-anchor="middle" class="lb">memory</text>
+  <text x="90" y="234" text-anchor="middle" class="sm">flash / DRAM</text>
+  <text x="90" y="252" text-anchor="middle" class="sm">weights, model</text>
+
+  <!-- DMA engine -->
+  <rect x="170" y="180" width="80" height="60" class="blk"/>
+  <text x="210" y="206" text-anchor="middle" class="lb">DMA</text>
+  <text x="210" y="222" text-anchor="middle" class="sm">block xfer</text>
+
+  <!-- SRAM scratchpad -->
+  <rect x="280" y="120" width="100" height="180" class="blk-em"/>
+  <text x="330" y="146" text-anchor="middle" class="lb">Scratchpad</text>
+  <text x="330" y="162" text-anchor="middle" class="sm">SRAM, kB–MB</text>
+  <text x="330" y="190" text-anchor="middle" class="sm">— weights —</text>
+  <text x="330" y="220" text-anchor="middle" class="sm">— activations —</text>
+  <text x="330" y="250" text-anchor="middle" class="sm">— results —</text>
+  <text x="330" y="280" text-anchor="middle" class="sm">no cache, no</text>
+  <text x="330" y="293" text-anchor="middle" class="sm">arbitrary access</text>
+
+  <!-- MAC array 16x16 grid -->
+  <rect x="410" y="120" width="180" height="180" class="blk-em"/>
+  <text x="500" y="142" text-anchor="middle" class="lb">MAC array (16×16)</text>
+  <!-- 8x8 sample grid showing PEs (visual abstraction of 16x16) -->
+  <g transform="translate(424,154)">
+    <!-- 8 rows x 8 cols of small squares, 18 px each, gap 2 -->
+    <g>
+      <!-- row 0 -->
+      <rect x="0"   y="0"   width="14" height="14" class="pe"/>
+      <rect x="18"  y="0"   width="14" height="14" class="pe"/>
+      <rect x="36"  y="0"   width="14" height="14" class="pe"/>
+      <rect x="54"  y="0"   width="14" height="14" class="pe"/>
+      <rect x="72"  y="0"   width="14" height="14" class="pe"/>
+      <rect x="90"  y="0"   width="14" height="14" class="pe"/>
+      <rect x="108" y="0"   width="14" height="14" class="pe"/>
+      <rect x="126" y="0"   width="14" height="14" class="pe"/>
+      <!-- row 1 -->
+      <rect x="0"   y="18"  width="14" height="14" class="pe"/>
+      <rect x="18"  y="18"  width="14" height="14" class="pe"/>
+      <rect x="36"  y="18"  width="14" height="14" class="pe"/>
+      <rect x="54"  y="18"  width="14" height="14" class="pe"/>
+      <rect x="72"  y="18"  width="14" height="14" class="pe"/>
+      <rect x="90"  y="18"  width="14" height="14" class="pe"/>
+      <rect x="108" y="18"  width="14" height="14" class="pe"/>
+      <rect x="126" y="18"  width="14" height="14" class="pe"/>
+      <!-- row 2 -->
+      <rect x="0"   y="36"  width="14" height="14" class="pe"/>
+      <rect x="18"  y="36"  width="14" height="14" class="pe"/>
+      <rect x="36"  y="36"  width="14" height="14" class="pe"/>
+      <rect x="54"  y="36"  width="14" height="14" class="pe"/>
+      <rect x="72"  y="36"  width="14" height="14" class="pe"/>
+      <rect x="90"  y="36"  width="14" height="14" class="pe"/>
+      <rect x="108" y="36"  width="14" height="14" class="pe"/>
+      <rect x="126" y="36"  width="14" height="14" class="pe"/>
+      <!-- row 3 -->
+      <rect x="0"   y="54"  width="14" height="14" class="pe"/>
+      <rect x="18"  y="54"  width="14" height="14" class="pe"/>
+      <rect x="36"  y="54"  width="14" height="14" class="pe"/>
+      <rect x="54"  y="54"  width="14" height="14" class="pe"/>
+      <rect x="72"  y="54"  width="14" height="14" class="pe"/>
+      <rect x="90"  y="54"  width="14" height="14" class="pe"/>
+      <rect x="108" y="54"  width="14" height="14" class="pe"/>
+      <rect x="126" y="54"  width="14" height="14" class="pe"/>
+      <!-- row 4 -->
+      <rect x="0"   y="72"  width="14" height="14" class="pe"/>
+      <rect x="18"  y="72"  width="14" height="14" class="pe"/>
+      <rect x="36"  y="72"  width="14" height="14" class="pe"/>
+      <rect x="54"  y="72"  width="14" height="14" class="pe"/>
+      <rect x="72"  y="72"  width="14" height="14" class="pe"/>
+      <rect x="90"  y="72"  width="14" height="14" class="pe"/>
+      <rect x="108" y="72"  width="14" height="14" class="pe"/>
+      <rect x="126" y="72"  width="14" height="14" class="pe"/>
+      <!-- row 5 -->
+      <rect x="0"   y="90"  width="14" height="14" class="pe"/>
+      <rect x="18"  y="90"  width="14" height="14" class="pe"/>
+      <rect x="36"  y="90"  width="14" height="14" class="pe"/>
+      <rect x="54"  y="90"  width="14" height="14" class="pe"/>
+      <rect x="72"  y="90"  width="14" height="14" class="pe"/>
+      <rect x="90"  y="90"  width="14" height="14" class="pe"/>
+      <rect x="108" y="90"  width="14" height="14" class="pe"/>
+      <rect x="126" y="90"  width="14" height="14" class="pe"/>
+      <!-- row 6 -->
+      <rect x="0"   y="108" width="14" height="14" class="pe"/>
+      <rect x="18"  y="108" width="14" height="14" class="pe"/>
+      <rect x="36"  y="108" width="14" height="14" class="pe"/>
+      <rect x="54"  y="108" width="14" height="14" class="pe"/>
+      <rect x="72"  y="108" width="14" height="14" class="pe"/>
+      <rect x="90"  y="108" width="14" height="14" class="pe"/>
+      <rect x="108" y="108" width="14" height="14" class="pe"/>
+      <rect x="126" y="108" width="14" height="14" class="pe"/>
+      <!-- row 7 -->
+      <rect x="0"   y="126" width="14" height="14" class="pe"/>
+      <rect x="18"  y="126" width="14" height="14" class="pe"/>
+      <rect x="36"  y="126" width="14" height="14" class="pe"/>
+      <rect x="54"  y="126" width="14" height="14" class="pe"/>
+      <rect x="72"  y="126" width="14" height="14" class="pe"/>
+      <rect x="90"  y="126" width="14" height="14" class="pe"/>
+      <rect x="108" y="126" width="14" height="14" class="pe"/>
+      <rect x="126" y="126" width="14" height="14" class="pe"/>
+    </g>
+  </g>
+  <text x="500" y="290" text-anchor="middle" class="sm">256 MACs/cycle, int8</text>
+
+  <!-- Sequencer / controller -->
+  <rect x="610" y="180" width="60" height="60" class="blk"/>
+  <text x="640" y="205" text-anchor="middle" class="lb">Seq.</text>
+  <text x="640" y="222" text-anchor="middle" class="sm">controller</text>
+
+  <!-- Arrows: External -> DMA -> Scratchpad -> MAC -> Scratchpad -->
+  <line x1="140" y1="210" x2="166" y2="210" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="250" y1="210" x2="276" y2="210" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="380" y1="210" x2="406" y2="210" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
+  <!-- writeback curve from MAC array back to scratchpad (top) -->
+  <path d="M 500 116 C 500 90, 330 90, 330 116" fill="none" stroke="#2a1a0e" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+  <text x="415" y="86" text-anchor="middle" class="sm">accumulator writeback</text>
+
+  <!-- Control lines from sequencer (gray dashed) -->
+  <line x1="610" y1="195" x2="500" y2="120" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
+  <line x1="610" y1="215" x2="380" y2="215" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
+  <line x1="610" y1="230" x2="252" y2="225" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
+  <text x="640" y="260" text-anchor="middle" class="sm">no per-cycle</text>
+  <text x="640" y="273" text-anchor="middle" class="sm">instruction fetch</text>
+
+  <!-- Caption -->
+  <text x="350" y="395" text-anchor="middle" class="cap">Local scratchpad feeds a parallel MAC grid. A thin sequencer replaces the CPU's fetch/decode machine.</text>
+</svg>

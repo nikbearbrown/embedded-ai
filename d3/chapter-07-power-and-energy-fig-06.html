@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 7.6 — Battery life curve · agricultural sensor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 480px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .gridline { stroke: var(--color-border); stroke-width: 0.6; }
+  .curve   { fill: none; stroke: var(--color-ink); stroke-width: 1.8; }
+  .curve.no-radio { stroke: var(--color-ochre); stroke-width: 2; }
+  .target-line { stroke: var(--color-red); stroke-width: 1; stroke-dasharray: 6 4; }
+  .target-label { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-red); }
+  .legend { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .point { fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 7.6 — Battery life vs inference period</h1>
+<p class="subtitle">Agricultural sensor on 2 × AA cells · STM32L4 + LoRa · 8,550 mWh budget</p>
+<div id="chart" role="img"></div>
+<p class="caption">Four curves for four LoRa transmit intervals. Above the 180-day six-month target lives only when LoRa drops to once a day or vanishes. The inference axis barely matters once the radio is set — the radio is the binding constraint.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+// Energy model parameters (mJ).
+const E_INFERENCE = 7.92;
+const E_SENSOR    = 7.5;
+const SLEEP_MW    = 3.3 * 0.001;
+const E_LORA      = 60;
+const BUDGET_MJ   = 8550 * 3.6;
+const SECONDS_PER_DAY = 86400;
+
+function batteryDays(periodS, loraIntervalS) {
+  const inferenceAvgMw = (E_INFERENCE + E_SENSOR) / periodS;
+  const loraAvgMw      = loraIntervalS ? (E_LORA / loraIntervalS) : 0;
+  const avgMw          = inferenceAvgMw + loraAvgMw + SLEEP_MW;
+  const lifeSeconds    = BUDGET_MJ / avgMw;
+  return lifeSeconds / SECONDS_PER_DAY;
+}
+
+const periods = d3.range(0, 2.8, 0.05).map(e => Math.pow(10, e));
+const curves = [
+  { label: '1 / hour',  intervalS: 3600,    dashed: false, points: periods.map(p => ({ p, d: batteryDays(p, 3600) })) },
+  { label: '1 / 6 h',   intervalS: 21600,   dashed: true,  points: periods.map(p => ({ p, d: batteryDays(p, 21600) })) },
+  { label: '1 / day',   intervalS: 86400,   dashed: 'dot', points: periods.map(p => ({ p, d: batteryDays(p, 86400) })) },
+  { label: 'no radio',  intervalS: null,    dashed: false, points: periods.map(p => ({ p, d: batteryDays(p, null) })), noRadio: true }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 480;
+  const margin = { top: 32, right: 80, bottom: 64, left: 72 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'bl-title bl-desc');
+  svg.append('title').attr('id', 'bl-title').text('Battery life curves for an agricultural sensor.');
+  svg.append('desc').attr('id', 'bl-desc').text('Battery life in days against inference period in seconds, both on log scales. Four overlaid curves correspond to four LoRa transmission intervals. A dashed red line marks the 180-day six-month target.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog().domain([1, 600]).range([0, chartWidth]);
+  const yScaleLog = d3.scaleLog().domain([1, 10000]).range([chartHeight, 0]);
+
+  // gridlines
+  [10, 100, 1000].forEach(d => {
+    gChart.append('line').attr('class', 'gridline')
+      .attr('x1', 0).attr('x2', chartWidth)
+      .attr('y1', yScaleLog(d)).attr('y2', yScaleLog(d));
+  });
+  [10, 100].forEach(t => {
+    gChart.append('line').attr('class', 'gridline')
+      .attr('y1', 0).attr('y2', chartHeight)
+      .attr('x1', xScaleLog(t)).attr('x2', xScaleLog(t));
+  });
+
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLog).tickValues([1, 10, 100, 600]).tickFormat(d => d + ' s'));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLog).tickValues([1, 10, 100, 1000, 10000]).tickFormat(d => d.toLocaleString() + ' d'));
+
+  // 180-day target line
+  gChart.append('line').attr('class', 'target-line')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', yScaleLog(180)).attr('y2', yScaleLog(180));
+  gChart.append('text').attr('class', 'target-label')
+    .attr('x', chartWidth - 8).attr('y', yScaleLog(180) - 6)
+    .attr('text-anchor', 'end').text('180-day target');
+
+  // curves
+  const lineGen = d3.line().x(d => xScaleLog(d.p)).y(d => yScaleLog(Math.max(0.5, d.d)));
+  curves.forEach(c => {
+    const path = gChart.append('path').datum(c.points)
+      .attr('class', c.noRadio ? 'curve no-radio' : 'curve')
+      .attr('d', lineGen);
+    if (c.dashed === true) path.attr('stroke-dasharray', '6 3');
+    if (c.dashed === 'dot') path.attr('stroke-dasharray', '2 3');
+
+    // curve label at right edge
+    const last = c.points[c.points.length - 1];
+    gChart.append('text').attr('class', 'legend')
+      .attr('x', chartWidth + 4).attr('y', yScaleLog(Math.max(0.5, last.d)) + 4)
+      .style('fill', c.noRadio ? 'var(--color-ochre)' : 'var(--color-ink)')
+      .text(c.label);
+  });
+
+  // sample points: three example scheduling pairs from chapter — on the 1/hour curve
+  const examplePeriods = [1, 60, 600];
+  examplePeriods.forEach(p => {
+    const d = batteryDays(p, 3600);
+    gChart.append('circle').attr('class', 'point')
+      .attr('cx', xScaleLog(p)).attr('cy', yScaleLog(d)).attr('r', 4)
+      .attr('tabindex', 0)
+      .attr('aria-label', `${p} s inference period at 1/hour LoRa: ${d.toFixed(0)} days`)
+      .on('mouseover', (event) => showTip(event, `<strong>${p} s inference</strong><br/>LoRa 1/h<br/>${d.toFixed(0)} days`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

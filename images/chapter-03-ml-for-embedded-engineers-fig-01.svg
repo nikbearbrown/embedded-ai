@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t01 d01">
+  <title id="t01">Weights live in flash, activations live in RAM</title>
+  <desc id="d01">A feedforward network with arrows flowing left to right through four layers. Weights persist in flash storage between layers; activations are recomputed in RAM per inference and discarded after each layer.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .em { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-weight: bold; fill: #2a1a0e; }
+    </style>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+    <marker id="arGray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#8a8480"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <!-- Top label -->
+  <text x="350" y="32" text-anchor="middle" class="ti">Two memories. Two behaviors. One inference.</text>
+
+  <!-- FLASH BAND (top) -->
+  <rect x="40" y="58" width="620" height="116" fill="#f2ede6" stroke="#c8c4c0" stroke-width="1"/>
+  <text x="56" y="80" class="em">Flash · weights</text>
+  <text x="56" y="96" class="sm">fixed after training · large · persistent</text>
+
+  <!-- Weight bricks (sit above each edge in the network) -->
+  <g>
+    <rect x="180" y="108" width="80" height="44" fill="#2a1a0e"/>
+    <text x="220" y="128" text-anchor="middle" class="sm" fill="#fdfcfb">W₁</text>
+    <text x="220" y="144" text-anchor="middle" class="sm" fill="#fdfcfb">784×128</text>
+
+    <rect x="320" y="108" width="80" height="44" fill="#4a4540"/>
+    <text x="360" y="128" text-anchor="middle" class="sm" fill="#fdfcfb">W₂</text>
+    <text x="360" y="144" text-anchor="middle" class="sm" fill="#fdfcfb">128×128</text>
+
+    <rect x="460" y="108" width="80" height="44" fill="#8a8480"/>
+    <text x="500" y="128" text-anchor="middle" class="sm" fill="#fdfcfb">W₃</text>
+    <text x="500" y="144" text-anchor="middle" class="sm" fill="#fdfcfb">128×10</text>
+  </g>
+
+  <!-- Down arrows from weight bricks to layers -->
+  <line x1="220" y1="156" x2="220" y2="200" stroke="#8a8480" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arGray)"/>
+  <line x1="360" y1="156" x2="360" y2="200" stroke="#8a8480" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arGray)"/>
+  <line x1="500" y1="156" x2="500" y2="200" stroke="#8a8480" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arGray)"/>
+
+  <!-- NETWORK FLOW (middle band) -->
+  <!-- Layer nodes -->
+  <g>
+    <circle cx="100" cy="230" r="22" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <text x="100" y="234" text-anchor="middle" class="sm">x</text>
+
+    <circle cx="240" cy="230" r="22" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <text x="240" y="234" text-anchor="middle" class="sm">h₁</text>
+
+    <circle cx="380" cy="230" r="22" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <text x="380" y="234" text-anchor="middle" class="sm">h₂</text>
+
+    <circle cx="520" cy="230" r="22" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <text x="520" y="234" text-anchor="middle" class="sm">ŷ</text>
+  </g>
+
+  <!-- Forward arrows -->
+  <line x1="124" y1="230" x2="216" y2="230" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+  <line x1="264" y1="230" x2="356" y2="230" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+  <line x1="404" y1="230" x2="496" y2="230" stroke="#2a1a0e" stroke-width="1.4" marker-end="url(#ar)"/>
+
+  <!-- Layer captions -->
+  <text x="100" y="270" text-anchor="middle" class="sm">input</text>
+  <text x="240" y="270" text-anchor="middle" class="sm">hidden 1</text>
+  <text x="380" y="270" text-anchor="middle" class="sm">hidden 2</text>
+  <text x="520" y="270" text-anchor="middle" class="sm">output</text>
+
+  <!-- RAM BAND (bottom) -->
+  <rect x="40" y="290" width="620" height="84" fill="#f2ede6" stroke="#c8c4c0" stroke-width="1"/>
+  <text x="56" y="312" class="em">RAM · activations</text>
+  <text x="56" y="328" class="sm">recomputed every inference · transient · only peak two layers held</text>
+
+  <!-- Up arrows from layer to RAM buffer -->
+  <line x1="240" y1="252" x2="240" y2="290" stroke="#8a8480" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="380" y1="252" x2="380" y2="290" stroke="#8a8480" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- Activation buffers (the ones currently live) -->
+  <rect x="208" y="338" width="64" height="26" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1"/>
+  <text x="240" y="356" text-anchor="middle" class="sm">a₁ (512 B)</text>
+
+  <rect x="348" y="338" width="64" height="26" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1"/>
+  <text x="380" y="356" text-anchor="middle" class="sm">a₂ (512 B)</text>
+
+  <!-- Discard arrow: a1 will be freed once a2 is computed -->
+  <path d="M 272 351 C 300 351, 320 351, 346 351" fill="none" stroke="#8a8480" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="310" y="346" text-anchor="middle" class="sm" fill="#8a8480">discarded</text>
+
+  <!-- Side totals -->
+  <text x="660" y="128" text-anchor="end" class="lb">~406 KB total</text>
+  <text x="660" y="356" text-anchor="end" class="lb">&lt; 1 KB peak</text>
+
+  <!-- Caption -->
+  <text x="350" y="400" text-anchor="middle" class="cap">Weights are paid once and stored. Activations are paid every inference and thrown away.</text>
+</svg>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.3 — Activation footprint timeline: naive vs reuse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 460px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); }
+  .gridline { stroke: var(--color-border); stroke-opacity: 0.6; shape-rendering: crispEdges; }
+  .line-naive { fill: none; stroke: var(--color-red); stroke-width: 2; }
+  .line-reuse { fill: none; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 4 3; }
+  .area-gap  { fill: var(--color-border); opacity: 0.5; }
+  .dot { stroke: var(--color-white); stroke-width: 1.5; cursor: pointer; }
+  .dot-naive { fill: var(--color-red); }
+  .dot-reuse { fill: var(--color-ink); }
+  .label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ink); }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); font-weight: 600; }
+  .legend text { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 5.3 — Activation footprint across a small CNN</h1>
+<p class="subtitle">Naive allocation sums every buffer; reuse keeps only the largest live tensor.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Peak SRAM drops from 2.27 MB (dead on a 256 KB part) to 1.15 MB by reusing buffers across layers.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const layerData = [
+  { layer: 'Input',  shape: '96×96×3',  naive: 110,  reuse: 110  },
+  { layer: 'Conv1',  shape: '96×96×32', naive: 1260, reuse: 1150 },
+  { layer: 'Pool1',  shape: '48×48×32', naive: 1548, reuse: 288  },
+  { layer: 'Conv2',  shape: '48×48×64', naive: 2124, reuse: 576  },
+  { layer: 'Pool2',  shape: '24×24×64', naive: 2268, reuse: 144  },
+  { layer: 'FC',     shape: '10',       naive: 2270, reuse: 0    }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 56, right: 40, bottom: 80, left: 80 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Activation footprint timeline');
+  svg.append('desc').attr('id', 'chart-desc').text('Two lines comparing naive cumulative allocation against buffer-reuse strategy across CNN layers.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScalePoint = d3.scalePoint().domain(layerData.map(d => d.layer)).range([0, chartWidth]).padding(0.5);
+  const yScaleLinear = d3.scaleLinear().domain([0, 2500]).range([chartHeight, 0]);
+
+  // gridlines
+  yScaleLinear.ticks(5).forEach(t => {
+    gChart.append('line').attr('class', 'gridline').attr('aria-hidden', 'true')
+      .attr('x1', 0).attr('x2', chartWidth)
+      .attr('y1', yScaleLinear(t)).attr('y2', yScaleLinear(t));
+  });
+
+  // axes
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScalePoint));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLinear).ticks(5).tickFormat(d => d + ' KB'));
+
+  // shape sub-labels
+  gChart.selectAll('.shape-label').data(layerData).enter()
+    .append('text').attr('class', 'axis')
+    .attr('x', d => xScalePoint(d.layer)).attr('y', chartHeight + 36)
+    .attr('text-anchor', 'middle').text(d => d.shape);
+
+  // gap area
+  const areaGen = d3.area()
+    .x(d => xScalePoint(d.layer))
+    .y0(d => yScaleLinear(d.reuse))
+    .y1(d => yScaleLinear(d.naive));
+  gChart.append('path').attr('class', 'area-gap').attr('d', areaGen(layerData));
+
+  // lines
+  const naiveLine = d3.line().x(d => xScalePoint(d.layer)).y(d => yScaleLinear(d.naive));
+  const reuseLine = d3.line().x(d => xScalePoint(d.layer)).y(d => yScaleLinear(d.reuse));
+  gChart.append('path').attr('class', 'line-naive').attr('d', naiveLine(layerData));
+  gChart.append('path').attr('class', 'line-reuse').attr('d', reuseLine(layerData));
+
+  // dots
+  function dotHandlers(strategy) {
+    return {
+      mouseover: (event, d) => {
+        tooltip.html(`<strong>${d.layer}</strong> · ${d.shape}<br>${strategy}: ${strategy === 'naive cumulative' ? d.naive : d.reuse} KB`)
+          .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+          .transition().duration(150).style('opacity', 1);
+      },
+      mousemove: (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'),
+      mouseout: () => tooltip.transition().duration(100).style('opacity', 0)
+    };
+  }
+  const nh = dotHandlers('naive cumulative');
+  const rh = dotHandlers('reuse peak');
+
+  gChart.selectAll('.dot-naive-pt').data(layerData).enter().append('circle')
+    .attr('class', 'dot dot-naive').attr('tabindex', 0).attr('aria-label', d => `${d.layer} naive ${d.naive} KB`)
+    .attr('cx', d => xScalePoint(d.layer)).attr('cy', d => yScaleLinear(d.naive)).attr('r', 4)
+    .on('mouseover', nh.mouseover).on('mousemove', nh.mousemove).on('mouseout', nh.mouseout);
+
+  gChart.selectAll('.dot-reuse-pt').data(layerData).enter().append('circle')
+    .attr('class', 'dot dot-reuse').attr('tabindex', 0).attr('aria-label', d => `${d.layer} reuse ${d.reuse} KB`)
+    .attr('cx', d => xScalePoint(d.layer)).attr('cy', d => yScaleLinear(d.reuse)).attr('r', 4)
+    .on('mouseover', rh.mouseover).on('mousemove', rh.mousemove).on('mouseout', rh.mouseout);
+
+  // peak callouts
+  gChart.append('text').attr('class', 'annotation')
+    .attr('x', xScalePoint('FC')).attr('y', yScaleLinear(2270) - 10)
+    .attr('text-anchor', 'end').attr('fill', 'var(--color-red)')
+    .text('naive peak 2.27 MB');
+  gChart.append('text').attr('class', 'annotation')
+    .attr('x', xScalePoint('Conv1')).attr('y', yScaleLinear(1150) - 10)
+    .attr('text-anchor', 'start')
+    .text('reuse peak 1.15 MB');
+
+  // legend
+  const legend = gChart.append('g').attr('class', 'legend').attr('transform', `translate(${chartWidth - 220},-30)`);
+  legend.append('line').attr('x1', 0).attr('x2', 28).attr('y1', 0).attr('y2', 0).attr('stroke', 'var(--color-red)').attr('stroke-width', 2);
+  legend.append('text').attr('x', 34).attr('y', 4).text('naive cumulative');
+  legend.append('line').attr('x1', 110).attr('x2', 138).attr('y1', 0).attr('y2', 0).attr('stroke', 'var(--color-ink)').attr('stroke-width', 2).attr('stroke-dasharray', '4 3');
+  legend.append('text').attr('x', 144).attr('y', 4).text('buffer reuse');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

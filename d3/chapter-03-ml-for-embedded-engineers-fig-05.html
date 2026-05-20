@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 3.5 — Sensing task to model class</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 500px; }
+  .axis-arrow { stroke: var(--color-ink); stroke-width: 1.2; fill: none; }
+  .axis-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .col-head   { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .col-sub    { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .row-head   { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .row-sub    { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .grid-line  { stroke: var(--color-border); stroke-width: 0.5; }
+  .row-rule   { stroke: var(--color-border); stroke-width: 0.4; stroke-dasharray: 3 3; }
+  .primary-cell { fill: var(--color-ink); cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .primary-cell.brand { fill: var(--color-red); }
+  .primary-text { fill: var(--color-white); font-family: 'Inter', sans-serif; font-size: 11px; }
+  .fallback-mark { fill: none; stroke: var(--color-ink); stroke-width: 1.4; }
+  .fallback-text { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ink); }
+  .legend-text  { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .caption      { color: var(--color-secondary); font-size: 13px; margin-top: 12px; max-width: 65ch; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 3.5 — Sensing task to model class</h1>
+<p class="subtitle">Walk left to right. Stop at the first model that meets your accuracy bar.</p>
+<div id="chart" role="img" aria-labelledby="t-fig05 d-fig05"></div>
+<p class="caption">Filled squares mark primary recommendations; rings mark fallbacks when constraints permit.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const cols = [
+  { id: 'tree',   label: 'Tree',       sub: 'if-then leaves' },
+  { id: '1dcnn',  label: '1D CNN',     sub: 'sequences' },
+  { id: '2dcnn',  label: '2D CNN',     sub: 'image' },
+  { id: 'dscnn',  label: 'DS-CNN',     sub: 'depthwise sep' },
+  { id: 'rnn',    label: 'RNN / LSTM', sub: 'stateful' }
+];
+const rows = [
+  { label: 'Image classification', sub: 'vision · 96×96+ pixels', primary: '2dcnn', fallback: 'dscnn', primaryBrand: true },
+  { label: 'Keyword spotting',     sub: 'audio · spectrograms',   primary: 'dscnn', fallback: 'rnn',  primaryBrand: false },
+  { label: 'Time-series anomaly',  sub: 'sensor streams',         primary: 'tree',  fallback: '1dcnn', primaryBrand: false },
+  { label: 'Structured tabular',   sub: 'engineered features',    primary: 'tree',  fallback: null,    primaryBrand: false },
+  { label: 'Gesture / motion',     sub: 'accelerometer',          primary: '1dcnn', fallback: 'tree',  primaryBrand: false }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip()      { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = container.clientHeight || 500;
+
+  const margin = { top: 60, right: 30, bottom: 80, left: 220 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+  const colWidth = chartWidth / cols.length;
+  const rowHeight = chartHeight / rows.length;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role','img').attr('aria-labelledby','t-fig05 d-fig05');
+  svg.append('title').attr('id','t-fig05').text('Sensing task to model class recommendations');
+  svg.append('desc').attr('id','d-fig05').text('A grid of five tasks against five model classes ordered cheapest to most expensive; primary recommendations are filled, fallbacks are ringed.');
+
+  svg.append('defs').append('marker').attr('id','ar05')
+    .attr('markerWidth',8).attr('markerHeight',6).attr('refX',7).attr('refY',3).attr('orient','auto')
+    .append('polygon').attr('points','0 0, 8 3, 0 6').attr('fill','var(--color-ink)');
+
+  // cost axis
+  svg.append('path').attr('class','axis-arrow')
+    .attr('d', `M ${margin.left} 30 L ${totalWidth-margin.right} 30`)
+    .attr('marker-end', 'url(#ar05)');
+  svg.append('text').attr('class','axis-label').attr('x', margin.left).attr('y', 22).text('cheaper');
+  svg.append('text').attr('class','axis-label').attr('x', totalWidth-margin.right).attr('y', 22).attr('text-anchor','end').text('more expensive');
+
+  // column headers
+  cols.forEach((c, i) => {
+    const cx = margin.left + i*colWidth + colWidth/2;
+    svg.append('text').attr('class','col-head').attr('x', cx).attr('y', 52).attr('text-anchor','middle').text(c.label);
+    svg.append('text').attr('class','col-sub').attr('x', cx).attr('y', 66).attr('text-anchor','middle').text(c.sub);
+  });
+
+  // header divider
+  svg.append('line').attr('class','grid-line').attr('x1', 40).attr('y1', margin.top+10).attr('x2', totalWidth-40).attr('y2', margin.top+10);
+
+  // vertical gridlines
+  for (let i=0; i<=cols.length; i++) {
+    svg.append('line').attr('class','grid-line')
+      .attr('x1', margin.left + i*colWidth).attr('y1', margin.top+10)
+      .attr('x2', margin.left + i*colWidth).attr('y2', margin.top+10+chartHeight);
+  }
+
+  // rows
+  rows.forEach((r, ri) => {
+    const cy = margin.top + 10 + ri*rowHeight + rowHeight/2;
+    svg.append('text').attr('class','row-head').attr('x', margin.left-20).attr('y', cy-4).attr('text-anchor','end').text(r.label);
+    svg.append('text').attr('class','row-sub').attr('x', margin.left-20).attr('y', cy+10).attr('text-anchor','end').text(r.sub);
+    if (ri < rows.length-1) {
+      svg.append('line').attr('class','row-rule')
+        .attr('x1', 40).attr('y1', margin.top+10+(ri+1)*rowHeight)
+        .attr('x2', totalWidth-40).attr('y2', margin.top+10+(ri+1)*rowHeight);
+    }
+
+    // primary cell
+    const pi = cols.findIndex(c => c.id === r.primary);
+    if (pi >= 0) {
+      const cx = margin.left + pi*colWidth + colWidth/2;
+      svg.append('rect')
+        .attr('class', r.primaryBrand ? 'primary-cell brand' : 'primary-cell')
+        .attr('x', cx-26).attr('y', cy-18).attr('width', 52).attr('height', 36)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${r.label}: primary recommendation ${cols[pi].label}`)
+        .on('mouseover', (e) => showTip(e, `<strong>${r.label}</strong> → <strong>${cols[pi].label}</strong><br>primary recommendation`))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+      svg.append('text').attr('class','primary-text').attr('x', cx).attr('y', cy+4).attr('text-anchor','middle').text('primary');
+    }
+
+    // fallback
+    if (r.fallback) {
+      const fi = cols.findIndex(c => c.id === r.fallback);
+      const fx = margin.left + fi*colWidth + colWidth/2;
+      svg.append('circle').attr('class','fallback-mark')
+        .attr('cx', fx).attr('cy', cy).attr('r', 16)
+        .attr('tabindex', 0)
+        .attr('aria-label', `${r.label}: fallback ${cols[fi].label}`)
+        .on('mouseover', (e) => showTip(e, `<strong>${r.label}</strong> → <strong>${cols[fi].label}</strong><br>fallback when constraints permit`))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+      svg.append('text').attr('class','fallback-text').attr('x', fx).attr('y', cy+4).attr('text-anchor','middle').text('fb');
+    }
+  });
+
+  // legend
+  const legendY = totalHeight - 40;
+  svg.append('line').attr('class','grid-line').attr('x1', 40).attr('y1', legendY-16).attr('x2', totalWidth-40).attr('y2', legendY-16);
+  svg.append('rect').attr('class','primary-cell').attr('x', 60).attr('y', legendY-8).attr('width', 20).attr('height', 14);
+  svg.append('text').attr('class','legend-text').attr('x', 90).attr('y', legendY+3).text('primary recommendation');
+  svg.append('circle').attr('class','fallback-mark').attr('cx', 270).attr('cy', legendY-1).attr('r', 9);
+  svg.append('text').attr('class','legend-text').attr('x', 286).attr('y', legendY+3).text('fallback when constraints permit');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

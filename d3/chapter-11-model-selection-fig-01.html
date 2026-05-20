@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 11.1 — Five deployment-aware metrics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; }
+  #chart { width: 100%; height: 540px; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; max-width: 260px; }
+  .center-node { fill: var(--color-ink); }
+  .center-text { fill: var(--color-white); font-family: 'EB Garamond', serif; }
+  .spoke { stroke: var(--color-secondary); stroke-dasharray: 4 3; }
+  .metric-card { fill: var(--color-white); stroke: var(--color-secondary); stroke-width: 1; cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .metric-card.active { stroke: var(--color-red); stroke-width: 1.5; }
+  .metric-rule { stroke-width: 4; }
+  .metric-name { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-ink); }
+  .metric-how { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .metric-fail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-red); font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 11.1 — Five deployment-aware metrics</h1>
+<p class="subtitle">Hover any spoke to read how to measure it and the failure mode if skipped.</p>
+<div id="chart" role="img" aria-labelledby="t-fig1 d-fig1"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const metricData = [
+  { id: 'latency',  name: 'Latency on target hardware', how: 'ms wall-clock; mean / p95 / max over 100 runs',     fail: 'trust FLOPs, miss the WCET deadline',         angle: -140 },
+  { id: 'memory',   name: 'Memory footprint (int8)',     how: 'flash from linker map; SRAM from tensor arena',     fail: 'param count lies, the link fails',            angle: -40  },
+  { id: 'energy',   name: 'Energy per inference',        how: 'mJ via sense resistor + scope, full cycle',         fail: 'coin cell dies before the quarter ends',      angle: 180  },
+  { id: 'accuracy', name: 'Accuracy on your dataset',    how: 'your camera, your lighting, your noise',            fail: '5–20% drop from the domain gap',              angle: 0    },
+  { id: 'quantacc', name: 'Accuracy under quantization', how: 'float32 → int8 gap on your validation set',         fail: 'ship a model you never measured',             angle: 90   }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const w = container.clientWidth || 800;
+  const h = 540;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', w).attr('height', h)
+    .attr('role', 'img')
+    .attr('aria-labelledby', 't-fig1 d-fig1');
+
+  svg.append('title').attr('id', 't-fig1').text('Five deployment-aware metrics around a candidate model');
+  svg.append('desc').attr('id', 'd-fig1').text('Hub-and-spoke diagram of latency, memory, energy, accuracy, and quantized accuracy with how-to-measure and skip-cost notes.');
+
+  const cx = w / 2, cy = h / 2;
+
+  // Center node
+  svg.append('rect').attr('class', 'center-node')
+    .attr('x', cx - 70).attr('y', cy - 30).attr('width', 140).attr('height', 60);
+  svg.append('text').attr('class', 'center-text')
+    .attr('x', cx).attr('y', cy - 4).attr('text-anchor', 'middle').attr('font-size', 16).attr('font-weight', 600)
+    .text('candidate model');
+  svg.append('text').attr('class', 'center-text')
+    .attr('x', cx).attr('y', cy + 14).attr('text-anchor', 'middle').attr('font-size', 11).attr('opacity', 0.7)
+    .text('on target hardware');
+
+  // Spokes + cards
+  const R = Math.min(w, h) * 0.36;
+
+  metricData.forEach((m, i) => {
+    const rad = (m.angle * Math.PI) / 180;
+    const ex = cx + Math.cos(rad) * R;
+    const ey = cy + Math.sin(rad) * R;
+
+    // Spoke
+    svg.append('line').attr('class', 'spoke')
+      .attr('x1', cx + Math.cos(rad) * 80).attr('y1', cy + Math.sin(rad) * 32)
+      .attr('x2', ex).attr('y2', ey)
+      .attr('fill', 'none').attr('stroke-width', 1);
+
+    // Card
+    const cardW = 240, cardH = 78;
+    const cx2 = ex - cardW / 2, cy2 = ey - cardH / 2;
+
+    const g = svg.append('g')
+      .attr('tabindex', 0)
+      .attr('aria-label', `${m.name}: ${m.how}. Skip: ${m.fail}`)
+      .on('mouseover', function (event) {
+        d3.select(this).select('rect.metric-card').classed('active', true);
+        tooltip.html(`<strong>${m.name}</strong><br>${m.how}<br><em>skip → ${m.fail}</em>`)
+          .style('opacity', 1)
+          .style('left', (event.pageX + 12) + 'px')
+          .style('top',  (event.pageY - 28) + 'px');
+      })
+      .on('mousemove', (event) => tooltip
+        .style('left', (event.pageX + 12) + 'px')
+        .style('top',  (event.pageY - 28) + 'px'))
+      .on('mouseout', function () {
+        d3.select(this).select('rect.metric-card').classed('active', false);
+        tooltip.style('opacity', 0);
+      });
+
+    g.append('rect').attr('class', 'metric-card')
+      .attr('x', cx2).attr('y', cy2).attr('width', cardW).attr('height', cardH);
+
+    g.append('rect').attr('class', 'metric-rule')
+      .attr('x', cx2).attr('y', cy2).attr('width', 4).attr('height', cardH)
+      .attr('fill', i === 0 ? 'var(--color-red)' : 'var(--color-ink)');
+
+    g.append('text').attr('class', 'metric-name')
+      .attr('x', cx2 + 14).attr('y', cy2 + 20)
+      .text(m.name);
+    g.append('text').attr('class', 'metric-how')
+      .attr('x', cx2 + 14).attr('y', cy2 + 40)
+      .text(m.how);
+    g.append('text').attr('class', 'metric-fail')
+      .attr('x', cx2 + 14).attr('y', cy2 + 60)
+      .text('skip → ' + m.fail);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

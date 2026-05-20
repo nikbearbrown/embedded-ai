@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 5.2 — Flash vs SRAM routing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 480px; }
+  .bank text { font-family: 'Inter', sans-serif; fill: var(--color-white); }
+  .bank .name { font-weight: 700; font-size: 16px; }
+  .artifact { stroke: var(--color-secondary); stroke-width: 1; fill: var(--color-white); cursor: pointer; }
+  .artifact:hover { stroke: var(--color-ochre); stroke-width: 2; }
+  .artifact-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .arrow { stroke: var(--color-ink); stroke-width: 1; fill: none; }
+  .callout { fill: none; stroke: var(--color-ochre); stroke-width: 2; }
+  .callout-text { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); text-anchor: middle; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 5.2 — Flash vs SRAM routing</h1>
+<p class="subtitle">Flash holds what never changes; SRAM holds what changes during inference.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Execute-in-place from flash works for weights — never for activations, because flash is read-only at runtime.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const artifactData = [
+  { label: 'firmware binary',        bank: 'flash' },
+  { label: 'model weights',          bank: 'flash' },
+  { label: 'biases + quant scales',  bank: 'flash' },
+  { label: 'activation LUTs',        bank: 'flash' },
+  { label: 'activation tensors',     bank: 'sram'  },
+  { label: 'stack + heap',           bank: 'sram'  },
+  { label: 'DMA buffers',            bank: 'sram'  },
+  { label: 'RTOS TCBs + globals',    bank: 'sram'  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = container.clientHeight || 480;
+  const margin = { top: 32, right: 24, bottom: 80, left: 24 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+  svg.append('title').attr('id', 'chart-title').text('Flash vs SRAM routing');
+  svg.append('desc').attr('id', 'chart-desc').text('Two-bank diagram routing deployment artifacts to flash or SRAM.');
+
+  // arrowhead marker
+  svg.append('defs').append('marker')
+    .attr('id', 'arrow-bw').attr('markerWidth', 8).attr('markerHeight', 6)
+    .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const bankWidth = chartWidth * 0.28;
+  const centerWidth = chartWidth * 0.30;
+  const gap = (chartWidth - bankWidth * 2 - centerWidth) / 2;
+  const bankHeight = chartHeight - 60;
+
+  // flash bank
+  const flashBank = gChart.append('g').attr('class', 'bank');
+  flashBank.append('rect').attr('x', 0).attr('y', 0).attr('width', bankWidth).attr('height', bankHeight).attr('fill', 'var(--color-ink)');
+  flashBank.append('text').attr('class', 'name').attr('x', bankWidth / 2).attr('y', 30).attr('text-anchor', 'middle').text('FLASH');
+  flashBank.append('text').attr('x', bankWidth / 2).attr('y', 50).attr('text-anchor', 'middle').attr('font-size', 12).text('non-volatile · read-only at runtime');
+
+  // sram bank
+  const sramX = bankWidth + centerWidth + gap * 2;
+  const sramBank = gChart.append('g').attr('class', 'bank').attr('transform', `translate(${sramX},0)`);
+  sramBank.append('rect').attr('x', 0).attr('y', 0).attr('width', bankWidth).attr('height', bankHeight).attr('fill', '#404040');
+  sramBank.append('text').attr('class', 'name').attr('x', bankWidth / 2).attr('y', 30).attr('text-anchor', 'middle').text('SRAM');
+  sramBank.append('text').attr('x', bankWidth / 2).attr('y', 50).attr('text-anchor', 'middle').attr('font-size', 12).text('volatile · writable · scarce');
+
+  // artifact column in the middle
+  const artX = bankWidth + gap;
+  const artifactHeight = 28;
+  const artifactGap = 6;
+  const startY = (bankHeight - artifactData.length * (artifactHeight + artifactGap)) / 2;
+
+  artifactData.forEach((d, i) => {
+    const y = startY + i * (artifactHeight + artifactGap);
+    const g = gChart.append('g').attr('tabindex', 0).attr('aria-label', `${d.label} routes to ${d.bank}`);
+    g.append('rect').attr('class', 'artifact')
+      .attr('x', artX).attr('y', y).attr('width', centerWidth).attr('height', artifactHeight)
+      .on('mouseover', (event) => {
+        tooltip.html(`<strong>${d.label}</strong><br>routes to ${d.bank.toUpperCase()}`)
+          .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+          .transition().duration(150).style('opacity', 1);
+      })
+      .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+    g.append('text').attr('class', 'artifact-label')
+      .attr('x', artX + centerWidth / 2).attr('y', y + artifactHeight / 2 + 4)
+      .attr('text-anchor', 'middle').text(d.label);
+
+    // arrow to correct bank
+    const arrowY = y + artifactHeight / 2;
+    if (d.bank === 'flash') {
+      g.append('line').attr('class', 'arrow').attr('x1', artX).attr('y1', arrowY).attr('x2', bankWidth + 4).attr('y2', arrowY).attr('marker-end', 'url(#arrow-bw)');
+    } else {
+      g.append('line').attr('class', 'arrow').attr('x1', artX + centerWidth).attr('y1', arrowY).attr('x2', sramX - 4).attr('y2', arrowY).attr('marker-end', 'url(#arrow-bw)');
+    }
+  });
+
+  // callout
+  const calloutY = bankHeight + 16;
+  gChart.append('rect').attr('class', 'callout').attr('x', 60).attr('y', calloutY).attr('width', chartWidth - 120).attr('height', 36);
+  gChart.append('text').attr('class', 'callout-text').attr('x', chartWidth / 2).attr('y', calloutY + 22)
+    .text('Execute-in-place from flash works for weights — never for activations.');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

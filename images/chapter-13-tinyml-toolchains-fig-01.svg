@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t01 d01">
+  <title id="t01">Six-step deployment pipeline with artifact formats and dominant failure modes</title>
+  <desc id="d01">Horizontal flow showing Train, Convert, Optimize, Compile, Deploy, Verify. Each gate has the artifact format above and the dominant failure mode below.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .fail { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .stepnum { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9px; fill: #6a6560; }
+    </style>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">Six steps from trained checkpoint to verified binary</text>
+  <text x="32" y="50" class="sm">artifact above each gate · dominant failure mode below</text>
+
+  <!-- step boxes: 6 across; width 88, gap 16; start x=32 -->
+  <!-- ARTIFACT row labels (above boxes) -->
+  <g class="sm">
+    <text x="76"  y="118" text-anchor="middle">.h5 / .pth</text>
+    <text x="180" y="118" text-anchor="middle">.tflite / .onnx</text>
+    <text x="284" y="118" text-anchor="middle">int8 .tflite</text>
+    <text x="388" y="118" text-anchor="middle">.elf binary</text>
+    <text x="492" y="118" text-anchor="middle">flashed image</text>
+    <text x="596" y="118" text-anchor="middle">accuracy Δ</text>
+  </g>
+  <g class="stepnum">
+    <text x="76"  y="105" text-anchor="middle">artifact</text>
+    <text x="180" y="105" text-anchor="middle">artifact</text>
+    <text x="284" y="105" text-anchor="middle">artifact</text>
+    <text x="388" y="105" text-anchor="middle">artifact</text>
+    <text x="492" y="105" text-anchor="middle">artifact</text>
+    <text x="596" y="105" text-anchor="middle">artifact</text>
+  </g>
+
+  <!-- thin divider rule -->
+  <line x1="32" y1="128" x2="668" y2="128" stroke="#c8c4c0" stroke-width="0.75"/>
+
+  <!-- Step boxes -->
+  <g>
+    <rect x="32"  y="148" width="88" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <rect x="136" y="148" width="88" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <rect x="240" y="148" width="88" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <rect x="344" y="148" width="88" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <rect x="448" y="148" width="88" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+    <rect x="552" y="148" width="88" height="60" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  </g>
+
+  <!-- Step numbers and names -->
+  <g>
+    <text x="76"  y="172" text-anchor="middle" class="stepnum">step 1</text>
+    <text x="180" y="172" text-anchor="middle" class="stepnum">step 2</text>
+    <text x="284" y="172" text-anchor="middle" class="stepnum">step 3</text>
+    <text x="388" y="172" text-anchor="middle" class="stepnum">step 4</text>
+    <text x="492" y="172" text-anchor="middle" class="stepnum">step 5</text>
+    <text x="596" y="172" text-anchor="middle" class="stepnum">step 6</text>
+
+    <text x="76"  y="192" text-anchor="middle" class="ti">Train</text>
+    <text x="180" y="192" text-anchor="middle" class="ti">Convert</text>
+    <text x="284" y="192" text-anchor="middle" class="ti">Optimize</text>
+    <text x="388" y="192" text-anchor="middle" class="ti">Compile</text>
+    <text x="492" y="192" text-anchor="middle" class="ti">Deploy</text>
+    <text x="596" y="192" text-anchor="middle" class="ti">Verify</text>
+  </g>
+
+  <!-- Arrows between boxes -->
+  <g>
+    <line x1="122" y1="178" x2="132" y2="178" stroke="#2a1a0e" stroke-width="1.25" marker-end="url(#ar)"/>
+    <line x1="226" y1="178" x2="236" y2="178" stroke="#2a1a0e" stroke-width="1.25" marker-end="url(#ar)"/>
+    <line x1="330" y1="178" x2="340" y2="178" stroke="#2a1a0e" stroke-width="1.25" marker-end="url(#ar)"/>
+    <line x1="434" y1="178" x2="444" y2="178" stroke="#2a1a0e" stroke-width="1.25" marker-end="url(#ar)"/>
+    <line x1="538" y1="178" x2="548" y2="178" stroke="#2a1a0e" stroke-width="1.25" marker-end="url(#ar)"/>
+  </g>
+
+  <!-- "where it breaks" row below -->
+  <line x1="32" y1="228" x2="668" y2="228" stroke="#c8c4c0" stroke-width="0.75"/>
+  <text x="32" y="248" class="lb">Where it breaks (silently)</text>
+
+  <g class="fail">
+    <text x="76"  y="276" text-anchor="middle">model below</text>
+    <text x="76"  y="290" text-anchor="middle">threshold</text>
+    <text x="76"  y="304" text-anchor="middle">before deploy</text>
+
+    <text x="180" y="276" text-anchor="middle">custom layer</text>
+    <text x="180" y="290" text-anchor="middle">silently</text>
+    <text x="180" y="304" text-anchor="middle">substituted</text>
+
+    <text x="284" y="276" text-anchor="middle">layer fusion</text>
+    <text x="284" y="290" text-anchor="middle">unsupported</text>
+    <text x="284" y="304" text-anchor="middle">by runtime</text>
+
+    <text x="388" y="276" text-anchor="middle">tensor arena</text>
+    <text x="388" y="290" text-anchor="middle">alignment</text>
+    <text x="388" y="304" text-anchor="middle">mismatch</text>
+
+    <text x="492" y="276" text-anchor="middle">flash region</text>
+    <text x="492" y="290" text-anchor="middle">corrupts one</text>
+    <text x="492" y="304" text-anchor="middle">weight</text>
+
+    <text x="596" y="276" text-anchor="middle">accuracy drift</text>
+    <text x="596" y="290" text-anchor="middle">no clear</text>
+    <text x="596" y="304" text-anchor="middle">root cause</text>
+  </g>
+
+  <!-- The silent-failure note -->
+  <rect x="32" y="332" width="636" height="44" fill="none" stroke="#c8860e" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="46" y="350" class="lb">Every gate reports success.</text>
+  <text x="46" y="366" class="sm">The toolchain prints "Conversion successful" whether the model works on the device or not — only step 6 catches the lie.</text>
+
+  <text x="350" y="402" text-anchor="middle" class="cap">Train → Convert → Optimize → Compile → Deploy → Verify. Each gate has its own silent failure mode.</text>
+</svg>

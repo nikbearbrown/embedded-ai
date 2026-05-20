@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 10.5 — CNC milling integration timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #121212; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; min-height: 480px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .track-eyebrow { font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.5px; fill: var(--color-secondary); }
+  .track-title { font-family: 'EB Garamond', Georgia, serif; font-size: 14px; font-weight: 600; fill: var(--color-ink); }
+  .track-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .tick-mark { fill: var(--color-ink); }
+  .tick-mark.muted { fill: var(--color-secondary); }
+  .inference-bar { fill: var(--color-border); stroke: var(--color-secondary); stroke-width: 0.75; }
+  .inference-bar.next { stroke-dasharray: 3 2; }
+  .event-line { stroke: var(--color-ink); stroke-width: 1.5; }
+  .event-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: var(--color-ink); }
+  .deadline-line { stroke: var(--color-ink); stroke-width: 1; stroke-dasharray: 4 3; }
+  .outcome-box { fill: var(--color-white); stroke: var(--color-ink); }
+  .outcome-title { font-family: 'EB Garamond', Georgia, serif; font-size: 14px; font-weight: 600; fill: var(--color-ink); }
+  .outcome-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-white);
+             border: 1px solid var(--color-border); padding: 8px 12px; font-size: 12px; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 10.5 — CNC milling integration timeline</h1>
+<p class="subtitle">1 kHz control loop · 5 ms shutdown deadline · 35–55 ms AI inference. The deadline is met by the RMS detector, not the AI.</p>
+<div id="chart" role="main"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const eventTimeline = {
+  totalMs: 60,
+  events: [
+    { t: 0,  label: 'fault onset',    type: 'heavy' },
+    { t: 5,  label: '5 ms deadline',  type: 'deadline' },
+    { t: 38, label: 'AI · advisory',  type: 'muted' }
+  ],
+  controlTicks: Array.from({ length: 60 }, (_, i) => i),
+  rmsSamples: Array.from({ length: 60 }, (_, i) => i),
+  rmsDetect: 2,
+  aiInferences: [
+    { start: 0,  duration: 38, label: 'inference run · 38 ms', complete: true },
+    { start: 50, duration: 10, label: 'next run · scheduled',  complete: false }
+  ]
+};
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth = container.clientWidth || 900;
+  const totalHeight = 480;
+  const margin = { top: 60, right: 40, bottom: 100, left: 220 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'fig05-title fig05-desc');
+  svg.append('title').attr('id', 'fig05-title').text('CNC milling integration timeline');
+  svg.append('desc').attr('id', 'fig05-desc').text('Three tracks showing the 1 kHz control loop, asynchronous AI inference every 50 ms, and the RMS backup detector. The RMS detector fires at 2 ms; the AI completes at 38 ms.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const xScaleLinear = d3.scaleLinear().domain([0, eventTimeline.totalMs]).range([0, chartWidth]);
+
+  // Time axis
+  const xAxis = d3.axisBottom(xScaleLinear).tickValues([0,10,20,30,40,50,60]).tickFormat(d => d === 60 ? '60 ms' : d);
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`).call(xAxis);
+  gChart.append('text').attr('class', 'track-sub')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 40).attr('text-anchor', 'middle')
+    .text('time after fault onset');
+
+  // Track positions
+  const trackHeight = chartHeight / 3;
+  const tracks = [
+    { y: trackHeight * 0.5, eyebrow: 'CONTROL LOOP · 1 kHz', title: 'reads fault_flag, fault_probability', sub: 'deadline 1 ms · deterministic',
+      render: g => {
+        g.append('line').attr('x1', 0).attr('x2', chartWidth).attr('y1', 0).attr('y2', 0)
+          .attr('stroke', 'var(--color-secondary)').attr('stroke-width', 0.75);
+        g.selectAll('.tick').data(eventTimeline.controlTicks).join('rect')
+          .attr('class', 'tick-mark').attr('x', d => xScaleLinear(d) - 1).attr('y', -6).attr('width', 2).attr('height', 12);
+      }
+    },
+    { y: trackHeight * 1.5, eyebrow: 'AI INFERENCE · every 50 ms', title: 'updates fault_probability', sub: 'no hard deadline · advisory only',
+      render: g => {
+        eventTimeline.aiInferences.forEach(inf => {
+          g.append('rect').attr('class', `inference-bar${inf.complete ? '' : ' next'}`)
+            .attr('x', xScaleLinear(inf.start)).attr('y', -12)
+            .attr('width', xScaleLinear(inf.duration) - xScaleLinear(0)).attr('height', 24)
+            .attr('tabindex', 0).attr('aria-label', inf.label)
+            .on('mouseover', (event) => {
+              tooltip.html(`<strong>${inf.label}</strong><br>start ${inf.start} ms · duration ${inf.duration} ms`)
+                .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+                .transition().duration(150).style('opacity', 1);
+            })
+            .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+            .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+          g.append('text').attr('class', 'track-sub')
+            .attr('x', xScaleLinear(inf.start) + (xScaleLinear(inf.duration) - xScaleLinear(0)) / 2)
+            .attr('y', 4).attr('text-anchor', 'middle').text(inf.label);
+        });
+        const x38 = xScaleLinear(38);
+        g.append('circle').attr('cx', x38).attr('cy', 0).attr('r', 4).attr('fill', 'var(--color-ink)');
+        g.append('text').attr('class', 'track-sub').attr('x', x38 + 8).attr('y', -16).text('fault_probability ← 0.97 (at +38 ms)');
+      }
+    },
+    { y: trackHeight * 2.5, eyebrow: 'RMS BACKUP DETECTOR · 1 kHz', title: 'deterministic, in-loop', sub: 'trips fault_flag on threshold',
+      render: g => {
+        g.append('line').attr('x1', 0).attr('x2', chartWidth).attr('y1', 0).attr('y2', 0)
+          .attr('stroke', 'var(--color-secondary)').attr('stroke-width', 0.75);
+        g.selectAll('.rms-tick').data(eventTimeline.rmsSamples).join('rect')
+          .attr('class', 'tick-mark muted')
+          .attr('x', d => xScaleLinear(d) - 1).attr('y', -6).attr('width', 2).attr('height', 12);
+        const xDetect = xScaleLinear(eventTimeline.rmsDetect);
+        g.append('circle').attr('cx', xDetect).attr('cy', 0).attr('r', 5).attr('fill', 'var(--color-ink)');
+        g.append('text').attr('class', 'track-sub').attr('x', xDetect + 8).attr('y', -14).text('fault_flag ← true (at +2 ms)');
+      }
+    }
+  ];
+
+  tracks.forEach(t => {
+    // Left-side label block
+    svg.append('text').attr('class', 'track-eyebrow').attr('x', 24).attr('y', margin.top + t.y - 16).text(t.eyebrow);
+    svg.append('text').attr('class', 'track-title').attr('x', 24).attr('y', margin.top + t.y).text(t.title);
+    svg.append('text').attr('class', 'track-sub').attr('x', 24).attr('y', margin.top + t.y + 16).text(t.sub);
+    // Track group
+    const g = gChart.append('g').attr('transform', `translate(0,${t.y})`);
+    t.render(g);
+  });
+
+  // Vertical event lines spanning all tracks
+  eventTimeline.events.forEach(ev => {
+    const x = xScaleLinear(ev.t);
+    gChart.append('line')
+      .attr('class', ev.type === 'deadline' ? 'deadline-line' : (ev.type === 'muted' ? 'deadline-line' : 'event-line'))
+      .attr('x1', x).attr('x2', x).attr('y1', -16).attr('y2', chartHeight)
+      .attr('stroke', ev.type === 'muted' ? 'var(--color-secondary)' : 'var(--color-ink)');
+    gChart.append('text').attr('class', ev.type === 'muted' ? 'track-sub' : 'event-label')
+      .attr('x', x).attr('y', -22).attr('text-anchor', 'middle').text(ev.label);
+  });
+
+  // Outcome callout
+  const outcome = gChart.append('g').attr('transform', `translate(0,${chartHeight + 56})`);
+  outcome.append('rect').attr('class', 'outcome-box').attr('x', 0).attr('y', 0).attr('width', chartWidth).attr('height', 40);
+  outcome.append('text').attr('class', 'outcome-title').attr('x', 16).attr('y', 18).text('Shutdown triggered by RMS at +2 ms — well inside the 5 ms budget.');
+  outcome.append('text').attr('class', 'outcome-sub').attr('x', 16).attr('y', 34).text('AI advisory arrives at +38 ms and would have missed. It serves as early warning, not as the guarantee.');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

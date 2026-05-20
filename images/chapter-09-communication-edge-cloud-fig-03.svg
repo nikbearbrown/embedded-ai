@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" role="img" aria-labelledby="t03 d03">
+  <title id="t03">Radio bandwidth ranges vs payload transmission time within a 500 ms budget</title>
+  <desc id="d03">Horizontal log-scale chart of four radio bandwidth ranges from LoRaWAN to WiFi. Three payload markers — a 96x96 RGB image, a 32x32 image, and a 16-element feature vector — show which radios can finish transmitting within a 500 ms latency budget.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
+      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
+      .pay { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #2a1a0e; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .badge { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #fdfcfb; }
+    </style>
+    <marker id="ar3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+    <marker id="arRed3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#8a1f1f"/>
+    </marker>
+  </defs>
+  <rect width="760" height="440" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">What survives 500 ms? Bandwidth on log scale, with payload requirements overlaid</text>
+  <text x="32" y="50" class="nm">x = uplink bandwidth (kbps, log10). a payload needs more bps than its label to fit in 500 ms.</text>
+
+  <!-- Axis geometry: x runs from 0.1 kbps (log -1) to 100000 kbps (log 5). 6 decades. -->
+  <!-- Plot region: x from 90 to 720 (630 px → 105 px per decade). y rows from 110 down. -->
+  <!-- log10 0.1 → x=90; log10 1 → 195; 10 → 300; 100 → 405; 1000 → 510; 10000 → 615; 100000 → 720 -->
+
+  <!-- Gridlines -->
+  <g stroke="#c8c4c0" stroke-width="0.6">
+    <line x1="90"  y1="80" x2="90"  y2="330"/>
+    <line x1="195" y1="80" x2="195" y2="330"/>
+    <line x1="300" y1="80" x2="300" y2="330"/>
+    <line x1="405" y1="80" x2="405" y2="330"/>
+    <line x1="510" y1="80" x2="510" y2="330"/>
+    <line x1="615" y1="80" x2="615" y2="330"/>
+    <line x1="720" y1="80" x2="720" y2="330"/>
+  </g>
+
+  <!-- x axis -->
+  <line x1="90" y1="330" x2="720" y2="330" stroke="#4a4540" stroke-width="1"/>
+  <text x="90"  y="346" text-anchor="middle" class="ax">0.1</text>
+  <text x="195" y="346" text-anchor="middle" class="ax">1</text>
+  <text x="300" y="346" text-anchor="middle" class="ax">10</text>
+  <text x="405" y="346" text-anchor="middle" class="ax">100</text>
+  <text x="510" y="346" text-anchor="middle" class="ax">1 k</text>
+  <text x="615" y="346" text-anchor="middle" class="ax">10 k</text>
+  <text x="720" y="346" text-anchor="middle" class="ax">100 k</text>
+  <text x="405" y="364" text-anchor="middle" class="lb">uplink bandwidth (kbps, log scale)</text>
+
+  <!-- Radio bars. Bandwidth ranges:
+       LoRaWAN 0.3–50 kbps         → x: log10(0.3)=-0.52, log10(50)=1.70 → x ≈ 140 to ≈ 374
+       NB-IoT 20–250 kbps           → log10(20)=1.30, log10(250)=2.40 → x ≈ 331 to ≈ 447
+       LTE Cat-M1 0.3–1000 kbps     → log10(0.3)=-0.52, log10(1000)=3 → x ≈ 140 to ≈ 510
+       WiFi 1000–100000 kbps        → log10(1000)=3, log10(100000)=5 → x ≈ 510 to ≈ 720
+       Convert: x = 90 + (log10(kbps) + 1) * 105
+  -->
+
+  <!-- LoRaWAN row, y=100 -->
+  <rect x="140" y="92"  width="234" height="22" fill="#2a1a0e"/>
+  <text x="148" y="107" class="badge">LoRaWAN</text>
+  <text x="84" y="107" text-anchor="end" class="lb">LoRaWAN</text>
+  <text x="380" y="107" class="sm">0.3 – 50 kbps</text>
+
+  <!-- NB-IoT row, y=130 -->
+  <rect x="331" y="122" width="116" height="22" fill="#4a4540"/>
+  <text x="339" y="137" class="badge">NB-IoT</text>
+  <text x="84" y="137" text-anchor="end" class="lb">NB-IoT</text>
+  <text x="455" y="137" class="sm">20 – 250 kbps</text>
+
+  <!-- LTE Cat-M1 row, y=160 -->
+  <rect x="247" y="152" width="263" height="22" fill="#8a8480"/>
+  <text x="255" y="167" class="badge">LTE Cat-M1</text>
+  <text x="84" y="167" text-anchor="end" class="lb">LTE Cat-M1</text>
+  <text x="518" y="167" class="sm">~50 – 1 000 kbps</text>
+
+  <!-- WiFi row, y=190 -->
+  <rect x="510" y="182" width="210" height="22" fill="#c8c4c0"/>
+  <text x="518" y="197" class="badge" fill="#2a1a0e">WiFi (2.4 GHz)</text>
+  <text x="84" y="197" text-anchor="end" class="lb">WiFi</text>
+  <text x="595" y="197" class="sm" text-anchor="end">1 – 100 Mbps</text>
+
+  <!-- Payload markers: at 500 ms budget, required bandwidth = bytes * 8 / 0.5 = bytes * 16 bps
+       96x96 RGB = 27 648 B → 442 368 bps = 442 kbps → log10 = 2.65 → x ≈ 90 + 3.65*105 ≈ 473
+       32x32 RGB = 3 072 B  →  49 152 bps ≈ 49.2 kbps → log10 = 1.69 → x ≈ 90 + 2.69*105 ≈ 372
+       16 float feature = 64 B → 1 024 bps = 1.0 kbps → log10 = 0 → x ≈ 90 + 1*105 = 195
+  -->
+
+  <!-- payload axis markers as vertical dashed lines + diamond -->
+  <g>
+    <!-- 96x96 -->
+    <line x1="473" y1="80" x2="473" y2="330" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="3 3"/>
+    <polygon points="473,225 481,233 473,241 465,233" fill="#8a1f1f"/>
+    <text x="473" y="222" text-anchor="middle" class="pay" fill="#8a1f1f">96×96 RGB · 27 KB</text>
+    <text x="473" y="254" text-anchor="middle" class="sm" fill="#8a1f1f">needs ≥ 442 kbps to clear 500 ms</text>
+
+    <!-- 32x32 -->
+    <line x1="372" y1="80" x2="372" y2="330" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="3 3"/>
+    <polygon points="372,270 380,278 372,286 364,278" fill="#8a1f1f"/>
+    <text x="372" y="267" text-anchor="middle" class="pay" fill="#8a1f1f">32×32 RGB · 3 KB</text>
+    <text x="372" y="299" text-anchor="middle" class="sm" fill="#8a1f1f">needs ≥ 49 kbps to clear 500 ms</text>
+
+    <!-- 16 feature -->
+    <line x1="195" y1="80" x2="195" y2="330" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="3 3"/>
+    <polygon points="195,225 203,233 195,241 187,233" fill="#2a1a0e"/>
+    <text x="208" y="222" text-anchor="start" class="pay">16-feat · 64 B</text>
+    <text x="208" y="254" text-anchor="start" class="sm">needs ≥ 1 kbps — passes on every radio</text>
+  </g>
+
+  <!-- failure ribbon: 96x96 fails LoRaWAN and NB-IoT -->
+  <rect x="90" y="376" width="710" height="0" fill="none"/>
+  <text x="32" y="392" class="lb">Reading rule:</text>
+  <text x="32" y="408" class="sm">a payload "fits" if its dashed line falls inside the radio's bar.</text>
+  <text x="32" y="422" class="sm">96×96 fits only on LTE Cat-M1 and WiFi · 32×32 fits NB-IoT, LTE, WiFi · 16-feature fits all four.</text>
+</svg>

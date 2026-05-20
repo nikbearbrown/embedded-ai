@@ -10,7 +10,13 @@ Then training stops. The parameters freeze. The model becomes, functionally, a d
 
 Inside the model, the architecture is a directed graph. The most common shape is a *feedforward* network in which data flows through a sequence of layers from input to output. Each layer carries two kinds of data. *Weights* (the learned parameters) are fixed after training. *Activations* (the intermediate results computed at runtime) are not — they are what the layer computes from its input and passes to the next layer. Weights live in flash. Activations live in RAM. The total weight count sets your flash budget. The peak activation size sets your RAM budget. Two different numbers, two different memory regions, both required.
 
+![Two-band diagram of a feedforward network. The top band labeled flash holds the weight matrices W1, W2, W3 — fixed and persistent. The bottom band labeled RAM holds the transient activation buffers a1 and a2, recomputed per inference and discarded between layers. Side totals: roughly 406 KB in flash, under 1 KB peak in RAM.](../images/chapter-03-ml-for-embedded-engineers-fig-01.png)
+*Figure 3.1 — Weights to flash, activations to RAM.*
+
 To make this concrete, take a small feedforward network: 784 input neurons (a 28×28 grayscale image flattened), one hidden layer of 128 neurons, an output layer of 10 classes. The hidden layer has a weight matrix connecting every input to every hidden unit: 784 × 128 = 100,352 weights, plus 128 biases. As float32, that is about 401 KB. The output layer is 128 × 10 = 1,280 weights plus 10 biases — about 5 KB. Total weights: ~406 KB, easily inside a 1 MB flash. The activations, by contrast, are tiny: 128 floats out of the hidden layer (512 bytes), 10 floats out of the output (40 bytes). Under 1 KB peak activation memory.
+
+![Three-layer multilayer perceptron with input layer of 784 neurons, hidden layer of 128, output layer of 10. Edges labeled with weight matrix sizes — 784 by 128 at about 401 KB, 128 by 10 at about 5 KB. Each layer labeled with its activation size: 3.1 KB, 512 B, 40 B. Totals strip: 406 KB flash, under 1 KB peak RAM.](../images/chapter-03-ml-for-embedded-engineers-fig-02.png)
+*Figure 3.2 — A small MLP: three layers, two cost columns.*
 
 That ratio — weights huge, activations tiny — flips when you scale up. A convolutional network for image classification has dozens of layers and produces large activation tensors at every step. Activation memory can dominate weight memory by an order of magnitude.
 
@@ -20,11 +26,17 @@ The operation count for a fully connected layer is *(input size) × (output size
 
 Fully connected layers are simple but bad for image data. A 224×224 RGB image is 150,528 pixels; a fully connected layer connecting that to even 128 output neurons would need 19 million weights — 76 MB as float32, which is dead on arrival for most embedded targets. *Convolutional* layers solve this by exploiting spatial locality. Instead of connecting every input to every output, a convolutional layer applies a small filter — say 3×3 — that slides across the image, computing a weighted sum at each position, and reuses the same filter weights across the whole image. Nine weights per filter, times the number of filters, instead of one weight per pixel-output pair. The parameter count drops by orders of magnitude, and the 2D spatial structure of the image is preserved in a way the flat-vector layer cannot.
 
+![Side-by-side comparison. Left panel labeled fully connected shows a flattened 150,528-pixel input vector crossed by dense connecting lines to 128 output neurons; cost callout reads 19,267,584 weights, roughly 76 MB. Right panel labeled convolution shows a 7-by-7 image grid with one solid and three ghosted 3-by-3 filter outlines sliding across positions, plus a 3-by-3 palette of 9 shared weight squares; cost callout reads 9 weights per filter, reused everywhere.](../images/chapter-03-ml-for-embedded-engineers-fig-03.png)
+*Figure 3.3 — Fully connected versus convolution.*
+
 The operation count for a convolutional layer is *(output H) × (output W) × (output channels) × (kernel H) × (kernel W) × (input channels)*. For a 224×224 RGB input with 32 output channels and a 3×3 kernel, that is 224 × 224 × 32 × 3 × 3 × 3 ≈ 43.6 million MACs. Expensive — but far cheaper than the equivalent fully connected layer, and accurate enough on real images that the family of *convolutional neural networks* (CNNs) has dominated embedded vision for a decade.
 
 A typical CNN stacks several convolutional layers (each extracting features), interleaves them with *pooling* layers that reduce spatial resolution by taking, say, the maximum value in each 2×2 region, and ends with a few fully connected layers that turn the spatial feature maps into class predictions. A well-designed CNN for a 96×96 input can do useful classification with 200,000 to 500,000 parameters and fit in a couple of megabytes of flash when quantized.
 
-The two important efficient-CNN ideas to know by name are *depthwise separable convolution* and the *MobileNet* family that uses it. A standard 3×3 convolution with 32 input channels and 64 output channels does 3 × 3 × 32 × 64 = 18,432 multiplications per output pixel — combining spatial filtering and channel mixing in one operation. Depthwise separable splits that into two cheaper steps: a depthwise convolution that filters each input channel independently (3 × 3 × 32 = 288 mults per output pixel), followed by a 1×1 pointwise convolution that mixes channels (1 × 1 × 32 × 64 = 2,048 mults per output pixel). Total: 2,336, which is roughly an eighth of the standard convolution. Accuracy loss for many vision tasks is small; the cost reduction is large. MobileNetV2 — 3.5 million parameters, ~300 million MACs per inference, ~90% top-5 on ImageNet — is the canonical version. Scaled down to 96×96 input and a 0.35× width multiplier, it drops to ~400,000 parameters and ~25 million MACs, which fits a Cortex-M7 with a couple hundred milliseconds of inference latency. That scaled version is the sweet spot for embedded vision: accurate enough for real tasks, cheap enough to run.
+The two important efficient-CNN ideas to know by name are *depthwise separable convolution* and the *MobileNet* family that uses it. A standard 3×3 convolution with 32 input channels and 64 output channels does 3 × 3 × 32 × 64 = 18,432 multiplications per output pixel — combining spatial filtering and channel mixing in one operation. Depthwise separable splits that into two cheaper steps: a depthwise convolution that filters each input channel independently (3 × 3 × 32 = 288 mults per output pixel), followed by a 1×1 pointwise convolution that mixes channels (1 × 1 × 32 × 64 = 2,048 mults per output pixel). Total: 2,336, which is roughly an eighth of the standard convolution.
+
+![Two stacked block diagrams. Top row labeled standard 3-by-3 convolution: one input tensor (32 channels) feeds a single block that produces a 64-channel output; right-hand cost reads 3 times 3 times 32 times 64 equals 18,432 mults per pixel. Bottom row labeled depthwise separable: input passes through a depthwise 3-by-3 block (3 times 3 times 32 equals 288), an intermediate 32-channel tensor, then a pointwise 1-by-1 block (1 times 1 times 32 times 64 equals 2,048), to a 64-channel output. Total callout reads 288 plus 2,048 equals 2,336 mults per pixel, roughly 8 times cheaper than standard.](../images/chapter-03-ml-for-embedded-engineers-fig-04.png)
+*Figure 3.4 — Standard versus depthwise separable convolution.* Accuracy loss for many vision tasks is small; the cost reduction is large. MobileNetV2 — 3.5 million parameters, ~300 million MACs per inference, ~90% top-5 on ImageNet — is the canonical version. Scaled down to 96×96 input and a 0.35× width multiplier, it drops to ~400,000 parameters and ~25 million MACs, which fits a Cortex-M7 with a couple hundred milliseconds of inference latency. That scaled version is the sweet spot for embedded vision: accurate enough for real tasks, cheap enough to run.
 
 Recurrent networks are the architecture you have to be careful with. *RNNs* are designed for sequence data — time series, audio, text — and they carry a hidden state from one time step to the next, which is what makes them powerful at sequential tasks. The hidden state is also what makes them painful on embedded hardware. It must be stored in RAM between time steps, and for *LSTMs* — the most common practical variant — the state is four times the size of the hidden dimension. A 128-unit LSTM holds 512 values of state, updated, for audio, 100 times a second. The operation count per time step is high, too — a 128-unit LSTM on 40-dimensional audio features is about 260,000 MACs per step, or 26 million per one-second window, comparable to a small CNN but with the additional state-management overhead. Where you can, embedded audio applications prefer 1D convolutions or depthwise separable convolutions over RNNs for exactly this reason.
 
@@ -37,6 +49,9 @@ Whatever the architecture, three numbers determine deployment cost. The *paramet
 The translation between the two domains is essentially a vocabulary exchange. *Model size* is a flash requirement. *Parameter count* multiplied by bytes is the same flash requirement, said differently. *Activation memory* is a RAM requirement. *FLOPs* or *MAC count* divided by sustained throughput is a latency. *Quantization* is a memory and compute reduction at the cost of precision. *Pruning* reduces parameter and operation counts. *Batch size* is always 1 on embedded — there is no batch. When an ML engineer says *high memory footprint* they usually mean parameters plus activations; when you say *it doesn't fit in RAM* you mean activations exceed available SRAM. You are describing the same problem in the two languages of the same field. Learning to switch lets you ask for the right thing — *we need activation memory under 150 KB* — and accept the right answer back — *try MobileNetV2 with 0.35 width multiplier*.
 
 The mapping from sensing task to model class is mostly conventional but worth stating. For *image classification, visual inspection, and object detection*, use a CNN; start with MobileNetV2 or V3, scale resolution and width multiplier until constraints are met, and try EfficientNet-Lite if you need more accuracy at similar cost. For *keyword spotting and audio classification*, prefer 1D CNNs or depthwise separable convolutions on spectrograms over RNNs; DS-CNN models hit 95%+ on standard keyword sets in under 100 KB of weights. For *time-series anomaly detection on sensor streams*, start with decision trees on engineered features (statistical moments, FFT magnitudes, autocorrelation); move to 1D CNNs or autoencoders only if raw streams are required. For *structured tabular data*, use trees or gradient-boosted trees; neural networks rarely beat them on small tabular datasets. For *gesture and motion classification* from accelerometers, use 1D CNNs if you have the RAM; use trees on hand-crafted features if you do not.
+
+![Grid mapping five sensing tasks on rows against five model classes on columns ordered left to right from cheapest to most expensive — tree, 1D CNN, 2D CNN, depthwise-separable CNN, RNN. Filled black squares mark primary recommendations; ringed circles mark fallbacks. Image classification points to 2D CNN with DS-CNN fallback; keyword spotting points to DS-CNN with RNN fallback; time-series anomaly points to tree with 1D CNN fallback; structured tabular points to tree; gesture-and-motion points to 1D CNN with tree fallback. A cost arrow at top runs left to right.](../images/chapter-03-ml-for-embedded-engineers-fig-05.png)
+*Figure 3.5 — Sensing task to model class.*
 
 The pattern across all of these is the same one. Use the simplest model that meets the accuracy bar. Trees before networks. Feedforward before recurrent. Small CNNs before large. Every increment in model complexity costs memory, compute, and power, and only the increment that is *paid back* in accuracy is worth taking. The previous chapter taught you to read what the hardware can give. This chapter taught you to read what the model demands. The next chapter starts on the question those two together produce: how do you actually measure what an inference pass *costs* on the part you have, when the spec sheet and the architecture tell you what it ought to cost?
 
@@ -96,6 +111,116 @@ Use `tflite` package (PyPI) or write a minimal FlatBuffers parser. Document whic
 **Connection to previous chapters:** This module produces the structured input that chapters 5 (memory), 6 (compute), 7 (power), and 11 (model selection) will all consume. The Constraint list from chapter 2 is the budget side; ModelSummary is the demand side.
 
 **Preview of next chapter:** Chapter 4 adds `profiling.py` — a latency predictor that takes a ModelSummary and a Target and predicts inference latency stage by stage, using processor-class throughput tables.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the
+figures in this chapter. Each produces a standalone HTML file you can open
+in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
+your Claude project context before using these prompts. They define the stack,
+naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 3.1 — Weights to flash, activations to RAM
+
+```
+Build a single-file D3 v7 HTML diagram of a four-layer feedforward network.
+Two horizontal bands run across the canvas: a top "Flash · weights" band
+holding three weight bricks W₁, W₂, W₃ labeled with matrix dimensions; a
+bottom "RAM · activations" band holding two activation buffers a₁, a₂.
+Between the bands, a row of four circular nodes (x, h₁, h₂, ŷ) connected by
+forward arrows. Dashed wires drop from each weight brick to the matching
+inter-layer arrow and rise from each layer to its RAM buffer. Show a
+"discarded" arc between a₁ and a₂. Side totals on the right: "~406 KB total"
+in the flash band, "< 1 KB peak" in the RAM band. Tooltips on bricks and
+buffers report byte counts. Reference: d3/chapter-03-ml-for-embedded-engineers-fig-01.html.
+```
+
+> Reference implementation: `d3/chapter-03-ml-for-embedded-engineers-fig-01.html`
+
+---
+
+### Figure 3.2 — A small MLP: 784 to 128 to 10
+
+```
+Build a single-file D3 v7 HTML diagram of a three-layer multilayer
+perceptron with a slider control for hidden width (8–512, default 128).
+Layout: three rectangular layer boxes left to right (input 784, hidden,
+output 10), height scaled by sqrt of neuron count. Each box shows its
+neuron count and activation size; each edge between boxes carries a small
+card with the weight-matrix dimensions and byte total. Below the diagram,
+a single "Totals" strip reports flash usage (W₁ + W₂ + biases) and peak
+RAM. Dragging the slider recomputes flash and RAM live. Tooltips on each
+layer box. Reference: d3/chapter-03-ml-for-embedded-engineers-fig-02.html.
+```
+
+> Reference implementation: `d3/chapter-03-ml-for-embedded-engineers-fig-02.html`
+
+---
+
+### Figure 3.3 — Fully connected versus convolution
+
+```
+Build a single-file D3 v7 HTML with two side-by-side panels.
+Left panel "Fully connected": a tall flattened input column of 150,528
+units against a short output column of 128, connected by a fan of thin
+gray lines suggesting density. Bottom callout: "19,267,584 weights ≈ 76 MB
+float32 — dead on arrival."
+Right panel "Convolution": an 8×8 image grid with one solid 3×3 filter
+outline plus three dashed ghost positions showing the slide path; below
+the grid, a 3×3 palette of nine filled weight squares with the label "9
+shared weights." Add a slider that adjusts kernel size (1, 3, 5) and
+relabels the callout. Bottom callout: "k² weights per filter · reused
+everywhere." Reference: d3/chapter-03-ml-for-embedded-engineers-fig-03.html.
+```
+
+> Reference implementation: `d3/chapter-03-ml-for-embedded-engineers-fig-03.html`
+
+---
+
+### Figure 3.4 — Standard versus depthwise separable convolution
+
+```
+Build a single-file D3 v7 HTML with two stacked rows and three sliders
+(input channels, output channels, kernel size).
+Top row "Standard 3×3 convolution": input tensor box → single dark block
+(spatial + channel mix) → output tensor box. Right-hand cost label: "k·k·
+inC·outC = N mults/px."
+Bottom row "Depthwise separable": input tensor → depthwise block (per-
+channel filter, k·k·inC) → intermediate tensor → pointwise block (1·1·
+inC·outC) → output tensor. Side labels report each step's mult count.
+Below both rows, a wide dark callout bar reports "depthwise + pointwise =
+total mults/px" on the left and "≈ Nx cheaper than standard" on the right,
+both recomputed live as sliders change. Tooltips on every block.
+Reference: d3/chapter-03-ml-for-embedded-engineers-fig-04.html.
+```
+
+> Reference implementation: `d3/chapter-03-ml-for-embedded-engineers-fig-04.html`
+
+---
+
+### Figure 3.5 — Sensing task to model class
+
+```
+Build a single-file D3 v7 HTML grid with five rows (image classification,
+keyword spotting, time-series anomaly, structured tabular, gesture/motion)
+and five columns (Tree, 1D CNN, 2D CNN, DS-CNN, RNN/LSTM) ordered left to
+right cheapest to most expensive. A horizontal "cheaper → more expensive"
+arrow runs above the column headers. Each row carries a row label and
+sub-label on the left margin. For each row, place a filled rectangle in
+the primary column labeled "primary" and a ringed circle labeled "fb" in
+the fallback column when one exists. Image classification's primary cell
+uses the brand red. Legend at the bottom explains the two marks. Tooltips
+on primary cells and fallback rings restate the recommendation in words.
+Reference: d3/chapter-03-ml-for-embedded-engineers-fig-05.html.
+```
+
+> Reference implementation: `d3/chapter-03-ml-for-embedded-engineers-fig-05.html`
 
 ---
 

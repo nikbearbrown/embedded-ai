@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 14.1 — Bandwidth-vs-payload arithmetic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 440px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .bar.primary { fill: var(--color-red); }
+  .bar.secondary { fill: var(--color-secondary); }
+  .bar.faint { fill: var(--color-border); }
+  .value-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); font-weight: 600; }
+  .row-label { font-family: 'Inter', sans-serif; font-size: 13px; fill: var(--color-ink); font-weight: 600; }
+  .row-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ochre); font-weight: 600; }
+  .ref-line { stroke: var(--color-ink); stroke-width: 1; stroke-dasharray: 4 3; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 14.1 — Bandwidth-vs-payload arithmetic</h1>
+<p class="subtitle">One JPEG image, plotted next to LoRaWAN's per-hour airtime allowance at SF7 and SF12.</p>
+<div id="chart" role="img" aria-labelledby="t-c d-c"></div>
+<p class="caption">A single 20 KB JPEG is wider than the radio pipe at every spreading factor. Cloud inference is physically impossible — the bytes cannot leave the device.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const rows = [
+  { label: 'One JPEG', sub: '224×224 RGB, compressed', value: 20, unit: 'KB per image', cls: 'primary' },
+  { label: 'LoRaWAN SF7', sub: 'fastest, shortest range', value: 50, unit: 'KB / hr ceiling', cls: 'secondary' },
+  { label: 'LoRaWAN SF12', sub: 'longest range', value: 3.75, unit: 'KB / hr — cannot fit one image', cls: 'faint' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong>: ${d.value} KB/hr — ${d.unit}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 700;
+  const totalHeight = container.clientHeight || 440;
+  const margin = { top: 24, right: 24, bottom: 64, left: 180 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-c d-c');
+  svg.append('title').attr('id', 't-c').text('Payload size vs LoRaWAN per-hour airtime ceiling');
+  svg.append('desc').attr('id', 'd-c').text('Horizontal bars comparing the 20 KB compressed JPEG against per-hour data ceilings at SF7 and SF12.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([0, 60]).range([0, chartWidth]);
+  const y = d3.scaleBand().domain(rows.map(d => d.label)).range([0, chartHeight]).padding(0.3);
+
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(x).ticks(7));
+  g.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 44)
+    .attr('text-anchor', 'middle').text('kilobytes per hour');
+
+  // Row labels (outside left)
+  g.append('g').selectAll('text.row-label')
+    .data(rows).join('text')
+      .attr('class', 'row-label')
+      .attr('x', -16).attr('y', d => y(d.label) + y.bandwidth() / 2 - 4)
+      .attr('text-anchor', 'end').text(d => d.label);
+  g.append('g').selectAll('text.row-sub')
+    .data(rows).join('text')
+      .attr('class', 'row-sub')
+      .attr('x', -16).attr('y', d => y(d.label) + y.bandwidth() / 2 + 12)
+      .attr('text-anchor', 'end').text(d => d.sub);
+
+  g.selectAll('.bar')
+    .data(rows).join('rect')
+      .attr('class', d => `bar ${d.cls}`)
+      .attr('x', 0).attr('y', d => y(d.label))
+      .attr('width', d => x(d.value))
+      .attr('height', y.bandwidth())
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.label}: ${d.value} kilobytes per hour`)
+      .on('mouseover', (event, d) => showTip(event, d))
+      .on('mousemove', moveTip)
+      .on('mouseout', hideTip);
+
+  // Value labels at bar ends
+  g.selectAll('.value-label')
+    .data(rows).join('text')
+      .attr('class', 'value-label')
+      .attr('x', d => x(d.value) + 8)
+      .attr('y', d => y(d.label) + y.bandwidth() / 2 + 4)
+      .text(d => `${d.value} KB`);
+
+  // Reference: vertical line at "one image" width (20 KB)
+  g.append('line').attr('class', 'ref-line')
+    .attr('x1', x(20)).attr('x2', x(20))
+    .attr('y1', 0).attr('y2', chartHeight);
+  g.append('text').attr('class', 'annotation')
+    .attr('x', x(20)).attr('y', -8)
+    .attr('text-anchor', 'middle')
+    .text('one image');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 4.1 — Four-stage inference pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; }
+  #chart { width: 100%; height: 460px; }
+  .stage rect.body { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.4; }
+  .stage rect.body.primary { stroke: var(--color-red); stroke-width: 2; }
+  .stage rect.header { fill: var(--color-secondary); }
+  .stage rect.header.primary { fill: var(--color-red); }
+  .stage text.title { fill: var(--color-white); font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+  .stage text.headline { fill: var(--color-ink); font-family: 'Inter', sans-serif; font-size: 12px; }
+  .stage text.detail { fill: var(--color-secondary); font-family: 'Inter', sans-serif; font-size: 11px; }
+  .flow-arrow { fill: none; stroke: var(--color-ink); stroke-width: 1.2; }
+  .bracket { fill: none; stroke: var(--color-secondary); stroke-width: 1; }
+  .bracket.alert { stroke: var(--color-red); }
+  .bracket-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .bracket-label.alert { fill: var(--color-red); font-weight: 600; }
+  .bracket-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 4.1 — Four-stage inference pipeline</h1>
+<p class="subtitle">What the profiler measures versus what the application deadline measures.</p>
+<div id="chart" role="img" aria-labelledby="t-chart d-chart"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const stageData = [
+  { id: 1, label: 'STAGE 1 — INPUT PREP', headline: 'FFT, normalize, reshape',     detail: 'ADC samples → tensor', primary: false },
+  { id: 2, label: 'STAGE 2 — INFERENCE',  headline: 'layer-by-layer execution',   detail: 'weight load, MAC, write', primary: true  },
+  { id: 3, label: 'STAGE 3 — OUTPUT',     headline: 'softmax, NMS, threshold',    detail: 'logits → labels',         primary: false },
+  { id: 4, label: 'STAGE 4 — DELIVERY',   headline: 'GPIO, log, LoRaWAN',         detail: 'act on the result',       primary: false }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>${d.headline}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top',  (event.pageY - 28) + 'px')
+    .style('opacity', 1);
+}
+function moveTip(event) {
+  tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px');
+}
+function hideTip() { tooltip.style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 900;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 56, right: 24, bottom: 96, left: 24 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-chart d-chart');
+  svg.append('title').attr('id', 't-chart').text('Four-stage inference pipeline');
+  svg.append('desc').attr('id', 'd-chart').text('Four labelled stages connected by arrows, with brackets showing what the profiler reports versus the end-to-end application deadline.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand()
+    .domain(stageData.map(d => d.id))
+    .range([0, chartWidth])
+    .padding(0.12);
+
+  const boxHeight = 110;
+  const stages = gChart.selectAll('.stage')
+    .data(stageData)
+    .join('g')
+      .attr('class', 'stage')
+      .attr('transform', d => `translate(${xScaleBand(d.id)},40)`)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.label}: ${d.headline}`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+  stages.append('rect')
+    .attr('class', d => 'body' + (d.primary ? ' primary' : ''))
+    .attr('width', xScaleBand.bandwidth())
+    .attr('height', boxHeight);
+  stages.append('rect')
+    .attr('class', d => 'header' + (d.primary ? ' primary' : ''))
+    .attr('width', xScaleBand.bandwidth())
+    .attr('height', 24);
+  stages.append('text')
+    .attr('class', 'title')
+    .attr('x', 10).attr('y', 16)
+    .text(d => d.label);
+  stages.append('text')
+    .attr('class', 'headline')
+    .attr('x', 12).attr('y', 50)
+    .text(d => d.headline);
+  stages.append('text')
+    .attr('class', 'detail')
+    .attr('x', 12).attr('y', 70)
+    .text(d => d.detail);
+
+  // arrows between stages
+  for (let i = 0; i < stageData.length - 1; i++) {
+    const x1 = xScaleBand(stageData[i].id) + xScaleBand.bandwidth();
+    const x2 = xScaleBand(stageData[i + 1].id);
+    const y = 40 + boxHeight / 2;
+    svg.append('defs').append('marker')
+      .attr('id', `arrow-${i}`).attr('markerWidth', 8).attr('markerHeight', 6)
+      .attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+      .append('polygon').attr('points', '0 0, 8 3, 0 6')
+      .attr('fill', 'currentColor');
+    gChart.append('line')
+      .attr('class', 'flow-arrow')
+      .attr('x1', x1 + 2).attr('y1', y)
+      .attr('x2', x2 - 2).attr('y2', y)
+      .attr('marker-end', `url(#arrow-${i})`);
+  }
+
+  // profiler bracket — Stage 2 only
+  const bx1 = xScaleBand(2);
+  const bx2 = xScaleBand(2) + xScaleBand.bandwidth();
+  const bracketY = 40 + boxHeight + 20;
+  gChart.append('path')
+    .attr('class', 'bracket alert')
+    .attr('d', `M${bx1} ${bracketY - 6} L${bx1} ${bracketY} L${bx2} ${bracketY} L${bx2} ${bracketY - 6}`);
+  gChart.append('text')
+    .attr('class', 'bracket-label alert')
+    .attr('x', (bx1 + bx2) / 2).attr('y', bracketY + 18)
+    .attr('text-anchor', 'middle')
+    .text('what the profiler reports');
+  gChart.append('text')
+    .attr('class', 'bracket-sub')
+    .attr('x', (bx1 + bx2) / 2).attr('y', bracketY + 34)
+    .attr('text-anchor', 'middle')
+    .style('fill', 'var(--color-red)')
+    .text('≈ 50 ms');
+
+  // application bracket — all four
+  const ax1 = xScaleBand(1);
+  const ax2 = xScaleBand(4) + xScaleBand.bandwidth();
+  const appY = bracketY + 60;
+  gChart.append('path')
+    .attr('class', 'bracket')
+    .attr('d', `M${ax1} ${appY - 6} L${ax1} ${appY} L${ax2} ${appY} L${ax2} ${appY - 6}`);
+  gChart.append('text')
+    .attr('class', 'bracket-label')
+    .attr('x', (ax1 + ax2) / 2).attr('y', appY + 18)
+    .attr('text-anchor', 'middle')
+    .text('end-to-end application latency');
+  gChart.append('text')
+    .attr('class', 'bracket-sub')
+    .attr('x', (ax1 + ax2) / 2).attr('y', appY + 34)
+    .attr('text-anchor', 'middle')
+    .text('≈ 150 ms once FFT, post-process, and radio counted');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

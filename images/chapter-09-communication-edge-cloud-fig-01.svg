@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" role="img" aria-labelledby="t01 d01">
+  <title id="t01">Four-tier processing topology — on-device, near-edge, far-edge, cloud</title>
+  <desc id="d01">Four columns showing the processing tiers a sensor reading can traverse, annotated with typical round-trip latency range, available radio bandwidth, and compute ceiling at each tier. Latency and money rise as you move right; privacy and local control fall.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: bold; fill: #2a1a0e; }
+      .h2 { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .badge { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #fdfcfb; }
+    </style>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="760" height="440" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">Four tiers between the sensor and the datacenter</text>
+  <text x="32" y="50" class="nm">latency, money, and bandwidth ceiling all rise as you move right</text>
+
+  <!-- tier columns: x at 40, 220, 400, 580; width 160 -->
+  <!-- Tier 1: ON-DEVICE -->
+  <rect x="40"  y="90" width="160" height="200" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.5"/>
+  <rect x="40"  y="90" width="160" height="22" fill="#2a1a0e"/>
+  <text x="48"  y="106" class="badge">TIER 1 — ON-DEVICE</text>
+  <text x="48"  y="130" class="h2">Endpoint MCU</text>
+  <text x="48"  y="148" class="sm">model runs in flash + SRAM</text>
+  <text x="48"  y="162" class="sm">only the label leaves</text>
+  <text x="48"  y="186" class="lb">latency: 1–80 ms</text>
+  <text x="48"  y="202" class="lb">bandwidth: n/a</text>
+  <text x="48"  y="218" class="lb">compute: 100 M MACs</text>
+  <text x="48"  y="246" class="sm">strengths: privacy, no net</text>
+  <text x="48"  y="262" class="sm">limits: memory, energy</text>
+  <text x="48"  y="278" class="sm">example: ESP32, STM32</text>
+
+  <!-- Tier 2: NEAR-EDGE -->
+  <rect x="220" y="90" width="160" height="200" fill="#fdfcfb" stroke="#4a4540" stroke-width="1.5"/>
+  <rect x="220" y="90" width="160" height="22" fill="#4a4540"/>
+  <text x="228" y="106" class="badge">TIER 2 — NEAR-EDGE</text>
+  <text x="228" y="130" class="h2">Local gateway</text>
+  <text x="228" y="148" class="sm">WiFi / Ethernet hop</text>
+  <text x="228" y="162" class="sm">data stays in the building</text>
+  <text x="228" y="186" class="lb">latency: 1–50 ms</text>
+  <text x="228" y="202" class="lb">bandwidth: 1–100 Mbps</text>
+  <text x="228" y="218" class="lb">compute: 10 G MACs</text>
+  <text x="228" y="246" class="sm">strengths: low jitter, mains</text>
+  <text x="228" y="262" class="sm">limits: another box on-site</text>
+  <text x="228" y="278" class="sm">example: Raspberry Pi, Jetson</text>
+
+  <!-- Tier 3: FAR-EDGE -->
+  <rect x="400" y="90" width="160" height="200" fill="#fdfcfb" stroke="#8a8480" stroke-width="1.5"/>
+  <rect x="400" y="90" width="160" height="22" fill="#8a8480"/>
+  <text x="408" y="106" class="badge">TIER 3 — FAR-EDGE</text>
+  <text x="408" y="130" class="h2">Regional server</text>
+  <text x="408" y="148" class="sm">cellular / LoRaWAN / sat</text>
+  <text x="408" y="162" class="sm">5G MEC or base station</text>
+  <text x="408" y="186" class="lb">latency: 50–500 ms</text>
+  <text x="408" y="202" class="lb">bandwidth: 1 k–1 M bps</text>
+  <text x="408" y="218" class="lb">compute: 1 T MACs</text>
+  <text x="408" y="246" class="sm">strengths: roaming devices</text>
+  <text x="408" y="262" class="sm">limits: variable, costly</text>
+  <text x="408" y="278" class="sm">example: NB-IoT, LTE-M, MEC</text>
+
+  <!-- Tier 4: CLOUD -->
+  <rect x="580" y="90" width="160" height="200" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="1.5"/>
+  <rect x="580" y="90" width="160" height="22" fill="#c8c4c0"/>
+  <text x="588" y="106" class="badge" fill="#2a1a0e">TIER 4 — CLOUD</text>
+  <text x="588" y="130" class="h2">Centralized datacenter</text>
+  <text x="588" y="148" class="sm">always-on internet</text>
+  <text x="588" y="162" class="sm">third-party processing</text>
+  <text x="588" y="186" class="lb">latency: 100 ms–seconds</text>
+  <text x="588" y="202" class="lb">bandwidth: 1–1000 Mbps</text>
+  <text x="588" y="218" class="lb">compute: unlimited</text>
+  <text x="588" y="246" class="sm">strengths: scale, fresh models</text>
+  <text x="588" y="262" class="sm">limits: privacy, recurring $</text>
+  <text x="588" y="278" class="sm">example: AWS, Azure, GCP</text>
+
+  <!-- flow arrows between tiers -->
+  <line x1="200" y1="200" x2="218" y2="200" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+  <line x1="380" y1="200" x2="398" y2="200" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+  <line x1="560" y1="200" x2="578" y2="200" stroke="#2a1a0e" stroke-width="1.2" marker-end="url(#ar)"/>
+
+  <!-- bottom axis: rising cost axis -->
+  <line x1="40" y1="330" x2="740" y2="330" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar)"/>
+  <text x="48"  y="324" class="sm">fast · private · constrained</text>
+  <text x="732" y="324" text-anchor="end" class="sm">scalable · costly · always-online</text>
+  <text x="390" y="346" text-anchor="middle" class="lb">latency, money, bandwidth ceiling all increase →</text>
+
+  <!-- top annotation: roundtrip example -->
+  <line x1="120" y1="86" x2="120" y2="72" stroke="#8a1f1f" stroke-width="1"/>
+  <line x1="660" y1="86" x2="660" y2="72" stroke="#8a1f1f" stroke-width="1"/>
+  <line x1="120" y1="72" x2="660" y2="72" stroke="#8a1f1f" stroke-width="1"/>
+  <text x="390" y="68" text-anchor="middle" class="lb" fill="#8a1f1f">a single inference can hop any prefix of this chain</text>
+
+  <!-- privacy / regulatory hatch under tiers 3 and 4 -->
+  <rect x="400" y="370" width="340" height="38" fill="#fdfcfb" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="570" y="386" text-anchor="middle" class="lb" fill="#8a1f1f">data leaves the device</text>
+  <text x="570" y="402" text-anchor="middle" class="sm" fill="#8a1f1f">HIPAA, GDPR, PCI-DSS can forbid this hop</text>
+
+  <text x="40"  y="386" class="lb">data never leaves</text>
+  <text x="40"  y="402" class="sm">privacy is structural, not policy</text>
+
+  <text x="382" y="430" text-anchor="middle" class="cap">The decision is which prefix of these four tiers your application can afford on latency, energy, privacy, and money.</text>
+</svg>

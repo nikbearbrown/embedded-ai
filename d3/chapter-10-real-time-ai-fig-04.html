@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 10.4 — AI failure-mode matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #121212; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; min-height: 520px; }
+  .matrix-header { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-ink); letter-spacing: 0.5px; }
+  .row-name { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; font-weight: 600; fill: var(--color-ink); }
+  .row-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .cell-primary { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .cell-sub { font-family: 'Inter', sans-serif; font-size: 10px; }
+  .verdict-bad { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; }
+  .legend-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-white);
+             border: 1px solid var(--color-border); padding: 8px 12px; font-size: 12px; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 10.4 — AI failure modes against the ASIL D threshold</h1>
+<p class="subtitle">Less than 10⁻⁸ failures per hour is the bar. Five of six rows fail it unmitigated. Hover any cell.</p>
+<div id="chart" role="main"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const failureModeData = [
+  { id: 'fn', name: 'False negative', sub: 'pedestrian detector misses pedestrian — no braking',
+    probability: { v: '~10⁻²', sub: '10⁶× above bar', sev: 4 },
+    severity: { v: 'catastrophic', sub: 'life-critical', sev: 4 },
+    asild: { v: 'NO', sev: 4 },
+    mitigation: 'redundant voting + hierarchical fallback on independent sensor' },
+  { id: 'fp', name: 'False positive', sub: 'detector flags healthy motor — unnecessary stop',
+    probability: { v: '~10⁻³', sub: 'not a safety bar', sev: 1 },
+    severity: { v: 'economic', sub: 'production loss', sev: 1 },
+    asild: { v: 'N/A', sev: 1 },
+    mitigation: 'confidence gating; tune threshold against business cost' },
+  { id: 'lat', name: 'Latency violation', sub: 'correct output too late — obstacle at 5 m, decision at 2 m',
+    probability: { v: 'depends on WCET', sub: 'often unbounded', sev: 4 },
+    severity: { v: 'catastrophic', sub: 'same as no output', sev: 4 },
+    asild: { v: 'NO', sev: 4 },
+    mitigation: 'bounded execution + advisory pattern; remove AI from critical path' },
+  { id: 'adv', name: 'Adversarial misclassification', sub: 'stop sign with stickers reads as speed limit',
+    probability: { v: 'low in field', sub: 'unbounded in attack', sev: 3 },
+    severity: { v: 'catastrophic', sub: 'targeted harm', sev: 3 },
+    asild: { v: 'NO', sev: 4 },
+    mitigation: 'redundant voting with diverse architectures; sensor cross-check' },
+  { id: 'dist', name: 'Distribution shift', sub: 'trained on adults; misses children, wheelchair users',
+    probability: { v: 'unknown', sub: 'cannot prove completeness', sev: 3 },
+    severity: { v: 'catastrophic', sub: 'silent failure', sev: 3 },
+    asild: { v: 'NO', sev: 4 },
+    mitigation: 'SOTIF / ISO/PAS 21448 OOD monitor; conservative fallback' },
+  { id: 'num', name: 'Numerical instability', sub: 'quantization drift; −5% when truth is +5%',
+    probability: { v: '10⁻⁴–10⁻²', sub: 'target-dependent', sev: 2 },
+    severity: { v: 'depends', sub: 'moderate to high', sev: 2 },
+    asild: { v: 'RARELY', sev: 3 },
+    mitigation: 'post-training validation; range clamps; accumulator widening' }
+];
+
+// Severity → grayscale (warm). 1 = light, 4 = ink.
+const severityScale = ['#FFFFFF', '#D4D4D4', '#787878', '#404040', '#121212'];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function shade(sev) { return severityScale[sev]; }
+function textColor(sev) { return sev >= 3 ? 'var(--color-white)' : 'var(--color-ink)'; }
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth = container.clientWidth || 1000;
+  const totalHeight = 520;
+  const margin = { top: 60, right: 24, bottom: 60, left: 24 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'fig04-title fig04-desc');
+  svg.append('title').attr('id', 'fig04-title').text('AI failure-mode matrix');
+  svg.append('desc').attr('id', 'fig04-desc').text('Six failure modes shaded by their acceptability against the ASIL D ten-to-the-minus-eight per hour threshold.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const cols = [
+    { id: 'mode', label: 'FAILURE MODE', w: 0.30 },
+    { id: 'probability', label: 'TYPICAL PROBABILITY', w: 0.18 },
+    { id: 'severity', label: 'SEVERITY', w: 0.16 },
+    { id: 'asild', label: 'ASIL D OK?', w: 0.12 },
+    { id: 'mitigation', label: 'REQUIRED MITIGATION', w: 0.24 }
+  ];
+  let cumulative = 0;
+  cols.forEach(c => { c.x = cumulative * chartWidth; c.width = c.w * chartWidth; cumulative += c.w; });
+
+  // header
+  gChart.append('rect').attr('x', 0).attr('y', -32).attr('width', chartWidth).attr('height', 24)
+    .attr('fill', 'var(--color-border)');
+  cols.forEach(c => {
+    gChart.append('text').attr('class', 'matrix-header')
+      .attr('x', c.x + 8).attr('y', -16).text(c.label);
+  });
+
+  const rowHeight = chartHeight / failureModeData.length;
+
+  gChart.selectAll('.row').data(failureModeData).join('g').attr('class', 'row')
+    .attr('transform', (d, i) => `translate(0,${i * rowHeight})`)
+    .each(function(d) {
+      const row = d3.select(this);
+      // mode column
+      row.append('rect').attr('x', cols[0].x).attr('y', 0).attr('width', cols[0].width).attr('height', rowHeight - 4)
+        .attr('fill', 'var(--color-white)').attr('stroke', 'var(--color-border)');
+      row.append('rect').attr('x', cols[0].x).attr('y', 0).attr('width', 6).attr('height', rowHeight - 4)
+        .attr('fill', shade(d.asild.sev));
+      row.append('text').attr('class', 'row-name').attr('x', cols[0].x + 16).attr('y', 18).text(d.name);
+      row.append('text').attr('class', 'row-sub').attr('x', cols[0].x + 16).attr('y', 36).text(d.sub);
+
+      const cells = [
+        { col: cols[1], data: d.probability },
+        { col: cols[2], data: d.severity },
+        { col: cols[3], data: d.asild }
+      ];
+      cells.forEach(c => {
+        const cellG = row.append('g').attr('tabindex', 0)
+          .attr('aria-label', `${d.name} ${c.col.label}: ${c.data.v}`)
+          .on('mouseover', (event) => {
+            tooltip.html(`<strong>${d.name}</strong><br>${c.col.label}: ${c.data.v}<br><em>${c.data.sub || ''}</em><br><br>Mitigation: ${d.mitigation}`)
+              .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+              .transition().duration(150).style('opacity', 1);
+          })
+          .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+          .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+        cellG.append('rect').attr('x', c.col.x).attr('y', 0).attr('width', c.col.width).attr('height', rowHeight - 4)
+          .attr('fill', shade(c.data.sev));
+        cellG.append('text').attr('class', 'cell-primary')
+          .attr('x', c.col.x + c.col.width / 2).attr('y', 22)
+          .attr('text-anchor', 'middle').attr('fill', textColor(c.data.sev))
+          .text(c.data.v);
+        if (c.data.sub) {
+          cellG.append('text').attr('class', 'cell-sub')
+            .attr('x', c.col.x + c.col.width / 2).attr('y', 38)
+            .attr('text-anchor', 'middle').attr('fill', c.data.sev >= 3 ? '#D4D4D4' : 'var(--color-secondary)')
+            .text(c.data.sub);
+        }
+      });
+      // mitigation
+      row.append('rect').attr('x', cols[4].x).attr('y', 0).attr('width', cols[4].width).attr('height', rowHeight - 4)
+        .attr('fill', 'var(--color-white)').attr('stroke', 'var(--color-border)');
+      const mitText = row.append('text').attr('class', 'row-sub').attr('x', cols[4].x + 8).attr('y', 18);
+      const words = d.mitigation.split(' ');
+      let line = '';
+      let y = 18;
+      words.forEach(w => {
+        if ((line + ' ' + w).length > 32) {
+          mitText.append('tspan').attr('x', cols[4].x + 8).attr('y', y).text(line);
+          line = w;
+          y += 14;
+        } else {
+          line = line ? line + ' ' + w : w;
+        }
+      });
+      mitText.append('tspan').attr('x', cols[4].x + 8).attr('y', y).text(line);
+    });
+
+  // Legend
+  const gLegend = gChart.append('g').attr('class', 'g-legend')
+    .attr('transform', `translate(0,${chartHeight + 12})`);
+  gLegend.append('text').attr('class', 'matrix-header').attr('x', 0).attr('y', 0).text('SHADING');
+  const legendItems = [
+    { c: '#121212', t: 'fails ASIL D unmitigated' },
+    { c: '#404040', t: 'catastrophic when triggered' },
+    { c: '#787878', t: 'moderate / app-dependent' },
+    { c: '#D4D4D4', t: 'economic, not safety' }
+  ];
+  legendItems.forEach((it, i) => {
+    const x = 60 + i * 180;
+    gLegend.append('rect').attr('x', x).attr('y', -10).attr('width', 16).attr('height', 12).attr('fill', it.c);
+    gLegend.append('text').attr('class', 'legend-label').attr('x', x + 22).attr('y', 0).text(it.t);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

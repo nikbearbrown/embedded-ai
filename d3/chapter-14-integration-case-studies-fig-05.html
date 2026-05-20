@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 14.5 — Vineyard 24-hour energy timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #2a1a0e;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #wrap { display: grid; grid-template-rows: 1fr 1fr; gap: 16px; height: 480px; }
+  .panel { width: 100%; height: 100%; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .solar { fill: var(--color-border); fill-opacity: 0.55; stroke: var(--color-secondary); stroke-width: 1; }
+  .sleep-line { stroke: var(--color-secondary); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .spike { fill: var(--color-red); }
+  .spike:hover { fill-opacity: 0.7; }
+  .soc-line { fill: none; stroke: var(--color-ink); stroke-width: 1.75; }
+  .annotation { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ochre); font-weight: 600; }
+  .label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .panel-title { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 14.5 — Vineyard 24-hour energy timeline</h1>
+<p class="subtitle">Solar harvest, four inference spikes, sleep baseline, and battery state-of-charge across a single day.</p>
+<div id="wrap">
+  <div id="power" class="panel" role="img" aria-labelledby="t-pow d-pow"></div>
+  <div id="soc"   class="panel" role="img" aria-labelledby="t-soc d-soc"></div>
+</div>
+<p class="caption">Energy balance positive on average; the 18.5 Wh buffer covers roughly 1.5 days of overcast.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.label}</strong><br>${d.detail}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+const events = [
+  { hour: 7,  label: '07:00 inference', detail: '4.3 J · post-dew capture · powdery mildew classifier' },
+  { hour: 10, label: '10:00 inference', detail: '4.3 J · mid-morning capture' },
+  { hour: 14, label: '14:00 inference', detail: '4.3 J · afternoon capture' },
+  { hour: 18, label: '18:00 inference', detail: '4.3 J · pre-sunset capture' }
+];
+
+const socTrace = [
+  { hour: 0,  soc: 90 }, { hour: 3, soc: 88 }, { hour: 6, soc: 85 },
+  { hour: 7,  soc: 84 }, { hour: 9, soc: 86 }, { hour: 10, soc: 84 },
+  { hour: 12, soc: 92 }, { hour: 14, soc: 95 }, { hour: 15, soc: 96 },
+  { hour: 17, soc: 96 }, { hour: 18, soc: 95 }, { hour: 21, soc: 92 },
+  { hour: 24, soc: 88 }
+];
+
+function drawPower() {
+  const container = document.getElementById('power');
+  d3.select('#power').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 240;
+  const margin = { top: 28, right: 24, bottom: 40, left: 56 };
+  const w = totalWidth - margin.left - margin.right;
+  const h = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#power').append('svg').attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-pow d-pow');
+  svg.append('title').attr('id', 't-pow').text('Power profile across one day');
+  svg.append('desc').attr('id', 'd-pow').text('Solar harvest bell curve, sleep baseline at 150 mW, and four inference spikes.');
+
+  svg.append('text').attr('class', 'panel-title').attr('x', margin.left).attr('y', 18).text('Power profile');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([0, 24]).range([0, w]);
+  const y = d3.scaleLinear().domain([0, 2]).range([h, 0]);
+
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toString().padStart(2, '0') + ':00'));
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(4));
+  svg.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(${margin.left - 40},${margin.top + h/2}) rotate(-90)`)
+    .attr('text-anchor', 'middle').text('power (W)');
+
+  // Solar harvest area (sample points 6 → 18)
+  const solarPoints = d3.range(0, 25, 0.25).map(t => {
+    if (t < 6 || t > 18) return { t, p: 0 };
+    const phase = (t - 12) / 6;
+    return { t, p: Math.max(0, 2 * (1 - phase * phase)) };
+  });
+  const area = d3.area().x(d => x(d.t)).y0(h).y1(d => y(d.p)).curve(d3.curveBasis);
+  g.append('path').datum(solarPoints).attr('class', 'solar').attr('d', area);
+
+  // Sleep baseline
+  g.append('line').attr('class', 'sleep-line')
+    .attr('x1', 0).attr('x2', w)
+    .attr('y1', y(0.15)).attr('y2', y(0.15));
+  g.append('text').attr('class', 'label')
+    .attr('x', 6).attr('y', y(0.15) - 4).text('150 mW sleep baseline');
+
+  // Inference spikes
+  g.selectAll('.spike').data(events).join('rect')
+    .attr('class', 'spike')
+    .attr('x', d => x(d.hour) - 3)
+    .attr('y', d => y(1.5))
+    .attr('width', 6)
+    .attr('height', d => h - y(1.5))
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label}: ${d.detail}`)
+    .on('mouseover', (event, d) => showTip(event, d))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+}
+
+function drawSOC() {
+  const container = document.getElementById('soc');
+  d3.select('#soc').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 220;
+  const margin = { top: 28, right: 24, bottom: 40, left: 56 };
+  const w = totalWidth - margin.left - margin.right;
+  const h = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#soc').append('svg').attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-soc d-soc');
+  svg.append('title').attr('id', 't-soc').text('Battery state of charge across one day');
+  svg.append('desc').attr('id', 'd-soc').text('Battery SOC trace dipping overnight and recharging across the solar harvest window.');
+
+  svg.append('text').attr('class', 'panel-title').attr('x', margin.left).attr('y', 18).text('Battery state of charge (18.5 Wh buffer)');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([0, 24]).range([0, w]);
+  const y = d3.scaleLinear().domain([60, 100]).range([h, 0]);
+
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x).ticks(8).tickFormat(d => d.toString().padStart(2, '0') + ':00'));
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y).ticks(4).tickFormat(d => d + '%'));
+
+  const line = d3.line().x(d => x(d.hour)).y(d => y(d.soc)).curve(d3.curveMonotoneX);
+  g.append('path').datum(socTrace).attr('class', 'soc-line').attr('d', line);
+
+  // Ride-through annotation
+  g.append('line').attr('x1', x(0)).attr('x2', x(8))
+    .attr('y1', h + 22).attr('y2', h + 22)
+    .attr('stroke', 'var(--color-ink)').attr('stroke-width', 0.75);
+  g.append('text').attr('class', 'annotation')
+    .attr('x', x(4)).attr('y', h + 18).attr('text-anchor', 'middle')
+    .text('1.5-day overcast ride-through covered by buffer');
+}
+
+function draw() { drawPower(); drawSOC(); }
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('power'));
+ro.observe(document.getElementById('soc'));
+</script>
+</body>
+</html>

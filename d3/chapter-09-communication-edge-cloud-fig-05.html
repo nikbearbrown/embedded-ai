@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 9.5 — MobileNetV2 split-inference diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 20px; max-width: 80ch; }
+  #chart { width: 100%; min-height: 500px; }
+  .side-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: var(--color-white); }
+  .block-name { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: var(--color-ink); }
+  .block-spec { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .cut-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: var(--color-red); }
+  .cut-info  { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-red); }
+  .compare-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: var(--color-white); }
+  .compare-note  { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-style: italic; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 12px; max-width: 280px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  .block-rect { cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .block-rect.dim { opacity: 0.35; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 9.5 — Split inference: cut where the activation is small</h1>
+<p class="subtitle">MobileNetV2 with 224×224×3 input. Blocks 1–6 on device, blocks 7–13 plus head on cloud. The decision is the bandwidth check, not the layer count.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Activation tensors shrink toward the middle of the network. The split-cut goes where they are smallest — usually well before the halfway mark of the parameter count.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const blocks = [
+  { name: 'Input',    shape: '224² × 3',  kb: 150, side: 'device' },
+  { name: 'Conv1',    shape: '112² × 32', kb: 100, side: 'device' },
+  { name: 'Block 3',  shape: '28² × 96',  kb: 19,  side: 'device' },
+  { name: 'Block 6',  shape: '14² × 160', kb: 8,   side: 'device', split: true },
+  { name: 'Block 10', shape: '14² × 96',  kb: 6,   side: 'cloud' },
+  { name: 'Block 13', shape: '7² × 320',  kb: 4,   side: 'cloud' },
+  { name: 'Head',     shape: '1 000 cls', kb: 4,   side: 'cloud' }
+];
+
+const strategies = [
+  { name: 'FULL ON-DEVICE',  ms: 450,  color: '#787878',           note: 'device runs the full model itself' },
+  { name: 'SPLIT',           ms: 328,  color: 'var(--color-ink)',  note: 'device runs blocks 1–6, server the rest · 1.4× faster' },
+  { name: 'FULL CLOUD',      ms: 1200, color: 'var(--color-border)', note: 'device sends raw image, server runs all · 3.7× slower' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) { tooltip.html(html).style('left', (event.pageX + 12)+'px').style('top', (event.pageY - 28)+'px').style('opacity', 1); }
+function moveTip(event) { tooltip.style('left', (event.pageX + 12)+'px').style('top', (event.pageY - 28)+'px'); }
+function hideTip() { tooltip.style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+
+  const totalWidth = container.clientWidth || 780;
+  const totalHeight = 540;
+  const margin = { top: 40, right: 16, bottom: 16, left: 16 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+
+  const svg = d3.select('#chart')
+    .append('svg')
+      .attr('width', totalWidth).attr('height', totalHeight)
+      .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('MobileNetV2 split-inference diagram');
+  svg.append('desc').attr('id', 'chart-desc').text('Layer blocks arranged left to right with activation tensor size annotated. Blocks 1 through 6 are on the device; a dashed split-cut separates them from blocks 7 through 13 plus head on the cloud.');
+
+  const defs = svg.append('defs');
+  defs.append('marker')
+      .attr('id', 'arrow-ink-fig5')
+      .attr('markerWidth', 9).attr('markerHeight', 7).attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-ink)');
+  defs.append('marker')
+      .attr('id', 'arrow-red-fig5')
+      .attr('markerWidth', 9).attr('markerHeight', 7).attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-red)');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // Side label strips
+  const splitIdx = blocks.findIndex(b => b.split);
+  const xScale = d3.scaleBand().domain(blocks.map((b, i) => i)).range([0, chartWidth]).padding(0.1);
+  const deviceWidth = (splitIdx + 1) * xScale.step();
+  const cloudStart = deviceWidth;
+
+  gChart.append('rect').attr('x', 0).attr('y', 0).attr('width', deviceWidth - 6).attr('height', 22).attr('fill', 'var(--color-ink)');
+  gChart.append('text').attr('class', 'side-label').attr('x', 10).attr('y', 15).text('DEVICE — ESP32-S3 · blocks 1 to 6 · 30 M MACs · 180 ms');
+  gChart.append('rect').attr('x', cloudStart + 6).attr('y', 0).attr('width', chartWidth - cloudStart - 6).attr('height', 22).attr('fill', 'var(--color-secondary)');
+  gChart.append('text').attr('class', 'side-label').attr('x', cloudStart + 16).attr('y', 15).text('CLOUD — server · blocks 7 to 13 + head · 20 M MACs · 20 ms');
+
+  // Heights encoded by sqrt(kb)*8 + 20
+  const maxKb = d3.max(blocks, b => b.kb);
+  const blockTop = 100;
+  const blockBottom = 280;
+  const hScale = d3.scaleSqrt().domain([0, maxKb]).range([24, blockBottom - blockTop]);
+
+  const gBlocks = gChart.append('g').attr('class', 'g-blocks');
+
+  const cells = gBlocks.selectAll('.block-cell')
+    .data(blocks)
+    .join('g')
+      .attr('class', 'block-cell');
+
+  cells.append('rect')
+      .attr('class', 'block-rect')
+      .attr('x', (d, i) => xScale(i))
+      .attr('y', d => blockBottom - hScale(d.kb))
+      .attr('width', xScale.bandwidth())
+      .attr('height', d => hScale(d.kb))
+      .attr('fill', 'var(--color-white)')
+      .attr('stroke', d => d.split ? 'var(--color-red)' : (d.side === 'device' ? 'var(--color-ink)' : 'var(--color-secondary)'))
+      .attr('stroke-width', d => d.split ? 2 : 1.5)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: shape ${d.shape}, activation size ${d.kb} KB`)
+      .on('mouseover', (event, d) => {
+        showTip(event, `<strong>${d.name}</strong><br>shape: ${d.shape}<br>activation: ${d.kb} KB int8<br>side: ${d.side}`);
+        cells.selectAll('.block-rect').classed('dim', e => e.name !== d.name);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', () => { hideTip(); cells.selectAll('.block-rect').classed('dim', false); });
+
+  cells.append('text')
+      .attr('class', 'block-name')
+      .attr('x', (d, i) => xScale(i) + xScale.bandwidth()/2)
+      .attr('y', d => blockBottom - hScale(d.kb) + 16)
+      .attr('text-anchor', 'middle')
+      .attr('fill', d => d.split ? 'var(--color-red)' : 'var(--color-ink)')
+      .text(d => d.name);
+
+  cells.append('text')
+      .attr('class', 'block-spec')
+      .attr('x', (d, i) => xScale(i) + xScale.bandwidth()/2)
+      .attr('y', d => blockBottom - hScale(d.kb) + 30)
+      .attr('text-anchor', 'middle')
+      .text(d => d.shape);
+
+  cells.append('text')
+      .attr('class', 'block-spec')
+      .attr('x', (d, i) => xScale(i) + xScale.bandwidth()/2)
+      .attr('y', d => blockBottom + 14)
+      .attr('text-anchor', 'middle')
+      .style('font-weight', d => d.split ? 700 : 400)
+      .attr('fill', d => d.split ? 'var(--color-red)' : 'var(--color-secondary)')
+      .text(d => d.kb + ' KB');
+
+  // arrows between consecutive blocks
+  blocks.forEach((b, i) => {
+    if (i === blocks.length - 1) return;
+    const x1 = xScale(i) + xScale.bandwidth();
+    const x2 = xScale(i+1);
+    const y = blockBottom - 20;
+    const isCut = blocks[i].split;
+    gBlocks.append('line')
+        .attr('x1', x1).attr('y1', y).attr('x2', x2 - 2).attr('y2', y)
+        .attr('stroke', isCut ? 'var(--color-red)' : 'var(--color-ink)')
+        .attr('stroke-width', isCut ? 1.5 : 1)
+        .attr('marker-end', isCut ? 'url(#arrow-red-fig5)' : 'url(#arrow-ink-fig5)');
+  });
+
+  // split-cut vertical dashed line
+  const cutX = xScale(splitIdx) + xScale.bandwidth() + xScale.step() * 0.05;
+  gChart.append('line')
+      .attr('x1', cutX).attr('y1', 30).attr('x2', cutX).attr('y2', blockBottom + 30)
+      .attr('stroke', 'var(--color-red)').attr('stroke-width', 1.5).attr('stroke-dasharray', '6 4');
+  gChart.append('text').attr('class', 'cut-label').attr('x', cutX).attr('y', 44).attr('text-anchor', 'middle').text('split cut');
+  gChart.append('text').attr('class', 'cut-info').attr('x', cutX).attr('y', 64).attr('text-anchor', 'middle').text('↑ 8 KB up · ↓ 4 KB down');
+  gChart.append('text').attr('class', 'cut-info').attr('x', cutX).attr('y', 80).attr('text-anchor', 'middle').text('96 ms at 1 Mbps WiFi');
+
+  // comparison strip
+  const stripY = 330;
+  gChart.append('text')
+      .attr('x', 0).attr('y', stripY - 8)
+      .attr('class', 'block-name')
+      .text('End-to-end latency comparison');
+
+  const maxMs = d3.max(strategies, s => s.ms);
+  const msScale = d3.scaleLinear().domain([0, maxMs]).range([0, chartWidth * 0.6]);
+  strategies.forEach((s, i) => {
+    const y = stripY + 4 + i * 28;
+    gChart.append('rect')
+        .attr('x', 0).attr('y', y)
+        .attr('width', msScale(s.ms)).attr('height', 22)
+        .attr('fill', s.color);
+    gChart.append('text')
+        .attr('class', 'compare-label')
+        .attr('x', 10).attr('y', y + 15)
+        .attr('fill', s.name === 'FULL CLOUD' ? 'var(--color-ink)' : 'var(--color-white)')
+        .text(`${s.name} · ${s.ms} ms`);
+    gChart.append('text')
+        .attr('class', 'compare-note')
+        .attr('x', msScale(s.ms) + 12).attr('y', y + 15)
+        .text(s.note);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

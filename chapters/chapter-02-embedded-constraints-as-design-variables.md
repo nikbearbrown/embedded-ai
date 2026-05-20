@@ -16,6 +16,9 @@ RAM is volatile, fast, writable, and scarce. It is where the *activations* live 
 
 External memory complicates the picture. Some parts — the ESP32-S3 is the canonical example — support external PSRAM up to 32 MB through the package. That dramatically increases what is *addressable*, but external memory is slower than on-chip SRAM and costs more energy per access. Move activations to external PSRAM and every layer reads inputs from across an external bus and writes outputs back across the same bus, which inflates both latency and energy. The model still runs. It just runs differently.
 
+![nRF52840 memory map with side-by-side stacked bars. Left: 1 MB flash split into ~250 KB firmware, 300 KB int8 weights, and ~474 KB free, plus a dashed ghost bar marking the 1.2 MB float32 weights case as over budget. Right: 256 KB SRAM split into 30 KB BLE stack, 180 KB activation arena, and 46 KB remaining headroom.](../images/chapter-02-embedded-constraints-as-design-variables-fig-01.png)
+*Figure 2.1 — nRF52840 memory map: where weights and activations actually live.*
+
 So memory is not a hard wall — it is a trade-off surface. To answer it for any candidate hardware you need two numbers from the model (weights size, activation size) and three numbers from the part (flash, on-chip SRAM, external memory if any), and one from the system (how much memory other functions already consume). Most TinyML frameworks will give you the activation number directly; TensorFlow Lite for Microcontrollers exposes a *tensor arena size* that tells you exactly how much RAM the inference will need. If that number plus everything else exceeds available SRAM, the deployment does not happen.
 
 Compute is the second question, and the gap between *clock speed* and *useful neural-network throughput* is the gap most engineers underestimate the first time.
@@ -25,6 +28,9 @@ Clock speed tells you cycles per second. It does not tell you multiply-accumulat
 Compare three real targets. The STM32F411 (Cortex-M4 at 100 MHz, with FPU): about 60–70 MMAC/s sustained for float32. The STM32H7A3 (Cortex-M7 at 280 MHz, larger caches, deeper pipeline, double-precision FPU): about 180–220 MMAC/s sustained. The Raspberry Pi Zero 2 W (quad Cortex-A53 at 1 GHz with NEON): on int8, optimized, several giga-ops per second. A model that runs 50 million MACs per inference takes roughly 830 ms on the F411, 250 ms on the H7, and 20–30 ms on the Pi. If your latency budget is 100 ms, the F411 is dead before you start, the H7 is plausible if you can hit your sustained throughput, and the Pi is comfortable — but you have just paid for it in power and complexity.
 
 The arithmetic you need is straightforward. Get the operation count from the model — most frameworks report it; for fully connected layers it is *(input size) × (output size)*, and for convolutions it is *(output H) × (output W) × (output channels) × (kernel H) × (kernel W) × (input channels)*. Get the sustained throughput from a benchmark or by profiling. Divide. *Inference latency = total operations / sustained throughput.* If a vendor claims 400 GOPS for some "AI acceleration" mode, trust the claim only after multiplying by a utilization factor (typically 0.5–0.7) for what real code on a real model achieves, and only after profiling on hardware. Marketing numbers describe the silicon; profiling numbers describe your model.
+
+![Horizontal bar chart on a log-spaced latency axis. Three rows: RPi Zero 2 W at about 25 ms (clears budget), STM32H7A3 at about 250 ms (plausible with int8 and SIMD), STM32F411 at about 830 ms (misses budget by eight times). A dashed vertical line marks the 100 ms budget; bars to the left clear it, bars crossing it fail.](../images/chapter-02-embedded-constraints-as-design-variables-fig-02.png)
+*Figure 2.2 — Inference latency for a 50 M-MAC model across three targets vs a 100 ms budget.*
 
 Power is the third question, and it is usually the binding one for battery-powered devices.
 
@@ -52,7 +58,13 @@ $$
 
 The coin cell now runs about 259 hours, eleven days, which is below the two-week threshold. The deployment fails on power. Notice what changed: the model did not change, the hardware did not change, the firmware did not change. The application asked the inference to run more often. That is the entire delta, and it is enough to take the device out of spec.
 
+![Three side-by-side current-vs-time strips for the nRF52840 wearable. Case A: 80 ms active pulse inside a 5 s period, I_avg about 0.088 mA, 104 days, passes. Case B: 160 ms active pulse inside a 5 s period, I_avg about 0.172 mA, 53 days, passes. Case C: 160 ms active pulse inside a 1 s period, I_avg about 0.85 mA, 11 days, fails. Below the strips, a log-scaled days axis places all three cases against a dashed two-week threshold; Case C falls below it.](../images/chapter-02-embedded-constraints-as-design-variables-fig-03.png)
+*Figure 2.3 — Duty cycle decides battery life: same hardware, same model, three deployments.*
+
 Power couples to memory and to compute, and the coupling matters. Reducing inference latency by clocking faster increases active current. Moving activations to external PSRAM saves on-chip RAM but every external access costs more energy than an on-chip access, so power goes up. Quantizing to int8 reduces bytes moved per operation, which reduces both cycles and the energy per cycle. Every optimization that improves one constraint touches the others.
+
+![Four-node diagram with memory, compute, power, and real-time at the corners. Curved arrows along each edge carry annotations: int8 quantize reduces bytes and cycles, larger model raises activation RAM, PSRAM adds energy per access, int8 weights cut flash and energy, dynamic graph raises WCET variance, deadline tightening forces faster code, clock-faster raises active current, cache misses raise WCET variance, peak current spike causes brown-out, lock to TCM cuts WCET at area cost.](../images/chapter-02-embedded-constraints-as-design-variables-fig-04.png)
+*Figure 2.4 — The four constraints are a connected surface, not independent axes.*
 
 Power also has a peak constraint, distinct from average. A coin cell with 220 mAh capacity is not the same as a coin cell that can deliver 10 mA on demand. CR2032 cells, for instance, have high internal resistance — the maximum sustained current is on the order of 3 mA, and inference routines that draw more than that pull the supply voltage down, brown-out the part, and reset the system. The fix is a larger battery, a bulk capacitor sized to supply the peak, a slower clock, or a longer inference spread over more cycles. Average power tells you how long the device runs. Peak power tells you whether it runs at all.
 
@@ -90,9 +102,15 @@ For the STM32L4R5, lower active current and far lower sleep current give an even
 
 For the Raspberry Pi Zero 2 W, there is no true deep-sleep mode. Best case it idles at around 150 mA. At 150 mA continuous, 5,000 mAh runs out in about 33 hours. Even with aggressive optimization to 50 mA idle, battery life is on the order of four days. Six months is not on the table. The Pi disqualifies itself on power, not on compute or memory.
 
+![Four-axis radar chart comparing ESP32-S3, STM32L4R5, and RPi Zero 2 W. Axes: memory headroom, compute margin, battery life on a log scale with a six-month target marker, and inverse cost score. The two microcontroller polygons cover broadly similar viable regions. The Pi polygon stretches to the outer ring on memory and compute but collapses to near the center on the battery axis, marking a failure even though the other axes pass.](../images/chapter-02-embedded-constraints-as-design-variables-fig-05.png)
+*Figure 2.5 — Three candidates, four axes: the Pi collapses on power while two MCUs occupy the viable region.*
+
 So the choice collapses to ESP32-S3 versus STM32L4R5. Both meet all constraints. The STM32 has lower cost and lower active power; the ESP32 has the AI accelerator and a richer software ecosystem if the model needs to grow. The decision moves to secondary factors — toolchain familiarity, camera-interface support, LoRaWAN library quality, and whether you trust the ESP32's claimed acceleration enough to bet a six-month deployment on it without profiling first. None of those factors will let you change the four answers above. The constraints define the set of viable platforms; the secondary factors decide which of the viable platforms is the right one.
 
 That is what *constraints as design variables* means. Memory, compute, power, real-time — each is a number you can compute from the datasheet and the model. Together they are a four-dimensional surface, and the deployment lives at the points on the surface where all four are satisfied at once. Most points on the surface are not such points. The job of the next chapter is to give you the model side of the equation — what makes inference cheap or expensive, what an architecture's resource demand actually depends on — so the calculations in this chapter have something on the other side of the equals sign.
+
+![Sequential four-gate flowchart. Diamonds across the top, left to right: memory (weights fit flash, arena plus system under SRAM), compute (ops over sustained throughput under latency budget), power (average and peak current within battery and supply limits), real-time (WCET plus margin under deadline). A yes path links them across the top and terminates in a viable deploy box. A no path drops each gate into a model-side iteration box listing quantize, prune, raise clock, stretch duty cycle, or lock to TCM, each looping back. A footer bar states that if no iteration closes the gap, the part or requirement changes.](../images/chapter-02-embedded-constraints-as-design-variables-fig-06.png)
+*Figure 2.6 — Decision flowchart: does this model deploy on this part?*
 
 ---
 
@@ -145,6 +163,66 @@ Run pytest. All tests pass before you stop.
 **Connection to previous chapters:** Chapter 1's `Application` is now consumed alongside `Target` by `derive_constraints`. The four-constraint object becomes the contract every later module reads.
 
 **Preview of next chapter:** Chapter 3 adds `model.py` to load a TFLite model file and extract parameter count, MAC count, layer types, and the largest activation tensor — the inputs every memory/compute/power module will need.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the
+figures in this chapter. Each produces a standalone HTML file you can open
+in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
+your Claude project context before using these prompts. They define the stack,
+naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 2.1 — nRF52840 memory map under inference
+
+Build a two-panel D3 v7 figure showing two stacked vertical bars side by side. Left panel: 1 MB flash budget for the nRF52840, with segments for firmware (250 KB), int8 weights (300 KB, primary emphasis), and remaining free flash (~474 KB). Add a dashed ghost bar next to the stack representing the 1.2 MB float32 weights case, labeled "over budget" in `var(--color-red)`. Right panel: 256 KB SRAM budget, with segments for BLE stack (30 KB), activation arena (180 KB, primary emphasis), and remaining headroom (46 KB). Each segment carries an inline label with its name and KB value. y-axis ticks in KB; zero baseline on both panels. Tooltip on each segment shows segment name and KB. Standalone HTML, D3 v7 from the pinned CDN, inline CSS using `var(--color-*)`, EB Garamond / Inter / JetBrains Mono fonts, `prefers-color-scheme: dark` support, ResizeObserver redraw, role="img" with title and desc.
+
+> Reference implementation: `d3/chapter-02-embedded-constraints-as-design-variables-fig-01.html`
+
+---
+
+### Figure 2.2 — Inference latency across three embedded targets
+
+Build a single horizontal bar chart on a log-scaled x-axis. Three rows: RPi Zero 2 W (25 ms, `var(--color-ink)`, "comfortable"), STM32H7A3 (250 ms, `var(--color-secondary)`, "plausible with int8/SIMD"), STM32F411 (830 ms, `var(--color-red)`, "misses budget by 8×"). x-domain `[10, 1000]` ms with log-spaced tick values at 10, 30, 100, 300, 1000. Overlay a dashed vertical line at 100 ms labeled "100 ms budget" in `var(--color-ochre)`. Each bar carries its value and a one-line verdict at the bar end. Left-axis labels show target name and a one-line core/clock subtitle. Tooltip on hover. Standalone HTML, D3 v7, inline CSS with CSS variables, EB Garamond / Inter / JetBrains Mono, dark-mode media query, ResizeObserver redraw, accessible markup.
+
+> Reference implementation: `d3/chapter-02-embedded-constraints-as-design-variables-fig-02.html`
+
+---
+
+### Figure 2.3 — Duty cycle decides battery life
+
+Build a three-panel figure plus a summary log strip below. Each top panel is a current-vs-time strip for an nRF52840 wearable case: Case A (80 ms active / 5 s period, I_avg ≈ 0.088 mA, 104 days, passes), Case B (160 ms / 5 s, I_avg ≈ 0.172 mA, 53 days, passes), Case C (160 ms / 1 s, I_avg ≈ 0.85 mA, 11 days, fails). Each strip shows a tall narrow rectangle for the active pulse and a thin baseline for idle. Fail case uses `var(--color-red)`; passing cases use `var(--color-ink)`. Below the strips, a single log-scaled days axis from 1 to 1000 with dot markers for the three cases at 104, 53, and 11 days, and a dashed line at 14 days labeled "2-week threshold" in `var(--color-red)`. Tooltip on pulse and on each dot. Standalone HTML, D3 v7, CSS variables, EB Garamond / Inter / JetBrains Mono, dark-mode and reduced-motion media queries, ResizeObserver redraw, accessible markup.
+
+> Reference implementation: `d3/chapter-02-embedded-constraints-as-design-variables-fig-03.html`
+
+---
+
+### Figure 2.4 — Four-constraint coupling diagram
+
+Build a single-panel node-link diagram. Four ellipse nodes at the corners of an implicit square: memory (top-left), compute (top-right), power (bottom-left), real-time (bottom-right). Each node fill is `var(--color-ink)`, labels in `var(--color-white)`. Draw ten directed curved arrows between nodes (both directions on each edge plus two diagonals), each carrying a short labeled trade-off such as "int8 quantize → −bytes, −cycles", "clock faster → +active current", "PSRAM → +energy/access", "lock to TCM → −WCET, +area". The clock-faster diagonal is highlighted in `var(--color-red)`. Hover on any edge highlights the arrow and label and shows a tooltip naming the source-to-target pair. Standalone HTML, D3 v7, CSS variables, EB Garamond / Inter, dark-mode media query, ResizeObserver redraw, role="img" with title and desc.
+
+> Reference implementation: `d3/chapter-02-embedded-constraints-as-design-variables-fig-04.html`
+
+---
+
+### Figure 2.5 — Radar comparison of three candidate platforms
+
+Build a four-axis radar chart with axes for memory headroom (top), compute margin (right), battery life on a log scale (bottom), and inverse cost score (left). Plot three overlapping polygons normalized to `[0, 1]` per axis: ESP32-S3 (`var(--color-red)`, viable), STM32L4R5 (`var(--color-ink)`, viable, dashed stroke), RPi Zero 2 W (`var(--color-secondary)`, fails on battery, dotted stroke). Concentric polygon rings at 0.25, 0.50, 0.75, 1.00. Mark the six-month battery target on the battery axis with a red circle and label "6-mo target". Right-side legend listing each platform with cost, projected life, and pass/fail. Tooltip on each polygon vertex showing platform name and axis score. Standalone HTML, D3 v7, CSS variables, EB Garamond / Inter / JetBrains Mono, dark-mode media query, ResizeObserver redraw, accessible markup.
+
+> Reference implementation: `d3/chapter-02-embedded-constraints-as-design-variables-fig-05.html`
+
+---
+
+### Figure 2.6 — Deployment decision flowchart
+
+Build a horizontal flowchart of four sequential gate diamonds: memory, compute, power, real-time. Each diamond carries the gate name and the two questions it asks (e.g., "weights fit flash? arena+system < SRAM?"). The yes branch links each gate to the next along the top in `var(--color-ink)` and terminates in a "VIABLE — deploy" box after gate four. The no branch drops each gate down to a model-side iteration box in `var(--color-red)` listing three concrete actions (e.g., "quantize weights", "prune layers", "shrink activations") and a "→ retry from gate N" line. Below the iteration row, a footer bar reads "if no iteration closes the gap — change the part, change the model class, or change the requirement". Clicking a gate highlights it in `var(--color-red)`. Tooltip on hover. Standalone HTML, D3 v7, CSS variables, EB Garamond / Inter, dark-mode and reduced-motion media queries, ResizeObserver redraw, accessible markup.
+
+> Reference implementation: `d3/chapter-02-embedded-constraints-as-design-variables-fig-06.html`
 
 ---
 

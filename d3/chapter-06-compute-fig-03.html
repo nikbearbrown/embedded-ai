@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 6.3 — Processor-class ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 65ch; }
+  #chart { width: 100%; height: 560px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .tier-bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .tier-bar:hover { opacity: 0.75; }
+  .tier-bar.active { stroke: var(--color-red); stroke-width: 2.5; }
+  .tier-name { font-family: 'EB Garamond', Georgia, serif; font-size: 14px; font-weight: 700; fill: var(--color-ink); pointer-events: none; }
+  .row-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-secondary); text-transform: uppercase; letter-spacing: 0.06em; }
+  .cell { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); pointer-events: none; }
+  .cell-sub { font-family: 'EB Garamond', Georgia, serif; font-size: 10px; fill: var(--color-secondary); pointer-events: none; }
+  .perf { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; fill: var(--color-ink); pointer-events: none; }
+  .perf-hi { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; fill: var(--color-red); pointer-events: none; }
+  .row-line { stroke: var(--color-border); stroke-width: 0.5; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 260px; line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 6.3 — Processor-class ladder</h1>
+<p class="subtitle">Peak int8 MMAC/s climbs four orders of magnitude across the five tiers. Capability, cost, and power rise together — pick the lowest tier that closes your budget.</p>
+<div id="chart" role="img" aria-labelledby="ladder-t ladder-d"></div>
+<p id="ladder-t" style="display:none">Processor-class ladder.</p>
+<p id="ladder-d" style="display:none">Five tiers: Cortex-M0+, Cortex-M4, Cortex-M7, Cortex-A53, and NPU accelerator, with pipeline, SIMD, clock, peak MMAC per second, and example chip per tier.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tierData = [
+  { name: 'Cortex-M0+', pipeline: '2-stage', pipelineSub: 'in-order',          simd: 'none',     simdSub: 'scalar only',      clock: '≤ 48 MHz',          peak: 1.5,    peakStr: '≈ 1.5 M',  peakNote: 'int32 scalar, software multiply', chip: 'RP2040, STM32F0', chipSub: '≤ $2 BOM',     fill: '#C8C4C0', tone: 'light' },
+  { name: 'Cortex-M4',  pipeline: '3-stage', pipelineSub: 'in-order, FPU',     simd: 'DSP ext.', simdSub: '4×int8 / 2×int16', clock: '100 MHz',           peak: 400,    peakStr: '≈ 400 M',  peakNote: 'int8 SIMD via CMSIS-NN',           chip: 'nRF52840, STM32L4', chipSub: '$3–6 BOM',  fill: '#8A8480', tone: 'mid' },
+  { name: 'Cortex-M7',  pipeline: '6-stage', pipelineSub: 'dual-issue, FPU',   simd: 'DSP ext.', simdSub: '4×int8 + dual issue', clock: '400 MHz',        peak: 800,    peakStr: '≈ 800 M',  peakNote: 'f32 dual-issue',                   chip: 'STM32H7, RT1062',   chipSub: '$8–15 BOM',  fill: '#4A4540', tone: 'dark' },
+  { name: 'Cortex-A53', pipeline: '8-stage', pipelineSub: 'out-of-order',      simd: 'NEON',     simdSub: '16×int8 per core', clock: '1 GHz × 4 cores',   peak: 64000, peakStr: '≈ 64 G',   peakNote: 'int8 NEON across 4 cores',         chip: 'Pi Zero 2 W',       chipSub: '$15–25 module', fill: '#1F1A14', tone: 'ink' },
+  { name: 'NPU tier',   pipeline: 'dataflow',pipelineSub: 'MAC array',         simd: 'grid SIMD',simdSub: '128–256 MACs/cycle', clock: '200–500 MHz',     peak: 250000, peakStr: '≈ 250 G+', peakNote: 'int8 fixed-function accelerator',  chip: 'M55 + Ethos-U55',   chipSub: '$10–20 BOM',    fill: '#C8102E', tone: 'red' }
+];
+
+const rows = [
+  { key: 'pipeline', label: 'Pipeline' },
+  { key: 'simd',     label: 'SIMD' },
+  { key: 'clock',    label: 'Clock' },
+  { key: 'peak',     label: 'Peak MMAC/s' },
+  { key: 'chip',     label: 'Example' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.name}</strong><br>${d.pipeline} · ${d.simd}<br>${d.clock}<br>Peak: ${d.peakStr} MMAC/s<br><span style="opacity:0.85">${d.chip} · ${d.chipSub}</span>`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const sel = '#chart';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 900;
+  const totalHeight = container.clientHeight || 560;
+  const margin = { top: 100, right: 24, bottom: 80, left: 120 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'ladder-t ladder-d');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleBand = d3.scaleBand().domain(tierData.map(d => d.name)).range([0, chartWidth]).padding(0.15);
+  // Capability bars at top, heights grow left-to-right
+  const capHeight = d3.scaleLinear().domain([0, 4]).range([16, 76]);
+
+  // Capability bars (anchored at bottom of cap area, growing upward)
+  const capBottom = -10;
+  tierData.forEach((d, i) => {
+    const h = capHeight(i);
+    gChart.append('rect')
+      .attr('class', 'tier-bar')
+      .attr('x', xScaleBand(d.name))
+      .attr('y', capBottom - h)
+      .attr('width', xScaleBand.bandwidth())
+      .attr('height', h)
+      .attr('fill', d.fill)
+      .attr('tabindex', 0)
+      .attr('aria-label', `${d.name}, ${d.pipeline}, ${d.simd}, ${d.clock}, peak ${d.peakStr} MMAC/s, ${d.chip}`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // Tier name labels
+  gChart.selectAll('.tier-name').data(tierData).join('text')
+    .attr('class', 'tier-name')
+    .attr('x', d => xScaleBand(d.name) + xScaleBand.bandwidth() / 2)
+    .attr('y', 10).attr('text-anchor', 'middle').text(d => d.name);
+
+  // Row layout
+  const rowHeight = chartHeight / rows.length;
+  rows.forEach((r, ri) => {
+    const yMid = ri * rowHeight + rowHeight / 2 + 20;
+    const yTop = ri * rowHeight + 20;
+    // Row label (left gutter)
+    gChart.append('text').attr('class', 'row-label')
+      .attr('x', -16).attr('y', yMid).attr('text-anchor', 'end').text(r.label);
+    // Bottom separator
+    gChart.append('line').attr('class', 'row-line')
+      .attr('x1', -110).attr('x2', chartWidth).attr('y1', yTop + rowHeight - 10).attr('y2', yTop + rowHeight - 10);
+
+    // Cells
+    tierData.forEach(d => {
+      const cx = xScaleBand(d.name) + xScaleBand.bandwidth() / 2;
+      if (r.key === 'pipeline') {
+        gChart.append('text').attr('class', 'cell').attr('x', cx).attr('y', yMid - 6).attr('text-anchor', 'middle').text(d.pipeline);
+        gChart.append('text').attr('class', 'cell-sub').attr('x', cx).attr('y', yMid + 9).attr('text-anchor', 'middle').text(d.pipelineSub);
+      } else if (r.key === 'simd') {
+        gChart.append('text').attr('class', 'cell').attr('x', cx).attr('y', yMid - 6).attr('text-anchor', 'middle').text(d.simd);
+        gChart.append('text').attr('class', 'cell-sub').attr('x', cx).attr('y', yMid + 9).attr('text-anchor', 'middle').text(d.simdSub);
+      } else if (r.key === 'clock') {
+        gChart.append('text').attr('class', 'cell').attr('x', cx).attr('y', yMid + 2).attr('text-anchor', 'middle').text(d.clock);
+      } else if (r.key === 'peak') {
+        gChart.append('text').attr('class', d.tone === 'red' ? 'perf-hi' : 'perf').attr('x', cx).attr('y', yMid - 4).attr('text-anchor', 'middle').text(d.peakStr);
+        gChart.append('text').attr('class', 'cell-sub').attr('x', cx).attr('y', yMid + 12).attr('text-anchor', 'middle').text(d.peakNote);
+      } else if (r.key === 'chip') {
+        gChart.append('text').attr('class', 'cell').attr('x', cx).attr('y', yMid - 6).attr('text-anchor', 'middle').text(d.chip);
+        gChart.append('text').attr('class', 'cell-sub').attr('x', cx).attr('y', yMid + 9).attr('text-anchor', 'middle').text(d.chipSub);
+      }
+    });
+  });
+
+  // Footer arrow
+  const footerY = chartHeight + 30;
+  gChart.append('line')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', footerY).attr('y2', footerY)
+    .attr('stroke', 'var(--color-ink)').attr('stroke-width', 1)
+    .attr('marker-end', 'url(#arrow-ladder)');
+  // arrow def
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id', 'arrow-ladder').attr('markerWidth', 9).attr('markerHeight', 7).attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-ink)');
+  gChart.append('text').attr('class', 'cell').attr('x', chartWidth / 2).attr('y', footerY + 20).attr('text-anchor', 'middle')
+    .text('capability × cost × power — all rise together');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

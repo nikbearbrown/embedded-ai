@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 8.3 — NPU classes by MAC count vs power</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FDFCFB;
+    --color-ink:       #2A1A0E;
+    --color-red:       #C8102E;
+    --color-secondary: #4A4540;
+    --color-border:    #C8C4C0;
+    --color-ochre:     #C8860E;
+    --color-mid:       #8A8480;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #14110D;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2A24;
+      --color-ochre:     #D49A30;
+      --color-mid:       #6E665F;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 460px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-mid); shape-rendering: crispEdges; }
+  .grid line { stroke: var(--color-border); stroke-opacity: 0.55; shape-rendering: crispEdges; }
+  .grid path { stroke-width: 0; }
+  .cluster { fill: none; stroke: var(--color-mid); stroke-width: 1; stroke-dasharray: 4 3; }
+  .cluster-label { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); font-weight: 600; }
+  .cluster-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .dot { fill: var(--color-ink); stroke: var(--color-white); stroke-width: 1.5; transition: r 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .dot:hover, .dot:focus { r: 7; }
+  .dot-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ink); pointer-events: none; }
+  .highlight-box { fill: none; stroke: var(--color-ink); stroke-width: 1.25; }
+  .highlight-label { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); font-weight: 600; }
+  .axis-title { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 8.3 — NPU classes by MAC count vs power</h1>
+<p class="subtitle">Three clusters separate cleanly. Only one is the embedded class.</p>
+<div id="chart" role="img" aria-labelledby="t03 d03"></div>
+<p class="caption">Embedded AI lives in the bottom-left cluster. The other two are different planets in MAC count and power.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const partData = [
+  { name: 'Syntiant NDP120', macs: 128,    powerMW: 0.2,    cls: 'micro' },
+  { name: 'Ethos-U55',       macs: 256,    powerMW: 100,    cls: 'micro' },
+  { name: 'STM32N6',         macs: 512,    powerMW: 180,    cls: 'micro' },
+  { name: 'K210',            macs: 64,     powerMW: 300,    cls: 'micro' },
+  { name: 'Coral Edge TPU',  macs: 512,    powerMW: 2000,   cls: 'edge'  },
+  { name: 'Hailo-8',         macs: 8000,   powerMW: 2500,   cls: 'edge'  },
+  { name: 'Movidius Myriad X', macs: 1024, powerMW: 1500,   cls: 'edge'  },
+  { name: 'TPU v4',          macs: 200000, powerMW: 200000, cls: 'data'  },
+  { name: 'H100 / TensorRT', macs: 150000, powerMW: 350000, cls: 'data'  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.name}</strong><br/>${d.macs.toLocaleString()} MACs · ${d.powerMW >= 1000 ? (d.powerMW/1000).toFixed(1) + ' W' : d.powerMW + ' mW'}`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 700;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 60, right: 40, bottom: 80, left: 80 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't03 d03');
+  svg.append('title').attr('id', 't03').text('NPU classes on MAC count vs power');
+  svg.append('desc').attr('id', 'd03').text('Log-log scatter of NPU MAC count against active power. Three clusters: microNPUs, edge NPUs, and datacenter NPUs.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScale = d3.scaleLog().domain([10, 1000000]).range([0, chartWidth]);
+  const yScale = d3.scaleLog().domain([0.1, 1000000]).range([chartHeight, 0]);
+
+  // Gridlines
+  gChart.append('g').attr('class', 'grid')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScale).ticks(6, '~s').tickSize(-chartHeight).tickFormat(''));
+  gChart.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(yScale).ticks(7, '~s').tickSize(-chartWidth).tickFormat(''));
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).tickValues([10, 100, 1000, 10000, 100000, 1000000])
+    .tickFormat(d => d >= 1000 ? d3.format('~s')(d).replace('G', 'B') : d);
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`).call(xAxis);
+  gChart.append('g').attr('class', 'axis').call(d3.axisLeft(yScale).tickValues([0.1, 1, 10, 100, 1000, 10000, 100000, 1000000])
+    .tickFormat(d => {
+      if (d < 1) return d + ' mW';
+      if (d < 1000) return d + ' mW';
+      return (d / 1000) + ' W';
+    }));
+
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 44).attr('text-anchor', 'middle')
+    .text('MAC count (log)');
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', -chartHeight / 2).attr('y', -56).attr('text-anchor', 'middle')
+    .attr('transform', 'rotate(-90)').text('active power (log)');
+
+  // Cluster bounds (computed from data extents per class)
+  const clusters = {
+    micro: { label: 'microNPUs',     sub: '10–200 mW · MCU-scale' },
+    edge:  { label: 'edge NPUs',     sub: '0.5–5 W · cameras, drones' },
+    data:  { label: 'datacenter NPUs', sub: '30–300 W · not embedded' }
+  };
+  Object.entries(clusters).forEach(([cls, meta]) => {
+    const members = partData.filter(p => p.cls === cls);
+    const xs = members.map(p => xScale(p.macs));
+    const ys = members.map(p => yScale(p.powerMW));
+    const cx = d3.mean(xs), cy = d3.mean(ys);
+    const rx = (d3.max(xs) - d3.min(xs)) / 2 + 38;
+    const ry = (d3.max(ys) - d3.min(ys)) / 2 + 32;
+    gChart.append('ellipse').attr('class', 'cluster').attr('cx', cx).attr('cy', cy).attr('rx', rx).attr('ry', ry);
+    gChart.append('text').attr('class', 'cluster-label')
+      .attr('x', cx).attr('y', cy - ry - 12).attr('text-anchor', 'middle').text(meta.label);
+    gChart.append('text').attr('class', 'cluster-sub')
+      .attr('x', cx).attr('y', cy - ry + 4).attr('text-anchor', 'middle').text(meta.sub);
+  });
+
+  // Dots
+  gChart.selectAll('.dot')
+    .data(partData).join('circle')
+      .attr('class', 'dot')
+      .attr('cx', d => xScale(d.macs))
+      .attr('cy', d => yScale(d.powerMW))
+      .attr('r', 5)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.macs} MACs, ${d.powerMW} mW`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip)
+      .on('focus', (event, d) => showTip(event, d)).on('blur', hideTip);
+
+  // Dot labels
+  gChart.selectAll('.dot-label')
+    .data(partData).join('text')
+      .attr('class', 'dot-label')
+      .attr('x', d => xScale(d.macs))
+      .attr('y', d => yScale(d.powerMW) - 10)
+      .attr('text-anchor', 'middle')
+      .text(d => d.name);
+
+  // Highlight micro cluster as "embedded"
+  const microMembers = partData.filter(p => p.cls === 'micro');
+  const mxs = microMembers.map(p => xScale(p.macs));
+  const mys = microMembers.map(p => yScale(p.powerMW));
+  const bx = d3.min(mxs) - 24, by = d3.min(mys) - 24;
+  const bw = (d3.max(mxs) - d3.min(mxs)) + 48, bh = (d3.max(mys) - d3.min(mys)) + 48;
+  gChart.append('rect').attr('class', 'highlight-box').attr('x', bx).attr('y', by).attr('width', bw).attr('height', bh);
+  gChart.append('text').attr('class', 'highlight-label')
+    .attr('x', bx + bw + 12).attr('y', by + bh - 14).text('the embedded class');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

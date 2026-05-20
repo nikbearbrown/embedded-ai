@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 13.5 — Nano 33 BLE Sense deployment dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { border: 1px solid var(--color-border); padding: 16px; }
+  .panel-title { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 16px; margin-bottom: 4px; }
+  .panel-sub { color: var(--color-secondary); font-size: 12px; margin-bottom: 12px; }
+  .chart { width: 100%; height: 200px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .bar.budget { fill: var(--color-border); }
+  .bar.measured { fill: var(--color-ink); }
+  .bar.segment-stack { fill: var(--color-secondary); }
+  .bar.tier1 { fill: var(--color-ink); }
+  .bar.tier2 { fill: var(--color-secondary); }
+  .bar.tier3 { fill: var(--color-border); stroke: var(--color-secondary); }
+  .bar:hover, .bar:focus { opacity: 0.8; outline: none; }
+  .label-y { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .label-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: var(--color-ink); font-weight: 700; }
+  .seg-text { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--color-white); }
+  .footnote { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); }
+  .caption { color: var(--color-secondary); font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 13px; margin-top: 16px; max-width: 70ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 13.5 — Nano 33 BLE Sense deployment dashboard</h1>
+<p class="subtitle">Twelve-class keyword spotter on the nRF52840: latency, SRAM, flash, and accuracy across the three pipeline stages.</p>
+<div id="wrap">
+  <div class="panel">
+    <div class="panel-title">Latency (ms per inference)</div>
+    <div class="panel-sub">budget 100 ms vs measured</div>
+    <div id="chartLatency" class="chart" role="img" aria-labelledby="lat-t lat-d"></div>
+    <p class="footnote">2.4× headroom against budget.</p>
+  </div>
+  <div class="panel">
+    <div class="panel-title">SRAM (KB)</div>
+    <div class="panel-sub">256 KB available · 100 KB used (80 arena + 20 stack)</div>
+    <div id="chartSram" class="chart" role="img" aria-labelledby="sram-t sram-d"></div>
+    <p class="footnote">39% used · 156 KB free for application code.</p>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Flash · model byte array (KB)</div>
+    <div class="panel-sub">int8 quantization · ~4× shrink vs float32</div>
+    <div id="chartFlash" class="chart" role="img" aria-labelledby="fla-t fla-d"></div>
+    <p class="footnote">85 KB model alongside ~100 KB TFLite Micro engine.</p>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Accuracy across pipeline (%)</div>
+    <div class="panel-sub">float32 → int8 TFLite → on-device</div>
+    <div id="chartAcc" class="chart" role="img" aria-labelledby="acc-t acc-d"></div>
+    <p class="footnote">1.4 pp total drift · within budget for int8 PTQ.</p>
+  </div>
+</div>
+<p class="caption">The deployment is real because the on-device numbers track the Python numbers.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function setupSvg(selector, titleText, descText) {
+  const container = document.querySelector(selector);
+  d3.select(selector).selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 400;
+  const totalHeight = container.clientHeight || 200;
+  const id = selector.slice(1);
+  const svg = d3.select(selector).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', `${id}-t ${id}-d`);
+  svg.append('title').attr('id', `${id}-t`).text(titleText);
+  svg.append('desc').attr('id', `${id}-d`).text(descText);
+  return { svg, totalWidth, totalHeight };
+}
+
+function drawLatency() {
+  const { svg, totalWidth, totalHeight } = setupSvg('#chartLatency',
+    'Latency budget versus measured',
+    'Two horizontal bars showing the 100 ms latency budget and the 42 ms measured inference time on the Nano 33 BLE Sense.');
+  const margin = { top: 12, right: 60, bottom: 32, left: 88 };
+  const w = totalWidth - margin.left - margin.right;
+  const h = totalHeight - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const xScaleLinear = d3.scaleLinear().domain([0, 120]).range([0, w]);
+  const data = [
+    { name: 'budget',   value: 100, cls: 'budget'  , body: 'Application latency budget for a 100 ms keyword spotting window.' },
+    { name: 'measured', value: 42,  cls: 'measured', body: '42 ms — 2.4× under budget. Headroom for audio frontend.' }
+  ];
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${h})`).call(d3.axisBottom(xScaleLinear).ticks(4));
+  g.selectAll('rect').data(data).join('rect')
+    .attr('class', d => `bar ${d.cls}`)
+    .attr('x', 0).attr('y', (d, i) => i * 40 + 8)
+    .attr('width', d => xScaleLinear(d.value)).attr('height', 28)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.name}: ${d.value} ms`)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.name}</strong>: ${d.value} ms<br><br>${d.body}`))
+    .on('mousemove', moveTip).on('mouseout', hideTip)
+    .on('focus', function (event, d) { showTip(event, `<strong>${d.name}</strong>: ${d.value} ms<br><br>${d.body}`); })
+    .on('blur', hideTip);
+  g.selectAll('.label-y').data(data).join('text')
+    .attr('class', 'label-y').attr('x', -8).attr('y', (d, i) => i * 40 + 26)
+    .attr('text-anchor', 'end').text(d => d.name);
+  g.selectAll('.label-val').data(data).join('text')
+    .attr('class', 'label-val').attr('x', d => xScaleLinear(d.value) + 6).attr('y', (d, i) => i * 40 + 26)
+    .text(d => `${d.value} ms`);
+}
+
+function drawSram() {
+  const { svg, totalWidth, totalHeight } = setupSvg('#chartSram',
+    'SRAM available versus used',
+    'Two bars: 256 KB available SRAM and 100 KB used, with the used bar segmented into 80 KB arena and 20 KB stack.');
+  const margin = { top: 12, right: 60, bottom: 32, left: 88 };
+  const w = totalWidth - margin.left - margin.right;
+  const h = totalHeight - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const xScaleLinear = d3.scaleLinear().domain([0, 300]).range([0, w]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${h})`).call(d3.axisBottom(xScaleLinear).ticks(4));
+
+  // Available bar
+  const avail = { name: 'available', value: 256, body: '256 KB of SRAM total on the nRF52840.' };
+  g.append('rect').attr('class', 'bar budget')
+    .attr('x', 0).attr('y', 8).attr('width', xScaleLinear(avail.value)).attr('height', 28)
+    .attr('tabindex', 0).attr('aria-label', `${avail.name}: ${avail.value} KB`)
+    .datum(avail)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.name}</strong>: ${d.value} KB<br><br>${d.body}`))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('text').attr('class', 'label-y').attr('x', -8).attr('y', 26).attr('text-anchor', 'end').text('available');
+  g.append('text').attr('class', 'label-val').attr('x', xScaleLinear(256) + 6).attr('y', 26).text('256 KB');
+
+  // Used bar — stacked: arena 80, stack 20
+  const arenaEnd = xScaleLinear(80);
+  const stackEnd = xScaleLinear(100);
+  g.append('rect').attr('class', 'bar measured')
+    .attr('x', 0).attr('y', 48).attr('width', arenaEnd).attr('height', 28)
+    .attr('tabindex', 0).attr('aria-label', 'arena: 80 KB')
+    .on('mouseover', event => showTip(event, '<strong>tensor arena</strong>: 80 KB<br><br>All intermediate activations, 16-byte aligned.'))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('rect').attr('class', 'bar segment-stack')
+    .attr('x', arenaEnd).attr('y', 48).attr('width', stackEnd - arenaEnd).attr('height', 28)
+    .attr('tabindex', 0).attr('aria-label', 'stack: 20 KB')
+    .on('mouseover', event => showTip(event, '<strong>stack</strong>: 20 KB<br><br>Main loop + ISR frames.'))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+  g.append('text').attr('class', 'label-y').attr('x', -8).attr('y', 66).attr('text-anchor', 'end').text('used');
+  g.append('text').attr('class', 'label-val').attr('x', stackEnd + 6).attr('y', 66).text('100 KB');
+  g.append('text').attr('class', 'seg-text').attr('x', arenaEnd / 2).attr('y', 66).attr('text-anchor', 'middle').text('arena 80');
+  if (stackEnd - arenaEnd > 32) {
+    g.append('text').attr('class', 'seg-text').attr('x', (arenaEnd + stackEnd) / 2).attr('y', 66).attr('text-anchor', 'middle').text('stk 20');
+  }
+}
+
+function drawFlash() {
+  const { svg, totalWidth, totalHeight } = setupSvg('#chartFlash',
+    'Flash usage breakdown',
+    'Two bars: 85 KB model byte array and approximately 100 KB TFLite Micro engine.');
+  const margin = { top: 12, right: 60, bottom: 32, left: 88 };
+  const w = totalWidth - margin.left - margin.right;
+  const h = totalHeight - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const xScaleLinear = d3.scaleLinear().domain([0, 300]).range([0, w]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${h})`).call(d3.axisBottom(xScaleLinear).ticks(4));
+  const data = [
+    { name: 'model',  value: 85, cls: 'measured', body: 'int8 .tflite flatbuffer embedded as const byte array.' },
+    { name: 'engine', value: 100, cls: 'segment-stack', body: 'TFLite Micro engine + registered op kernels.' }
+  ];
+  g.selectAll('rect').data(data).join('rect')
+    .attr('class', d => `bar ${d.cls}`)
+    .attr('x', 0).attr('y', (d, i) => i * 40 + 8)
+    .attr('width', d => xScaleLinear(d.value)).attr('height', 28)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.name}: ${d.value} KB`)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.name}</strong>: ${d.value} KB<br><br>${d.body}`))
+    .on('mousemove', moveTip).on('mouseout', hideTip)
+    .on('focus', function (event, d) { showTip(event, `<strong>${d.name}</strong>: ${d.value} KB<br><br>${d.body}`); })
+    .on('blur', hideTip);
+  g.selectAll('.label-y').data(data).join('text')
+    .attr('class', 'label-y').attr('x', -8).attr('y', (d, i) => i * 40 + 26)
+    .attr('text-anchor', 'end').text(d => d.name);
+  g.selectAll('.label-val').data(data).join('text')
+    .attr('class', 'label-val').attr('x', d => xScaleLinear(d.value) + 6).attr('y', (d, i) => i * 40 + 26)
+    .text(d => `${d.value} KB`);
+}
+
+function drawAccuracy() {
+  const { svg, totalWidth, totalHeight } = setupSvg('#chartAcc',
+    'Accuracy across pipeline stages',
+    'Three bars: float32 source 94.2 percent, TFLite int8 interpreter 93.1 percent, on-device 92.8 percent.');
+  const margin = { top: 12, right: 60, bottom: 32, left: 88 };
+  const w = totalWidth - margin.left - margin.right;
+  const h = totalHeight - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const xScaleLinear = d3.scaleLinear().domain([90, 95]).range([0, w]);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${h})`).call(d3.axisBottom(xScaleLinear).ticks(5));
+  const data = [
+    { name: 'float32',    value: 94.2, cls: 'tier1', body: 'Reference accuracy in framework on Python.' },
+    { name: 'tflite int8', value: 93.1, cls: 'tier2', body: '−1.1 pp from float32 — quantization cost.' },
+    { name: 'on-device',  value: 92.8, cls: 'tier3', body: '−0.3 pp from interpreter — preprocessing + microphone, not toolchain.' }
+  ];
+  g.selectAll('rect').data(data).join('rect')
+    .attr('class', d => `bar ${d.cls}`)
+    .attr('x', 0).attr('y', (d, i) => i * 28 + 8)
+    .attr('width', d => xScaleLinear(d.value)).attr('height', 22)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.name}: ${d.value} percent`)
+    .on('mouseover', (event, d) => showTip(event, `<strong>${d.name}</strong>: ${d.value} %<br><br>${d.body}`))
+    .on('mousemove', moveTip).on('mouseout', hideTip)
+    .on('focus', function (event, d) { showTip(event, `<strong>${d.name}</strong>: ${d.value} %<br><br>${d.body}`); })
+    .on('blur', hideTip);
+  g.selectAll('.label-y').data(data).join('text')
+    .attr('class', 'label-y').attr('x', -8).attr('y', (d, i) => i * 28 + 24)
+    .attr('text-anchor', 'end').text(d => d.name);
+  g.selectAll('.label-val').data(data).join('text')
+    .attr('class', 'label-val').attr('x', d => xScaleLinear(d.value) + 6).attr('y', (d, i) => i * 28 + 24)
+    .text(d => `${d.value}`);
+}
+
+function drawAll() {
+  drawLatency();
+  drawSram();
+  drawFlash();
+  drawAccuracy();
+}
+drawAll();
+const ro = new ResizeObserver(() => drawAll());
+ro.observe(document.getElementById('chartLatency'));
+ro.observe(document.getElementById('chartSram'));
+ro.observe(document.getElementById('chartFlash'));
+ro.observe(document.getElementById('chartAcc'));
+</script>
+</body>
+</html>

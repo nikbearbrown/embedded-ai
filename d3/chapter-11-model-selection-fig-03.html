@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 11.3 — Architecture family comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; }
+  .legend { display: flex; gap: 18px; margin-bottom: 12px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--color-secondary); align-items: center; }
+  .swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: middle; }
+  #chart { width: 100%; height: 480px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .row-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; fill: var(--color-ink); }
+  .bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .bar.flash { fill: var(--color-ink); }
+  .bar.flops { fill: var(--color-secondary); }
+  .bar.acc { fill: var(--color-border); }
+  .bar:hover { opacity: 0.78; }
+  .val-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 11.3 — Architecture family comparison</h1>
+<p class="subtitle">Six candidates · three normalized axes. Bars rendered 0–1 within axis; lower flash/GFLOPs = better, higher accuracy = better.</p>
+<div class="legend">
+  <span><span class="swatch" style="background: var(--color-ink)"></span>flash (params)</span>
+  <span><span class="swatch" style="background: var(--color-secondary)"></span>compute (GFLOPs)</span>
+  <span><span class="swatch" style="background: var(--color-border)"></span>accuracy (top-1)</span>
+</div>
+<div id="chart" role="img" aria-labelledby="t-fig3 d-fig3"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const archData = [
+  { name: 'MobileNetV2-1.0',    params: 3.4,  gflops: 0.30,  acc: 0.72, paramN: 0.23, flopN: 0.055, accN: 0.81 },
+  { name: 'MobileNetV3-Small',  params: 2.5,  gflops: 0.06,  acc: 0.68, paramN: 0.17, flopN: 0.011, accN: 0.76 },
+  { name: 'EfficientNet-Lite0', params: 4.6,  gflops: 0.40,  acc: 0.75, paramN: 0.31, flopN: 0.073, accN: 0.84 },
+  { name: 'SqueezeNet',         params: 1.2,  gflops: 0.83,  acc: 0.58, paramN: 0.08, flopN: 0.151, accN: 0.65 },
+  { name: 'Tiny-YOLOv3',        params: 15.0, gflops: 5.5,   acc: 0.51, paramN: 1.00, flopN: 1.000, accN: 0.57 },
+  { name: 'Random forest',      params: 0.05, gflops: 0.001, acc: 0.89, paramN: 0.003,flopN: 0.0002,accN: 1.00 }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const w = container.clientWidth || 800;
+  const h = 480;
+  const margin = { top: 24, right: 60, bottom: 36, left: 170 };
+  const innerW = w - margin.left - margin.right;
+  const innerH = h - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', w).attr('height', h)
+    .attr('role', 'img').attr('aria-labelledby', 't-fig3 d-fig3');
+  svg.append('title').attr('id', 't-fig3').text('Architecture family comparison across three normalized axes');
+  svg.append('desc').attr('id', 'd-fig3').text('Grouped horizontal bars comparing six architectures on parameter count, GFLOPs and accuracy.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 1]).range([0, innerW]);
+  const yScaleBand = d3.scaleBand().domain(archData.map(d => d.name)).range([0, innerH]).padding(0.18);
+
+  const xAxis = d3.axisBottom(xScaleLinear).ticks(5);
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`).call(xAxis);
+
+  // Row label
+  g.selectAll('.row-label')
+    .data(archData)
+    .join('text')
+      .attr('class', 'row-label')
+      .attr('x', -8).attr('y', d => yScaleBand(d.name) + yScaleBand.bandwidth() / 2 + 4)
+      .attr('text-anchor', 'end')
+      .text(d => d.name);
+
+  // Bars — three per row, stacked vertically inside the band
+  const barH = yScaleBand.bandwidth() / 3 - 1;
+
+  archData.forEach(d => {
+    const y0 = yScaleBand(d.name);
+    // flash
+    g.append('rect').attr('class', 'bar flash')
+      .attr('x', 0).attr('y', y0)
+      .attr('width', xScaleLinear(d.paramN)).attr('height', barH)
+      .on('mouseover', (event) => tooltip.html(`<strong>${d.name}</strong><br>params: ${d.params} M`)
+        .style('opacity', 1).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.style('opacity', 0));
+    g.append('text').attr('class', 'val-label')
+      .attr('x', xScaleLinear(d.paramN) + 6).attr('y', y0 + barH - 1)
+      .text(`${d.params} M params`);
+
+    // gflops
+    g.append('rect').attr('class', 'bar flops')
+      .attr('x', 0).attr('y', y0 + barH + 1)
+      .attr('width', xScaleLinear(d.flopN)).attr('height', barH)
+      .on('mouseover', (event) => tooltip.html(`<strong>${d.name}</strong><br>compute: ${d.gflops} GFLOPs`)
+        .style('opacity', 1).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.style('opacity', 0));
+    g.append('text').attr('class', 'val-label')
+      .attr('x', xScaleLinear(d.flopN) + 6).attr('y', y0 + (barH + 1) + barH - 1)
+      .text(`${d.gflops} GFLOPs`);
+
+    // acc
+    g.append('rect').attr('class', 'bar acc')
+      .attr('x', 0).attr('y', y0 + 2 * (barH + 1))
+      .attr('width', xScaleLinear(d.accN)).attr('height', barH)
+      .on('mouseover', (event) => tooltip.html(`<strong>${d.name}</strong><br>accuracy: ${(d.acc * 100).toFixed(0)}%`)
+        .style('opacity', 1).style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.style('opacity', 0));
+    g.append('text').attr('class', 'val-label')
+      .attr('x', xScaleLinear(d.accN) + 6).attr('y', y0 + 2 * (barH + 1) + barH - 1)
+      .text(`${(d.acc * 100).toFixed(0)}%`);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

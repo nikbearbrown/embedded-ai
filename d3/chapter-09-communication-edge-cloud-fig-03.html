@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 9.3 — Radio bandwidth ranges with payload markers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 20px; max-width: 80ch; }
+  #chart { width: 100%; min-height: 440px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .grid line { stroke: var(--color-border); stroke-width: 0.6; }
+  .grid path { display: none; }
+  .radio-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 12px; fill: var(--color-white); }
+  .radio-spec  { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis-title  { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .payload-line { stroke: var(--color-red); stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
+  .payload-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-red); }
+  .payload-sub   { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-style: italic; fill: var(--color-red); }
+  .pass-line { stroke: var(--color-ink); stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
+  .pass-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; fill: var(--color-ink); }
+  .caption  { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 80ch; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 12px; max-width: 280px; transition: opacity 150ms cubic-bezier(0.2,0.8,0.2,1); }
+  rect.radio-bar { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  rect.radio-bar.dim { opacity: 0.35; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 9.3 — Bandwidth on log scale, payloads overlaid</h1>
+<p class="subtitle">A payload fits inside a 500 ms budget when its dashed line lands inside the radio's bar. The 96×96 image fails LoRaWAN and NB-IoT; the 16-feature vector passes everywhere.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Required bandwidth for a 500 ms budget is bytes × 16 bps. Move the budget and the dashed lines slide; move the payload and they slide too.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const radios = [
+  { name: 'LoRaWAN',    min: 0.3,  max: 50,    energy: '~ 21 mJ / 100 B',  color: 'var(--color-ink)' },
+  { name: 'NB-IoT',     min: 20,   max: 250,   energy: '~ 150 mJ / 100 B', color: 'var(--color-secondary)' },
+  { name: 'LTE Cat-M1', min: 50,   max: 1000,  energy: '~ 1 J / 100 B',    color: '#787878' },
+  { name: 'WiFi',       min: 1000, max: 100000,energy: '~ 50 mJ / 100 B',  color: 'var(--color-border)' }
+];
+
+const budgetMs = 500;
+const payloads = [
+  { name: '96×96 RGB image',  bytes: 27648, sub: '27 KB raw', cls: 'fail' },
+  { name: '32×32 RGB image',  bytes: 3072,  sub: '3 KB raw',  cls: 'fail' },
+  { name: '16-feature vector',bytes: 64,    sub: '64 B summary', cls: 'pass' }
+];
+payloads.forEach(p => { p.requiredKbps = (p.bytes * 8) / (budgetMs / 1000) / 1000; });
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) { tooltip.html(html).style('left', (event.pageX + 12)+'px').style('top', (event.pageY - 28)+'px').style('opacity', 1); }
+function moveTip(event) { tooltip.style('left', (event.pageX + 12)+'px').style('top', (event.pageY - 28)+'px'); }
+function hideTip() { tooltip.style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+
+  const totalWidth = container.clientWidth || 760;
+  const totalHeight = 440;
+  const margin = { top: 32, right: 32, bottom: 64, left: 110 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart')
+    .append('svg')
+      .attr('width', totalWidth).attr('height', totalHeight)
+      .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Radio bandwidth log-scale chart with payload markers');
+  svg.append('desc').attr('id', 'chart-desc').text('Horizontal bars per radio cover their uplink bandwidth range. Vertical dashed lines mark the bandwidth each payload requires to clear a 500 ms budget.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLog = d3.scaleLog()
+    .domain([0.1, 100000])
+    .range([0, chartWidth]);
+
+  const yScaleBand = d3.scaleBand()
+    .domain(radios.map(r => r.name))
+    .range([0, chartHeight - 60])
+    .padding(0.25);
+
+  // gridlines
+  gChart.append('g').attr('class', 'grid')
+    .call(d3.axisBottom(xScaleLog).ticks(6, '~s').tickSize(chartHeight).tickFormat(''));
+
+  // x axis
+  const xAxis = d3.axisBottom(xScaleLog).tickValues([0.1, 1, 10, 100, 1000, 10000, 100000]).tickFormat(d => d3.format('~s')(d) + (d >= 1000 ? 'bps' : 'k'));
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight - 60})`)
+    .call(xAxis);
+
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight - 30)
+    .attr('text-anchor', 'middle')
+    .text('uplink bandwidth (kbps, log scale)');
+
+  // radio bars
+  const gRadios = gChart.append('g').attr('class', 'g-radios');
+  const radioSel = gRadios.selectAll('.radio-row').data(radios).join('g').attr('class', 'radio-row');
+
+  radioSel.append('rect')
+      .attr('class', 'radio-bar')
+      .attr('x', d => xScaleLog(d.min))
+      .attr('y', d => yScaleBand(d.name))
+      .attr('width', d => xScaleLog(d.max) - xScaleLog(d.min))
+      .attr('height', yScaleBand.bandwidth())
+      .attr('fill', d => d.color)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.min} to ${d.max} kbps`)
+      .on('mouseover', (event, d) => {
+        showTip(event, `<strong>${d.name}</strong><br>${d.min} – ${d.max} kbps<br>energy: ${d.energy}`);
+        radioSel.selectAll('.radio-bar').classed('dim', e => e.name !== d.name);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout', () => { hideTip(); radioSel.selectAll('.radio-bar').classed('dim', false); });
+
+  // radio name on left, with light label background
+  radioSel.append('text')
+      .attr('class', 'radio-spec')
+      .attr('x', -10)
+      .attr('y', d => yScaleBand(d.name) + yScaleBand.bandwidth()/2 + 4)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'var(--color-ink)')
+      .style('font-weight', 700)
+      .text(d => d.name);
+
+  // payload markers
+  payloads.forEach((p) => {
+    const x = xScaleLog(p.requiredKbps);
+    const cls = p.cls === 'pass' ? 'pass-line' : 'payload-line';
+    gChart.append('line')
+        .attr('class', cls)
+        .attr('x1', x).attr('y1', 0)
+        .attr('x2', x).attr('y2', chartHeight - 60);
+
+    const labelCls = p.cls === 'pass' ? 'pass-label' : 'payload-label';
+    const subCls   = p.cls === 'pass' ? 'pass-label' : 'payload-sub';
+    gChart.append('text').attr('class', labelCls)
+        .attr('x', x).attr('y', -10)
+        .attr('text-anchor', 'middle')
+        .text(p.name);
+    gChart.append('text').attr('class', subCls)
+        .attr('x', x).attr('y', 4)
+        .attr('text-anchor', 'middle')
+        .style('font-weight', 400)
+        .text(`${p.sub} · needs ≥ ${p.requiredKbps >= 1 ? Math.round(p.requiredKbps) : p.requiredKbps.toFixed(1)} kbps`);
+  });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

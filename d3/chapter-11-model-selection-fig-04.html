@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 11.4 — Pareto frontier of face-detection candidates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 16px; }
+  #chart { width: 100%; height: 520px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .frontier-line { fill: none; stroke: var(--color-ink); stroke-width: 1.5; }
+  .point { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .point.frontier { fill: var(--color-ink); }
+  .point.dominated { fill: var(--color-white); stroke: var(--color-secondary); stroke-dasharray: 3 2; stroke-width: 1.25; }
+  .point.recommended { stroke: var(--color-red); stroke-width: 2; }
+  .budget-line { stroke: var(--color-secondary); stroke-dasharray: 3 3; stroke-width: 0.75; }
+  .budget-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; fill: var(--color-ink); }
+  .sublabel { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--color-secondary); }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 11.4 — Pareto frontier of face-detection candidates</h1>
+<p class="subtitle">Latency × accuracy on your target. Bubble size proportional to memory.</p>
+<div id="chart" role="img" aria-labelledby="t-fig4 d-fig4"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const modelData = [
+  { name: 'TinyFace',          ms: 45,  acc: 84, mem: 120,   pareto: true,  recommended: false },
+  { name: 'MobileNetV2-0.25',  ms: 80,  acc: 88, mem: 250,   pareto: false, recommended: false },
+  { name: 'MobileNetV3-Small', ms: 95,  acc: 90, mem: 380,   pareto: true,  recommended: false },
+  { name: 'MobileNetV2-0.35',  ms: 110, acc: 91, mem: 420,   pareto: true,  recommended: false },
+  { name: 'EfficientNet-Lite0',ms: 180, acc: 94, mem: 1800,  pareto: true,  recommended: true  },
+  { name: 'ResNet18',          ms: 450, acc: 96, mem: 11000, pareto: false, recommended: false }
+];
+const budgets = [50, 100, 200];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const w = container.clientWidth || 800;
+  const h = 520;
+  const margin = { top: 60, right: 40, bottom: 80, left: 70 };
+  const innerW = w - margin.left - margin.right;
+  const innerH = h - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', w).attr('height', h)
+    .attr('role', 'img').attr('aria-labelledby', 't-fig4 d-fig4');
+  svg.append('title').attr('id', 't-fig4').text('Pareto frontier — six face-detection candidates');
+  svg.append('desc').attr('id', 'd-fig4').text('Latency on x, accuracy on y, memory as bubble size. Frontier connects four candidates; two are dominated.');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 500]).range([0, innerW]);
+  const yScaleLinear = d3.scaleLinear().domain([80, 100]).range([innerH, 0]);
+  const rScaleSqrt   = d3.scaleSqrt().domain([0, 11000]).range([3, 22]);
+
+  // Axes
+  g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(6));
+  g.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLinear).ticks(5));
+
+  g.append('text').attr('class', 'axis-title')
+    .attr('x', innerW / 2).attr('y', innerH + 36).attr('text-anchor', 'middle')
+    .text('latency on target (ms) — lower is better');
+  g.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(-46,${innerH / 2}) rotate(-90)`).attr('text-anchor', 'middle')
+    .text('accuracy (%) — higher is better');
+
+  // Budget lines
+  budgets.forEach(b => {
+    g.append('line').attr('class', 'budget-line')
+      .attr('x1', xScaleLinear(b)).attr('x2', xScaleLinear(b))
+      .attr('y1', 0).attr('y2', innerH);
+    g.append('text').attr('class', 'budget-label')
+      .attr('x', xScaleLinear(b)).attr('y', -8).attr('text-anchor', 'middle')
+      .text(`${b} ms`);
+  });
+
+  // Frontier line
+  const frontier = modelData.filter(d => d.pareto).sort((a, b) => a.ms - b.ms);
+  const linePath = d3.line().x(d => xScaleLinear(d.ms)).y(d => yScaleLinear(d.acc));
+  g.append('path').attr('class', 'frontier-line').attr('d', linePath(frontier));
+
+  // Points
+  g.selectAll('circle.point')
+    .data(modelData)
+    .join('circle')
+      .attr('class', d => 'point ' + (d.pareto ? 'frontier' : 'dominated') + (d.recommended ? ' recommended' : ''))
+      .attr('cx', d => xScaleLinear(d.ms))
+      .attr('cy', d => yScaleLinear(d.acc))
+      .attr('r', d => rScaleSqrt(d.mem))
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.ms} ms, ${d.acc}%, ${d.mem} KB${d.pareto ? '' : ' — dominated'}`)
+      .on('mouseover', (event, d) => tooltip
+        .html(`<strong>${d.name}</strong><br>${d.ms} ms · ${d.acc}% · ${d.mem >= 1000 ? (d.mem/1000).toFixed(1) + ' MB' : d.mem + ' KB'}<br><em>${d.pareto ? 'on Pareto frontier' : 'dominated'}</em>`)
+        .style('opacity', 1)
+        .style('left', (event.pageX + 12) + 'px')
+        .style('top', (event.pageY - 28) + 'px'))
+      .on('mousemove', (event) => tooltip
+        .style('left', (event.pageX + 12) + 'px')
+        .style('top', (event.pageY - 28) + 'px'))
+      .on('mouseout', () => tooltip.style('opacity', 0));
+
+  // Labels — to the right of each point
+  g.selectAll('text.label')
+    .data(modelData)
+    .join('text')
+      .attr('class', 'label')
+      .attr('x', d => xScaleLinear(d.ms) + rScaleSqrt(d.mem) + 6)
+      .attr('y', d => yScaleLinear(d.acc) + 4)
+      .attr('fill', d => d.pareto ? 'var(--color-ink)' : 'var(--color-secondary)')
+      .text(d => d.name + (d.pareto ? '' : ' (dominated)'));
+
+  // Frontier annotation
+  g.append('text').attr('class', 'label')
+    .attr('x', xScaleLinear(70)).attr('y', yScaleLinear(98))
+    .attr('fill', 'var(--color-red)').text('Pareto frontier');
+  g.append('text').attr('class', 'sublabel')
+    .attr('x', xScaleLinear(70)).attr('y', yScaleLinear(98) + 14)
+    .text('choices that are not dominated');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

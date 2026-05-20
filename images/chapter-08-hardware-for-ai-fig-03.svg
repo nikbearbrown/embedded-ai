@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t03 d03">
+  <title id="t03">Three classes of NPU on MAC count vs power</title>
+  <desc id="d03">A log-log scatter plot. The x-axis is MAC count from 10 to 100,000-plus. The y-axis is active power envelope from 1 milliwatt to 100 watts. Three clusters appear. Bottom-left cluster: microNPUs including Ethos-U55 and Syntiant NDP120 at 8 to 256 MACs and 0.2 to 200 milliwatts. Middle cluster: edge NPUs including Coral Edge TPU, Hailo-8, and Movidius at 100 to 1000 MACs and 0.5 to 5 watts. Top-right cluster: datacenter NPUs including Google TPU and NVIDIA TensorRT at over 10,000 MACs and 30 to 300 watts.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .dot { fill: #2a1a0e; }
+      .dot-em { fill: #2a1a0e; stroke: #fdfcfb; stroke-width: 1.5; }
+      .cluster { fill: none; stroke: #8a8480; stroke-width: 1; stroke-dasharray: 4 3; }
+    </style>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="460" fill="#fdfcfb"/>
+
+  <text x="32" y="32" class="ti">NPU classes — MAC count vs active power</text>
+  <text x="32" y="48" class="sm">log-log; only one cluster is the embedded class</text>
+
+  <!-- Axes: x from 90..640 (550 px), y from 80..360 (280 px) -->
+  <line x1="90" y1="360" x2="640" y2="360" stroke="#8a8480"/>
+  <line x1="90" y1="80"  x2="90"  y2="360" stroke="#8a8480"/>
+
+  <!-- X log ticks: 10, 100, 1k, 10k, 100k+ -> x positions evenly across 550 px / 4 decades = 137.5 each -->
+  <g>
+    <line x1="90"   y1="358" x2="90"   y2="362" stroke="#4a4540"/>
+    <text x="90"   y="378" text-anchor="middle" class="sm">10</text>
+    <line x1="227.5" y1="358" x2="227.5" y2="362" stroke="#4a4540"/>
+    <text x="227.5" y="378" text-anchor="middle" class="sm">100</text>
+    <line x1="365"  y1="358" x2="365"  y2="362" stroke="#4a4540"/>
+    <text x="365"  y="378" text-anchor="middle" class="sm">1,000</text>
+    <line x1="502.5" y1="358" x2="502.5" y2="362" stroke="#4a4540"/>
+    <text x="502.5" y="378" text-anchor="middle" class="sm">10,000</text>
+    <line x1="640"  y1="358" x2="640"  y2="362" stroke="#4a4540"/>
+    <text x="640"  y="378" text-anchor="middle" class="sm">100,000+</text>
+  </g>
+  <text x="365" y="398" text-anchor="middle" class="sm">MAC count (log)</text>
+
+  <!-- Y log ticks: 1 mW, 10, 100 mW, 1 W, 10 W, 100 W -> 5 decades over 280 px = 56 px each (top=80, bottom=360) -->
+  <g>
+    <line x1="88" y1="360" x2="92" y2="360" stroke="#4a4540"/>
+    <text x="84" y="363" text-anchor="end" class="sm">1 mW</text>
+    <line x1="88" y1="304" x2="92" y2="304" stroke="#4a4540"/>
+    <text x="84" y="307" text-anchor="end" class="sm">10 mW</text>
+    <line x1="88" y1="248" x2="92" y2="248" stroke="#4a4540"/>
+    <text x="84" y="251" text-anchor="end" class="sm">100 mW</text>
+    <line x1="88" y1="192" x2="92" y2="192" stroke="#4a4540"/>
+    <text x="84" y="195" text-anchor="end" class="sm">1 W</text>
+    <line x1="88" y1="136" x2="92" y2="136" stroke="#4a4540"/>
+    <text x="84" y="139" text-anchor="end" class="sm">10 W</text>
+    <line x1="88" y1="80"  x2="92" y2="80"  stroke="#4a4540"/>
+    <text x="84" y="83"  text-anchor="end" class="sm">100 W</text>
+  </g>
+  <text x="32" y="220" text-anchor="middle" class="sm" transform="rotate(-90 32 220)">active power (log)</text>
+
+  <!-- gridlines (light) -->
+  <g stroke="#e0dcd6" stroke-width="0.5">
+    <line x1="227.5" y1="80" x2="227.5" y2="360"/>
+    <line x1="365"   y1="80" x2="365"   y2="360"/>
+    <line x1="502.5" y1="80" x2="502.5" y2="360"/>
+    <line x1="90"  y1="304" x2="640" y2="304"/>
+    <line x1="90"  y1="248" x2="640" y2="248"/>
+    <line x1="90"  y1="192" x2="640" y2="192"/>
+    <line x1="90"  y1="136" x2="640" y2="136"/>
+  </g>
+
+  <!-- Cluster 1: microNPUs. bounded ellipse. center ~ (170, 290) radii (75, 50) -->
+  <ellipse cx="170" cy="290" rx="80" ry="55" class="cluster"/>
+  <text x="170" y="225" text-anchor="middle" class="lb">microNPUs</text>
+  <text x="170" y="240" text-anchor="middle" class="sm">10–200 mW · MCU-scale</text>
+
+  <!-- Syntiant NDP120: ~64 MACs, 0.2 mW -> x ~ log10(64)*137.5 + 90 = 1.806*137.5 + 90 = 338... wait recompute scale -->
+  <!-- decade width = 137.5, decade 0 (=10) at x=90. log10(N) decade index = log10(N)-1. -->
+  <!-- Syntiant NDP120: ~128 effective MACs, 0.2 mW. log10(128)=2.107 → x=90+(2.107-1)*137.5=90+1.107*137.5=90+152.2=242.2. y for 0.2 mW: log10(0.2)=-0.7 in mW, top=100W=5 decades. y = 360 - (log10(P_mW)-0)*56 = 360 - (-0.7)*56 = 360+39 = 399 — below axis. Bump to 1 mW (y=360). Use 200 µW≈0.2 mW: clamp into axis at y≈360. -->
+  <!-- Use approximations for placement -->
+  <circle cx="180" cy="350" r="4" class="dot-em"/>
+  <text x="180" y="345" text-anchor="middle" class="sm">Syntiant NDP120</text>
+  <!-- Ethos-U55 (256 MACs at ~100 mW). log10(256)=2.408 → x=90+1.408*137.5=283.6. log10(100mW)=2 → y=360-2*56=248 -->
+  <circle cx="226" cy="276" r="4" class="dot-em"/>
+  <text x="226" y="270" text-anchor="middle" class="sm">Ethos-U55</text>
+  <!-- STM32N6 NPU (~512 MACs eff at ~180 mW). log10(512)=2.708 → x=90+1.708*137.5=325. log10(180)=2.255 → y=360-2.255*56=234 -->
+  <circle cx="290" cy="248" r="4" class="dot-em"/>
+  <text x="290" y="242" text-anchor="middle" class="sm">STM32N6</text>
+  <!-- K210 KPU (~64 MACs at ~300 mW). log10(64)=1.806 → x=90+0.806*137.5=201. log10(300)=2.477 → y=360-2.477*56=222 -->
+  <circle cx="156" cy="290" r="4" class="dot-em"/>
+  <text x="156" y="304" text-anchor="middle" class="sm">K210</text>
+
+  <!-- Cluster 2: edge NPUs. center ~ (430, 180) -->
+  <ellipse cx="440" cy="180" rx="90" ry="50" class="cluster"/>
+  <text x="440" y="118" text-anchor="middle" class="lb">edge NPUs</text>
+  <text x="440" y="133" text-anchor="middle" class="sm">0.5–5 W · cameras, drones</text>
+
+  <!-- Coral Edge TPU (~512 MACs, 2 W). x=325, log10(2000)=3.301 → y=360-3.301*56=175 -->
+  <circle cx="395" cy="175" r="4" class="dot-em"/>
+  <text x="395" y="170" text-anchor="middle" class="sm">Coral TPU</text>
+  <!-- Hailo-8 (~26 TOPS roughly 2.5 W; tens of thousands of MACs but show ~5000 effective). x=log10(5000)-1=2.699 → 90+2.699*137.5? wait the decades: 10→x=90, 100→x=227.5, 1000→365, 10000→502.5. log10(5000)=3.699 → x=90+(3.699-1)*137.5=90+371.2=461.2 -->
+  <circle cx="470" cy="158" r="4" class="dot-em"/>
+  <text x="470" y="153" text-anchor="middle" class="sm">Hailo-8</text>
+  <!-- Movidius Myriad X (~1024 MACs, 1 W). log10(1024)=3.01 → x=90+2.01*137.5=366.4. log10(1000)=3 → y=360-3*56=192 -->
+  <circle cx="416" cy="200" r="4" class="dot-em"/>
+  <text x="416" y="216" text-anchor="middle" class="sm">Movidius</text>
+
+  <!-- Cluster 3: datacenter NPUs. center ~ (590, 100) -->
+  <ellipse cx="600" cy="105" rx="55" ry="40" class="cluster"/>
+  <text x="600" y="60" text-anchor="middle" class="lb">datacenter NPUs</text>
+  <text x="600" y="75" text-anchor="middle" class="sm">30–300 W · not embedded</text>
+
+  <!-- Google TPU v4 (~100k MACs, 200 W). x≈640, log10(200000)=5.301 → y=360-5.301*56=63. -->
+  <circle cx="610" cy="100" r="4" class="dot-em"/>
+  <text x="610" y="95" text-anchor="middle" class="sm">TPU v4</text>
+  <!-- NVIDIA H100 / TensorRT. ~100k+ MACs, 350 W → y=360-5.544*56≈50 -->
+  <circle cx="585" cy="115" r="4" class="dot-em"/>
+  <text x="585" y="127" text-anchor="middle" class="sm">H100 / TensorRT</text>
+
+  <!-- Embedded box highlight -->
+  <rect x="105" y="240" width="130" height="120" fill="none" stroke="#2a1a0e" stroke-width="1.25"/>
+  <path d="M 240 300 L 280 300" fill="none" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar)"/>
+  <text x="320" y="304" class="lb">the embedded class</text>
+
+  <!-- Caption -->
+  <text x="350" y="435" text-anchor="middle" class="cap">Embedded AI lives in the bottom-left cluster. The other two are different planets in MAC count and power.</text>
+</svg>

@@ -22,6 +22,9 @@ Verify. You run inference on the device with inputs you've also run through the 
 
 Every step has its own failure mode. The converter can refuse a custom layer, or accept it and silently substitute an approximation. The optimizer can apply a fusion that's incompatible with the target runtime's kernel. The compiler can pack the model in a way that the runtime cannot align. The runtime can have an old bug for an op that worked everywhere else.
 
+![Horizontal flow of six pipeline gates — Train, Convert, Optimize, Compile, Deploy, Verify — with the artifact format above each box and the dominant silent-failure mode listed below.](../images/chapter-13-tinyml-toolchains-fig-01.png)
+*Figure 13.1 — Six steps from trained checkpoint to verified binary. Every gate reports success; only step 6 catches the lie.*
+
 ## TensorFlow Lite for Microcontrollers — the dominant path
 
 TFLite Micro is the inference engine most embedded ML projects deploy through. It's a C++ library with no standard-library dependencies, no dynamic memory allocation by default, and a code footprint around 100 KB before you add op kernels. Three things make it work on a microcontroller: it's deterministic, it's static, and it's small.
@@ -66,6 +69,9 @@ Inference is then `Invoke()` after copying input data into the input tensor and 
 
 Four pitfalls swallow most first-time deployments. *Tensor arena too small* — `AllocateTensors()` returns `kTfLiteError` and the message tells you exactly how many bytes you needed; bump `kTensorArenaSize` and recompile. *Missing operations* — the model uses an op you didn't add to the resolver, and you get `Op not found` at startup; add it. *Quantization mismatch* — the calibration set used at conversion didn't match what the device sees, and predictions are wrong; recalibrate with a representative set. *Memory alignment* — the tensor arena needs 16-byte alignment, which `alignas(16)` gives you; without it you get hard faults that look like random crashes.
 
+![Two adjacent memory regions. Flash contains the model byte array, the TFLite Micro engine, and op kernels. SRAM contains the tensor arena with a 16-byte alignment marker, the stack, and the heap. Four numbered red pins call out arena too small, missing op, calibration mismatch, and alignment fault.](../images/chapter-13-tinyml-toolchains-fig-02.png)
+*Figure 13.2 — TFLite Micro on-device memory layout. Four failure points sit at the boundary between the static model and the live activation arena.*
+
 ## Edge Impulse and where the abstraction stops
 
 Edge Impulse is the other path. It's a web platform that runs the entire pipeline behind a GUI: data collection, model design, training, optimization, and deployment-package generation. You upload data or stream it from the device. You configure preprocessing — MFCCs and FFTs for audio, scaling and normalization for images. You pick an architecture from a menu or supply a custom one. The platform trains in the cloud, quantizes automatically, and hands back a C++ library, an Arduino library, or a firmware binary tailored to your target.
@@ -75,6 +81,9 @@ What it handles well is the boilerplate. You don't write OpResolver registration
 What it hides is exactly the visibility you need when something fails. You can pick architectures from a menu but you cannot drop in arbitrary custom layers. Hyperparameter control is limited compared to writing your own training script. And when the deployed model misbehaves, you don't have direct access to the converter logs, the intermediate `.tflite` file, or the optimization decisions the platform made on your behalf.
 
 The right call is roughly: rapid prototype, team without ML expertise, standard task on a supported target — Edge Impulse, weeks become hours. Custom architecture, fine-grained quantization control, or a deployment failure that needs intermediate artifacts to debug — own the pipeline, write the converter calls yourself, and keep the artifacts.
+
+![Heatmap-style matrix with six toolchain rows (TFLite Micro, Edge Impulse, STM32Cube.AI, Vela, Edge TPU compiler, ONNX Runtime) and six capability columns (Custom layers, Intermediate artifacts, Quantization control, Vendor-tuned kernels, GUI workflow, Debug access on fail). Cells are shaded full, partial, or none.](../images/chapter-13-tinyml-toolchains-fig-03.png)
+*Figure 13.3 — Toolchain feature matrix. Pick by the column that matters most: visibility (TFLite Micro, ONNX Runtime) or workflow speed (Edge Impulse).*
 
 ## ONNX and vendor compilers
 
@@ -105,6 +114,9 @@ Toolchain-induced accuracy loss is what happens when the deployment pipeline int
 
 The way you measure all of this is to compare the converted model's accuracy against the original on the *same* validation set, then bisect. Run the validation set through the trained model in Python and record outputs. Run it through the converted model in the TFLite interpreter (still in Python). Run it on the device. The differences between (training, converted) and (converted, on-device) localize the error to either conversion-and-optimization or compilation-and-runtime. From there, you keep bisecting — disable fusion, swap calibration sets, check op support — until the source is found.
 
+![Three horizontal accuracy bars — Python source 94.2 percent, TFLite Python interpreter 93.1 percent, on-device 92.8 percent — with two red dashed brackets labelling the 1.1 percentage-point conversion-plus-optimization gap and the 0.3 percentage-point compile-plus-runtime gap. Two boxes below map root causes to each gap.](../images/chapter-13-tinyml-toolchains-fig-04.png)
+*Figure 13.4 — Three-stage accuracy bisection. Whichever gap appears first localizes the bug.*
+
 ## A keyword spotter ends up on a Nano 33 BLE Sense
 
 A 1D CNN for keyword spotting. Five convolutional layers, two fully connected, 16 kHz audio in one-second windows, twelve output classes (ten keywords plus *unknown* and *silence*). Validation accuracy 94.2% in float32. Target an Arduino Nano 33 BLE Sense — nRF52840, Cortex-M4 at 64 MHz, 256 KB SRAM.
@@ -126,6 +138,9 @@ The converted model is 85 KB. Test it in the TFLite Python interpreter against t
 Convert the binary to a C array with `xxd -i keyword_model.tflite > keyword_model_data.h`. Build the Arduino sketch with an 80 KB tensor arena, register only the four ops the model actually uses (Conv2D, FullyConnected, Reshape, Softmax — every op you don't add saves a few hundred bytes of code), and wire the microphone path to copy audio into the input tensor before each `Invoke()`.
 
 Compile, flash, run. Measured latency 42 ms against a 100 ms budget. SRAM usage: 80 KB tensor arena plus 20 KB of stack equals 100 KB on a 256 KB part. On-device accuracy on 50 recorded samples played through the microphone: 92.8%. The 0.3% gap between the TFLite interpreter (93.1%) and the device (92.8%) tracks to microphone noise and the small differences between training-time audio preprocessing and the device's audio frontend, not to the toolchain. That gap is acceptable; if it had been three percent, the next move would be to instrument the audio frontend and verify that what the device passes to the model matches what the training pipeline passed to the model.
+
+![Four-panel deployment dashboard. Latency: 100 ms budget bar over a 42 ms measured bar. SRAM: 256 KB available over a 100 KB used bar segmented into 80 KB arena and 20 KB stack. Flash: 85 KB model bar over a 100 KB engine bar. Accuracy: 94.2 percent float32, 93.1 percent TFLite int8, 92.8 percent on-device.](../images/chapter-13-tinyml-toolchains-fig-05.png)
+*Figure 13.5 — Nano 33 BLE Sense keyword-spotter dashboard. The deployment is real because the on-device numbers track the Python numbers.*
 
 The deployment is real. Not because the converter said `Conversion successful` — it always says that — but because the on-device numbers track the Python numbers. That comparison, run against a held-out set of inputs, is the only thing that distinguishes a working deployment from a silent failure.
 
@@ -203,6 +218,58 @@ Note: this module requires `tensorflow` as an optional dependency. Document the 
 **Connection to previous chapters:** Reads the OptimizationPlan (12) to know what conversions to run. Outputs feed the integration report in chapter 14.
 
 **Preview of next chapter:** Chapter 14 adds `report.py` — the integration-decision-document generator that aggregates every prior verdict into a single Markdown decision doc matching the shape of Chapter 14's three case studies. Plus integration tests that replicate those three case studies as `tinyml-feasibility report` invocations.
+
+---
+
+## Prompts
+
+Use these prompts with Claude to generate interactive D3 v7 versions of the
+figures in this chapter. Each produces a standalone HTML file you can open
+in a browser and modify freely.
+
+**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
+your Claude project context before using these prompts. They define the stack,
+naming conventions, color system, and typography the figures use.
+
+---
+
+### Figure 13.1 — Six-step deployment pipeline
+
+Build a standalone D3 v7 horizontal flow diagram of the six deployment-pipeline gates: Train, Convert, Optimize, Compile, Deploy, Verify. Render each step as a bordered box arranged left-to-right with an arrow between adjacent boxes. Above each box, place its artifact format in JetBrains Mono (`.h5 / .pth`, `.tflite / .onnx`, `int8 .tflite`, `.elf binary`, `flashed image`, `accuracy Δ`). Inside the box, render the step number above the step name. Below each box, render the dominant silent-failure mode in two or three short lines. Below the flow, draw an ochre dashed-border callout reading "Every gate reports success. Only step 6 catches the lie." Channels: x-position is pipeline order; the colors come from var(--color-ink), var(--color-secondary), var(--color-border), and var(--color-ochre). On hover, show a tooltip naming the step's artifact and failure mode. Make the diagram keyboard-accessible (tabindex on each box), include role/title/desc, support dark mode, and respect prefers-reduced-motion.
+
+> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-01.html`
+
+---
+
+### Figure 13.2 — TFLite Micro on-device memory layout
+
+Build a standalone D3 v7 two-region memory diagram. Left region: Flash (read-only) containing three stacked blocks proportional to typical sizes — model byte array (~85 KB), TFLite Micro engine (~100 KB), op kernels. Right region: SRAM (read-write) containing tensor arena (~80 KB), stack (~20 KB), and heap. Mark the arena with a vertical ochre bar labelled "16 byte align". Overlay four red numbered pins on the diagram at the locations of the four silent failures — arena too small, missing op, calibration mismatch, alignment fault — and list them in a legend strip below. Channels: y-position within each region encodes the block's role; block height encodes typical KB; the ochre alignment marker encodes the structural constraint. On hover, show a tooltip explaining each block's role in `Invoke()`. Use var(--color-ink), var(--color-secondary), var(--color-border) for blocks; var(--color-red) for failure pins; var(--color-ochre) for the alignment marker. Include role/title/desc, full keyboard access, dark-mode, and reduced-motion support.
+
+> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-02.html`
+
+---
+
+### Figure 13.3 — Toolchain feature matrix
+
+Build a standalone D3 v7 heatmap-style matrix with six rows (TFLite Micro, Edge Impulse, STM32Cube.AI, Vela (Ethos-U), Edge TPU compiler, ONNX Runtime) and six columns (Custom layers, Intermediate artifacts, Quantization control, Vendor-tuned kernels, GUI workflow, Debug access on fail). Each cell takes one of three states: full (fill var(--color-ink)), partial (fill var(--color-secondary)), or none (var(--color-border) at low opacity). Rotate column headers ~30°. Row labels include a one-line subtitle in var(--color-secondary). Below the matrix, render a three-item legend. Channels: position-along-aligned-scales (the heatmap grid) and three discrete lightness steps; no hue encoding. On hover, show a tooltip naming the toolchain, the capability, and which support tier the cell represents. Cells must be tabbable, with aria-label naming all three. Include role/title/desc, dark-mode, prefers-reduced-motion. Use ResizeObserver to redraw on container resize.
+
+> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-03.html`
+
+---
+
+### Figure 13.4 — Three-stage accuracy bisection
+
+Build a standalone D3 v7 horizontal bar chart with three bars stacked vertically, one per pipeline stage: Stage 1 Python source 94.2%, Stage 2 TFLite Python interpreter 93.1%, Stage 3 on-device 92.8%. X-axis runs 90 to 95 percent — note: this is the one case where a non-zero start is honest because the channel is the small differences between stages, not absolute magnitude; mark this explicitly in the chart subtitle. Bars use a sequential luminance from var(--color-ink) down to var(--color-border). To the right of each bar, label the value in JetBrains Mono. Between stages 1-2 and stages 2-3, draw red dashed brackets labelling the deltas: "Δ 1.1 pp — conversion + optimization" and "Δ 0.3 pp — compile + runtime". Below the chart, render two side-by-side dashed-border boxes mapping the root causes to each gap. Channels: x-position-along-shared-scale for accuracy; sequential luminance for stage order. On hover, show a tooltip explaining what each stage measures. Keyboard accessible. Dark-mode and reduced-motion respected.
+
+> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-04.html`
+
+---
+
+### Figure 13.5 — Nano 33 BLE Sense deployment dashboard
+
+Build a standalone D3 v7 four-panel dashboard in a 2×2 grid. Panel A: Latency — two horizontal bars with x-domain [0, 120 ms]: budget 100 ms in var(--color-border), measured 42 ms in var(--color-ink). Panel B: SRAM — two horizontal bars with x-domain [0, 300 KB]: available 256 KB; used 100 KB segmented into 80 KB arena (var(--color-ink)) and 20 KB stack (var(--color-secondary)). Panel C: Flash — two bars with x-domain [0, 300 KB]: model 85 KB and engine ~100 KB. Panel D: Accuracy — three bars with x-domain [90, 95 %]: float32 94.2, TFLite int8 93.1, on-device 92.8, sequential luminance from var(--color-ink) to var(--color-border). Channels: position-along-common-scale per panel; panels are small multiples comparing budget vs measured. Each bar tabbable with aria-label and a hover tooltip explaining what it represents. ResizeObserver redraw on each panel's container. Italic footnotes under each panel summarize the takeaway. Include role/title/desc, dark-mode, reduced-motion.
+
+> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-05.html`
 
 ---
 

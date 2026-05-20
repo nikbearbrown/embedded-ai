@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 10.3 — Five design patterns for safe AI integration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #121212; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; }
+  .pattern-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .pattern-card { background: var(--color-white); border: 1px solid var(--color-border); padding: 16px; min-height: 200px; }
+  .pattern-card.active { border-color: var(--color-red); }
+  .pattern-eyebrow { font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.5px; color: var(--color-secondary); }
+  .pattern-title { font-family: 'EB Garamond', Georgia, serif; font-size: 18px; margin: 4px 0 8px; }
+  .pattern-svg { width: 100%; height: 120px; }
+  .pattern-mitigation { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--color-secondary); margin-top: 12px; }
+  .ai-rect { fill: var(--color-border); stroke: var(--color-secondary); stroke-width: 0.75; }
+  .safe-rect { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.5; }
+  .act-rect { fill: var(--color-ink); }
+  .block-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ink); }
+  .block-label.inv { fill: var(--color-white); }
+  .arrow-line { stroke: var(--color-secondary); fill: none; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-white);
+             border: 1px solid var(--color-border); padding: 8px 12px; font-size: 12px; max-width: 240px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 10.3 — Five patterns for putting AI in a real-time system</h1>
+<p class="subtitle">The AI is on the diagram. The safety guarantee is the block next to it. Hover any card for the failure mode it mitigates.</p>
+<div id="chart" role="main">
+  <div class="pattern-grid" id="grid"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const patternData = [
+  { id: 'advisory', label: 'PATTERN 1', title: 'Advisory, not command',
+    mitigation: 'AI false output — supervisor owns the decision',
+    blocks: [
+      { type: 'ai',   x: 8,  y: 30, w: 70, h: 36, label: 'AI', sub: 'suggests' },
+      { type: 'safe', x: 100,y: 30, w: 90, h: 36, label: 'supervisor', sub: 'deterministic' },
+      { type: 'act',  x: 120,y: 86, w: 60, h: 20, label: 'actuator' }
+    ],
+    arrows: [{ x1: 78, y1: 48, x2: 99, y2: 48 }, { x1: 150, y1: 66, x2: 150, y2: 86 }]
+  },
+  { id: 'bounded', label: 'PATTERN 2', title: 'Bounded execution, rejection',
+    mitigation: 'Latency violation — deadline never overruns',
+    blocks: [
+      { type: 'ai',   x: 8,  y: 30, w: 70, h: 36, label: 'AI', sub: '+ timer' },
+      { type: 'safe', x: 100,y: 18, w: 90, h: 22, label: 'use result' },
+      { type: 'safe', x: 100,y: 54, w: 90, h: 22, label: 'UNKNOWN' },
+      { type: 'act',  x: 120,y: 86, w: 60, h: 20, label: 'safe state' }
+    ],
+    arrows: [{ x1: 78, y1: 40, x2: 99, y2: 28 }, { x1: 78, y1: 54, x2: 99, y2: 64 }, { x1: 150, y1: 76, x2: 150, y2: 86 }]
+  },
+  { id: 'gating', label: 'PATTERN 3', title: 'Confidence gating',
+    mitigation: 'False positive — unsure ⇒ do not act',
+    blocks: [
+      { type: 'ai',   x: 8,  y: 30, w: 80, h: 36, label: 'AI', sub: 'class + score' },
+      { type: 'safe', x: 108,y: 18, w: 82, h: 22, label: '≥ 0.98 — act' },
+      { type: 'safe', x: 108,y: 54, w: 82, h: 22, label: '< 0.98 — flag' },
+      { type: 'act',  x: 120,y: 86, w: 60, h: 20, label: 'actuator' }
+    ],
+    arrows: [{ x1: 88, y1: 40, x2: 107, y2: 28 }, { x1: 88, y1: 54, x2: 107, y2: 64 }, { x1: 150, y1: 40, x2: 150, y2: 86 }]
+  },
+  { id: 'voting', label: 'PATTERN 4', title: 'Redundant voting',
+    mitigation: 'Adversarial inputs and model-specific failures',
+    blocks: [
+      { type: 'ai', x: 8, y: 18, w: 56, h: 18, label: 'model A' },
+      { type: 'ai', x: 8, y: 42, w: 56, h: 18, label: 'model B' },
+      { type: 'ai', x: 8, y: 66, w: 56, h: 18, label: 'model C' },
+      { type: 'safe', x: 90, y: 42, w: 80, h: 22, label: '2-of-3 vote' },
+      { type: 'act',  x: 105,y: 86, w: 56, h: 20, label: 'actuator' }
+    ],
+    arrows: [
+      { x1: 64, y1: 27, x2: 89, y2: 50 },
+      { x1: 64, y1: 51, x2: 89, y2: 53 },
+      { x1: 64, y1: 75, x2: 89, y2: 56 },
+      { x1: 130, y1: 64, x2: 130, y2: 86 }
+    ]
+  },
+  { id: 'layers', label: 'PATTERN 5', title: 'Hierarchical layers',
+    mitigation: 'Any AI failure — simpler layers below catch it',
+    blocks: [
+      { type: 'ai',   x: 8, y: 24, w: 180, h: 18, label: 'AI · perception' },
+      { type: 'safe', x: 8, y: 50, w: 180, h: 18, label: 'rule-based threshold' },
+      { type: 'act',  x: 8, y: 76, w: 180, h: 18, label: 'hardware trip' }
+    ],
+    arrows: [{ x1: 198, y1: 32, x2: 198, y2: 92 }]
+  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+const cards = d3.select('#grid').selectAll('.pattern-card').data(patternData).join('div')
+  .attr('class', 'pattern-card').attr('tabindex', 0)
+  .attr('aria-label', d => `${d.title}: mitigates ${d.mitigation}`)
+  .on('mouseover', (event, d) => {
+    d3.select(event.currentTarget).classed('active', true);
+    tooltip.html(`<strong>${d.title}</strong><br>Mitigates: ${d.mitigation}`)
+      .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+      .transition().duration(150).style('opacity', 1);
+  })
+  .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+  .on('mouseout', (event) => {
+    d3.select(event.currentTarget).classed('active', false);
+    tooltip.transition().duration(100).style('opacity', 0);
+  });
+
+cards.each(function(d) {
+  const card = d3.select(this);
+  card.append('div').attr('class', 'pattern-eyebrow').text(d.label);
+  card.append('div').attr('class', 'pattern-title').text(d.title);
+  const svg = card.append('svg').attr('class', 'pattern-svg').attr('viewBox', '0 0 220 120')
+    .attr('role', 'img').attr('aria-label', `${d.title} diagram`);
+  svg.append('defs').append('marker').attr('id', `arr-${d.id}`).attr('markerWidth', 6).attr('markerHeight', 4)
+    .attr('refX', 5).attr('refY', 2).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 6 2, 0 4').attr('fill', 'var(--color-secondary)');
+  d.arrows.forEach(a => {
+    svg.append('line').attr('class', 'arrow-line')
+      .attr('x1', a.x1).attr('y1', a.y1).attr('x2', a.x2).attr('y2', a.y2)
+      .attr('marker-end', `url(#arr-${d.id})`);
+  });
+  d.blocks.forEach(b => {
+    svg.append('rect').attr('class', `${b.type}-rect`).attr('x', b.x).attr('y', b.y).attr('width', b.w).attr('height', b.h);
+    const tx = b.x + b.w / 2;
+    svg.append('text').attr('class', b.type === 'act' ? 'block-label inv' : 'block-label')
+      .attr('x', tx).attr('y', b.y + b.h / 2 + 3).attr('text-anchor', 'middle').text(b.label);
+    if (b.sub) {
+      svg.append('text').attr('class', 'block-label')
+        .attr('x', tx).attr('y', b.y + b.h / 2 + 15).attr('text-anchor', 'middle')
+        .attr('fill', 'var(--color-secondary)').text(b.sub);
+    }
+  });
+  card.append('div').attr('class', 'pattern-mitigation').text(`Mitigates: ${d.mitigation}`);
+});
+</script>
+</body>
+</html>

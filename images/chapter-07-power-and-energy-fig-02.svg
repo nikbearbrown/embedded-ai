@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t02 d02">
+  <title id="t02">Power composition shifts with duty cycle</title>
+  <desc id="d02">Two stacked bars showing average power composition. Left bar: 80% active duty cycle — dynamic power dominates, leakage is a sliver. Right bar: 1% active duty cycle — sleep leakage dominates, dynamic is a thin slice.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .seg { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #fdfcfb; }
+    </style>
+    <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="420" fill="#fdfcfb"/>
+
+  <text x="350" y="28" text-anchor="middle" class="ti">Average power composition by duty cycle</text>
+
+  <!-- LEFT BAR — high duty cycle (80% active) -->
+  <text x="160" y="60" text-anchor="middle" class="lb">High duty cycle (80% active)</text>
+  <text x="160" y="76" text-anchor="middle" class="sm">average power ≈ 12 mW</text>
+  <!-- bar geometry: x=120, width=80, y from 90 to 340 (height 250) -->
+  <!-- dynamic = 11.5 mW → 96% of bar = 240px (90 to 330) -->
+  <!-- leakage = 0.5 mW → 4% = 10px (330 to 340) -->
+  <rect x="120" y="90"  width="80" height="240" fill="#2a1a0e"/>
+  <rect x="120" y="330" width="80" height="10"  fill="#8a8480"/>
+  <text x="160" y="220" text-anchor="middle" class="seg">dynamic power</text>
+  <text x="160" y="236" text-anchor="middle" class="seg">≈ 11.5 mW</text>
+  <text x="206" y="338" class="sm">leakage</text>
+  <!-- axis label -->
+  <line x1="110" y1="90" x2="115" y2="90" stroke="#4a4540"/>
+  <line x1="110" y1="340" x2="115" y2="340" stroke="#4a4540"/>
+  <line x1="115" y1="90" x2="115" y2="340" stroke="#8a8480"/>
+  <text x="106" y="94" text-anchor="end" class="sm">12 mW</text>
+  <text x="106" y="343" text-anchor="end" class="sm">0</text>
+
+  <!-- left arrow -->
+  <path d="M 160 90 L 160 75 L 248 75" fill="none" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+  <text x="244" y="360" text-anchor="middle" class="lb">reduce V and f</text>
+  <text x="244" y="374" text-anchor="middle" class="sm">DVFS · accelerator offload</text>
+
+  <!-- divider -->
+  <line x1="350" y1="50" x2="350" y2="395" stroke="#c8c4c0" stroke-width="0.75"/>
+
+  <!-- RIGHT BAR — low duty cycle (1% active) -->
+  <text x="540" y="60" text-anchor="middle" class="lb">Low duty cycle (1% active)</text>
+  <text x="540" y="76" text-anchor="middle" class="sm">average power ≈ 0.6 mW</text>
+  <!-- height represents 0.6 mW. To make the qualitative comparison legible at the same axis, we scale the bar proportionally: 240*(0.6/12)=12 px? Too tiny. Use a same-height "share" bar instead, normalized to 100% composition. -->
+  <!-- We'll show composition share at same bar length, with footnote about absolute scale. -->
+  <rect x="500" y="90"  width="80" height="36"  fill="#2a1a0e"/>
+  <rect x="500" y="126" width="80" height="214" fill="#8a8480"/>
+  <text x="540" y="112" text-anchor="middle" class="seg">dynamic ≈ 0.1 mW</text>
+  <text x="540" y="230" text-anchor="middle" class="seg">sleep leakage</text>
+  <text x="540" y="246" text-anchor="middle" class="seg">≈ 0.5 mW</text>
+  <!-- normalized note -->
+  <text x="540" y="364" text-anchor="middle" class="sm">shares normalized to bar length</text>
+  <text x="540" y="376" text-anchor="middle" class="sm">true height ≈ 12 mW × 0.05</text>
+
+  <!-- right arrow -->
+  <path d="M 540 90 L 540 75 L 452 75" fill="none" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+  <text x="456" y="360" text-anchor="middle" class="lb">deepen sleep · gate peripherals</text>
+
+  <!-- crossover band note -->
+  <text x="350" y="408" text-anchor="middle" class="cap">Crossover near 5–10% active. Above it, attack dynamic. Below it, attack sleep — active power barely matters.</text>
+</svg>

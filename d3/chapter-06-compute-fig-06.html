@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 6.6 — Latency budget waterfall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 65ch; }
+  #chart { width: 100%; height: 360px; }
+  .controls { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; max-width: 65ch; }
+  .controls label { font-family: 'Inter', sans-serif; font-size: 13px; color: var(--color-secondary); }
+  .controls input[type=range] { flex: 1; accent-color: var(--color-red); }
+  .controls output { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--color-ink); font-weight: 700; min-width: 76px; text-align: right; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-secondary); shape-rendering: crispEdges; }
+  .axis-title { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); }
+  .infer { fill: var(--color-ink); transition: width 200ms cubic-bezier(0.2,0.8,0.2,1), x 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .sleep { fill: var(--color-ink); }
+  .ceiling { stroke: var(--color-red); stroke-width: 1.25; stroke-dasharray: 5 4; }
+  .ceiling-label { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-red); }
+  .avg { stroke: var(--color-ink); stroke-width: 1; stroke-dasharray: 2 3; }
+  .avg-label { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); }
+  .annot { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); pointer-events: none; }
+  .annot-sub { font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 11px; fill: var(--color-secondary); pointer-events: none; }
+  .math { padding: 16px; border: 1px solid var(--color-border); margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--color-ink); }
+  .math strong { font-family: 'Inter', sans-serif; font-weight: 700; }
+  .verdict-row { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .verdict { padding: 8px 12px; flex: 1; min-width: 160px; }
+  .verdict.headroom { border: 1px solid var(--color-ink); }
+  .verdict.pass { background: var(--color-ink); color: var(--color-white); }
+  .verdict.fail { background: var(--color-red); color: var(--color-white); }
+  .verdict-label { font-family: 'Inter', sans-serif; font-size: 11px; margin-bottom: 4px; opacity: 0.75; }
+  .verdict-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 240px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 6.6 — Latency budget waterfall</h1>
+<p class="subtitle">A 1-second duty cycle. Inference burns 28 mA briefly; the device sleeps the rest of the second at near zero. Drag the inference duration to see when the time-weighted average crosses the 5 mA budget.</p>
+<div class="controls">
+  <label for="dur">Inference duration</label>
+  <input id="dur" type="range" min="20" max="220" step="2" value="80" aria-label="Inference duration in milliseconds">
+  <output id="dur-out">80 ms</output>
+</div>
+<div id="chart" role="img" aria-labelledby="duty-t duty-d"></div>
+<p id="duty-t" style="display:none">Duty-cycle waterfall plot.</p>
+<p id="duty-d" style="display:none">Single 1-second window with a tall inference block at 28 mA and a long sleep block at near zero, plus the 5 mA budget ceiling and the time-weighted average.</p>
+<div class="math">
+  <p><strong>Average current</strong> = (28 mA × <span id="t-sec">0.080</span> s + 0.002 mA × <span id="sleep-sec">0.920</span> s) / 1 s = <span id="avg-out" style="color:var(--color-red)">2.24</span> mA</p>
+</div>
+<div class="verdict-row">
+  <div class="verdict headroom"><div class="verdict-label">Budget</div><div class="verdict-value">5.00 mA</div></div>
+  <div class="verdict headroom"><div class="verdict-label">Time-weighted average</div><div class="verdict-value" id="avg-card">2.24 mA</div></div>
+  <div class="verdict pass" id="verdict-card"><div class="verdict-label">Verdict</div><div class="verdict-value" id="verdict-text">pass · 2.76 mA headroom</div></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const INFER_CURRENT_MA = 28;
+const SLEEP_CURRENT_MA = 0.002;
+const WINDOW_MS = 1000;
+const BUDGET_MA = 5;
+
+function computeAverage(durMs) {
+  const tSec = durMs / 1000;
+  const sleepSec = 1 - tSec;
+  return INFER_CURRENT_MA * tSec + SLEEP_CURRENT_MA * sleepSec;
+}
+
+function render(durMs) {
+  const sel = '#chart';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 800;
+  const totalHeight = container.clientHeight || 360;
+  const margin = { top: 48, right: 64, bottom: 56, left: 72 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'duty-t duty-d');
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, WINDOW_MS]).range([0, chartWidth]);
+  const yScaleLinear = d3.scaleLinear().domain([0, 32]).range([chartHeight, 0]);
+
+  // Axes
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(6).tickFormat(d => d));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScaleLinear).tickValues([0, BUDGET_MA, 10, 20, 28]).tickFormat(d => d));
+
+  // Axis titles
+  svg.append('text').attr('class', 'axis-title')
+    .attr('x', margin.left + chartWidth / 2).attr('y', totalHeight - 18).attr('text-anchor', 'middle')
+    .text('Time within 1-second window (ms)');
+  svg.append('text').attr('class', 'axis-title')
+    .attr('transform', `translate(20,${margin.top + chartHeight / 2}) rotate(-90)`)
+    .attr('text-anchor', 'middle').text('Current (mA)');
+
+  // 5 mA budget ceiling
+  gChart.append('line').attr('class', 'ceiling')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', yScaleLinear(BUDGET_MA)).attr('y2', yScaleLinear(BUDGET_MA));
+  gChart.append('text').attr('class', 'ceiling-label')
+    .attr('x', chartWidth - 4).attr('y', yScaleLinear(BUDGET_MA) - 6).attr('text-anchor', 'end')
+    .text('5 mA budget ceiling');
+
+  // Inference block
+  gChart.append('rect').attr('class', 'infer')
+    .attr('x', 0).attr('y', yScaleLinear(INFER_CURRENT_MA))
+    .attr('width', xScaleLinear(durMs))
+    .attr('height', chartHeight - yScaleLinear(INFER_CURRENT_MA));
+
+  // Sleep block (thin baseline line)
+  gChart.append('rect').attr('class', 'sleep')
+    .attr('x', xScaleLinear(durMs)).attr('y', chartHeight - 1)
+    .attr('width', xScaleLinear(WINDOW_MS - durMs)).attr('height', 1);
+
+  // Time-weighted average dashed line
+  const avg = computeAverage(durMs);
+  gChart.append('line').attr('class', 'avg')
+    .attr('x1', 0).attr('x2', chartWidth)
+    .attr('y1', yScaleLinear(avg)).attr('y2', yScaleLinear(avg));
+  gChart.append('text').attr('class', 'avg-label')
+    .attr('x', chartWidth - 4).attr('y', yScaleLinear(avg) - 6).attr('text-anchor', 'end')
+    .text(`${avg.toFixed(2)} mA average`);
+
+  // Inference annotation
+  const annX = Math.min(xScaleLinear(durMs) + 16, chartWidth - 220);
+  gChart.append('line')
+    .attr('x1', xScaleLinear(durMs / 2)).attr('y1', yScaleLinear(INFER_CURRENT_MA) - 4)
+    .attr('x2', annX - 6).attr('y2', 14)
+    .attr('stroke', 'var(--color-ink)').attr('stroke-width', 0.75);
+  gChart.append('text').attr('class', 'annot')
+    .attr('x', annX).attr('y', 12)
+    .text(`Inference burst: ${durMs} ms × 28 mA`);
+  gChart.append('text').attr('class', 'annot-sub')
+    .attr('x', annX).attr('y', 26)
+    .text('(active radio off; MCU at full clock)');
+
+  // Sleep annotation
+  gChart.append('text').attr('class', 'annot-sub')
+    .attr('x', chartWidth / 2).attr('y', chartHeight - 8).attr('text-anchor', 'middle')
+    .text(`${WINDOW_MS - durMs} ms sleep at ~2 µA — practically zero`);
+}
+
+const slider = document.getElementById('dur');
+const out = document.getElementById('dur-out');
+const tSecEl = document.getElementById('t-sec');
+const sleepSecEl = document.getElementById('sleep-sec');
+const avgOut = document.getElementById('avg-out');
+const avgCard = document.getElementById('avg-card');
+const verdictCard = document.getElementById('verdict-card');
+const verdictText = document.getElementById('verdict-text');
+
+function update() {
+  const dur = +slider.value;
+  out.textContent = `${dur} ms`;
+  render(dur);
+  const avg = computeAverage(dur);
+  tSecEl.textContent = (dur / 1000).toFixed(3);
+  sleepSecEl.textContent = ((WINDOW_MS - dur) / 1000).toFixed(3);
+  avgOut.textContent = avg.toFixed(2);
+  avgCard.textContent = `${avg.toFixed(2)} mA`;
+  if (avg <= BUDGET_MA) {
+    verdictCard.className = 'verdict pass';
+    verdictText.textContent = `pass · ${(BUDGET_MA - avg).toFixed(2)} mA headroom`;
+  } else {
+    verdictCard.className = 'verdict fail';
+    verdictText.textContent = `fail · over by ${(avg - BUDGET_MA).toFixed(2)} mA`;
+  }
+}
+
+slider.addEventListener('input', update);
+update();
+const ro = new ResizeObserver(() => render(+slider.value));
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

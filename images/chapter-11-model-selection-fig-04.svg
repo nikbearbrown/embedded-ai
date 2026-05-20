@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t11d d11d">
+  <title id="t11d">Pareto frontier — six face-detection candidates against latency and accuracy</title>
+  <desc id="d11d">A scatter plot of latency in milliseconds on the x-axis versus accuracy percent on the y-axis. Six face-detection models are placed at their measured points; the Pareto frontier connects TinyFace, MobileNetV3-Small, MobileNetV2-0.35, and EfficientNet-Lite0. MobileNetV2-0.25 and ResNet18 are labelled as dominated. Bubble size encodes memory footprint. Vertical dashed lines mark 50, 100, and 200 millisecond budgets.</desc>
+  <defs>
+    <style>
+      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
+      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
+      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
+      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
+      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+    </style>
+    <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    </marker>
+  </defs>
+  <rect width="700" height="460" fill="#fdfcfb"/>
+
+  <text x="32" y="30" class="ti">Pareto frontier — six face-detection candidates on your hardware</text>
+  <text x="32" y="46" class="sm">Bubble size proportional to memory (KB). Dashed lines mark 50, 100, 200 ms budgets.</text>
+
+  <!-- Plot area: x = latency 0..500 ms (px 80..640), y = accuracy 80..100% (px 380..80) -->
+  <line x1="80" y1="80" x2="80" y2="380" stroke="#8a8480" stroke-width="1"/>
+  <line x1="80" y1="380" x2="640" y2="380" stroke="#8a8480" stroke-width="1"/>
+
+  <!-- x ticks every 100 ms -->
+  <g class="sm">
+    <line x1="80" y1="380" x2="80" y2="384" stroke="#4a4540"/><text x="80" y="396" text-anchor="middle">0</text>
+    <line x1="192" y1="380" x2="192" y2="384" stroke="#4a4540"/><text x="192" y="396" text-anchor="middle">100</text>
+    <line x1="304" y1="380" x2="304" y2="384" stroke="#4a4540"/><text x="304" y="396" text-anchor="middle">200</text>
+    <line x1="416" y1="380" x2="416" y2="384" stroke="#4a4540"/><text x="416" y="396" text-anchor="middle">300</text>
+    <line x1="528" y1="380" x2="528" y2="384" stroke="#4a4540"/><text x="528" y="396" text-anchor="middle">400</text>
+    <line x1="640" y1="380" x2="640" y2="384" stroke="#4a4540"/><text x="640" y="396" text-anchor="middle">500</text>
+  </g>
+  <text x="360" y="414" text-anchor="middle" class="sm">latency on target (ms) — lower is better</text>
+
+  <!-- y ticks 80, 85, 90, 95, 100 -->
+  <g class="sm">
+    <line x1="76" y1="380" x2="80" y2="380" stroke="#4a4540"/><text x="72" y="383" text-anchor="end">80</text>
+    <line x1="76" y1="305" x2="80" y2="305" stroke="#4a4540"/><text x="72" y="308" text-anchor="end">85</text>
+    <line x1="76" y1="230" x2="80" y2="230" stroke="#4a4540"/><text x="72" y="233" text-anchor="end">90</text>
+    <line x1="76" y1="155" x2="80" y2="155" stroke="#4a4540"/><text x="72" y="158" text-anchor="end">95</text>
+    <line x1="76" y1="80" x2="80" y2="80" stroke="#4a4540"/><text x="72" y="83" text-anchor="end">100</text>
+  </g>
+  <text x="32" y="230" text-anchor="middle" transform="rotate(-90 32 230)" class="sm">accuracy (%) — higher is better</text>
+
+  <!-- Budget vertical lines: 50ms, 100ms, 200ms -->
+  <line x1="136" y1="80" x2="136" y2="380" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="3 3"/>
+  <text x="136" y="74" text-anchor="middle" class="sm">50 ms</text>
+  <line x1="192" y1="80" x2="192" y2="380" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="3 3"/>
+  <text x="192" y="74" text-anchor="middle" class="sm">100 ms</text>
+  <line x1="304" y1="80" x2="304" y2="380" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="3 3"/>
+  <text x="304" y="74" text-anchor="middle" class="sm">200 ms</text>
+
+  <!-- Pareto frontier curve (TinyFace → MNv3-Small → MNv2-0.35 → ENLite0) -->
+  <!-- TinyFace: x=80+45/500*560=130.4, y=380-(84-80)/20*300=320; bubble r=4 (120KB) -->
+  <!-- MNv3-Small: x=80+95/500*560=186.4, y=380-(90-80)/20*300=230; r=7 (380KB) -->
+  <!-- MNv2-0.35: x=80+110/500*560=203.2, y=380-(91-80)/20*300=215; r=7.5 (420KB) -->
+  <!-- ENLite0: x=80+180/500*560=281.6, y=380-(94-80)/20*300=170; r=10 (1800KB) -->
+  <!-- MNv2-0.25 dominated: x=80+80/500*560=169.6, y=380-(88-80)/20*300=260; r=5.5 (250KB) -->
+  <!-- ResNet18 dominated: x=80+450/500*560=584, y=380-(96-80)/20*300=140; r=16 (11000KB) — cap r at 14 for chart fit -->
+
+  <polyline points="130.4,320 186.4,230 203.2,215 281.6,170" fill="none" stroke="#2a1a0e" stroke-width="1.25"/>
+
+  <!-- Bubbles on frontier — filled dark ink -->
+  <g>
+    <circle cx="130.4" cy="320" r="4" fill="#2a1a0e"/>
+    <circle cx="186.4" cy="230" r="7" fill="#2a1a0e"/>
+    <circle cx="203.2" cy="215" r="7.5" fill="#2a1a0e"/>
+    <circle cx="281.6" cy="170" r="10" fill="#2a1a0e"/>
+  </g>
+
+  <!-- Dominated bubbles — open / light -->
+  <circle cx="169.6" cy="260" r="5.5" fill="#fdfcfb" stroke="#8a8480" stroke-width="1.25" stroke-dasharray="3 2"/>
+  <circle cx="584" cy="140" r="14" fill="#fdfcfb" stroke="#8a8480" stroke-width="1.25" stroke-dasharray="3 2"/>
+
+  <!-- Labels -->
+  <text x="142" y="322" class="lb">TinyFace</text>
+  <text x="146" y="334" class="sm">45 ms · 84% · 120 KB</text>
+
+  <text x="196" y="222" class="lb">MNv3-Small</text>
+  <text x="196" y="246" class="sm">95 ms · 90% · 380 KB</text>
+
+  <text x="216" y="212" class="lb">MNv2-0.35</text>
+  <text x="216" y="200" class="sm">110 ms · 91% · 420 KB</text>
+
+  <text x="294" y="172" class="lb">EfficientNet-Lite0</text>
+  <text x="294" y="186" class="sm">180 ms · 94% · 1.8 MB</text>
+
+  <text x="180" y="272" class="sm" fill="#8a8480">MNv2-0.25 (dominated)</text>
+  <text x="180" y="284" class="sm" fill="#8a8480">80 ms · 88% · 250 KB</text>
+
+  <text x="560" y="135" text-anchor="end" class="sm" fill="#8a8480">ResNet18 (dominated)</text>
+  <text x="560" y="123" text-anchor="end" class="sm" fill="#8a8480">450 ms · 96% · 11 MB</text>
+
+  <!-- Frontier label -->
+  <path d="M 380 130 L 320 160" fill="none" stroke="#2a1a0e" stroke-width="0.75" marker-end="url(#ar4)"/>
+  <text x="382" y="128" class="lb">Pareto frontier</text>
+  <text x="382" y="142" class="sm">choices that aren't dominated</text>
+
+  <!-- Wins-at-budget callouts -->
+  <text x="100" y="430" class="sm">≤50 ms → TinyFace only</text>
+  <text x="280" y="430" class="sm">≤100 ms → MNv3-Small</text>
+  <text x="480" y="430" class="sm">≤200 ms → EfficientNet-Lite0</text>
+
+  <text x="350" y="450" text-anchor="middle" class="cap">The frontier names the choices. Which point you pick depends on which constraint binds.</text>
+</svg>

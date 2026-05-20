@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 8.6 — TOPS/W efficiency scatter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FDFCFB;
+    --color-ink:       #2A1A0E;
+    --color-red:       #C8102E;
+    --color-secondary: #4A4540;
+    --color-border:    #C8C4C0;
+    --color-ochre:     #C8860E;
+    --color-mid:       #8A8480;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #14110D;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2A24;
+      --color-ochre:     #D49A30;
+      --color-mid:       #6E665F;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 460px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-mid); shape-rendering: crispEdges; }
+  .grid line { stroke: var(--color-border); stroke-opacity: 0.45; shape-rendering: crispEdges; }
+  .grid path { stroke-width: 0; }
+  .iso-line { stroke: var(--color-mid); stroke-width: 0.75; stroke-dasharray: 4 3; fill: none; }
+  .iso-label { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; fill: var(--color-mid); font-style: italic; }
+  .family-line { stroke: var(--color-secondary); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .dot { fill: var(--color-ink); stroke: var(--color-white); stroke-width: 1.5; transition: r 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .dot:hover, .dot:focus { r: 7; }
+  .dot-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-ink); pointer-events: none; }
+  .axis-title { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-secondary); }
+  .callout { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); font-weight: 600; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 8.6 — TOPS / W efficiency</h1>
+<p class="subtitle">Effective int8 throughput vs active power. Diagonals are constant TOPS/W.</p>
+<div id="chart" role="img" aria-labelledby="t06 d06"></div>
+<p class="caption">Efficiency runs along the diagonals. Move up the chart by adding MACs; move left by killing overhead.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const parts = [
+  { name: 'Cortex-M7 + CMSIS-NN', powerMW: 50,  gops: 0.2,  family: null,  labelDy: -10 },
+  { name: 'Syntiant NDP120',      powerMW: 0.2, gops: 0.6,  family: null,  labelDy: -10 },
+  { name: 'K210',                 powerMW: 300, gops: 0.5,  family: null,  labelDy: -10 },
+  { name: 'Ethos-U55 (32)',       powerMW: 50,  gops: 32,   family: 'u55', labelDy: -10 },
+  { name: 'Ethos-U55 (64)',       powerMW: 70,  gops: 64,   family: 'u55', labelDy: null },
+  { name: 'Ethos-U55 (128)',      powerMW: 100, gops: 128,  family: 'u55', labelDy: null },
+  { name: 'Ethos-U55 (256)',      powerMW: 150, gops: 256,  family: 'u55', labelDy: -10 },
+  { name: 'STM32N6 (3 TOPS)',     powerMW: 180, gops: 3000, family: null,  labelDy: -10 }
+];
+
+// Iso lines: GOPS = (TOPS/W) * mW.
+// Plot from xMin..xMax (mW domain 0.1..1000), choose two points each.
+const isoLines = [
+  { tops: 0.01, label: '0.01 TOPS/W' },
+  { tops: 1,    label: '1 TOPS/W' },
+  { tops: 100,  label: '100 TOPS/W' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  const eff = d.gops / d.powerMW; // GOPS per mW = TOPS/W
+  tooltip.html(`<strong>${d.name}</strong><br/>${d.gops} GOPS · ${d.powerMW} mW<br/>${eff.toFixed(2)} TOPS/W`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 700;
+  const totalHeight = container.clientHeight || 460;
+  const margin = { top: 60, right: 40, bottom: 80, left: 80 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't06 d06');
+  svg.append('title').attr('id', 't06').text('TOPS per watt efficiency scatter');
+  svg.append('desc').attr('id', 'd06').text('Log-log scatter of int8 throughput against active power for eight embedded AI parts, with three iso-efficiency diagonals.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScale = d3.scaleLog().domain([0.1, 1000]).range([0, chartWidth]);
+  const yScale = d3.scaleLog().domain([0.1, 10000]).range([chartHeight, 0]);
+
+  // Gridlines
+  gChart.append('g').attr('class', 'grid')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScale).ticks(5, '~s').tickSize(-chartHeight).tickFormat(''));
+  gChart.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(yScale).ticks(6, '~s').tickSize(-chartWidth).tickFormat(''));
+
+  // Axes
+  gChart.append('g').attr('class', 'axis').attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScale).tickValues([0.1, 1, 10, 100, 1000]).tickFormat(d => d + ' mW'));
+  gChart.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScale).tickValues([0.1, 1, 10, 100, 1000, 10000]));
+
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 44).attr('text-anchor', 'middle')
+    .text('active power (log)');
+  gChart.append('text').attr('class', 'axis-title')
+    .attr('x', -chartHeight / 2).attr('y', -56).attr('text-anchor', 'middle')
+    .attr('transform', 'rotate(-90)').text('int8 throughput (GOPS, log)');
+
+  // Iso-efficiency diagonals: clip line to plot area
+  isoLines.forEach(iso => {
+    const xMin = 0.1, xMax = 1000;
+    const yAtMin = iso.tops * xMin;
+    const yAtMax = iso.tops * xMax;
+    // Clip to y domain 0.1..10000
+    const yClipLo = 0.1, yClipHi = 10000;
+    let x1 = xMin, y1 = yAtMin, x2 = xMax, y2 = yAtMax;
+    if (y1 < yClipLo) { x1 = yClipLo / iso.tops; y1 = yClipLo; }
+    if (y2 > yClipHi) { x2 = yClipHi / iso.tops; y2 = yClipHi; }
+    if (x1 < xMin) x1 = xMin;
+    if (x2 > xMax) x2 = xMax;
+    gChart.append('line').attr('class', 'iso-line')
+      .attr('x1', xScale(x1)).attr('y1', yScale(y1))
+      .attr('x2', xScale(x2)).attr('y2', yScale(y2));
+    gChart.append('text').attr('class', 'iso-label')
+      .attr('x', xScale(x2) - 8).attr('y', yScale(y2) - 6)
+      .attr('text-anchor', 'end').text(iso.label);
+  });
+
+  // Family connecting line (Ethos-U55)
+  const u55 = parts.filter(p => p.family === 'u55').sort((a, b) => a.powerMW - b.powerMW);
+  const line = d3.line().x(d => xScale(d.powerMW)).y(d => yScale(d.gops));
+  gChart.append('path').attr('class', 'family-line').attr('d', line(u55));
+
+  // Dots
+  gChart.selectAll('.dot')
+    .data(parts).join('circle')
+      .attr('class', 'dot')
+      .attr('cx', d => xScale(d.powerMW))
+      .attr('cy', d => yScale(d.gops))
+      .attr('r', 5)
+      .attr('tabindex', 0)
+      .attr('aria-label', d => `${d.name}: ${d.gops} GOPS at ${d.powerMW} mW`)
+      .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip)
+      .on('focus', (event, d) => showTip(event, d)).on('blur', hideTip);
+
+  gChart.selectAll('.dot-label')
+    .data(parts.filter(p => p.labelDy !== null)).join('text')
+      .attr('class', 'dot-label')
+      .attr('x', d => xScale(d.powerMW))
+      .attr('y', d => yScale(d.gops) + d.labelDy)
+      .attr('text-anchor', 'middle')
+      .text(d => d.name);
+
+  // Callouts
+  gChart.append('text').attr('class', 'callout')
+    .attr('x', xScale(0.4)).attr('y', yScale(2.5))
+    .attr('text-anchor', 'middle').text('always-on at µW');
+  gChart.append('text').attr('class', 'callout')
+    .attr('x', xScale(180)).attr('y', yScale(5000))
+    .attr('text-anchor', 'middle').text('vision at 100 TOPS/W');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

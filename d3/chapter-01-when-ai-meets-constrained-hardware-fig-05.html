@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 1.5 — Keyword-spotter feasibility scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 70ch; }
+  #chart { width: 100%; height: 540px; position: relative; }
+  .col-header { fill: var(--color-ink); }
+  .row-label { fill: var(--color-border); }
+  .cell { fill: var(--color-white); stroke: var(--color-border); stroke-width: 0.5; }
+  .cell-target { fill: var(--color-white); stroke: var(--color-border); stroke-width: 0.5; }
+  .bar-bg { fill: var(--color-border); opacity: 0.4; }
+  .bar-fill-pass { fill: var(--color-ink); }
+  .bar-fill-fail { fill: var(--color-red); }
+  .head-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; fill: var(--color-white); }
+  .head-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-border); }
+  .row-title { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; fill: var(--color-ink); }
+  .row-detail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .num { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .verdict-pass { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: var(--color-ink); letter-spacing: 0.5px; }
+  .verdict-fail { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px; fill: var(--color-red); letter-spacing: 0.5px; }
+  .verdict-detail { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .target-marker { stroke: var(--color-ink); stroke-width: 0.75; stroke-dasharray: 2 2; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 70ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 280px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 1.5 — Keyword-spotter feasibility scorecard</h1>
+<p class="subtitle">Same model, two MCUs, four constraints. Target A ships at higher cost. Target B does not run without model surgery.</p>
+<div id="chart" role="img" aria-labelledby="chart-title chart-desc"></div>
+<p class="caption">Two surfaces — what the model demands and what the hardware can supply. Feasibility is whether they overlap.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const scorecardData = {
+  targets: [
+    { id: 'A', label: 'Target A', spec: 'Cortex-M4 · 80 MHz · 256 KB · FPU · $3' },
+    { id: 'B', label: 'Target B', spec: 'Cortex-M0+ · 48 MHz · 32 KB · no FPU · $0.80' }
+  ],
+  rows: [
+    {
+      label: 'Memory fit',
+      detail1: '180 KB needed',
+      detail2: 'vs available SRAM',
+      A: { value: '180 / 256 KB', barPct: 70, verdict: 'PASS', verdictDetail: '76 KB headroom' },
+      B: { value: '180 / 32 KB',  barPct: 100, overflow: true, verdict: 'FAIL', verdictDetail: '5.6× over' }
+    },
+    {
+      label: 'Latency',
+      detail1: '1.8 M ops',
+      detail2: 'vs 100 ms budget',
+      A: { value: '22 / 100 ms',  barPct: 22, verdict: 'PASS', verdictDetail: '78 ms margin' },
+      B: { value: '375 / 100 ms', barPct: 100, overflow: true, verdict: 'FAIL', verdictDetail: 'FPU emulation' }
+    },
+    {
+      label: 'Battery life',
+      detail1: 'avg current → hours',
+      detail2: 'vs 168 h (7 days)',
+      A: { value: '4.4 mA · 227 h', barPct: 74, target: 0.74, verdict: 'PASS', verdictDetail: '9 days, tight' },
+      B: { value: 'n / a', text: 'model does not run', verdict: 'BLOCKED', verdictDetail: 'power analysis blocked' }
+    },
+    {
+      label: 'Unit cost',
+      detail1: 'BOM impact',
+      detail2: 'at consumer volume',
+      A: { value: '$3.00', barPct: 100, scaleNote: '3.75× more than B', verdict: 'COST', verdictDetail: '3.75× B' },
+      B: { value: '$0.80', barPct: 27, scaleNote: 'cheap — if it ran', verdict: 'COST', verdictDetail: 'cheap if it ran' }
+    }
+  ],
+  overall: {
+    A: { verdict: 'SHIPS — costs more', detail: '4 / 4 constraints meet target' },
+    B: { verdict: 'DOES NOT RUN — needs model surgery', detail: 'quantize · prune · re-architect' }
+  }
+};
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('svg').remove();
+  const totalWidth = container.clientWidth || 900;
+  const totalHeight = 540;
+  const margin = { top: 24, right: 24, bottom: 24, left: 24 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'chart-title chart-desc');
+
+  svg.append('title').attr('id', 'chart-title').text('Keyword-spotter feasibility scorecard');
+  svg.append('desc').attr('id', 'chart-desc').text('Side-by-side comparison of two candidate microcontrollers across memory, latency, battery, and cost.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const labelW = chartWidth * 0.28;
+  const colW = (chartWidth - labelW) / 2;
+  const headerH = 56;
+  const rowH = 64;
+  const verdictH = 56;
+
+  // Header row
+  gChart.append('rect').attr('class', 'col-header')
+    .attr('x', 0).attr('y', 0).attr('width', labelW).attr('height', headerH);
+  gChart.append('text').attr('class', 'head-title').attr('x', 16).attr('y', 26).text('Constraint');
+  gChart.append('text').attr('class', 'head-sub').attr('x', 16).attr('y', 44).text('measured against the budget');
+
+  scorecardData.targets.forEach((t, i) => {
+    const x = labelW + i * colW;
+    gChart.append('rect').attr('class', 'col-header')
+      .attr('x', x).attr('y', 0).attr('width', colW).attr('height', headerH);
+    gChart.append('text').attr('class', 'head-title')
+      .attr('x', x + colW / 2).attr('y', 26).attr('text-anchor', 'middle').text(t.label);
+    gChart.append('text').attr('class', 'head-sub')
+      .attr('x', x + colW / 2).attr('y', 44).attr('text-anchor', 'middle').text(t.spec);
+  });
+
+  // Rows
+  scorecardData.rows.forEach((row, ri) => {
+    const y = headerH + 8 + ri * (rowH + 4);
+
+    // Label cell
+    gChart.append('rect').attr('class', 'cell')
+      .attr('x', 0).attr('y', y).attr('width', labelW).attr('height', rowH);
+    gChart.append('text').attr('class', 'row-title').attr('x', 16).attr('y', y + 22).text(row.label);
+    gChart.append('text').attr('class', 'row-detail').attr('x', 16).attr('y', y + 40).text(row.detail1);
+    gChart.append('text').attr('class', 'row-detail').attr('x', 16).attr('y', y + 56).text(row.detail2);
+
+    // Target cells
+    ['A', 'B'].forEach((tid, ti) => {
+      const x = labelW + ti * colW;
+      const cellData = row[tid];
+      const cellGroup = gChart.append('g')
+        .attr('tabindex', 0)
+        .attr('aria-label', `${row.label} on Target ${tid}: ${cellData.value}, verdict ${cellData.verdict}`)
+        .on('mouseover', (event) => showTip(event, `<strong>${row.label} — Target ${tid}</strong><br>${cellData.value}<br>${cellData.verdict}: ${cellData.verdictDetail || cellData.text || ''}`))
+        .on('mousemove', moveTip).on('mouseout', hideTip);
+
+      cellGroup.append('rect').attr('class', 'cell-target')
+        .attr('x', x).attr('y', y).attr('width', colW).attr('height', rowH);
+
+      if (cellData.value && cellData.value !== 'n / a') {
+        cellGroup.append('text').attr('class', 'num')
+          .attr('x', x + colW / 2).attr('y', y + 22).attr('text-anchor', 'middle').text(cellData.value);
+      } else {
+        cellGroup.append('text').attr('class', 'num')
+          .attr('x', x + colW / 2).attr('y', y + 22).attr('text-anchor', 'middle').text('n / a');
+      }
+
+      if (typeof cellData.barPct === 'number') {
+        const barX = x + colW * 0.18;
+        const barY = y + 32;
+        const barW = colW * 0.64;
+        gChart.append('rect').attr('class', 'bar-bg')
+          .attr('x', barX).attr('y', barY).attr('width', barW).attr('height', 8);
+        const isFail = cellData.verdict === 'FAIL';
+        gChart.append('rect').attr('class', isFail ? 'bar-fill-fail' : 'bar-fill-pass')
+          .attr('x', barX).attr('y', barY).attr('width', barW * (cellData.barPct / 100)).attr('height', 8);
+
+        if (typeof cellData.target === 'number') {
+          gChart.append('line').attr('class', 'target-marker')
+            .attr('x1', barX + barW * cellData.target).attr('y1', barY - 3)
+            .attr('x2', barX + barW * cellData.target).attr('y2', barY + 11);
+        }
+
+        if (cellData.overflow) {
+          gChart.append('path')
+            .attr('d', `M ${barX + barW + 2} ${barY + 4} L ${barX + barW + 14} ${barY + 4} M ${barX + barW + 11} ${barY + 1} L ${barX + barW + 14} ${barY + 4} L ${barX + barW + 11} ${barY + 7}`)
+            .attr('fill', 'none').attr('stroke', 'var(--color-red)').attr('stroke-width', 1);
+        }
+      }
+
+      const verdictCls = cellData.verdict === 'PASS' ? 'verdict-pass' :
+                        (cellData.verdict === 'FAIL' || cellData.verdict === 'BLOCKED' ? 'verdict-fail' : 'row-detail');
+      const lineText = (cellData.verdict === 'PASS' || cellData.verdict === 'FAIL' || cellData.verdict === 'BLOCKED')
+        ? `${cellData.verdict} — ${cellData.verdictDetail || ''}`
+        : (cellData.scaleNote || cellData.text || '');
+
+      cellGroup.append('text').attr('class', verdictCls)
+        .attr('x', x + colW / 2).attr('y', y + 56).attr('text-anchor', 'middle')
+        .text(lineText);
+    });
+  });
+
+  // Overall verdict row
+  const vy = headerH + 8 + scorecardData.rows.length * (rowH + 4) + 8;
+  gChart.append('rect').attr('class', 'col-header')
+    .attr('x', 0).attr('y', vy).attr('width', labelW).attr('height', verdictH);
+  gChart.append('text').attr('class', 'head-title').attr('x', 16).attr('y', vy + 26).text('Overall verdict');
+  gChart.append('text').attr('class', 'head-sub').attr('x', 16).attr('y', vy + 44).text('all four budgets together');
+
+  ['A', 'B'].forEach((tid, ti) => {
+    const x = labelW + ti * colW;
+    const d = scorecardData.overall[tid];
+    gChart.append('rect').attr('class', 'cell-target')
+      .attr('x', x).attr('y', vy).attr('width', colW).attr('height', verdictH)
+      .attr('stroke', 'var(--color-ink)').attr('stroke-width', 1);
+    gChart.append('text').attr('class', 'row-title')
+      .attr('x', x + colW / 2).attr('y', vy + 24).attr('text-anchor', 'middle').text(d.verdict);
+    gChart.append('text').attr('class', 'row-detail')
+      .attr('x', x + colW / 2).attr('y', vy + 42).attr('text-anchor', 'middle').text(d.detail);
+  });
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

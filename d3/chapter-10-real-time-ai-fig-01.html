@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 10.1 — Real-time taxonomy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white: #FFFFFF; --color-ink: #121212; --color-red: #C8102E;
+    --color-secondary: #545454; --color-border: #D4D4D4; --color-ochre: #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white: #111111; --color-ink: #F0EBE3; --color-red: #E8243A;
+      --color-secondary: #A0978C; --color-border: #2E2E2E; --color-ochre: #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; min-height: 460px; }
+  .axis-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); letter-spacing: 0.5px; }
+  .class-name { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; }
+  .cell-title { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); }
+  .cell-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-white);
+             border: 1px solid var(--color-border); padding: 8px 12px; font-size: 12px; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 10.1 — Real-time taxonomy</h1>
+<p class="subtitle">Three classes — hard, firm, soft — compared by deadline tolerance, example application, and consequence of miss.</p>
+<div id="chart" role="main"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const taxonomyData = [
+  {
+    cls: 'HARD', strict: 3,
+    headline: 'no misses allowed',
+    tolerance: { lb: 'zero tolerance', sm: 'a missed deadline is a system failure' },
+    example: { lb: 'airbag controller', sm: 'deploy within 10–20 ms of crash detection' },
+    consequence: { lb: 'catastrophic', sm: 'physical harm, certification failure' },
+    home: 'advisory only — never on the critical path'
+  },
+  {
+    cls: 'FIRM', strict: 2,
+    headline: 'rare misses, useless if late',
+    tolerance: { lb: '< 0.1% miss budget', sm: 'correct but late = discard the result' },
+    example: { lb: 'radar sweep processor', sm: 'output stale after next sweep arrives' },
+    consequence: { lb: 'useless output', sm: 'no harm, but the computation was wasted' },
+    home: 'with rejection + confidence gating'
+  },
+  {
+    cls: 'SOFT', strict: 1,
+    headline: 'preferred, graceful slip',
+    tolerance: { lb: 'missed = still useful', sm: 'UX degrades, system continues running' },
+    example: { lb: 'gesture thermostat', sm: '200 ms inference where 100 ms was the budget' },
+    consequence: { lb: 'sluggish, not deadly', sm: 'user notices, nobody dies' },
+    home: 'native — variability is acceptable'
+  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+
+function draw() {
+  d3.select('#chart').selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth = container.clientWidth || 800;
+  const totalHeight = 460;
+  const margin = { top: 48, right: 40, bottom: 56, left: 160 };
+  const chartWidth = totalWidth - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'fig01-title fig01-desc');
+  svg.append('title').attr('id', 'fig01-title').text('Real-time taxonomy across three classes');
+  svg.append('desc').attr('id', 'fig01-desc').text('Three columns compare hard, firm, and soft real-time across deadline tolerance, example application, and consequence of miss.');
+
+  const xScaleBand = d3.scaleBand().domain(taxonomyData.map(d => d.cls)).range([0, chartWidth]).padding(0.08);
+  const rows = ['CLASS', 'DEADLINE TOLERANCE', 'EXAMPLE APPLICATION', 'CONSEQUENCE OF MISS'];
+  const rowHeight = chartHeight / rows.length;
+
+  const gChart = svg.append('g').attr('class', 'g-chart')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // row labels
+  gChart.selectAll('.row-label').data(rows).join('text')
+    .attr('class', 'axis-label')
+    .attr('x', -16).attr('y', (d, i) => i * rowHeight + rowHeight / 2)
+    .attr('text-anchor', 'end').attr('dominant-baseline', 'middle')
+    .text(d => d);
+
+  const strictColor = d3.scaleOrdinal()
+    .domain(['HARD', 'FIRM', 'SOFT'])
+    .range(['var(--color-ink)', '#404040', '#787878']);
+
+  gChart.selectAll('.col').data(taxonomyData).join('g')
+    .attr('class', 'col')
+    .attr('transform', d => `translate(${xScaleBand(d.cls)},0)`)
+    .each(function(d) {
+      const g = d3.select(this);
+      const w = xScaleBand.bandwidth();
+
+      // class header
+      g.append('rect').attr('class', 'class-rect')
+        .attr('x', 0).attr('y', 4).attr('width', w).attr('height', rowHeight - 12)
+        .attr('fill', strictColor(d.cls)).attr('tabindex', 0)
+        .attr('aria-label', `${d.cls} real-time: ${d.headline}`)
+        .on('mouseover', (event) => {
+          tooltip.html(`<strong>${d.cls}</strong><br>Where AI can live here: ${d.home}`)
+            .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px')
+            .transition().duration(150).style('opacity', 1);
+        })
+        .on('mousemove', (event) => tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'))
+        .on('mouseout', () => tooltip.transition().duration(100).style('opacity', 0));
+      g.append('text').attr('class', 'class-name')
+        .attr('x', w / 2).attr('y', rowHeight / 2 - 4).attr('text-anchor', 'middle')
+        .attr('fill', 'var(--color-white)').text(d.cls);
+      g.append('text').attr('class', 'cell-sub')
+        .attr('x', w / 2).attr('y', rowHeight / 2 + 12).attr('text-anchor', 'middle')
+        .attr('fill', '#D4D4D4').text(d.headline);
+
+      // 3 detail rows
+      [d.tolerance, d.example, d.consequence].forEach((row, i) => {
+        const yOff = (i + 1) * rowHeight;
+        g.append('rect').attr('x', 0).attr('y', yOff + 4).attr('width', w).attr('height', rowHeight - 12)
+          .attr('fill', 'var(--color-white)').attr('stroke', 'var(--color-border)');
+        g.append('text').attr('class', 'cell-title')
+          .attr('x', w / 2).attr('y', yOff + rowHeight / 2 - 4).attr('text-anchor', 'middle')
+          .text(row.lb);
+        g.append('text').attr('class', 'cell-sub')
+          .attr('x', w / 2).attr('y', yOff + rowHeight / 2 + 12).attr('text-anchor', 'middle')
+          .text(row.sm);
+      });
+    });
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

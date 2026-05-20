@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 8.1 — CPU vs NPU cycle utilization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FDFCFB;
+    --color-ink:       #2A1A0E;
+    --color-red:       #C8102E;
+    --color-secondary: #4A4540;
+    --color-border:    #C8C4C0;
+    --color-ochre:     #C8860E;
+    --color-mid:       #8A8480;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #14110D;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2A24;
+      --color-ochre:     #D49A30;
+      --color-mid:       #6E665F;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 420px; }
+  .axis text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-secondary); }
+  .axis path, .axis line { stroke: var(--color-mid); shape-rendering: crispEdges; }
+  .row-label { font-family: 'EB Garamond', Georgia, serif; font-size: 14px; fill: var(--color-ink); font-weight: 600; }
+  .row-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .seg-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-white); font-weight: 600; }
+  .seg-label.dark { fill: var(--color-ink); }
+  .seg { transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .seg:hover { opacity: 0.85; }
+  .bracket { fill: none; stroke: var(--color-ink); stroke-width: 1; }
+  .bracket-label { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); font-weight: 600; }
+  .callout { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); font-weight: 600; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 8.1 — Where each cycle goes</h1>
+<p class="subtitle">Cortex-M7 at 400 MHz vs a 16×16 NPU MAC array running the same 128×128 int8 matmul.</p>
+<div id="chart" role="img" aria-labelledby="t01 d01"></div>
+<p class="caption">A CPU spends two-thirds of its cycles on overhead. An NPU's silicon is the arithmetic.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const rowData = [
+  {
+    label: 'Cortex-M7',
+    sub: 'CPU, CMSIS-NN',
+    segments: [
+      { name: 'arithmetic',    value: 30, color: 'var(--color-ink)' },
+      { name: 'memory access', value: 50, color: 'var(--color-secondary)' },
+      { name: 'fetch/decode',  value: 15, color: 'var(--color-mid)' },
+      { name: 'stalls',        value: 5,  color: 'var(--color-border)' }
+    ],
+    overhead: { start: 30, end: 100, label: '70% overhead' }
+  },
+  {
+    label: '16×16 NPU',
+    sub: '256 MACs/cycle',
+    segments: [
+      { name: 'arithmetic — MAC array busy', value: 92, color: 'var(--color-ink)' },
+      { name: 'data movement',               value: 8,  color: 'var(--color-mid)' }
+    ],
+    overhead: null
+  }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, d) {
+  tooltip.html(`<strong>${d.name}</strong>: ${d.value}% of cycles`)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 700;
+  const totalHeight = container.clientHeight || 420;
+  const margin = { top: 60, right: 40, bottom: 80, left: 140 };
+  const chartWidth  = totalWidth  - margin.left - margin.right;
+  const chartHeight = totalHeight - margin.top  - margin.bottom;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't01 d01');
+  svg.append('title').attr('id', 't01').text('CPU vs NPU cycle utilization');
+  svg.append('desc').attr('id', 'd01').text('Two stacked horizontal bars compare how a CPU and NPU spend their cycles. The CPU bar splits 30% arithmetic, 50% memory, 15% fetch, 5% stalls; the NPU is roughly 92% arithmetic, 8% data movement.');
+
+  const gChart = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScaleLinear = d3.scaleLinear().domain([0, 100]).range([0, chartWidth]);
+  const yScaleBand = d3.scaleBand().domain(rowData.map(d => d.label)).range([0, chartHeight]).padding(0.45);
+
+  // X axis
+  gChart.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(xScaleLinear).ticks(5).tickFormat(d => d + '%'));
+  gChart.append('text')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 44)
+    .attr('text-anchor', 'middle').attr('class', 'row-sub')
+    .text('fraction of cycles');
+
+  rowData.forEach(row => {
+    const y = yScaleBand(row.label);
+    const h = yScaleBand.bandwidth();
+
+    // Row label
+    svg.append('text').attr('class', 'row-label')
+      .attr('x', margin.left - 12).attr('y', margin.top + y + h / 2 - 2)
+      .attr('text-anchor', 'end').text(row.label);
+    svg.append('text').attr('class', 'row-sub')
+      .attr('x', margin.left - 12).attr('y', margin.top + y + h / 2 + 14)
+      .attr('text-anchor', 'end').text(row.sub);
+
+    // Segments
+    let cumulative = 0;
+    gChart.selectAll(null)
+      .data(row.segments).enter()
+      .append('rect')
+        .attr('class', 'seg')
+        .attr('x', d => { const x = xScaleLinear(cumulative); cumulative += d.value; return x; })
+        .attr('y', y).attr('height', h)
+        .attr('width', d => xScaleLinear(d.value))
+        .attr('fill', d => d.color)
+        .attr('tabindex', 0)
+        .attr('aria-label', d => `${row.label} ${d.name}: ${d.value}%`)
+        .on('mouseover', showTip).on('mousemove', moveTip).on('mouseout', hideTip);
+
+    // Segment labels (only if wide enough)
+    cumulative = 0;
+    row.segments.forEach(seg => {
+      const segX = xScaleLinear(cumulative);
+      const segW = xScaleLinear(seg.value);
+      if (segW > 60) {
+        gChart.append('text')
+          .attr('class', seg.color === 'var(--color-border)' ? 'seg-label dark' : 'seg-label')
+          .attr('x', segX + segW / 2).attr('y', y + h / 2 + 4)
+          .attr('text-anchor', 'middle')
+          .text(`${seg.value}% ${seg.name}`);
+      }
+      cumulative += seg.value;
+    });
+
+    // Overhead bracket
+    if (row.overhead) {
+      const x1 = xScaleLinear(row.overhead.start);
+      const x2 = xScaleLinear(row.overhead.end);
+      gChart.append('path')
+        .attr('class', 'bracket')
+        .attr('d', `M ${x1} ${y - 6} L ${x1} ${y - 16} L ${x2} ${y - 16} L ${x2} ${y - 6}`);
+      gChart.append('text').attr('class', 'bracket-label')
+        .attr('x', (x1 + x2) / 2).attr('y', y - 22)
+        .attr('text-anchor', 'middle').text(row.overhead.label);
+    }
+  });
+
+  // Speedup callout
+  gChart.append('text').attr('class', 'callout')
+    .attr('x', chartWidth / 2).attr('y', chartHeight + 20)
+    .attr('text-anchor', 'middle')
+    .text('~8× faster — parallelism + no control overhead');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

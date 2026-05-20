@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 3.1 — Weights to flash, activations to RAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; }
+  #chart { width: 100%; height: 460px; }
+  .band-flash { fill: color-mix(in srgb, var(--color-ink) 5%, var(--color-white)); stroke: var(--color-border); }
+  .band-ram   { fill: color-mix(in srgb, var(--color-ink) 5%, var(--color-white)); stroke: var(--color-border); }
+  .band-label { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; fill: var(--color-ink); }
+  .band-sub   { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-secondary); }
+  .weight-brick { stroke: var(--color-ink); stroke-width: 0; cursor: pointer; transition: opacity 200ms cubic-bezier(0.2,0.8,0.2,1); }
+  .weight-brick.primary { fill: var(--color-red); }
+  .node { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1.4; }
+  .node-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .layer-cap { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .flow { stroke: var(--color-ink); stroke-width: 1.4; fill: none; }
+  .wire { stroke: var(--color-secondary); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+  .ram-buf { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1; }
+  .ram-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .total { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; font-weight: 600; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 12px; max-width: 65ch; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 3.1 — Weights to flash, activations to RAM</h1>
+<p class="subtitle">Two memories serve two behaviors. Click any brick or buffer to see what it costs.</p>
+<div id="chart" role="img" aria-labelledby="t-fig01 d-fig01"></div>
+<p class="caption">Weights are paid once and stored. Activations are paid every inference and thrown away.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const weights = [
+  { id: 'W1', x: 0.26, label: 'W₁', dims: '784 × 128', bytes: 401408, primary: true },
+  { id: 'W2', x: 0.50, label: 'W₂', dims: '128 × 128', bytes: 65536 },
+  { id: 'W3', x: 0.74, label: 'W₃', dims: '128 × 10',  bytes: 5120  }
+];
+const layers = [
+  { id: 'x',  x: 0.14, label: 'x',  caption: 'input'    },
+  { id: 'h1', x: 0.38, label: 'h₁', caption: 'hidden 1' },
+  { id: 'h2', x: 0.62, label: 'h₂', caption: 'hidden 2' },
+  { id: 'y',  x: 0.86, label: 'ŷ',  caption: 'output'   }
+];
+const buffers = [
+  { id: 'a1', x: 0.38, label: 'a₁ · 512 B' },
+  { id: 'a2', x: 0.62, label: 'a₂ · 512 B' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, html) {
+  tooltip.html(html)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip()      { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth || 800;
+  const totalHeight = container.clientHeight || 460;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't-fig01 d-fig01');
+  svg.append('title').attr('id', 't-fig01').text('Weights to flash, activations to RAM');
+  svg.append('desc').attr('id', 'd-fig01').text('A feedforward network with weights persisting in a flash band and activations transiently held in a RAM band.');
+
+  // bands
+  svg.append('rect').attr('class','band-flash').attr('x',40).attr('y',60).attr('width',totalWidth-80).attr('height',110);
+  svg.append('text').attr('class','band-label').attr('x',56).attr('y',82).text('Flash · weights');
+  svg.append('text').attr('class','band-sub').attr('x',56).attr('y',100).text('fixed after training · large · persistent');
+
+  svg.append('rect').attr('class','band-ram').attr('x',40).attr('y',totalHeight-130).attr('width',totalWidth-80).attr('height',86);
+  svg.append('text').attr('class','band-label').attr('x',56).attr('y',totalHeight-108).text('RAM · activations');
+  svg.append('text').attr('class','band-sub').attr('x',56).attr('y',totalHeight-92).text('recomputed each inference · transient · only the peak two layers held');
+
+  // weight bricks
+  svg.selectAll('.weight-brick').data(weights).join('rect')
+    .attr('class', d => d.primary ? 'weight-brick primary' : 'weight-brick')
+    .attr('x', d => d.x*totalWidth - 50)
+    .attr('y', 108)
+    .attr('width', 100).attr('height', 44)
+    .attr('fill', (d,i) => d.primary ? 'var(--color-red)' : (i===1 ? '#4a4540' : '#8a8480'))
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label} weight matrix ${d.dims}, ${d3.format(',')(d.bytes)} bytes`)
+    .on('mouseover', (e,d) => showTip(e, `<strong>${d.label}</strong> · ${d.dims}<br>${d3.format(',')(d.bytes)} bytes (float32)`))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+
+  svg.selectAll('.weight-label').data(weights).join('text')
+    .attr('class','node-label')
+    .attr('x', d => d.x*totalWidth)
+    .attr('y', 128).attr('text-anchor','middle').attr('fill','#fdfcfb')
+    .text(d => d.label);
+  svg.selectAll('.weight-dims').data(weights).join('text')
+    .attr('class','node-label')
+    .attr('x', d => d.x*totalWidth)
+    .attr('y', 144).attr('text-anchor','middle').attr('fill','#fdfcfb')
+    .text(d => d.dims);
+
+  // wires from bricks to network row
+  const networkY = totalHeight/2;
+  weights.forEach(w => {
+    svg.append('path').attr('class','wire')
+      .attr('d', `M ${w.x*totalWidth} 156 L ${w.x*totalWidth} ${networkY-26}`);
+  });
+
+  // layer nodes
+  svg.selectAll('.node').data(layers).join('circle')
+    .attr('class','node')
+    .attr('cx', d => d.x*totalWidth).attr('cy', networkY).attr('r', 22);
+  svg.selectAll('.node-label').data(layers).join('text')
+    .attr('class','node-label')
+    .attr('x', d => d.x*totalWidth).attr('y', networkY+4)
+    .attr('text-anchor','middle').text(d => d.label);
+  svg.selectAll('.layer-cap').data(layers).join('text')
+    .attr('class','layer-cap')
+    .attr('x', d => d.x*totalWidth).attr('y', networkY+44)
+    .attr('text-anchor','middle').text(d => d.caption);
+
+  // forward arrows between consecutive layers
+  svg.append('defs').append('marker').attr('id','ar01')
+    .attr('markerWidth',8).attr('markerHeight',6).attr('refX',7).attr('refY',3).attr('orient','auto')
+    .append('polygon').attr('points','0 0, 8 3, 0 6').attr('fill','var(--color-ink)');
+
+  for (let i=0; i<layers.length-1; i++) {
+    svg.append('path').attr('class','flow')
+      .attr('d', `M ${layers[i].x*totalWidth+24} ${networkY} L ${layers[i+1].x*totalWidth-26} ${networkY}`)
+      .attr('marker-end','url(#ar01)');
+  }
+
+  // ram buffers
+  svg.selectAll('.ram-buf').data(buffers).join('rect')
+    .attr('class','ram-buf')
+    .attr('x', d => d.x*totalWidth - 36)
+    .attr('y', totalHeight-74)
+    .attr('width', 72).attr('height', 26)
+    .attr('tabindex', 0)
+    .attr('aria-label', d => `${d.label}`)
+    .on('mouseover', (e,d) => showTip(e, `<strong>${d.label}</strong><br>held in RAM only while next layer computes`))
+    .on('mousemove', moveTip).on('mouseout', hideTip);
+
+  svg.selectAll('.ram-label').data(buffers).join('text')
+    .attr('class','ram-label')
+    .attr('x', d => d.x*totalWidth).attr('y', totalHeight-56)
+    .attr('text-anchor','middle').text(d => d.label);
+
+  // wires up from layers to ram buffers
+  buffers.forEach(b => {
+    svg.append('path').attr('class','wire')
+      .attr('d', `M ${b.x*totalWidth} ${networkY+22} L ${b.x*totalWidth} ${totalHeight-130}`);
+  });
+
+  // discard arrow between buffers
+  svg.append('path').attr('class','wire')
+    .attr('d', `M ${buffers[0].x*totalWidth + 38} ${totalHeight-61} C ${buffers[0].x*totalWidth+80} ${totalHeight-61}, ${buffers[1].x*totalWidth-80} ${totalHeight-61}, ${buffers[1].x*totalWidth-38} ${totalHeight-61}`);
+  svg.append('text').attr('class','layer-cap')
+    .attr('x', (buffers[0].x+buffers[1].x)/2*totalWidth).attr('y', totalHeight-66)
+    .attr('text-anchor','middle').text('discarded');
+
+  // totals
+  svg.append('text').attr('class','total').attr('x', totalWidth-50).attr('y', 128).attr('text-anchor','end').text('~406 KB total');
+  svg.append('text').attr('class','total').attr('x', totalWidth-50).attr('y', totalHeight-56).attr('text-anchor','end').text('< 1 KB peak');
+}
+
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

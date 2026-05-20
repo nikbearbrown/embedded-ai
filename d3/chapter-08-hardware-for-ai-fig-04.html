@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 8.4 — M55 + Ethos-U55 routing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FDFCFB;
+    --color-ink:       #2A1A0E;
+    --color-red:       #C8102E;
+    --color-secondary: #4A4540;
+    --color-border:    #C8C4C0;
+    --color-ochre:     #C8860E;
+    --color-mid:       #8A8480;
+    --color-host:      #F0ECE6;
+    --color-npu:       #E6DCD0;
+    --color-mem:       #D8D0C4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #14110D;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #3A332B;
+      --color-ochre:     #D49A30;
+      --color-mid:       #6E665F;
+      --color-host:      #2A2520;
+      --color-npu:       #322A22;
+      --color-mem:       #3B3027;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'EB Garamond', Georgia, serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 26px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+  #chart { width: 100%; height: 460px; }
+  .block { stroke: var(--color-ink); stroke-width: 1.25; }
+  .block-em { stroke: var(--color-ink); stroke-width: 2; }
+  .block-label { font-family: 'EB Garamond', Georgia, serif; font-size: 14px; fill: var(--color-ink); font-weight: 600; }
+  .block-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); }
+  .arrow-accel { stroke: var(--color-ink); stroke-width: 1.5; fill: none; }
+  .arrow-fallback { stroke: var(--color-mid); stroke-width: 1.5; stroke-dasharray: 5 3; fill: none; }
+  .route-label { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-ink); font-weight: 600; }
+  .op-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); }
+  .caption { color: var(--color-secondary); font-size: 13px; margin-top: 16px; max-width: 65ch; font-family: 'EB Garamond', Georgia, serif; font-style: italic; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 6px 10px; font-size: 12px; font-family: 'Inter', sans-serif; }
+  .callout { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; fill: var(--color-ink); font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 8.4 — Cortex-M55 + Ethos-U55 routing</h1>
+<p class="subtitle">Supported ops accelerate on the NPU; everything else falls back to the host CPU.</p>
+<div id="chart" role="img" aria-labelledby="t04 d04"></div>
+<p class="caption">The mapping of model ops to accelerator decides realised speedup. Peak throughput is the ceiling, not the floor.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const accelOps = ['conv2d', 'depthwise', 'fully connected', 'pooling', 'element-wise'];
+const fallbackOps = ['attention', 'custom activations', 'sparse ops', 'dynamic control flow'];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, txt) {
+  tooltip.html(txt)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const container = document.getElementById('chart');
+  d3.select('#chart').selectAll('*').remove();
+  const totalWidth  = container.clientWidth  || 700;
+  const totalHeight = container.clientHeight || 460;
+
+  const svg = d3.select('#chart').append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 't04 d04');
+  svg.append('title').attr('id', 't04').text('Cortex-M55 plus Ethos-U55 routing');
+  svg.append('desc').attr('id', 'd04').text('Operation router splits model ops into accelerated (NPU) and fallback (CPU) streams. Both connect to a shared SRAM pool over an AXI bus.');
+
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id', 'arrow-a').attr('markerWidth', 9).attr('markerHeight', 7).attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-ink)');
+  defs.append('marker').attr('id', 'arrow-f').attr('markerWidth', 9).attr('markerHeight', 7).attr('refX', 8).attr('refY', 3.5).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 9 3.5, 0 7').attr('fill', 'var(--color-mid)');
+
+  // Layout
+  const cx = totalWidth / 2;
+  const routerY = 70, routerH = 50, routerW = 200;
+  const lowerY = 180, lowerH = 130;
+  const npuX = cx - 280, hostX = cx + 80, blockW = 220;
+  const busY = 340, busH = 22;
+  const memY = 380, memH = 50, memW = 240;
+
+  // Incoming arrow
+  svg.append('line').attr('class', 'arrow-accel')
+    .attr('x1', cx).attr('y1', 30).attr('x2', cx).attr('y2', routerY - 4)
+    .attr('marker-end', 'url(#arrow-a)');
+  svg.append('text').attr('class', 'block-sub')
+    .attr('x', cx).attr('y', 22).attr('text-anchor', 'middle').text('model graph');
+
+  // Router
+  svg.append('rect').attr('class', 'block-em').attr('fill', 'var(--color-white)')
+    .attr('x', cx - routerW/2).attr('y', routerY).attr('width', routerW).attr('height', routerH);
+  svg.append('text').attr('class', 'block-label').attr('x', cx).attr('y', routerY + 22).attr('text-anchor', 'middle').text('Operation router');
+  svg.append('text').attr('class', 'block-sub').attr('x', cx).attr('y', routerY + 40).attr('text-anchor', 'middle').text('Vela compiler · TFLM delegate');
+
+  // NPU block
+  svg.append('rect').attr('class', 'block').attr('fill', 'var(--color-npu)')
+    .attr('x', npuX).attr('y', lowerY).attr('width', blockW).attr('height', lowerH);
+  svg.append('text').attr('class', 'block-label').attr('x', npuX + blockW/2).attr('y', lowerY + 22).attr('text-anchor', 'middle').text('Ethos-U55 microNPU');
+  svg.append('text').attr('class', 'block-sub').attr('x', npuX + blockW/2).attr('y', lowerY + 40).attr('text-anchor', 'middle').text('32 / 64 / 128 / 256 MACs');
+  svg.append('text').attr('class', 'block-sub').attr('x', npuX + blockW/2).attr('y', lowerY + 60).attr('text-anchor', 'middle').text('accelerated:');
+  accelOps.forEach((op, i) => {
+    svg.append('text').attr('class', 'op-name')
+      .attr('x', npuX + blockW/2).attr('y', lowerY + 78 + i * 12).attr('text-anchor', 'middle')
+      .text(op)
+      .on('mouseover', (e) => showTip(e, `accelerated on NPU: ${op}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // Host CPU block
+  svg.append('rect').attr('class', 'block').attr('fill', 'var(--color-host)')
+    .attr('x', hostX).attr('y', lowerY).attr('width', blockW).attr('height', lowerH);
+  svg.append('text').attr('class', 'block-label').attr('x', hostX + blockW/2).attr('y', lowerY + 22).attr('text-anchor', 'middle').text('Cortex-M55 host');
+  svg.append('text').attr('class', 'block-sub').attr('x', hostX + blockW/2).attr('y', lowerY + 40).attr('text-anchor', 'middle').text('scalar + Helium SIMD');
+  svg.append('text').attr('class', 'block-sub').attr('x', hostX + blockW/2).attr('y', lowerY + 60).attr('text-anchor', 'middle').text('fallback:');
+  fallbackOps.forEach((op, i) => {
+    svg.append('text').attr('class', 'op-name')
+      .attr('x', hostX + blockW/2).attr('y', lowerY + 78 + i * 12).attr('text-anchor', 'middle')
+      .text(op)
+      .on('mouseover', (e) => showTip(e, `falls back to CPU: ${op}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+  });
+
+  // Routing arrows
+  svg.append('path').attr('class', 'arrow-accel')
+    .attr('d', `M ${cx - 40} ${routerY + routerH} L ${npuX + blockW/2 + 10} ${lowerY - 4}`)
+    .attr('marker-end', 'url(#arrow-a)');
+  svg.append('text').attr('class', 'route-label')
+    .attr('x', cx - 140).attr('y', 158).attr('text-anchor', 'middle').text('accelerated');
+
+  svg.append('path').attr('class', 'arrow-fallback')
+    .attr('d', `M ${cx + 40} ${routerY + routerH} L ${hostX + blockW/2 - 10} ${lowerY - 4}`)
+    .attr('marker-end', 'url(#arrow-f)');
+  svg.append('text').attr('class', 'route-label')
+    .attr('x', cx + 140).attr('y', 158).attr('text-anchor', 'middle').text('fallback');
+
+  // AXI bus
+  svg.append('rect').attr('class', 'block').attr('fill', 'var(--color-white)')
+    .attr('x', 60).attr('y', busY).attr('width', totalWidth - 120).attr('height', busH);
+  svg.append('text').attr('class', 'block-sub')
+    .attr('x', cx).attr('y', busY + 15).attr('text-anchor', 'middle').text('AXI bus');
+
+  // Memory
+  svg.append('rect').attr('class', 'block').attr('fill', 'var(--color-mem)')
+    .attr('x', cx - memW/2).attr('y', memY).attr('width', memW).attr('height', memH);
+  svg.append('text').attr('class', 'block-label')
+    .attr('x', cx).attr('y', memY + 22).attr('text-anchor', 'middle').text('Shared SRAM pool');
+  svg.append('text').attr('class', 'block-sub')
+    .attr('x', cx).attr('y', memY + 38).attr('text-anchor', 'middle').text('128 KB – 2 MB · weights, activations');
+
+  // Connections to bus
+  svg.append('line').attr('class', 'arrow-accel')
+    .attr('x1', npuX + blockW/2).attr('y1', lowerY + lowerH)
+    .attr('x2', npuX + blockW/2).attr('y2', busY);
+  svg.append('line').attr('class', 'arrow-accel')
+    .attr('x1', hostX + blockW/2).attr('y1', lowerY + lowerH)
+    .attr('x2', hostX + blockW/2).attr('y2', busY);
+  svg.append('line').attr('class', 'arrow-accel')
+    .attr('x1', cx).attr('y1', busY + busH)
+    .attr('x2', cx).attr('y2', memY);
+
+  // Callout
+  svg.append('text').attr('class', 'callout')
+    .attr('x', totalWidth - 24).attr('y', 100).attr('text-anchor', 'end')
+    .text('80% accelerated → only 3–5× realised');
+  svg.append('text').attr('class', 'callout')
+    .attr('x', totalWidth - 24).attr('y', 116).attr('text-anchor', 'end')
+    .text('CPU fallback dominates unaccelerated %');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 6.4 — SIMD lane diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-white:     #FFFFFF;
+    --color-ink:       #121212;
+    --color-red:       #C8102E;
+    --color-secondary: #545454;
+    --color-border:    #D4D4D4;
+    --color-ochre:     #C8860E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-white:     #111111;
+      --color-ink:       #F0EBE3;
+      --color-red:       #E8243A;
+      --color-secondary: #A0978C;
+      --color-border:    #2E2E2E;
+      --color-ochre:     #D49A30;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--color-white); color: var(--color-ink); font-family: 'Inter', sans-serif; padding: 24px; }
+  h1 { font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 4px; }
+  p.subtitle { color: var(--color-secondary); font-size: 13px; margin-bottom: 24px; max-width: 65ch; }
+  #chart { width: 100%; height: 480px; }
+  .panel-label { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--color-ink); }
+  .panel-sub { font-family: 'EB Garamond', Georgia, serif; font-size: 12px; font-style: italic; fill: var(--color-secondary); }
+  .cycle-box { fill: none; stroke: var(--color-secondary); stroke-width: 0.75; }
+  .cycle-label { font-family: 'EB Garamond', Georgia, serif; font-size: 11px; font-style: italic; fill: var(--color-secondary); }
+  .lane-box { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 1; transition: fill 200ms cubic-bezier(0.2,0.8,0.2,1); cursor: pointer; }
+  .lane-box.active { fill: var(--color-red); }
+  .lane-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-ink); pointer-events: none; }
+  .op-sym { font-family: 'EB Garamond', Georgia, serif; font-size: 13px; fill: var(--color-secondary); pointer-events: none; }
+  .acc-box { fill: var(--color-ink); }
+  .acc-box.scalar { fill: var(--color-border); stroke: var(--color-ink); }
+  .acc-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: var(--color-white); pointer-events: none; }
+  .acc-text.scalar { fill: var(--color-ink); }
+  .reg-label { font-family: 'Inter', sans-serif; font-size: 12px; fill: var(--color-ink); pointer-events: none; }
+  .footer { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--color-secondary); pointer-events: none; }
+  .gain { font-family: 'EB Garamond', Georgia, serif; font-size: 18px; font-weight: 700; fill: var(--color-red); }
+  .divider { stroke: var(--color-border); stroke-width: 0.5; }
+  .tooltip { position: absolute; pointer-events: none; opacity: 0; background: var(--color-ink); color: var(--color-white); padding: 8px 12px; font-size: 12px; font-family: 'Inter', sans-serif; max-width: 240px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<h1>Figure 6.4 — SIMD lane diagram</h1>
+<p class="subtitle">Scalar Cortex-M4 takes four cycles for four int8 MACs. The same chip with DSP extensions packs four bytes into one 32-bit instruction — same clock, four times the throughput.</p>
+<div id="chart" role="img" aria-labelledby="simd-t simd-d"></div>
+<p id="simd-t" style="display:none">SIMD lane comparison: four-cycle scalar versus one-cycle SIMD.</p>
+<p id="simd-d" style="display:none">Scalar path on top shows four MUL+ADD pairs across four cycles; SIMD path below shows a 32-bit register split into four 8-bit lanes feeding a single fused multiply-accumulate.</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const lanes = [
+  { i: 0, a: 'a₀', b: 'b₀' },
+  { i: 1, a: 'a₁', b: 'b₁' },
+  { i: 2, a: 'a₂', b: 'b₂' },
+  { i: 3, a: 'a₃', b: 'b₃' }
+];
+
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip');
+function showTip(event, msg) {
+  tooltip.html(msg)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 28) + 'px')
+    .transition().duration(150).style('opacity', 1);
+}
+function moveTip(event) { tooltip.style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 28) + 'px'); }
+function hideTip() { tooltip.transition().duration(100).style('opacity', 0); }
+
+function draw() {
+  const sel = '#chart';
+  d3.select(sel).selectAll('*').remove();
+  const container = document.getElementById('chart');
+  const totalWidth  = container.clientWidth  || 900;
+  const totalHeight = container.clientHeight || 480;
+  const svg = d3.select(sel).append('svg')
+    .attr('width', totalWidth).attr('height', totalHeight)
+    .attr('role', 'img').attr('aria-labelledby', 'simd-t simd-d');
+
+  // Arrow marker
+  svg.append('defs').append('marker')
+    .attr('id', 'arrow-simd').attr('markerWidth', 8).attr('markerHeight', 6).attr('refX', 7).attr('refY', 3).attr('orient', 'auto')
+    .append('polygon').attr('points', '0 0, 8 3, 0 6').attr('fill', 'var(--color-ink)');
+
+  const margin = { left: 40, right: 40, top: 16, bottom: 16 };
+  const usableW = totalWidth - margin.left - margin.right;
+
+  // --- SCALAR (top half) ---
+  svg.append('text').attr('class', 'panel-label').attr('x', margin.left).attr('y', 40).text('Scalar Cortex-M4 (no SIMD)');
+  svg.append('text').attr('class', 'panel-sub').attr('x', margin.left).attr('y', 58).text('four MAC instructions · four cycles · 100 MMAC/s peak');
+
+  const cycleW = (usableW - 30) / 4;     // 4 cycles spaced
+  const cycleH = 86;
+  const cycleY = 80;
+  lanes.forEach((d, i) => {
+    const x = margin.left + i * (cycleW + 10);
+    const g = svg.append('g')
+      .attr('tabindex', 0)
+      .attr('aria-label', `Scalar cycle ${i + 1}: multiply ${d.a} by ${d.b}, accumulate`)
+      .on('mouseover', e => showTip(e, `<strong>Cycle ${i + 1}</strong><br>MUL ${d.a}, ${d.b}<br>ADD result, t`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+    g.append('rect').attr('class', 'cycle-box').attr('x', x).attr('y', cycleY).attr('width', cycleW).attr('height', cycleH);
+    g.append('text').attr('class', 'cycle-label').attr('x', x + cycleW / 2).attr('y', cycleY + 16).attr('text-anchor', 'middle').text(`cycle ${i + 1}`);
+    // bytes
+    const inner = (cycleW - 80) / 2;
+    const bxA = x + 14;
+    const bxB = x + 14 + 28 + 16;
+    const accX = bxB + 28 + 18;
+    g.append('rect').attr('class', 'lane-box').attr('x', bxA).attr('y', cycleY + 28).attr('width', 28).attr('height', 22);
+    g.append('text').attr('class', 'lane-text').attr('x', bxA + 14).attr('y', cycleY + 43).attr('text-anchor', 'middle').text(d.a);
+    g.append('text').attr('class', 'op-sym').attr('x', bxA + 28 + 8).attr('y', cycleY + 43).text('×');
+    g.append('rect').attr('class', 'lane-box').attr('x', bxB).attr('y', cycleY + 28).attr('width', 28).attr('height', 22);
+    g.append('text').attr('class', 'lane-text').attr('x', bxB + 14).attr('y', cycleY + 43).attr('text-anchor', 'middle').text(d.b);
+    g.append('text').attr('class', 'op-sym').attr('x', bxB + 28 + 8).attr('y', cycleY + 43).text('+=');
+    g.append('rect').attr('class', 'acc-box scalar').attr('x', accX).attr('y', cycleY + 28).attr('width', 32).attr('height', 22);
+    g.append('text').attr('class', 'acc-text scalar').attr('x', accX + 16).attr('y', cycleY + 43).attr('text-anchor', 'middle').text('acc');
+    g.append('text').attr('class', 'footer').attr('x', x + cycleW / 2).attr('y', cycleY + 76).attr('text-anchor', 'middle').text('MUL + ADD');
+  });
+  svg.append('text').attr('class', 'reg-label').attr('x', totalWidth - margin.right).attr('y', cycleY + 50).attr('text-anchor', 'end').text('4 cycles total');
+
+  // Divider
+  svg.append('line').attr('class', 'divider').attr('x1', margin.left).attr('x2', totalWidth - margin.right).attr('y1', 200).attr('y2', 200);
+
+  // --- SIMD (bottom half) ---
+  svg.append('text').attr('class', 'panel-label').attr('x', margin.left).attr('y', 226).text('SIMD Cortex-M4 (DSP extensions, SMLAD-style)');
+  svg.append('text').attr('class', 'panel-sub').attr('x', margin.left).attr('y', 244).text('one packed instruction · one cycle · 400 MMAC/s peak');
+
+  const regY = 264;
+  const laneW = (usableW - 120) / 4;
+  // Ra
+  svg.append('text').attr('class', 'reg-label').attr('x', margin.left).attr('y', regY + 18).text('Ra (32-bit)');
+  lanes.forEach((d, i) => {
+    const x = margin.left + 100 + i * laneW;
+    svg.append('rect').attr('class', 'lane-box').attr('x', x).attr('y', regY).attr('width', laneW - 4).attr('height', 28)
+      .attr('tabindex', 0)
+      .attr('aria-label', `Lane ${i}: ${d.a}`)
+      .on('mouseover', e => showTip(e, `<strong>Lane ${i}</strong><br>Ra byte ${i}: ${d.a}<br>Rb byte ${i}: ${d.b}`))
+      .on('mousemove', moveTip).on('mouseout', hideTip);
+    svg.append('text').attr('class', 'lane-text').attr('x', x + (laneW - 4) / 2).attr('y', regY + 18).attr('text-anchor', 'middle').text(d.a);
+  });
+  svg.append('text').attr('class', 'footer').attr('x', totalWidth - margin.right).attr('y', regY + 18).attr('text-anchor', 'end').text('8 bits each');
+
+  // Rb
+  const rbY = regY + 40;
+  svg.append('text').attr('class', 'reg-label').attr('x', margin.left).attr('y', rbY + 18).text('Rb (32-bit)');
+  lanes.forEach((d, i) => {
+    const x = margin.left + 100 + i * laneW;
+    svg.append('rect').attr('class', 'lane-box').attr('x', x).attr('y', rbY).attr('width', laneW - 4).attr('height', 28);
+    svg.append('text').attr('class', 'lane-text').attr('x', x + (laneW - 4) / 2).attr('y', rbY + 18).attr('text-anchor', 'middle').text(d.b);
+  });
+
+  // Arrows down
+  const arrowY1 = rbY + 30;
+  const arrowY2 = rbY + 54;
+  lanes.forEach((d, i) => {
+    const x = margin.left + 100 + i * laneW + (laneW - 4) / 2;
+    svg.append('line').attr('x1', x).attr('y1', arrowY1).attr('x2', x).attr('y2', arrowY2)
+      .attr('stroke', 'var(--color-ink)').attr('stroke-width', 1).attr('marker-end', 'url(#arrow-simd)');
+  });
+
+  // Accumulator (one wide box)
+  const accY = rbY + 60;
+  svg.append('rect').attr('class', 'acc-box')
+    .attr('x', margin.left + 100).attr('y', accY)
+    .attr('width', laneW * 4 - 4).attr('height', 28);
+  svg.append('text').attr('class', 'acc-text')
+    .attr('x', margin.left + 100 + (laneW * 4 - 4) / 2).attr('y', accY + 18)
+    .attr('text-anchor', 'middle')
+    .text('acc += a₀·b₀ + a₁·b₁ + a₂·b₂ + a₃·b₃   (one SMLAD-style instruction)');
+  svg.append('text').attr('class', 'footer').attr('x', totalWidth - margin.right).attr('y', accY + 18).attr('text-anchor', 'end').text('1 cycle');
+
+  // 4× gain badge
+  svg.append('text').attr('class', 'gain').attr('x', totalWidth / 2).attr('y', accY + 70).attr('text-anchor', 'middle')
+    .text('4× throughput at identical clock');
+}
+draw();
+const ro = new ResizeObserver(() => draw());
+ro.observe(document.getElementById('chart'));
+</script>
+</body>
+</html>
