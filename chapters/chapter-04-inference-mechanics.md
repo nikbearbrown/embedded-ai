@@ -167,58 +167,6 @@ The rule: the model is useful for the mechanics. The numbers come from your prof
 
 ---
 
-## Prompts
-
-Use these prompts with Claude to generate interactive D3 v7 versions of the
-figures in this chapter. Each produces a standalone HTML file you can open
-in a browser and modify freely.
-
-**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
-your Claude project context before using these prompts. They define the stack,
-naming conventions, color system, and typography the figures use.
-
----
-
-### Figure 4.1 — Four-stage inference pipeline
-
-Build a horizontal four-stage flow diagram in D3 v7. Data: four stages with `id`, `label`, `headline`, `detail` — Stage 1 Input Prep (FFT, normalize, reshape), Stage 2 Inference (layer-by-layer execution; this stage is `primary`), Stage 3 Output (softmax, NMS, threshold), Stage 4 Delivery (GPIO, log, LoRaWAN). Render each stage as a rounded-corner-less rectangle with a coloured header strip; primary stage uses `var(--color-red)` for both header fill and body stroke, others use `var(--color-secondary)`. Use `d3.scaleBand()` across the four stage ids for horizontal placement. Connect stages with short arrow segments using SVG `<marker>` arrowheads. Draw two brackets below the boxes: a red bracket spanning only Stage 2 labelled "what the profiler reports" with "≈ 50 ms" beneath; a neutral bracket spanning all four stages labelled "end-to-end application latency" with "≈ 150 ms" beneath. Standalone HTML, D3 7.9.0 cdnjs CDN, inline CSS/JS, role="img", title, desc, ResizeObserver redraw, prefers-reduced-motion suppression, tooltips on stage hover.
-
-> Reference implementation: `d3/chapter-04-inference-mechanics-fig-01.html`
-
----
-
-### Figure 4.2 — Matrix multiply tiling: naive vs cache-blocked
-
-Build a two-panel D3 v7 figure comparing matrix-multiply memory patterns. Each panel renders the matrices A (128×128), B (128×10), and C (128×10) as `<rect>` cells with `× =` glyphs between them. Panel A (naive): plain A, B, C rectangles with red horizontal scan lines overlaid on A indicating that every row is streamed from SRAM once per output column. Panel B (tiled, `primary` border): A subdivided into four 64×64 sub-blocks; one sub-block of A, one tile of B, and the corresponding tile of C all highlighted in `var(--color-ochre)` to indicate cache residency. Beneath each panel render a monospace meta block summarising compute cycles, memory cycles (red in panel A), and measured time. Use a shared `draw()` redraw on ResizeObserver. Standalone HTML, D3 v7 cdnjs, inline CSS/JS, accessible.
-
-> Reference implementation: `d3/chapter-04-inference-mechanics-fig-02.html`
-
----
-
-### Figure 4.3 — Memory hierarchy access cost
-
-Build a horizontal bar chart in D3 v7. Data: five tiers — registers (0.3 cyc), L1 cache (1.5), on-chip SRAM (3), external PSRAM (15, `primary`), flash XIP (12, `muted`) — each with a `perMac` string and a one-line `note`. Channels: y is tier (`d3.scaleBand()`), x is cycles per access (`d3.scaleLinear()` zero baseline, domain [0, 20]). PSRAM bar uses `var(--color-red)`; flash uses `var(--color-border)`; others use `var(--color-secondary)`. Tier labels render in the left margin (160px), accesses-per-MAC and note render in the right margin (280px) with PSRAM row coloured red. Add a 5-tick bottom axis labelled "cycles per access". Tooltips on bar hover; tabindex and aria-label on each bar. Standalone HTML, D3 7.9.0 cdnjs, inline CSS/JS, ResizeObserver, prefers-reduced-motion.
-
-> Reference implementation: `d3/chapter-04-inference-mechanics-fig-03.html`
-
----
-
-### Figure 4.4 — Tensor arena: reuse vs. no reuse
-
-Build a two-panel D3 v7 figure of tensor-arena layouts. Panel A (reuse, `primary` border): four rows along a shared byte-offset x-axis [0, 800] — row 0 weights+scratch, row 1 Layer 1 output (t=1) in `var(--color-secondary)`, row 2 Layer 3 output (t=3) in `var(--color-red)` occupying the *same* byte range, row 3 I/O tensors. Each row gets a left label ("t = 1", "t = 3", "I/O"). Panel B (no reuse): vertical stack with `d3.scaleLinear()` mapping cumulative bytes onto chart height; eight regions stacked — weights, Layers 1–6 outputs each retained, I/O. Each region's `<rect>` labelled inside with white text (weights label uses ink colour against the border-grey fill). Tooltips on hover show region label and byte count. Below each chart render a peak-memory text — neutral ink for the reuse panel (≈ 28 KB), red for the no-reuse panel ("8–10× larger; does not fit"). Standalone HTML, D3 7.9.0 cdnjs, inline CSS/JS, ResizeObserver, accessible.
-
-> Reference implementation: `d3/chapter-04-inference-mechanics-fig-04.html`
-
----
-
-### Figure 4.5 — Keyword-spotting latency waterfall
-
-Build a horizontal-bar waterfall in D3 v7. Data: five steps with `n`, `label`, `ms`, `kind`, `note` — (1) 367 ms theoretical prediction `kind=predict` (border-grey with ink stroke), (2) 1200 ms first deploy `kind=failure` (`var(--color-red)`), (3) 420 ms CMSIS-NN `kind=bar`, (4) 140 ms activations on chip `kind=bar`, (5) 45 ms int8 quantization `kind=final` (`var(--color-ink)`). Channels: y is step number (`d3.scaleBand()`), x is milliseconds (`d3.scaleLinear()` zero baseline, domain [0, 1200]). Step label and note render in a 250px left margin; value label in monospace renders to the right of each bar. Draw a vertical dashed `var(--color-red)` line at x = 100 ms labelled "100 ms target" above the plot. Bottom axis with 5 ticks labelled "milliseconds per inference". Tooltips on bar hover. Standalone HTML, D3 7.9.0 cdnjs, inline CSS/JS, ResizeObserver, accessible, prefers-reduced-motion suppression.
-
-> Reference implementation: `d3/chapter-04-inference-mechanics-fig-05.html`
-
----
-
 ## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Thelma Estrin** built one of the first real-time biomedical computing systems — getting EEG signals into a computer fast enough to be useful — when "real-time" still meant tape and paper.

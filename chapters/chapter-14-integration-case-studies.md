@@ -169,22 +169,6 @@ Run pytest. All unit tests + all three integration tests pass before you stop.
 
 ---
 
-## Prompts
-
-The six figures in this chapter were built from short structural prompts. Each prompt fixes the encoding, the comparison, and the reader's takeaway — not the styling, which the brutalist design system already constrains.
-
-**Figure 14.1 — Bandwidth-vs-payload arithmetic.** Horizontal-bar chart, three rows on a single kilobytes-per-hour axis: one 20 KB JPEG payload, LoRaWAN SF7 ceiling at ~50 KB/hr, LoRaWAN SF12 ceiling at ~3.75 KB/hr. Vertical dashed reference at one-image width. Annotation: at long range, one image takes more than five hours of airtime. Box: 30 s/hr regulatory ceiling. Reader takeaway: cloud is physically impossible — bytes are wider than the pipe.
-
-**Figure 14.2 — Industrial three-architecture decision tree.** Root node (acceptance specs) branches to three sibling nodes: fully on-device, edge-gateway over RS-485, hybrid threshold-plus-radio. Each branch terminates in a verdict node. Two rejected branches use dashed strokes plus an ochre constraint label naming what killed them ("↑ deployment cost", "↑ BOM ceiling"). Winning branch uses a heavier outline and full accent bar. Reader takeaway: two viable-looking architectures die on deployment economics, not technical grounds.
-
-**Figure 14.3 — Industrial energy budget stack.** Two stacked bars on a 0–1.6 mW axis: random forest at 2.5 s cadence (sleep + inference inside envelope), 1D CNN at same cadence (overflows envelope 5×). Dashed horizontal line at 0.28 mW envelope crossing both bars. Annotation on overflow bar: battery dies in 3 months. Headroom callout on RF bar. Reader takeaway: model-rejection arithmetic is visible.
-
-**Figure 14.4 — Medical wearable compression cascade.** Dual-axis line chart across four stages on the x-axis (float32 → pruned → distilled → QAT). Left y-axis tracks model size (ink solid line); right y-axis tracks VT/VF sensitivity (red dashed line). Two reference lines: 2 MB flash ceiling, 98% regulatory floor. Stage status row beneath the x-axis names each stage's pass/fail state. Reader takeaway: prune → distill → QAT is the only sequence that clears both lines.
-
-**Figure 14.5 — Vineyard 24-hour energy timeline.** Two stacked panels sharing a 0–24 hour x-axis. Top panel: solar harvest area (bell curve, peak 2 W at noon), 150 mW sleep baseline (dashed), four inference spikes at 07:00 / 10:00 / 14:00 / 18:00 with hover detail (4.3 J each). Bottom panel: battery state-of-charge trace, ride-through annotation spanning hours 0–8. Reader takeaway: harvest covers daily load; buffer covers variance.
-
-**Figure 14.6 — Cross-case comparative budgets.** Grid: four rows (power, memory, latency, BOM) × three columns (industrial, medical, agricultural) of horizontal bars whose width encodes tightness, not absolute magnitude. The binding-constraint cell in each column carries a 2 px ink outline; remaining cells fade to gray. Final row beneath the grid names the binding constraint per case in boxed text. Reader takeaway: same framework, three different binding constraints, three different deployments.
-
 ## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **W. Ross Ashby** was a British psychiatrist who founded cybernetics from the inside out, and his Law of Requisite Variety — a controller must have at least as much variety as the system it controls — is the structural reason why constraints decide your architecture, not your preferences.

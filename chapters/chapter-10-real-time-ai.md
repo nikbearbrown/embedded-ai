@@ -116,58 +116,6 @@ Tests:
 
 ---
 
-## Prompts
-
-Use these prompts with Claude to generate interactive D3 v7 versions of the
-figures in this chapter. Each produces a standalone HTML file you can open
-in a browser and modify freely.
-
-**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
-your Claude project context before using these prompts. They define the stack,
-naming conventions, color system, and typography the figures use.
-
----
-
-### Figure 10.1 — Real-time taxonomy
-
-Build a three-column comparison figure for the real-time taxonomy. Columns: HARD, FIRM, SOFT. Rows: class header, deadline tolerance, example application, consequence of miss. Data per column — HARD: zero tolerance / airbag controller 10–20 ms / catastrophic. FIRM: less than 0.1% miss budget / radar sweep processor / useless output. SOFT: missed but still useful / gesture thermostat 200 ms over 100 ms budget / sluggish UX. Channels: column = class (categorical, ordered by strictness); row = attribute (categorical). Color: class header fill uses a luminance ramp from var(--color-ink) for HARD through #404040 for FIRM to #787878 for SOFT — encodes strictness as luminance. Detail cells use var(--color-white) with a var(--color-border) hairline. Add a footer band reading "WHERE NON-DETERMINISTIC AI CAN LIVE" with one sentence per column. Standalone HTML, D3 v7 from the pinned CDN, EB Garamond / Inter / JetBrains Mono Google Fonts, inline CSS and JS, role="img" + title + desc, ResizeObserver, tooltip on hover of each class header naming where AI can live in that class. Respect prefers-reduced-motion.
-
-> Reference implementation: `d3/chapter-10-real-time-ai-fig-01.html`
-
----
-
-### Figure 10.2 — Latency distribution histogram
-
-Build a histogram of CNN inference latencies on a Cortex-M7. Synthesize 40 one-millisecond bins from 25 ms to 64 ms, peaking near 36 ms with a long right tail to 62 ms. Channels: x is execution time in ms (linear, zero baseline not required because position is the channel and zero is not meaningful for elapsed time); y is run count at that latency (linear, zero baseline). Bars in var(--color-ink). Add four vertical marker lines: mean at 38 ms, p95 at 47 ms, p99 at 53 ms, worst observed at 62 ms — first three dashed in var(--color-secondary), worst observed solid in var(--color-ink) at 1.5 px. Each marker labeled with its name and ms value above the plot. Add a horizontal annotation arrow under the x-axis spanning mean to worst observed with the label "+24 ms — variability the deadline must absorb." Standalone HTML, D3 v7 from the pinned CDN, EB Garamond / Inter / JetBrains Mono Google Fonts, var(--color-*) tokens with dark-mode @media, role="img" + title + desc, ResizeObserver, tooltip on each bar showing ms and count, prefers-reduced-motion respected.
-
-> Reference implementation: `d3/chapter-10-real-time-ai-fig-02.html`
-
----
-
-### Figure 10.3 — Five design patterns
-
-Build a 5-card grid figure of real-time AI design patterns. Cards arranged 3 across on wide screens, 1 across on narrow. Each card carries an eyebrow label (PATTERN 1–5), a title in EB Garamond, an embedded SVG block diagram, and a one-line mitigation under it. Patterns: (1) Advisory — AI box → supervisor box → actuator. (2) Bounded execution — AI + timer branches into "use result" and "UNKNOWN" then to a safe-state actuator. (3) Confidence gating — AI emits class + score; branches "≥ 0.98 act" and "< 0.98 flag" to actuator. (4) Voting — three AI models feed a "2-of-3 vote" supervisor to the actuator. (5) Hierarchical — three stacked layers: AI perception, rule-based threshold, hardware trip. Channels: position = data flow direction; container shape = block role (AI = gray ai-rect; supervisor = white safe-rect with heavy ink stroke; actuator = filled ink act-rect). Card border highlights to var(--color-red) on hover. Standalone HTML, D3 v7 from the pinned CDN, EB Garamond / Inter Google Fonts, var(--color-*) tokens, role="img" + aria-label per card, ResizeObserver via CSS grid, tooltip naming the mitigated failure mode, prefers-reduced-motion respected.
-
-> Reference implementation: `d3/chapter-10-real-time-ai-fig-03.html`
-
----
-
-### Figure 10.4 — AI failure-mode matrix
-
-Build a six-row failure-mode matrix as an SVG grid (not a markdown table). Rows: false negative, false positive, latency violation, adversarial misclassification, distribution shift, numerical instability. Columns: FAILURE MODE (name + example), TYPICAL PROBABILITY, SEVERITY, ASIL D OK?, REQUIRED MITIGATION. Channels: row = failure mode (categorical, ordered by severity); column = attribute; cell fill = a five-step warm-grayscale severity ramp from var(--color-white) at severity 1 through #D4D4D4, #787878, #404040, to var(--color-ink) at severity 4. Text color flips to var(--color-white) on dark cells (severity ≥ 3) for AAA contrast. Row name cells stay white with a 6 px left bar in the row's severity color. Add a SHADING legend under the matrix mapping the four darker steps to "fails ASIL D unmitigated," "catastrophic when triggered," "moderate / app-dependent," "economic, not safety." Standalone HTML, D3 v7 from the pinned CDN, EB Garamond / Inter / JetBrains Mono Google Fonts, var(--color-*) tokens, role="img" + title + desc, every cell tabindex="0" + aria-label, tooltip on hover showing row name, column attribute, value, and mitigation. ResizeObserver, prefers-reduced-motion respected.
-
-> Reference implementation: `d3/chapter-10-real-time-ai-fig-04.html`
-
----
-
-### Figure 10.5 — CNC milling integration timeline
-
-Build a three-track timeline figure for the CNC milling integration. Time axis: 0 to 60 ms after fault onset. Track 1 (top): 1 kHz control loop — render 60 evenly spaced tick marks every 1 ms. Track 2 (middle): asynchronous AI inference — render one completed inference bar from 0 to 38 ms (solid stroke) and a scheduled bar from 50 to 60 ms (dashed stroke); place a filled circle at +38 ms labeled "fault_probability ← 0.97." Track 3 (bottom): 1 kHz RMS backup detector — render 60 tick marks every 1 ms in var(--color-secondary), with a filled var(--color-ink) circle at +2 ms labeled "fault_flag ← true." Three vertical event lines spanning all tracks: fault onset at 0 ms (solid heavy), 5 ms deadline (dashed), AI advisory at 38 ms (dashed, secondary color). Channels: x = time (linear, zero baseline); y = track (categorical); mark type = event kind. Track labels in the left margin: eyebrow + title + sub. Outcome callout below the axis: "Shutdown triggered by RMS at +2 ms — well inside the 5 ms budget. AI advisory arrives at +38 ms and would have missed." Standalone HTML, D3 v7 from the pinned CDN, EB Garamond / Inter / JetBrains Mono Google Fonts, var(--color-*) tokens, role="img" + title + desc, inference bars tabindex="0" + aria-label with tooltip on hover, ResizeObserver, prefers-reduced-motion respected.
-
-> Reference implementation: `d3/chapter-10-real-time-ai-fig-05.html`
-
----
-
 ## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Chung Laung "C.L." Liu** co-authored the 1973 paper on rate-monotonic scheduling — the math behind every hard-real-time system that has to guarantee a deadline, including the AI ones.

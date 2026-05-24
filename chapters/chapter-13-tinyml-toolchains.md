@@ -221,58 +221,6 @@ Note: this module requires `tensorflow` as an optional dependency. Document the 
 
 ---
 
-## Prompts
-
-Use these prompts with Claude to generate interactive D3 v7 versions of the
-figures in this chapter. Each produces a standalone HTML file you can open
-in a browser and modify freely.
-
-**Prerequisites:** Load `brutalist/CLAUDE.md` and `brutalist/DESIGN.md` into
-your Claude project context before using these prompts. They define the stack,
-naming conventions, color system, and typography the figures use.
-
----
-
-### Figure 13.1 — Six-step deployment pipeline
-
-Build a standalone D3 v7 horizontal flow diagram of the six deployment-pipeline gates: Train, Convert, Optimize, Compile, Deploy, Verify. Render each step as a bordered box arranged left-to-right with an arrow between adjacent boxes. Above each box, place its artifact format in JetBrains Mono (`.h5 / .pth`, `.tflite / .onnx`, `int8 .tflite`, `.elf binary`, `flashed image`, `accuracy Δ`). Inside the box, render the step number above the step name. Below each box, render the dominant silent-failure mode in two or three short lines. Below the flow, draw an ochre dashed-border callout reading "Every gate reports success. Only step 6 catches the lie." Channels: x-position is pipeline order; the colors come from var(--color-ink), var(--color-secondary), var(--color-border), and var(--color-ochre). On hover, show a tooltip naming the step's artifact and failure mode. Make the diagram keyboard-accessible (tabindex on each box), include role/title/desc, support dark mode, and respect prefers-reduced-motion.
-
-> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-01.html`
-
----
-
-### Figure 13.2 — TFLite Micro on-device memory layout
-
-Build a standalone D3 v7 two-region memory diagram. Left region: Flash (read-only) containing three stacked blocks proportional to typical sizes — model byte array (~85 KB), TFLite Micro engine (~100 KB), op kernels. Right region: SRAM (read-write) containing tensor arena (~80 KB), stack (~20 KB), and heap. Mark the arena with a vertical ochre bar labelled "16 byte align". Overlay four red numbered pins on the diagram at the locations of the four silent failures — arena too small, missing op, calibration mismatch, alignment fault — and list them in a legend strip below. Channels: y-position within each region encodes the block's role; block height encodes typical KB; the ochre alignment marker encodes the structural constraint. On hover, show a tooltip explaining each block's role in `Invoke()`. Use var(--color-ink), var(--color-secondary), var(--color-border) for blocks; var(--color-red) for failure pins; var(--color-ochre) for the alignment marker. Include role/title/desc, full keyboard access, dark-mode, and reduced-motion support.
-
-> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-02.html`
-
----
-
-### Figure 13.3 — Toolchain feature matrix
-
-Build a standalone D3 v7 heatmap-style matrix with six rows (TFLite Micro, Edge Impulse, STM32Cube.AI, Vela (Ethos-U), Edge TPU compiler, ONNX Runtime) and six columns (Custom layers, Intermediate artifacts, Quantization control, Vendor-tuned kernels, GUI workflow, Debug access on fail). Each cell takes one of three states: full (fill var(--color-ink)), partial (fill var(--color-secondary)), or none (var(--color-border) at low opacity). Rotate column headers ~30°. Row labels include a one-line subtitle in var(--color-secondary). Below the matrix, render a three-item legend. Channels: position-along-aligned-scales (the heatmap grid) and three discrete lightness steps; no hue encoding. On hover, show a tooltip naming the toolchain, the capability, and which support tier the cell represents. Cells must be tabbable, with aria-label naming all three. Include role/title/desc, dark-mode, prefers-reduced-motion. Use ResizeObserver to redraw on container resize.
-
-> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-03.html`
-
----
-
-### Figure 13.4 — Three-stage accuracy bisection
-
-Build a standalone D3 v7 horizontal bar chart with three bars stacked vertically, one per pipeline stage: Stage 1 Python source 94.2%, Stage 2 TFLite Python interpreter 93.1%, Stage 3 on-device 92.8%. X-axis runs 90 to 95 percent — note: this is the one case where a non-zero start is honest because the channel is the small differences between stages, not absolute magnitude; mark this explicitly in the chart subtitle. Bars use a sequential luminance from var(--color-ink) down to var(--color-border). To the right of each bar, label the value in JetBrains Mono. Between stages 1-2 and stages 2-3, draw red dashed brackets labelling the deltas: "Δ 1.1 pp — conversion + optimization" and "Δ 0.3 pp — compile + runtime". Below the chart, render two side-by-side dashed-border boxes mapping the root causes to each gap. Channels: x-position-along-shared-scale for accuracy; sequential luminance for stage order. On hover, show a tooltip explaining what each stage measures. Keyboard accessible. Dark-mode and reduced-motion respected.
-
-> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-04.html`
-
----
-
-### Figure 13.5 — Nano 33 BLE Sense deployment dashboard
-
-Build a standalone D3 v7 four-panel dashboard in a 2×2 grid. Panel A: Latency — two horizontal bars with x-domain [0, 120 ms]: budget 100 ms in var(--color-border), measured 42 ms in var(--color-ink). Panel B: SRAM — two horizontal bars with x-domain [0, 300 KB]: available 256 KB; used 100 KB segmented into 80 KB arena (var(--color-ink)) and 20 KB stack (var(--color-secondary)). Panel C: Flash — two bars with x-domain [0, 300 KB]: model 85 KB and engine ~100 KB. Panel D: Accuracy — three bars with x-domain [90, 95 %]: float32 94.2, TFLite int8 93.1, on-device 92.8, sequential luminance from var(--color-ink) to var(--color-border). Channels: position-along-common-scale per panel; panels are small multiples comparing budget vs measured. Each bar tabbable with aria-label and a hover tooltip explaining what it represents. ResizeObserver redraw on each panel's container. Italic footnotes under each panel summarize the takeaway. Include role/title/desc, dark-mode, reduced-motion.
-
-> Reference implementation: `d3/chapter-13-tinyml-toolchains-fig-05.html`
-
----
-
 ## AI Wayback Machine
 
 The ideas in this chapter didn't appear from nowhere. **Sophie Wilson** designed the original ARM instruction set in 1983 — the architecture every Cortex-M chip in this book inherits, the silicon your `.tflite` ultimately gets compiled down to.
