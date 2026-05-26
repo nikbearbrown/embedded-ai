@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "embedded-ai",
   "version": "1.0.0",
   "description": "---",
@@ -18,6 +19,7 @@
   },
   "homepage": "https://github.com/nikbearbrown/embedded-ai#readme",
   "dependencies": {
+    "glob": "^13.0.6",
     "sharp": "^0.34.5"
   }
 }
