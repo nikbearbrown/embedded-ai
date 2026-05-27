@@ -1,71 +1,104 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t01 d01">
-  <title id="t01">Embedded memory hierarchy pyramid — registers, SRAM, flash, external memory</title>
-  <desc id="d01">A four-tier pyramid showing register file at the apex, SRAM beneath it, on-chip flash next, and external PSRAM or SDRAM at the base. Each tier labeled with size range, access latency, volatility, and what lives there.</desc>
+<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig-title-01">
+  <!--
+    Embedded memory hierarchy
+    Book: Embedded AI
+    Chapter: chapter-05-memory
+    Figure: 01
+    Type: structural schematic
+    Generated: 2026-05-27
+    Source: pantry/chapter-05-memory-cajal.md
+  -->
+  <title id="fig-title-01">Embedded memory hierarchy</title>
+  <desc>Four embedded memory tiers arranged from fastest and smallest to slowest and largest, with latency, capacity, volatility, and typical embedded-AI artifacts labeled for each tier.</desc>
+  <metadata>
+    <cajal:figure
+      xmlns:cajal="https://bearbrown.ai/cajal/1.0"
+      book="Embedded AI"
+      book-slug="embedded-ai"
+      chapter="chapter-05-memory"
+      figure-number="01"
+      figure-title="Embedded memory hierarchy"
+      figure-slug="embedded-memory-hierarchy"
+      figure-type="structural schematic"
+      priority="unranked"
+      author="Aditi Shinde &amp; Nik Bear Brown"
+      date-generated="2026-05-27"
+      source-file="pantry/chapter-05-memory-cajal.md"
+    />
+  </metadata>
   <defs>
-    <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-    </style>
-    <marker id="ar1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
+    <style>
+      text { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; }
+      .title { font-size: 16px; font-weight: 700; fill: #000000; }
+      .subtitle { font-size: 13px; font-weight: 400; fill: #555555; }
+      .header { font-size: 11px; font-weight: 700; fill: #555555; letter-spacing: 0.03em; }
+      .tier-name { font-size: 13px; font-weight: 700; fill: #000000; }
+      .body { font-size: 12px; font-weight: 400; fill: #000000; }
+      .small { font-size: 11px; font-weight: 400; fill: #555555; }
+      .axis { font-size: 11px; font-weight: 400; fill: #555555; }
+      .caption { font-size: 12px; font-weight: 400; fill: #555555; }
+      .bar { stroke: #000000; stroke-width: 1.25; }
+      .guide { stroke: #CCCCCC; stroke-width: 0.75; stroke-dasharray: 4 3; fill: none; }
+      .rule { stroke: #CCCCCC; stroke-width: 0.75; }
+    </style>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
 
-  <text x="32" y="28" class="ti">Embedded memory hierarchy</text>
-  <text x="32" y="44" class="sm">faster, smaller, more expensive per byte at the top</text>
+  <rect width="900" height="520" fill="#FFFFFF"/>
 
-  <!-- pyramid centered around x=300; tiers stacked top to bottom -->
-  <!-- tier 1: registers (apex) -->
-  <polygon points="280,70 320,70 330,110 270,110" fill="#2a1a0e"/>
-  <text x="300" y="93" text-anchor="middle" class="lb" fill="#fdfcfb">REGISTERS</text>
+  <text x="40" y="38" class="title">Embedded memory hierarchy</text>
+  <text x="40" y="60" class="subtitle">Read top to bottom: latency rises as capacity expands and placement becomes a deployment decision.</text>
 
-  <!-- tier 2: SRAM -->
-  <polygon points="270,110 330,110 360,180 240,180" fill="#4a4540"/>
-  <text x="300" y="138" text-anchor="middle" class="lb" fill="#fdfcfb">SRAM</text>
-  <text x="300" y="154" text-anchor="middle" class="sm" fill="#fdfcfb">64 KB – 2 MB · 1–2 cycle</text>
-  <text x="300" y="168" text-anchor="middle" class="sm" fill="#fdfcfb">volatile · writable</text>
+  <text x="40" y="104" class="header">LATENCY</text>
+  <text x="142" y="104" class="header">TIER</text>
+  <text x="322" y="104" class="header">CAPACITY SCALE</text>
+  <text x="660" y="104" class="header">WHAT LIVES THERE</text>
+  <line x1="40" y1="116" x2="860" y2="116" class="rule"/>
 
-  <!-- tier 3: on-chip flash -->
-  <polygon points="240,180 360,180 400,270 200,270" fill="#8a8480"/>
-  <text x="300" y="210" text-anchor="middle" class="lb" fill="#fdfcfb">ON-CHIP FLASH</text>
-  <text x="300" y="226" text-anchor="middle" class="sm" fill="#fdfcfb">512 KB – 2 MB · 10–50 cycle</text>
-  <text x="300" y="240" text-anchor="middle" class="sm" fill="#fdfcfb">non-volatile · ~100K erase</text>
-  <text x="300" y="254" text-anchor="middle" class="sm" fill="#fdfcfb">read-only at runtime</text>
+  <line x1="78" y1="136" x2="78" y2="424" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="62" y="146" text-anchor="end" class="axis">1 cycle</text>
+  <text x="62" y="214" text-anchor="end" class="axis">1-2 cycles</text>
+  <text x="62" y="290" text-anchor="end" class="axis">10-50 cycles</text>
+  <text x="62" y="380" text-anchor="end" class="axis">100s cycles</text>
 
-  <!-- tier 4: external memory -->
-  <polygon points="200,270 400,270 450,360 150,360" fill="#c8c4c0"/>
-  <text x="300" y="300" text-anchor="middle" class="lb">EXTERNAL PSRAM / SDRAM</text>
-  <text x="300" y="316" text-anchor="middle" class="sm">MB – GB · 10–50× SRAM latency</text>
-  <text x="300" y="330" text-anchor="middle" class="sm">overflow capacity · BOM + power cost</text>
+  <g id="row-registers">
+    <line x1="96" y1="144" x2="860" y2="144" class="guide"/>
+    <text x="142" y="138" class="tier-name">Registers</text>
+    <text x="142" y="156" class="small">bytes to words</text>
+    <rect x="322" y="127" width="88" height="34" class="bar" fill="#C8102E"/>
+    <text x="660" y="138" class="body">Active working set</text>
+    <text x="660" y="156" class="small">fastest access; compiler and CPU owned</text>
+  </g>
 
-  <!-- left side: latency axis -->
-  <line x1="80" y1="70" x2="80" y2="360" stroke="#8a8480" stroke-width="1" marker-end="url(#ar1)"/>
-  <text x="80" y="60" text-anchor="middle" class="ax">latency ↓</text>
-  <text x="68" y="90" text-anchor="end" class="sm">1 cycle</text>
-  <text x="68" y="148" text-anchor="end" class="sm">1–2 cy</text>
-  <text x="68" y="220" text-anchor="end" class="sm">10–50 cy</text>
-  <text x="68" y="320" text-anchor="end" class="sm">100s cy</text>
+  <g id="row-sram">
+    <line x1="96" y1="212" x2="860" y2="212" class="guide"/>
+    <text x="142" y="206" class="tier-name">SRAM</text>
+    <text x="142" y="224" class="small">64 KB-2 MB</text>
+    <rect x="322" y="187" width="146" height="50" class="bar" fill="#000000"/>
+    <text x="660" y="206" class="body">Stack, heap, activations</text>
+    <text x="660" y="224" class="small">DMA scratch; volatile runtime state</text>
+  </g>
 
-  <!-- right side: what lives where -->
-  <text x="490" y="92" class="lb">working set</text>
-  <line x1="330" y1="90" x2="488" y2="90" stroke="#4a4540" stroke-dasharray="2 3" stroke-width="0.75"/>
+  <g id="row-flash">
+    <line x1="96" y1="290" x2="860" y2="290" class="guide"/>
+    <text x="142" y="282" class="tier-name">On-chip flash</text>
+    <text x="142" y="300" class="small">512 KB-2 MB</text>
+    <rect x="322" y="258" width="224" height="64" class="bar" fill="#787878"/>
+    <text x="660" y="282" class="body">Firmware and model weights</text>
+    <text x="660" y="300" class="small">bias tables, LUTs, read-mostly assets</text>
+  </g>
 
-  <text x="490" y="148" class="lb">stack / heap / activations</text>
-  <text x="490" y="162" class="sm">DMA + scratch buffers</text>
-  <line x1="360" y1="145" x2="488" y2="145" stroke="#4a4540" stroke-dasharray="2 3" stroke-width="0.75"/>
+  <g id="row-external">
+    <line x1="96" y1="380" x2="860" y2="380" class="guide"/>
+    <text x="142" y="372" class="tier-name">External PSRAM / SDRAM</text>
+    <text x="142" y="390" class="small">MB-GB</text>
+    <rect x="322" y="342" width="300" height="76" class="bar" fill="#F5F5F5"/>
+    <text x="660" y="372" class="body">Overflow buffers</text>
+    <text x="660" y="390" class="small">large tensors; frame buffers; overflow</text>
+  </g>
 
-  <text x="490" y="218" class="lb">firmware + model weights</text>
-  <text x="490" y="232" class="sm">biases + activation LUTs</text>
-  <line x1="395" y1="215" x2="488" y2="215" stroke="#4a4540" stroke-dasharray="2 3" stroke-width="0.75"/>
-
-  <text x="490" y="308" class="lb">overflow weights / buffers</text>
-  <text x="490" y="322" class="sm">when on-chip cannot fit</text>
-  <line x1="445" y1="305" x2="488" y2="305" stroke="#4a4540" stroke-dasharray="2 3" stroke-width="0.75"/>
-
-  <!-- caption -->
-  <text x="350" y="395" text-anchor="middle" class="cap">Each tier trades latency and cost for capacity; the embedded-AI question is which artifact lives in which tier.</text>
+  <line x1="322" y1="452" x2="622" y2="452" stroke="#A4804A" stroke-width="2"/>
+  <text x="322" y="476" class="caption">Deployment question: which artifact belongs in the fastest tier that can hold it?</text>
 </svg>

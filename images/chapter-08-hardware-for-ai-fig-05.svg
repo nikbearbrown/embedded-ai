@@ -3,17 +3,17 @@
   <desc id="d05">Three small-multiples panels compare three deployments of a YOLO object-detection model. Each panel plots three bars: cost in dollars, power in watts, and latency in milliseconds per frame. Raspberry Pi Zero 2 W CPU-only costs 15 dollars, draws 1.5 watts, takes 2500 ms. Coral Edge TPU plus an A53 host costs 60 dollars, draws 2 watts, takes 25 ms. Xilinx Zynq-7020 FPGA with a custom YOLO accelerator costs 150 dollars, draws 3 watts, takes 15 ms. A callout names the Coral TPU as the commercial sweet spot.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .val { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .val { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">Same YOLO model, three platforms</text>
   <text x="32" y="48" class="sm">cost, power, latency per frame — log scale on latency</text>
@@ -21,28 +21,28 @@
   <!-- Three panels: x=40..240, 260..460, 480..680 -->
   <!-- PANEL 1: Raspberry Pi Zero 2 W (CPU-only) -->
   <g>
-    <rect x="40" y="80" width="200" height="320" fill="none" stroke="#c8c4c0" stroke-width="0.75"/>
+    <rect x="40" y="80" width="200" height="320" fill="none" stroke="#ADADAD" stroke-width="0.75"/>
     <text x="140" y="100" text-anchor="middle" class="lb">Raspberry Pi Zero 2 W</text>
     <text x="140" y="116" text-anchor="middle" class="sm">CPU-only · quad A53 1 GHz</text>
 
     <!-- Cost bar: $15 (max $200 -> scale) -->
     <text x="70" y="148" class="sm">cost</text>
     <text x="220" y="148" text-anchor="end" class="val">$15</text>
-    <line x1="70" y1="158" x2="220" y2="158" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="70" y="152" width="11.25" height="10" fill="#c8c4c0"/>
+    <line x1="70" y1="158" x2="220" y2="158" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="70" y="152" width="11.25" height="10" fill="#ADADAD"/>
 
     <!-- Power: 1.5 W (max 3.5 W) -->
     <text x="70" y="200" class="sm">power</text>
     <text x="220" y="200" text-anchor="end" class="val">1.5 W</text>
-    <line x1="70" y1="210" x2="220" y2="210" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="70" y="204" width="64" height="10" fill="#8a8480"/>
+    <line x1="70" y1="210" x2="220" y2="210" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="70" y="204" width="64" height="10" fill="#787878"/>
 
     <!-- Latency: 2500 ms (log scale: 10 to 10000 -> 4 decades over 150 px = 37.5 each) -->
     <!-- For 2500: log10(2500)-log10(10)=2.398 → 89.9 px -->
     <text x="70" y="252" class="sm">latency</text>
     <text x="220" y="252" text-anchor="end" class="val">2500 ms</text>
-    <line x1="70" y1="262" x2="220" y2="262" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="70" y="256" width="135" height="10" fill="#2a1a0e"/>
+    <line x1="70" y1="262" x2="220" y2="262" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="70" y="256" width="135" height="10" fill="#000000"/>
 
     <text x="140" y="320" text-anchor="middle" class="sm">fails real-time</text>
     <text x="140" y="336" text-anchor="middle" class="sm">cheapest, slowest</text>
@@ -50,25 +50,25 @@
 
   <!-- PANEL 2: Coral Edge TPU + A53 -->
   <g>
-    <rect x="260" y="80" width="200" height="320" fill="none" stroke="#2a1a0e" stroke-width="1.5"/>
+    <rect x="260" y="80" width="200" height="320" fill="none" stroke="#000000" stroke-width="1.5"/>
     <text x="360" y="100" text-anchor="middle" class="lb">Coral Edge TPU + A53</text>
     <text x="360" y="116" text-anchor="middle" class="sm">NPU · dedicated inference engine</text>
 
     <text x="290" y="148" class="sm">cost</text>
     <text x="440" y="148" text-anchor="end" class="val">$60</text>
-    <line x1="290" y1="158" x2="440" y2="158" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="290" y="152" width="45" height="10" fill="#c8c4c0"/>
+    <line x1="290" y1="158" x2="440" y2="158" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="290" y="152" width="45" height="10" fill="#ADADAD"/>
 
     <text x="290" y="200" class="sm">power</text>
     <text x="440" y="200" text-anchor="end" class="val">2 W</text>
-    <line x1="290" y1="210" x2="440" y2="210" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="290" y="204" width="85.7" height="10" fill="#8a8480"/>
+    <line x1="290" y1="210" x2="440" y2="210" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="290" y="204" width="85.7" height="10" fill="#787878"/>
 
     <!-- Latency 25 ms: log10(25)-1 = 0.398 → 14.9 px -->
     <text x="290" y="252" class="sm">latency</text>
     <text x="440" y="252" text-anchor="end" class="val">25 ms</text>
-    <line x1="290" y1="262" x2="440" y2="262" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="290" y="256" width="22" height="10" fill="#2a1a0e"/>
+    <line x1="290" y1="262" x2="440" y2="262" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="290" y="256" width="22" height="10" fill="#000000"/>
 
     <text x="360" y="320" text-anchor="middle" class="lb">commercial sweet spot</text>
     <text x="360" y="336" text-anchor="middle" class="sm">100× CPU at 4× cost · off-the-shelf</text>
@@ -76,32 +76,32 @@
 
   <!-- PANEL 3: Xilinx Zynq-7020 FPGA -->
   <g>
-    <rect x="480" y="80" width="200" height="320" fill="none" stroke="#c8c4c0" stroke-width="0.75"/>
+    <rect x="480" y="80" width="200" height="320" fill="none" stroke="#ADADAD" stroke-width="0.75"/>
     <text x="580" y="100" text-anchor="middle" class="lb">Xilinx Zynq-7020 FPGA</text>
     <text x="580" y="116" text-anchor="middle" class="sm">custom YOLO accelerator in fabric</text>
 
     <text x="510" y="148" class="sm">cost</text>
     <text x="660" y="148" text-anchor="end" class="val">$150</text>
-    <line x1="510" y1="158" x2="660" y2="158" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="510" y="152" width="112.5" height="10" fill="#c8c4c0"/>
+    <line x1="510" y1="158" x2="660" y2="158" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="510" y="152" width="112.5" height="10" fill="#ADADAD"/>
 
     <text x="510" y="200" class="sm">power</text>
     <text x="660" y="200" text-anchor="end" class="val">3 W</text>
-    <line x1="510" y1="210" x2="660" y2="210" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="510" y="204" width="128.6" height="10" fill="#8a8480"/>
+    <line x1="510" y1="210" x2="660" y2="210" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="510" y="204" width="128.6" height="10" fill="#787878"/>
 
     <!-- Latency 15 ms: log10(15)-1=0.176 → 6.6 px -->
     <text x="510" y="252" class="sm">latency</text>
     <text x="660" y="252" text-anchor="end" class="val">15 ms</text>
-    <line x1="510" y1="262" x2="660" y2="262" stroke="#c8c4c0" stroke-width="0.5"/>
-    <rect x="510" y="256" width="13.2" height="10" fill="#2a1a0e"/>
+    <line x1="510" y1="262" x2="660" y2="262" stroke="#ADADAD" stroke-width="0.5"/>
+    <rect x="510" y="256" width="13.2" height="10" fill="#000000"/>
 
     <text x="580" y="320" text-anchor="middle" class="sm">1.7× faster than TPU</text>
     <text x="580" y="336" text-anchor="middle" class="sm">2.5× cost · 6 months HDL work</text>
   </g>
 
   <!-- Callout connecting Panel 2 -->
-  <path d="M 360 360 L 360 388" fill="none" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+  <path d="M 360 360 L 360 388" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)"/>
   <text x="360" y="404" text-anchor="middle" class="lb">cheapest path through cost · power · latency</text>
 
   <!-- Caption -->

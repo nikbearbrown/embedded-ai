@@ -3,38 +3,38 @@
   <desc id="d05">Oscilloscope-style current trace over a 2-second window. Features in order: sleep floor at 10 microamps, narrow sensor-acquisition spike at 15 milliamps, taller inference burst at 80 milliamps for 150 ms, brief return to sleep, then a wide 100 milliamp LoRa transmit envelope, return to sleep floor.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .energy { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #8a6a3e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .energy { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #A4804A; }
     </style>
     <marker id="ar5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
   <text x="350" y="28" text-anchor="middle" class="ti">Power profile of one duty cycle</text>
   <text x="350" y="44" text-anchor="middle" class="sm">measured by current-sense resistor · log-scaled current</text>
 
   <!-- chart area: x 80..660, y 70..340 -->
-  <line x1="80" y1="70" x2="80" y2="340" stroke="#8a8480"/>
-  <line x1="80" y1="340" x2="660" y2="340" stroke="#8a8480"/>
+  <line x1="80" y1="70" x2="80" y2="340" stroke="#787878"/>
+  <line x1="80" y1="340" x2="660" y2="340" stroke="#787878"/>
 
   <!-- log y axis: 1 µA, 10 µA, 100 µA, 1 mA, 10 mA, 100 mA -->
   <!-- decades evenly spaced: 5 decades from y=340 (1 µA) to y=80 (100 mA), step 52 -->
   <text x="74" y="343" text-anchor="end" class="sm">1 µA</text>
-  <line x1="78" y1="340" x2="80" y2="340" stroke="#4a4540"/>
+  <line x1="78" y1="340" x2="80" y2="340" stroke="#555555"/>
   <text x="74" y="291" text-anchor="end" class="sm">10 µA</text>
-  <line x1="78" y1="288" x2="80" y2="288" stroke="#4a4540"/>
+  <line x1="78" y1="288" x2="80" y2="288" stroke="#555555"/>
   <text x="74" y="239" text-anchor="end" class="sm">100 µA</text>
-  <line x1="78" y1="236" x2="80" y2="236" stroke="#4a4540"/>
+  <line x1="78" y1="236" x2="80" y2="236" stroke="#555555"/>
   <text x="74" y="187" text-anchor="end" class="sm">1 mA</text>
-  <line x1="78" y1="184" x2="80" y2="184" stroke="#4a4540"/>
+  <line x1="78" y1="184" x2="80" y2="184" stroke="#555555"/>
   <text x="74" y="135" text-anchor="end" class="sm">10 mA</text>
-  <line x1="78" y1="132" x2="80" y2="132" stroke="#4a4540"/>
+  <line x1="78" y1="132" x2="80" y2="132" stroke="#555555"/>
   <text x="74" y="83" text-anchor="end" class="sm">100 mA</text>
-  <line x1="78" y1="80" x2="80" y2="80" stroke="#4a4540"/>
+  <line x1="78" y1="80" x2="80" y2="80" stroke="#555555"/>
   <text x="32" y="200" class="sm" transform="rotate(-90 32 200)">current (log scale)</text>
 
   <!-- time axis 0..2 s, 580 px → 290 px per second -->
@@ -46,64 +46,64 @@
   <text x="370" y="370" text-anchor="middle" class="sm">time (s)</text>
 
   <!-- baseline sleep at 10 µA (y=288) — full width -->
-  <line x1="80"  y1="288" x2="170" y2="288" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="170" y1="288" x2="170" y2="160" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="80"  y1="288" x2="170" y2="288" stroke="#000000" stroke-width="2"/>
+  <line x1="170" y1="288" x2="170" y2="160" stroke="#000000" stroke-width="2"/>
 
   <!-- sensor acquisition: 15 mA for 30 ms → ~9 px wide at y≈153 -->
-  <line x1="170" y1="160" x2="170" y2="156" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="170" y1="156" x2="180" y2="156" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="180" y1="156" x2="180" y2="288" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="170" y1="160" x2="170" y2="156" stroke="#000000" stroke-width="2"/>
+  <line x1="170" y1="156" x2="180" y2="156" stroke="#000000" stroke-width="2"/>
+  <line x1="180" y1="156" x2="180" y2="288" stroke="#000000" stroke-width="2"/>
 
   <!-- sleep gap 180..240 -->
-  <line x1="180" y1="288" x2="240" y2="288" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="240" y1="288" x2="240" y2="98" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="180" y1="288" x2="240" y2="288" stroke="#000000" stroke-width="2"/>
+  <line x1="240" y1="288" x2="240" y2="98" stroke="#000000" stroke-width="2"/>
 
   <!-- inference burst: 80 mA for 150 ms → 43 px wide at y≈95 -->
-  <line x1="240" y1="98" x2="283" y2="98" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="283" y1="98" x2="283" y2="288" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="240" y1="98" x2="283" y2="98" stroke="#000000" stroke-width="2"/>
+  <line x1="283" y1="98" x2="283" y2="288" stroke="#000000" stroke-width="2"/>
 
   <!-- sleep gap 283..400 -->
-  <line x1="283" y1="288" x2="400" y2="288" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="400" y1="288" x2="400" y2="92" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="283" y1="288" x2="400" y2="288" stroke="#000000" stroke-width="2"/>
+  <line x1="400" y1="288" x2="400" y2="92" stroke="#000000" stroke-width="2"/>
 
   <!-- LoRa transmit envelope: 100 mA for 700 ms → 203 px wide at y≈82 -->
-  <line x1="400" y1="92" x2="603" y2="92" stroke="#2a1a0e" stroke-width="2"/>
-  <line x1="603" y1="92" x2="603" y2="288" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="400" y1="92" x2="603" y2="92" stroke="#000000" stroke-width="2"/>
+  <line x1="603" y1="92" x2="603" y2="288" stroke="#000000" stroke-width="2"/>
 
   <!-- final sleep -->
-  <line x1="603" y1="288" x2="660" y2="288" stroke="#2a1a0e" stroke-width="2"/>
+  <line x1="603" y1="288" x2="660" y2="288" stroke="#000000" stroke-width="2"/>
 
   <!-- shaded fills under each region (simplified) -->
-  <rect x="170" y="156" width="10" height="184" fill="#2a1a0e" fill-opacity="0.18"/>
-  <rect x="240" y="98"  width="43" height="242" fill="#2a1a0e" fill-opacity="0.30"/>
-  <rect x="400" y="92"  width="203" height="248" fill="#2a1a0e" fill-opacity="0.22"/>
+  <rect x="170" y="156" width="10" height="184" fill="#000000" fill-opacity="0.18"/>
+  <rect x="240" y="98"  width="43" height="242" fill="#000000" fill-opacity="0.30"/>
+  <rect x="400" y="92"  width="203" height="248" fill="#000000" fill-opacity="0.22"/>
 
   <!-- labels with leader lines -->
   <!-- sleep -->
-  <path d="M 120 260 L 120 296" fill="none" stroke="#4a4540" stroke-width="0.8" marker-end="url(#ar5)"/>
+  <path d="M 120 260 L 120 296" fill="none" stroke="#555555" stroke-width="0.8" marker-end="url(#ar5)"/>
   <text x="120" y="252" text-anchor="middle" class="lb">sleep · 10 µA</text>
   <text x="120" y="266" text-anchor="middle" class="energy">≈ 0 mJ</text>
 
   <!-- sensor -->
-  <path d="M 175 110 L 175 152" fill="none" stroke="#4a4540" stroke-width="0.8" marker-end="url(#ar5)"/>
+  <path d="M 175 110 L 175 152" fill="none" stroke="#555555" stroke-width="0.8" marker-end="url(#ar5)"/>
   <text x="175" y="102" text-anchor="middle" class="lb">sensor</text>
   <text x="175" y="116" text-anchor="middle" class="sm">15 mA · 30 ms</text>
   <text x="175" y="378" text-anchor="middle" class="energy">1.5 mJ</text>
 
   <!-- inference -->
-  <path d="M 261 56 L 261 94" fill="none" stroke="#4a4540" stroke-width="0.8" marker-end="url(#ar5)"/>
+  <path d="M 261 56 L 261 94" fill="none" stroke="#555555" stroke-width="0.8" marker-end="url(#ar5)"/>
   <text x="261" y="48" text-anchor="middle" class="lb">inference</text>
   <text x="261" y="62" text-anchor="middle" class="sm">80 mA · 150 ms</text>
   <text x="261" y="378" text-anchor="middle" class="energy">39.6 mJ</text>
 
   <!-- LoRa transmit -->
-  <path d="M 500 56 L 500 88" fill="none" stroke="#4a4540" stroke-width="0.8" marker-end="url(#ar5)"/>
+  <path d="M 500 56 L 500 88" fill="none" stroke="#555555" stroke-width="0.8" marker-end="url(#ar5)"/>
   <text x="500" y="48" text-anchor="middle" class="lb">LoRa transmit</text>
   <text x="500" y="62" text-anchor="middle" class="sm">100 mA · 700 ms</text>
   <text x="500" y="378" text-anchor="middle" class="energy">231 mJ</text>
 
   <!-- total -->
-  <line x1="80" y1="395" x2="660" y2="395" stroke="#c8c4c0"/>
+  <line x1="80" y1="395" x2="660" y2="395" stroke="#ADADAD"/>
   <text x="80"  y="412" class="lb">total per cycle ≈ 272 mJ</text>
   <text x="660" y="412" text-anchor="end" class="sm">radio dominates — 85% of the energy bill</text>
 

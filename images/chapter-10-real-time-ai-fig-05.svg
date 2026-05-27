@@ -3,22 +3,22 @@
   <desc id="d10f5">A three-track timeline. The top track is a 1 kHz control loop reading fault_probability and fault_flag every millisecond. The middle track is an asynchronous AI inference firing every 50 milliseconds with 35 to 55 millisecond execution bars. The bottom track is the RMS backup detector running every millisecond. A fault onset event triggers the RMS detector at +2 ms while the AI does not finish until +40 ms.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
-      .eb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9px; letter-spacing: 0.5px; fill: #4a4540; }
-      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9px; fill: #4a4540; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .eb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; letter-spacing: 0.5px; fill: #555555; }
+      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; fill: #555555; }
     </style>
     <marker id="ar1f5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
     <marker id="ar2f5" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
-      <polygon points="0 0, 6 2, 0 4" fill="#4a4540"/>
+      <polygon points="0 0, 6 2, 0 4" fill="#555555"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">CNC milling integration — three tracks, three deadlines, one safety outcome</text>
   <text x="32" y="48" class="sm">Spindle 10,000 RPM · 1 ms control loop · 5 ms shutdown budget · AI takes 35–55 ms per inference</text>
@@ -26,7 +26,7 @@
   <!-- Time axis 60..640 covers 0..60 ms. 1 ms = 9.67 px ~ 10 px (use 60..640 = 580 px / 60 ms = 9.667 px/ms) -->
   <!-- Use scale: t_ms → x = 60 + t*9.667 -->
   <!-- gridlines at 0, 10, 20, 30, 40, 50, 60 ms -->
-  <g stroke="#c8c4c0" stroke-width="0.5" stroke-dasharray="2 3">
+  <g stroke="#ADADAD" stroke-width="0.5" stroke-dasharray="2 3">
     <line x1="60"  y1="80" x2="60"  y2="340"/>
     <line x1="157" y1="80" x2="157" y2="340"/>
     <line x1="253" y1="80" x2="253" y2="340"/>
@@ -37,7 +37,7 @@
   </g>
 
   <!-- x-axis at y=340 -->
-  <line x1="60" y1="340" x2="640" y2="340" stroke="#4a4540"/>
+  <line x1="60" y1="340" x2="640" y2="340" stroke="#555555"/>
   <text x="60"  y="356" text-anchor="middle" class="ax">0</text>
   <text x="157" y="356" text-anchor="middle" class="ax">10</text>
   <text x="253" y="356" text-anchor="middle" class="ax">20</text>
@@ -52,9 +52,9 @@
   <text x="32" y="100" class="nm">reads fault_flag, fault_probability</text>
   <text x="32" y="112" class="sm">deadline 1 ms · deterministic</text>
   <g>
-    <line x1="60" y1="118" x2="640" y2="118" stroke="#4a4540" stroke-width="0.75"/>
+    <line x1="60" y1="118" x2="640" y2="118" stroke="#555555" stroke-width="0.75"/>
     <!-- 60 ticks: every ~9.67 px -->
-    <g fill="#2a1a0e">
+    <g fill="#000000">
       <rect x="60"   y="114" width="2" height="8"/>
       <rect x="69.7" y="114" width="2" height="8"/>
       <rect x="79.3" y="114" width="2" height="8"/>
@@ -125,13 +125,13 @@
 
   <g>
     <!-- inference bar starting at t=0 ms, running 38 ms -> from x=60 to x=60+38*9.67=427 -->
-    <rect x="60" y="184" width="367" height="20" fill="#f5f2ee" stroke="#4a4540" stroke-width="0.75"/>
+    <rect x="60" y="184" width="367" height="20" fill="#F5F5F5" stroke="#555555" stroke-width="0.75"/>
     <text x="244" y="198" text-anchor="middle" class="sm">inference run · 38 ms</text>
     <!-- second inference scheduled at 50 ms -->
-    <rect x="543" y="184" width="100" height="20" fill="#f5f2ee" stroke="#4a4540" stroke-width="0.75" stroke-dasharray="3 2"/>
+    <rect x="543" y="184" width="100" height="20" fill="#F5F5F5" stroke="#555555" stroke-width="0.75" stroke-dasharray="3 2"/>
     <text x="593" y="198" text-anchor="middle" class="sm">next run · scheduled</text>
     <!-- fault_probability update point at end of inference -->
-    <circle cx="427" cy="194" r="4" fill="#2a1a0e"/>
+    <circle cx="427" cy="194" r="4" fill="#000000"/>
     <text x="438" y="178" class="sm">fault_probability ← 0.97 (set at +38 ms)</text>
   </g>
 
@@ -141,9 +141,9 @@
   <text x="32" y="256" class="sm">trips fault_flag on threshold</text>
 
   <g>
-    <line x1="60" y1="270" x2="640" y2="270" stroke="#4a4540" stroke-width="0.75"/>
+    <line x1="60" y1="270" x2="640" y2="270" stroke="#555555" stroke-width="0.75"/>
     <!-- Sample points at every 1 ms - draw as a step curve with small ticks below the line, going up after threshold trip at t=2 ms -->
-    <g fill="#4a4540">
+    <g fill="#555555">
       <rect x="60"   y="266" width="2" height="8"/>
       <rect x="69.7" y="266" width="2" height="8"/>
       <rect x="79.3" y="266" width="2" height="8"/>
@@ -177,29 +177,29 @@
       <rect x="350.0" y="266" width="2" height="8"/>
     </g>
     <!-- detection point at t=2 ms -> x = 60 + 2*9.67 = 79.3 -->
-    <circle cx="79.3" cy="270" r="5" fill="#2a1a0e"/>
+    <circle cx="79.3" cy="270" r="5" fill="#000000"/>
     <text x="84" y="262" class="sm">fault_flag ← true (at +2 ms)</text>
   </g>
 
   <!-- Vertical event lines -->
   <!-- t=0 fault onset, x=60 -->
-  <line x1="60" y1="76" x2="60" y2="320" stroke="#2a1a0e" stroke-width="1.5"/>
+  <line x1="60" y1="76" x2="60" y2="320" stroke="#000000" stroke-width="1.5"/>
   <text x="60" y="72" text-anchor="middle" class="nm">fault onset</text>
 
   <!-- t=2 ms RMS trip -->
-  <line x1="79.3" y1="296" x2="79.3" y2="320" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="79.3" y1="296" x2="79.3" y2="320" stroke="#000000" stroke-width="1" stroke-dasharray="3 2"/>
   <text x="79.3" y="312" text-anchor="start" class="sm" transform="rotate(0 79.3 312)"> </text>
 
   <!-- t=5 ms deadline -->
-  <line x1="108.3" y1="76" x2="108.3" y2="320" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="108.3" y1="76" x2="108.3" y2="320" stroke="#000000" stroke-width="1" stroke-dasharray="4 3"/>
   <text x="108.3" y="72" text-anchor="middle" class="nm">5 ms deadline</text>
 
   <!-- t=38 ms AI signal -->
-  <line x1="427" y1="76" x2="427" y2="320" stroke="#4a4540" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="427" y1="76" x2="427" y2="320" stroke="#555555" stroke-width="1" stroke-dasharray="3 2"/>
   <text x="427" y="72" text-anchor="middle" class="sm">AI advisory · +38 ms</text>
 
   <!-- Outcome annotation -->
-  <rect x="60" y="384" width="580" height="32" fill="#f5f2ee" stroke="#2a1a0e"/>
+  <rect x="60" y="384" width="580" height="32" fill="#F5F5F5" stroke="#000000"/>
   <text x="76" y="404" class="lb">shutdown triggered by RMS at +2 ms — well inside the 5 ms budget.</text>
   <text x="76" y="416" class="sm">AI advisory arrives at +38 ms and would have missed; it serves as early-warning on slower-developing faults, not as the guarantee.</text>
 

@@ -3,61 +3,61 @@
   <desc id="d03">A log-log scatter plot. The x-axis is MAC count from 10 to 100,000-plus. The y-axis is active power envelope from 1 milliwatt to 100 watts. Three clusters appear. Bottom-left cluster: microNPUs including Ethos-U55 and Syntiant NDP120 at 8 to 256 MACs and 0.2 to 200 milliwatts. Middle cluster: edge NPUs including Coral Edge TPU, Hailo-8, and Movidius at 100 to 1000 MACs and 0.5 to 5 watts. Top-right cluster: datacenter NPUs including Google TPU and NVIDIA TensorRT at over 10,000 MACs and 30 to 300 watts.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .dot { fill: #2a1a0e; }
-      .dot-em { fill: #2a1a0e; stroke: #fdfcfb; stroke-width: 1.5; }
-      .cluster { fill: none; stroke: #8a8480; stroke-width: 1; stroke-dasharray: 4 3; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .dot { fill: #000000; }
+      .dot-em { fill: #000000; stroke: #FFFFFF; stroke-width: 1.5; }
+      .cluster { fill: none; stroke: #787878; stroke-width: 1; stroke-dasharray: 4 3; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">NPU classes — MAC count vs active power</text>
   <text x="32" y="48" class="sm">log-log; only one cluster is the embedded class</text>
 
   <!-- Axes: x from 90..640 (550 px), y from 80..360 (280 px) -->
-  <line x1="90" y1="360" x2="640" y2="360" stroke="#8a8480"/>
-  <line x1="90" y1="80"  x2="90"  y2="360" stroke="#8a8480"/>
+  <line x1="90" y1="360" x2="640" y2="360" stroke="#787878"/>
+  <line x1="90" y1="80"  x2="90"  y2="360" stroke="#787878"/>
 
   <!-- X log ticks: 10, 100, 1k, 10k, 100k+ -> x positions evenly across 550 px / 4 decades = 137.5 each -->
   <g>
-    <line x1="90"   y1="358" x2="90"   y2="362" stroke="#4a4540"/>
+    <line x1="90"   y1="358" x2="90"   y2="362" stroke="#555555"/>
     <text x="90"   y="378" text-anchor="middle" class="sm">10</text>
-    <line x1="227.5" y1="358" x2="227.5" y2="362" stroke="#4a4540"/>
+    <line x1="227.5" y1="358" x2="227.5" y2="362" stroke="#555555"/>
     <text x="227.5" y="378" text-anchor="middle" class="sm">100</text>
-    <line x1="365"  y1="358" x2="365"  y2="362" stroke="#4a4540"/>
+    <line x1="365"  y1="358" x2="365"  y2="362" stroke="#555555"/>
     <text x="365"  y="378" text-anchor="middle" class="sm">1,000</text>
-    <line x1="502.5" y1="358" x2="502.5" y2="362" stroke="#4a4540"/>
+    <line x1="502.5" y1="358" x2="502.5" y2="362" stroke="#555555"/>
     <text x="502.5" y="378" text-anchor="middle" class="sm">10,000</text>
-    <line x1="640"  y1="358" x2="640"  y2="362" stroke="#4a4540"/>
+    <line x1="640"  y1="358" x2="640"  y2="362" stroke="#555555"/>
     <text x="640"  y="378" text-anchor="middle" class="sm">100,000+</text>
   </g>
   <text x="365" y="398" text-anchor="middle" class="sm">MAC count (log)</text>
 
   <!-- Y log ticks: 1 mW, 10, 100 mW, 1 W, 10 W, 100 W -> 5 decades over 280 px = 56 px each (top=80, bottom=360) -->
   <g>
-    <line x1="88" y1="360" x2="92" y2="360" stroke="#4a4540"/>
+    <line x1="88" y1="360" x2="92" y2="360" stroke="#555555"/>
     <text x="84" y="363" text-anchor="end" class="sm">1 mW</text>
-    <line x1="88" y1="304" x2="92" y2="304" stroke="#4a4540"/>
+    <line x1="88" y1="304" x2="92" y2="304" stroke="#555555"/>
     <text x="84" y="307" text-anchor="end" class="sm">10 mW</text>
-    <line x1="88" y1="248" x2="92" y2="248" stroke="#4a4540"/>
+    <line x1="88" y1="248" x2="92" y2="248" stroke="#555555"/>
     <text x="84" y="251" text-anchor="end" class="sm">100 mW</text>
-    <line x1="88" y1="192" x2="92" y2="192" stroke="#4a4540"/>
+    <line x1="88" y1="192" x2="92" y2="192" stroke="#555555"/>
     <text x="84" y="195" text-anchor="end" class="sm">1 W</text>
-    <line x1="88" y1="136" x2="92" y2="136" stroke="#4a4540"/>
+    <line x1="88" y1="136" x2="92" y2="136" stroke="#555555"/>
     <text x="84" y="139" text-anchor="end" class="sm">10 W</text>
-    <line x1="88" y1="80"  x2="92" y2="80"  stroke="#4a4540"/>
+    <line x1="88" y1="80"  x2="92" y2="80"  stroke="#555555"/>
     <text x="84" y="83"  text-anchor="end" class="sm">100 W</text>
   </g>
   <text x="32" y="220" text-anchor="middle" class="sm" transform="rotate(-90 32 220)">active power (log)</text>
 
   <!-- gridlines (light) -->
-  <g stroke="#e0dcd6" stroke-width="0.5">
+  <g stroke="#F5F5F5" stroke-width="0.5">
     <line x1="227.5" y1="80" x2="227.5" y2="360"/>
     <line x1="365"   y1="80" x2="365"   y2="360"/>
     <line x1="502.5" y1="80" x2="502.5" y2="360"/>
@@ -116,8 +116,8 @@
   <text x="585" y="127" text-anchor="middle" class="sm">H100 / TensorRT</text>
 
   <!-- Embedded box highlight -->
-  <rect x="105" y="240" width="130" height="120" fill="none" stroke="#2a1a0e" stroke-width="1.25"/>
-  <path d="M 240 300 L 280 300" fill="none" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar)"/>
+  <rect x="105" y="240" width="130" height="120" fill="none" stroke="#000000" stroke-width="1.25"/>
+  <path d="M 240 300 L 280 300" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar)"/>
   <text x="320" y="304" class="lb">the embedded class</text>
 
   <!-- Caption -->

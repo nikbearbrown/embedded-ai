@@ -3,20 +3,20 @@
   <desc id="d06">Sequential four-gate decision flowchart. Memory gate splits into flash and SRAM checks. Compute gate compares operations divided by sustained throughput against the latency budget. Power gate checks average and peak current against battery and supply limits. Real-time gate checks worst-case execution time plus margin against the deadline. Each gate branches to iterate or viable platform.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .gn { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11.5px; font-weight: bold; fill: #fdfcfb; }
-      .gs { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9.5px; fill: #fdfcfb; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10.5px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9.5px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .branchok { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #2a1a0e; }
-      .branchno { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #c8102e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .gn { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11.5px; font-weight: bold; fill: #FFFFFF; }
+      .gs { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9.5px; fill: #FFFFFF; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10.5px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9.5px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .branchok { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #000000; }
+      .branchno { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #C8102E; }
     </style>
     <marker id="ar6" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="350" y="26" text-anchor="middle" class="ti">Does this model deploy on this part?</text>
   <text x="350" y="42" text-anchor="middle" class="sm">four gates · all must pass · failure routes to iteration on the model side</text>
@@ -25,73 +25,73 @@
   <!-- Each diamond width 120, height 90 — drawn as polygon -->
 
   <!-- Gate 1 — MEMORY -->
-  <polygon points="110,90 180,135 110,180 40,135" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="1.5"/>
+  <polygon points="110,90 180,135 110,180 40,135" fill="#000000" stroke="#000000" stroke-width="1.5"/>
   <text x="110" y="125" text-anchor="middle" class="gn">memory</text>
   <text x="110" y="142" text-anchor="middle" class="gs">weights fit flash?</text>
   <text x="110" y="156" text-anchor="middle" class="gs">arena+system &lt; SRAM?</text>
 
   <!-- Gate 2 — COMPUTE -->
-  <polygon points="270,90 340,135 270,180 200,135" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="1.5"/>
+  <polygon points="270,90 340,135 270,180 200,135" fill="#000000" stroke="#000000" stroke-width="1.5"/>
   <text x="270" y="125" text-anchor="middle" class="gn">compute</text>
   <text x="270" y="142" text-anchor="middle" class="gs">ops / throughput</text>
   <text x="270" y="156" text-anchor="middle" class="gs">&lt; latency budget?</text>
 
   <!-- Gate 3 — POWER -->
-  <polygon points="430,90 500,135 430,180 360,135" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="1.5"/>
+  <polygon points="430,90 500,135 430,180 360,135" fill="#000000" stroke="#000000" stroke-width="1.5"/>
   <text x="430" y="121" text-anchor="middle" class="gn">power</text>
   <text x="430" y="138" text-anchor="middle" class="gs">avg I within battery?</text>
   <text x="430" y="152" text-anchor="middle" class="gs">peak I within supply?</text>
 
   <!-- Gate 4 — REAL-TIME -->
-  <polygon points="590,90 660,135 590,180 520,135" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="1.5"/>
+  <polygon points="590,90 660,135 590,180 520,135" fill="#000000" stroke="#000000" stroke-width="1.5"/>
   <text x="590" y="121" text-anchor="middle" class="gn">real-time</text>
   <text x="590" y="138" text-anchor="middle" class="gs">WCET + margin</text>
   <text x="590" y="152" text-anchor="middle" class="gs">&lt; deadline?</text>
 
   <!-- Arrows: gate to gate (yes branch) -->
-  <line x1="180" y1="135" x2="195" y2="135" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="180" y1="135" x2="195" y2="135" stroke="#000000" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="187" y="125" text-anchor="middle" class="branchok">yes</text>
-  <line x1="340" y1="135" x2="355" y2="135" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="340" y1="135" x2="355" y2="135" stroke="#000000" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="347" y="125" text-anchor="middle" class="branchok">yes</text>
-  <line x1="500" y1="135" x2="515" y2="135" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="500" y1="135" x2="515" y2="135" stroke="#000000" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="507" y="125" text-anchor="middle" class="branchok">yes</text>
 
   <!-- Inlet arrow -->
-  <line x1="20" y1="135" x2="35" y2="135" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="20" y1="135" x2="35" y2="135" stroke="#000000" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="20" y="125" text-anchor="middle" class="sm">candidate</text>
   <text x="20" y="148" text-anchor="middle" class="sm">model + part</text>
 
   <!-- Final "viable" terminal -->
-  <rect x="595" y="220" width="80" height="40" fill="#c8c4c0" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="595" y="220" width="80" height="40" fill="#ADADAD" stroke="#000000" stroke-width="1.25"/>
   <text x="635" y="237" text-anchor="middle" class="lb">VIABLE</text>
   <text x="635" y="251" text-anchor="middle" class="sm">deploy</text>
-  <line x1="590" y1="180" x2="630" y2="218" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="590" y1="180" x2="630" y2="218" stroke="#000000" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="617" y="200" class="branchok">yes</text>
 
   <!-- Failure branches go DOWN to iterate boxes -->
   <!-- Iterate row at y=290..330 -->
-  <rect x="50" y="260" width="120" height="90" fill="#fdfcfb" stroke="#c8102e" stroke-width="1.25"/>
+  <rect x="50" y="260" width="120" height="90" fill="#FFFFFF" stroke="#C8102E" stroke-width="1.25"/>
   <text x="110" y="278" text-anchor="middle" class="lb">iterate model</text>
   <text x="110" y="294" text-anchor="middle" class="sm">· quantize weights</text>
   <text x="110" y="308" text-anchor="middle" class="sm">· prune layers</text>
   <text x="110" y="322" text-anchor="middle" class="sm">· shrink activations</text>
   <text x="110" y="340" text-anchor="middle" class="sm">→ retry from gate 1</text>
 
-  <rect x="210" y="260" width="120" height="90" fill="#fdfcfb" stroke="#c8102e" stroke-width="1.25"/>
+  <rect x="210" y="260" width="120" height="90" fill="#FFFFFF" stroke="#C8102E" stroke-width="1.25"/>
   <text x="270" y="278" text-anchor="middle" class="lb">iterate compute</text>
   <text x="270" y="294" text-anchor="middle" class="sm">· raise clock</text>
   <text x="270" y="308" text-anchor="middle" class="sm">· int8 + SIMD</text>
   <text x="270" y="322" text-anchor="middle" class="sm">· shrink model</text>
   <text x="270" y="340" text-anchor="middle" class="sm">→ retry from gate 2</text>
 
-  <rect x="370" y="260" width="120" height="90" fill="#fdfcfb" stroke="#c8102e" stroke-width="1.25"/>
+  <rect x="370" y="260" width="120" height="90" fill="#FFFFFF" stroke="#C8102E" stroke-width="1.25"/>
   <text x="430" y="278" text-anchor="middle" class="lb">iterate power</text>
   <text x="430" y="294" text-anchor="middle" class="sm">· stretch duty cycle</text>
   <text x="430" y="308" text-anchor="middle" class="sm">· bulk cap for peak</text>
   <text x="430" y="322" text-anchor="middle" class="sm">· larger battery</text>
   <text x="430" y="340" text-anchor="middle" class="sm">→ retry from gate 3</text>
 
-  <rect x="530" y="260" width="120" height="90" fill="#fdfcfb" stroke="#c8102e" stroke-width="1.25"/>
+  <rect x="530" y="260" width="120" height="90" fill="#FFFFFF" stroke="#C8102E" stroke-width="1.25"/>
   <text x="590" y="278" text-anchor="middle" class="lb">iterate real-time</text>
   <text x="590" y="294" text-anchor="middle" class="sm">· lock to TCM</text>
   <text x="590" y="308" text-anchor="middle" class="sm">· integer-only graph</text>
@@ -99,17 +99,17 @@
   <text x="590" y="340" text-anchor="middle" class="sm">→ retry from gate 4</text>
 
   <!-- No arrows (down) -->
-  <line x1="110" y1="180" x2="110" y2="258" stroke="#c8102e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="110" y1="180" x2="110" y2="258" stroke="#C8102E" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="125" y="220" class="branchno">no</text>
-  <line x1="270" y1="180" x2="270" y2="258" stroke="#c8102e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="270" y1="180" x2="270" y2="258" stroke="#C8102E" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="285" y="220" class="branchno">no</text>
-  <line x1="430" y1="180" x2="430" y2="258" stroke="#c8102e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="430" y1="180" x2="430" y2="258" stroke="#C8102E" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="445" y="220" class="branchno">no</text>
-  <line x1="590" y1="180" x2="590" y2="258" stroke="#c8102e" stroke-width="1.5" marker-end="url(#ar6)"/>
+  <line x1="590" y1="180" x2="590" y2="258" stroke="#C8102E" stroke-width="1.5" marker-end="url(#ar6)"/>
   <text x="605" y="220" class="branchno">no</text>
 
   <!-- Bail out -->
-  <rect x="50" y="380" width="600" height="44" fill="#c8c4c0" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="50" y="380" width="600" height="44" fill="#ADADAD" stroke="#000000" stroke-width="1.25"/>
   <text x="350" y="400" text-anchor="middle" class="lb">if no iteration closes the gap — change the part, change the model class, or change the requirement</text>
   <text x="350" y="416" text-anchor="middle" class="sm">a constraint that cannot be loosened is the constraint that selects a different platform</text>
 

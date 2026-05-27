@@ -3,39 +3,39 @@
   <desc id="d11c">A grouped bar chart comparing MobileNetV2-1.0, MobileNetV3-Small, EfficientNet-Lite0, SqueezeNet, Tiny-YOLOv3, and a random forest baseline across parameter count, GFLOPs, and representative top-1 accuracy. Each row of three bars normalises to 0–1 within its axis, exposing which architecture wins on which axis.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Architecture family comparison — six candidates, three normalized axes</text>
   <text x="32" y="46" class="sm">Bars normalized 0–1 within axis; lower flash and GFLOPs are better, higher accuracy is better.</text>
 
   <!-- Legend -->
-  <rect x="380" y="22" width="10" height="10" fill="#2a1a0e"/>
+  <rect x="380" y="22" width="10" height="10" fill="#000000"/>
   <text x="394" y="31" class="sm">flash (params)</text>
-  <rect x="470" y="22" width="10" height="10" fill="#8a8480"/>
+  <rect x="470" y="22" width="10" height="10" fill="#787878"/>
   <text x="484" y="31" class="sm">compute (GFLOPs)</text>
-  <rect x="580" y="22" width="10" height="10" fill="#c8c4c0"/>
+  <rect x="580" y="22" width="10" height="10" fill="#ADADAD"/>
   <text x="594" y="31" class="sm">accuracy (top-1)</text>
 
   <!-- Axis -->
-  <line x1="190" y1="72" x2="190" y2="408" stroke="#8a8480" stroke-width="1"/>
-  <line x1="190" y1="408" x2="660" y2="408" stroke="#8a8480" stroke-width="1"/>
+  <line x1="190" y1="72" x2="190" y2="408" stroke="#787878" stroke-width="1"/>
+  <line x1="190" y1="408" x2="660" y2="408" stroke="#787878" stroke-width="1"/>
 
   <!-- x ticks 0, 0.5, 1 -->
-  <line x1="190" y1="408" x2="190" y2="412" stroke="#4a4540"/>
+  <line x1="190" y1="408" x2="190" y2="412" stroke="#555555"/>
   <text x="190" y="424" text-anchor="middle" class="sm">0</text>
-  <line x1="425" y1="408" x2="425" y2="412" stroke="#4a4540"/>
+  <line x1="425" y1="408" x2="425" y2="412" stroke="#555555"/>
   <text x="425" y="424" text-anchor="middle" class="sm">0.5</text>
-  <line x1="660" y1="408" x2="660" y2="412" stroke="#4a4540"/>
+  <line x1="660" y1="408" x2="660" y2="412" stroke="#555555"/>
   <text x="660" y="424" text-anchor="middle" class="sm">1.0 (worst flash / GFLOPs · best acc.)</text>
 
   <!-- Rows: 6 architectures, each with 3 bars stacked vertically -->
@@ -51,60 +51,60 @@
 
   <!-- Row 1 — MobileNetV2-1.0 -->
   <text x="180" y="92" text-anchor="end" class="nm">MobileNetV2-1.0</text>
-  <rect x="190" y="82" width="108" height="10" fill="#2a1a0e"/>
+  <rect x="190" y="82" width="108" height="10" fill="#000000"/>
   <text x="304" y="91" class="sm">3.4 M</text>
-  <rect x="190" y="94" width="24" height="10" fill="#8a8480"/>
+  <rect x="190" y="94" width="24" height="10" fill="#787878"/>
   <text x="220" y="103" class="sm">0.30 GF</text>
-  <rect x="190" y="106" width="381" height="10" fill="#c8c4c0"/>
+  <rect x="190" y="106" width="381" height="10" fill="#ADADAD"/>
   <text x="577" y="115" class="sm">72%</text>
 
   <!-- Row 2 — MobileNetV3-Small -->
   <text x="180" y="146" text-anchor="end" class="nm">MobileNetV3-Small</text>
-  <rect x="190" y="136" width="80" height="10" fill="#2a1a0e"/>
+  <rect x="190" y="136" width="80" height="10" fill="#000000"/>
   <text x="276" y="145" class="sm">2.5 M</text>
-  <rect x="190" y="148" width="5" height="10" fill="#8a8480"/>
+  <rect x="190" y="148" width="5" height="10" fill="#787878"/>
   <text x="201" y="157" class="sm">0.06 GF</text>
-  <rect x="190" y="160" width="357" height="10" fill="#c8c4c0"/>
+  <rect x="190" y="160" width="357" height="10" fill="#ADADAD"/>
   <text x="553" y="169" class="sm">68%</text>
 
   <!-- Row 3 — EfficientNet-Lite0 -->
   <text x="180" y="200" text-anchor="end" class="nm">EfficientNet-Lite0</text>
-  <rect x="190" y="190" width="146" height="10" fill="#2a1a0e"/>
+  <rect x="190" y="190" width="146" height="10" fill="#000000"/>
   <text x="342" y="199" class="sm">4.6 M</text>
-  <rect x="190" y="202" width="33" height="10" fill="#8a8480"/>
+  <rect x="190" y="202" width="33" height="10" fill="#787878"/>
   <text x="229" y="211" class="sm">0.40 GF</text>
-  <rect x="190" y="214" width="395" height="10" fill="#c8c4c0"/>
+  <rect x="190" y="214" width="395" height="10" fill="#ADADAD"/>
   <text x="591" y="223" class="sm">75%</text>
 
   <!-- Row 4 — SqueezeNet -->
   <text x="180" y="254" text-anchor="end" class="nm">SqueezeNet</text>
-  <rect x="190" y="244" width="38" height="10" fill="#2a1a0e"/>
+  <rect x="190" y="244" width="38" height="10" fill="#000000"/>
   <text x="234" y="253" class="sm">1.2 M ← small flash</text>
-  <rect x="190" y="256" width="71" height="10" fill="#8a8480"/>
+  <rect x="190" y="256" width="71" height="10" fill="#787878"/>
   <text x="267" y="265" class="sm">0.83 GF</text>
-  <rect x="190" y="268" width="305" height="10" fill="#c8c4c0"/>
+  <rect x="190" y="268" width="305" height="10" fill="#ADADAD"/>
   <text x="501" y="277" class="sm">58%</text>
 
   <!-- Row 5 — Tiny-YOLOv3 -->
   <text x="180" y="308" text-anchor="end" class="nm">Tiny-YOLOv3</text>
-  <rect x="190" y="298" width="470" height="10" fill="#2a1a0e"/>
-  <text x="666" y="307" text-anchor="end" class="sm" fill="#fdfcfb">15 M</text>
-  <rect x="190" y="310" width="470" height="10" fill="#8a8480"/>
-  <text x="666" y="319" text-anchor="end" class="sm" fill="#fdfcfb">5.5 GF</text>
-  <rect x="190" y="322" width="268" height="10" fill="#c8c4c0"/>
+  <rect x="190" y="298" width="470" height="10" fill="#000000"/>
+  <text x="666" y="307" text-anchor="end" class="sm" fill="#FFFFFF">15 M</text>
+  <rect x="190" y="310" width="470" height="10" fill="#787878"/>
+  <text x="666" y="319" text-anchor="end" class="sm" fill="#FFFFFF">5.5 GF</text>
+  <rect x="190" y="322" width="268" height="10" fill="#ADADAD"/>
   <text x="464" y="331" class="sm">51% (mAP)</text>
 
   <!-- Row 6 — Random forest -->
   <text x="180" y="362" text-anchor="end" class="nm">Random forest</text>
-  <rect x="190" y="352" width="2" height="10" fill="#2a1a0e"/>
+  <rect x="190" y="352" width="2" height="10" fill="#000000"/>
   <text x="198" y="361" class="sm">0.05 M ← tiny</text>
-  <rect x="190" y="364" width="2" height="10" fill="#8a8480"/>
+  <rect x="190" y="364" width="2" height="10" fill="#787878"/>
   <text x="198" y="373" class="sm">~0 GFLOPs</text>
-  <rect x="190" y="376" width="470" height="10" fill="#c8c4c0"/>
-  <text x="666" y="385" text-anchor="end" class="sm" fill="#2a1a0e">89% (tabular)</text>
+  <rect x="190" y="376" width="470" height="10" fill="#ADADAD"/>
+  <text x="666" y="385" text-anchor="end" class="sm" fill="#000000">89% (tabular)</text>
 
   <!-- Caveat callout -->
-  <path d="M 240 396 L 240 392 L 466 392 L 466 322" fill="none" stroke="#2a1a0e" stroke-width="0.75" stroke-dasharray="3 2" marker-end="url(#ar3)"/>
+  <path d="M 240 396 L 240 392 L 466 392 L 466 322" fill="none" stroke="#000000" stroke-width="0.75" stroke-dasharray="3 2" marker-end="url(#ar3)"/>
   <text x="350" y="406" text-anchor="middle" class="lb">"small" lives on a different axis for each architecture</text>
 
   <text x="350" y="445" text-anchor="middle" class="cap">No architecture wins all three axes. Each earned its efficiency by substituting a cheap op for an expensive one — or by exploiting structure the dense network ignored.</text>

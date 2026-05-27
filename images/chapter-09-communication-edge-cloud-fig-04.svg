@@ -3,19 +3,19 @@
   <desc id="d04">Log-log line chart. The x-axis is the seconds between transmissions from 1 second to one day. The y-axis is days of battery life on a 2000 mAh cell. Four lines for LoRaWAN, BLE, WiFi, and NB-IoT. A horizontal reference shows the 1 milliwatt average power budget where battery life collapses from years to hours.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
-      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
-      .leg { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
+      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .leg { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
     </style>
     <marker id="ar4" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="720" height="460" fill="#fdfcfb"/>
+  <rect width="720" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">Battery years or battery hours — the radio choice and the interval choose for you</text>
   <text x="32" y="50" class="nm">log-log. 2 000 mAh × 3.3 V = 23 760 J cell. days_battery = 23 760 / (events_per_day × mJ_per_event / 1 000)</text>
@@ -27,7 +27,7 @@
   <!-- That's a 5-decade range mapped to 280 px: 0.1 → 360, 1 → 304, 10 → 248, 100 → 192, 1000 → 136, 10000 → 80 -->
 
   <!-- gridlines x -->
-  <g stroke="#c8c4c0" stroke-width="0.6">
+  <g stroke="#ADADAD" stroke-width="0.6">
     <line x1="70"  y1="80" x2="70"  y2="360"/>
     <line x1="189.4" y1="80" x2="189.4" y2="360"/>
     <line x1="282.6" y1="80" x2="282.6" y2="360"/>
@@ -36,7 +36,7 @@
     <line x1="660"  y1="80" x2="660"  y2="360"/>
   </g>
   <!-- gridlines y -->
-  <g stroke="#c8c4c0" stroke-width="0.6">
+  <g stroke="#ADADAD" stroke-width="0.6">
     <line x1="70" y1="80"  x2="660" y2="80"/>
     <line x1="70" y1="136" x2="660" y2="136"/>
     <line x1="70" y1="192" x2="660" y2="192"/>
@@ -46,8 +46,8 @@
   </g>
 
   <!-- axes -->
-  <line x1="70" y1="360" x2="660" y2="360" stroke="#4a4540" stroke-width="1"/>
-  <line x1="70" y1="80"  x2="70"  y2="360" stroke="#4a4540" stroke-width="1"/>
+  <line x1="70" y1="360" x2="660" y2="360" stroke="#555555" stroke-width="1"/>
+  <line x1="70" y1="80"  x2="70"  y2="360" stroke="#555555" stroke-width="1"/>
 
   <!-- x labels -->
   <text x="70"    y="376" text-anchor="middle" class="ax">1 s</text>
@@ -90,14 +90,14 @@
        y(4.673) clamp to 80
        y(6.054) clamp to 80
   -->
-  <polyline points="70,241.5 189.4,185.4 282.6,141.9 402,85.8 495,80 660,80" fill="none" stroke="#2a1a0e" stroke-width="2"/>
+  <polyline points="70,241.5 189.4,185.4 282.6,141.9 402,85.8 495,80 660,80" fill="none" stroke="#000000" stroke-width="2"/>
 
   <!-- BLE (0.1 mJ): days = 2750, 27500, 165000, 1.65e6, 9.9e6, 2.376e8 → all > 10000 → y=80 across plot
        Plot only where it's interesting: actually starts at 2750 → log10 = 3.44 → y = 110.6
        T=1: 2750 → L=3.439, y=360-280*4.439/5= 111.4
        T=10: 27500 → L=4.439, clamp 4 → y=80
   -->
-  <polyline points="70,111.4 189.4,80 282.6,80 402,80 495,80 660,80" fill="none" stroke="#4a4540" stroke-width="2" stroke-dasharray="6 3"/>
+  <polyline points="70,111.4 189.4,80 282.6,80 402,80 495,80 660,80" fill="none" stroke="#555555" stroke-width="2" stroke-dasharray="6 3"/>
 
   <!-- WiFi (50 mJ): days = 5.5, 55, 330, 3300, 19800, 475200
        log10 = 0.74, 1.74, 2.52, 3.52, 4.30, 5.68
@@ -108,7 +108,7 @@
        y(4.30) clamp 4 → 80
        y(5.68) clamp 4 → 80
   -->
-  <polyline points="70,262.6 189.4,206.6 282.6,162.9 402,106.9 495,80 660,80" fill="none" stroke="#8a8480" stroke-width="2"/>
+  <polyline points="70,262.6 189.4,206.6 282.6,162.9 402,106.9 495,80 660,80" fill="none" stroke="#787878" stroke-width="2"/>
 
   <!-- NB-IoT (150 mJ): days = 1.83, 18.3, 110, 1100, 6600, 158400
        log10 = 0.262, 1.262, 2.041, 3.041, 3.820, 5.200
@@ -119,31 +119,31 @@
        y(3.820) = 360 - 280*4.820/5 = 90.0
        y(5.200) clamp 4 → 80
   -->
-  <polyline points="70,289.3 189.4,233.3 282.6,189.7 402,133.7 495,90 660,80" fill="none" stroke="#8a1f1f" stroke-width="2"/>
+  <polyline points="70,289.3 189.4,233.3 282.6,189.7 402,133.7 495,90 660,80" fill="none" stroke="#C8102E" stroke-width="2"/>
 
   <!-- Horizontal 1 mW budget line: 1 mW × 86 400 s = 86.4 J/day; battery = 23 760 J → 275 days → log10 ≈ 2.44, y = 167.6 -->
-  <line x1="70" y1="167.6" x2="660" y2="167.6" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="70" y1="167.6" x2="660" y2="167.6" stroke="#000000" stroke-width="1" stroke-dasharray="3 3"/>
   <text x="665" y="171" class="sm">1 mW average · 275 d</text>
 
   <!-- end-of-line labels -->
   <text x="668" y="84"  class="leg">BLE (0.1 mJ)</text>
   <text x="668" y="100" class="sm">≈ 4 mW peak, ms bursts</text>
 
-  <text x="668" y="148" class="leg" fill="#2a1a0e">LoRaWAN (21 mJ)</text>
+  <text x="668" y="148" class="leg" fill="#000000">LoRaWAN (21 mJ)</text>
   <text x="668" y="164" class="sm">≈ 132 mW TX, 160 ms</text>
 
-  <text x="668" y="206" class="leg" fill="#8a8480">WiFi (50 mJ)</text>
+  <text x="668" y="206" class="leg" fill="#787878">WiFi (50 mJ)</text>
   <text x="668" y="222" class="sm">≈ 1 W TX, 50 ms</text>
 
-  <text x="668" y="244" class="leg" fill="#8a1f1f">NB-IoT (150 mJ)</text>
+  <text x="668" y="244" class="leg" fill="#C8102E">NB-IoT (150 mJ)</text>
   <text x="668" y="260" class="sm">≈ 600 mW TX, 250 ms</text>
 
   <!-- Region annotations -->
   <text x="100" y="100" class="cap">years on a coin cell</text>
-  <text x="450" y="350" class="cap" fill="#8a1f1f">hours, not days</text>
+  <text x="450" y="350" class="cap" fill="#C8102E">hours, not days</text>
 
-  <line x1="70" y1="304" x2="120" y2="320" stroke="#8a1f1f" stroke-width="1"/>
-  <text x="125" y="324" class="sm" fill="#8a1f1f">collapse zone — anything below 1 day fails most field deployments</text>
+  <line x1="70" y1="304" x2="120" y2="320" stroke="#C8102E" stroke-width="1"/>
+  <text x="125" y="324" class="sm" fill="#C8102E">collapse zone — anything below 1 day fails most field deployments</text>
 
   <text x="365" y="430" text-anchor="middle" class="cap">Halve the interval, halve the lifetime. Halve the per-event energy, double it. Both levers live on this plane.</text>
 </svg>

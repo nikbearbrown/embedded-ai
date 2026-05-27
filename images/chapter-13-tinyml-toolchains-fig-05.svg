@@ -3,19 +3,19 @@
   <desc id="d05">Four panels. Latency budget 100 ms versus measured 42 ms. SRAM available 256 KB versus used 100 KB split into 80 KB arena and 20 KB stack. Flash model size 85 KB. Accuracy across three pipeline stages — 94.2, 93.1, 92.8 percent.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .head { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .good { fill: #4a4540; }
-      .accent { fill: #8a3020; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .head { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .good { fill: #555555; }
+      .accent { fill: #C8102E; }
     </style>
     <marker id="ar5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="720" height="460" fill="#fdfcfb"/>
+  <rect width="720" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="head">Nano 33 BLE Sense — keyword spotter dashboard</text>
   <text x="32" y="48" class="sm">nRF52840 · Cortex-M4 @ 64 MHz · 256 KB SRAM · 12-class CNN</text>
@@ -23,23 +23,23 @@
   <!-- 2x2 grid of panels -->
   <!-- Panel A — top-left — Latency -->
   <g>
-    <rect x="32" y="70" width="320" height="170" fill="none" stroke="#c8c4c0"/>
+    <rect x="32" y="70" width="320" height="170" fill="none" stroke="#ADADAD"/>
     <text x="48" y="92" class="ti">Latency (ms per inference)</text>
     <!-- bar group: budget 100, measured 42 -->
     <!-- bar area x 80-320, scale 0..120 -->
-    <line x1="80" y1="210" x2="80" y2="120" stroke="#4a4540"/>
-    <line x1="80" y1="210" x2="320" y2="210" stroke="#4a4540"/>
+    <line x1="80" y1="210" x2="80" y2="120" stroke="#555555"/>
+    <line x1="80" y1="210" x2="320" y2="210" stroke="#555555"/>
     <!-- x ticks 0, 50, 100 -->
     <g class="sm">
-      <line x1="80"  y1="208" x2="80"  y2="214" stroke="#4a4540"/>
+      <line x1="80"  y1="208" x2="80"  y2="214" stroke="#555555"/>
       <text x="80"  y="226" text-anchor="middle">0</text>
-      <line x1="180" y1="208" x2="180" y2="214" stroke="#4a4540"/>
+      <line x1="180" y1="208" x2="180" y2="214" stroke="#555555"/>
       <text x="180" y="226" text-anchor="middle">50</text>
-      <line x1="280" y1="208" x2="280" y2="214" stroke="#4a4540"/>
+      <line x1="280" y1="208" x2="280" y2="214" stroke="#555555"/>
       <text x="280" y="226" text-anchor="middle">100</text>
     </g>
     <!-- budget bar: 100 ms → width 200 -->
-    <rect x="80" y="132" width="200" height="22" fill="#c8c4c0"/>
+    <rect x="80" y="132" width="200" height="22" fill="#ADADAD"/>
     <text x="64" y="148" text-anchor="end" class="sm">budget</text>
     <text x="288" y="148" class="lb">100 ms</text>
     <!-- measured bar: 42 ms → width 84 -->
@@ -51,48 +51,48 @@
 
   <!-- Panel B — top-right — SRAM -->
   <g>
-    <rect x="368" y="70" width="320" height="170" fill="none" stroke="#c8c4c0"/>
+    <rect x="368" y="70" width="320" height="170" fill="none" stroke="#ADADAD"/>
     <text x="384" y="92" class="ti">SRAM (KB)</text>
-    <line x1="416" y1="210" x2="416" y2="120" stroke="#4a4540"/>
-    <line x1="416" y1="210" x2="668" y2="210" stroke="#4a4540"/>
+    <line x1="416" y1="210" x2="416" y2="120" stroke="#555555"/>
+    <line x1="416" y1="210" x2="668" y2="210" stroke="#555555"/>
     <g class="sm">
-      <line x1="416" y1="208" x2="416" y2="214" stroke="#4a4540"/>
+      <line x1="416" y1="208" x2="416" y2="214" stroke="#555555"/>
       <text x="416" y="226" text-anchor="middle">0</text>
-      <line x1="500" y1="208" x2="500" y2="214" stroke="#4a4540"/>
+      <line x1="500" y1="208" x2="500" y2="214" stroke="#555555"/>
       <text x="500" y="226" text-anchor="middle">100</text>
-      <line x1="584" y1="208" x2="584" y2="214" stroke="#4a4540"/>
+      <line x1="584" y1="208" x2="584" y2="214" stroke="#555555"/>
       <text x="584" y="226" text-anchor="middle">200</text>
-      <line x1="668" y1="208" x2="668" y2="214" stroke="#4a4540"/>
+      <line x1="668" y1="208" x2="668" y2="214" stroke="#555555"/>
       <text x="668" y="226" text-anchor="middle">300</text>
     </g>
     <!-- available 256 KB → width 215 -->
-    <rect x="416" y="132" width="215" height="22" fill="#c8c4c0"/>
+    <rect x="416" y="132" width="215" height="22" fill="#ADADAD"/>
     <text x="402" y="148" text-anchor="end" class="sm">available</text>
     <text x="636" y="148" class="lb">256 KB</text>
     <!-- used 100 KB: 80 arena + 20 stack -->
     <rect x="416" y="170" width="67" height="22" class="good"/>
-    <rect x="483" y="170" width="17" height="22" fill="#8a8480"/>
+    <rect x="483" y="170" width="17" height="22" fill="#787878"/>
     <text x="402" y="186" text-anchor="end" class="sm">used</text>
     <text x="508" y="186" class="lb">100 KB</text>
-    <text x="450" y="186" class="sm" fill="#fdfcfb" text-anchor="middle">arena 80</text>
-    <text x="492" y="186" class="sm" fill="#fdfcfb" text-anchor="middle">stk 20</text>
+    <text x="450" y="186" class="sm" fill="#FFFFFF" text-anchor="middle">arena 80</text>
+    <text x="492" y="186" class="sm" fill="#FFFFFF" text-anchor="middle">stk 20</text>
     <text x="668" y="234" text-anchor="end" class="cap">39% used · 156 KB free</text>
   </g>
 
   <!-- Panel C — bottom-left — Flash model size -->
   <g>
-    <rect x="32" y="260" width="320" height="170" fill="none" stroke="#c8c4c0"/>
+    <rect x="32" y="260" width="320" height="170" fill="none" stroke="#ADADAD"/>
     <text x="48" y="282" class="ti">Flash · model byte array (KB)</text>
-    <line x1="80" y1="400" x2="80" y2="310" stroke="#4a4540"/>
-    <line x1="80" y1="400" x2="320" y2="400" stroke="#4a4540"/>
+    <line x1="80" y1="400" x2="80" y2="310" stroke="#555555"/>
+    <line x1="80" y1="400" x2="320" y2="400" stroke="#555555"/>
     <g class="sm">
-      <line x1="80"  y1="398" x2="80"  y2="404" stroke="#4a4540"/>
+      <line x1="80"  y1="398" x2="80"  y2="404" stroke="#555555"/>
       <text x="80"  y="416" text-anchor="middle">0</text>
-      <line x1="160" y1="398" x2="160" y2="404" stroke="#4a4540"/>
+      <line x1="160" y1="398" x2="160" y2="404" stroke="#555555"/>
       <text x="160" y="416" text-anchor="middle">100</text>
-      <line x1="240" y1="398" x2="240" y2="404" stroke="#4a4540"/>
+      <line x1="240" y1="398" x2="240" y2="404" stroke="#555555"/>
       <text x="240" y="416" text-anchor="middle">200</text>
-      <line x1="320" y1="398" x2="320" y2="404" stroke="#4a4540"/>
+      <line x1="320" y1="398" x2="320" y2="404" stroke="#555555"/>
       <text x="320" y="416" text-anchor="middle">300</text>
     </g>
     <!-- model 85 KB → width 68 -->
@@ -100,7 +100,7 @@
     <text x="64" y="338" text-anchor="end" class="sm">model</text>
     <text x="156" y="338" class="lb">85 KB</text>
     <!-- engine 100 KB → width 80 -->
-    <rect x="80" y="360" width="80" height="22" fill="#8a8480"/>
+    <rect x="80" y="360" width="80" height="22" fill="#787878"/>
     <text x="64" y="376" text-anchor="end" class="sm">engine</text>
     <text x="168" y="376" class="lb">~100 KB</text>
     <text x="320" y="424" text-anchor="end" class="cap">int8 quantization · 4× shrink vs float32</text>
@@ -108,35 +108,35 @@
 
   <!-- Panel D — bottom-right — Accuracy across pipeline -->
   <g>
-    <rect x="368" y="260" width="320" height="170" fill="none" stroke="#c8c4c0"/>
+    <rect x="368" y="260" width="320" height="170" fill="none" stroke="#ADADAD"/>
     <text x="384" y="282" class="ti">Accuracy across pipeline (%)</text>
-    <line x1="416" y1="400" x2="416" y2="300" stroke="#4a4540"/>
-    <line x1="416" y1="400" x2="668" y2="400" stroke="#4a4540"/>
+    <line x1="416" y1="400" x2="416" y2="300" stroke="#555555"/>
+    <line x1="416" y1="400" x2="668" y2="400" stroke="#555555"/>
     <!-- range 90..95, 252px wide, 50.4 px per pp -->
     <g class="sm">
-      <line x1="416" y1="398" x2="416" y2="404" stroke="#4a4540"/>
+      <line x1="416" y1="398" x2="416" y2="404" stroke="#555555"/>
       <text x="416" y="416" text-anchor="middle">90</text>
-      <line x1="466" y1="398" x2="466" y2="404" stroke="#4a4540"/>
+      <line x1="466" y1="398" x2="466" y2="404" stroke="#555555"/>
       <text x="466" y="416" text-anchor="middle">91</text>
-      <line x1="516" y1="398" x2="516" y2="404" stroke="#4a4540"/>
+      <line x1="516" y1="398" x2="516" y2="404" stroke="#555555"/>
       <text x="516" y="416" text-anchor="middle">92</text>
-      <line x1="566" y1="398" x2="566" y2="404" stroke="#4a4540"/>
+      <line x1="566" y1="398" x2="566" y2="404" stroke="#555555"/>
       <text x="566" y="416" text-anchor="middle">93</text>
-      <line x1="616" y1="398" x2="616" y2="404" stroke="#4a4540"/>
+      <line x1="616" y1="398" x2="616" y2="404" stroke="#555555"/>
       <text x="616" y="416" text-anchor="middle">94</text>
-      <line x1="666" y1="398" x2="666" y2="404" stroke="#4a4540"/>
+      <line x1="666" y1="398" x2="666" y2="404" stroke="#555555"/>
       <text x="666" y="416" text-anchor="middle">95</text>
     </g>
     <!-- float32 94.2 → width = (94.2-90)*50.4 = 211 -->
-    <rect x="416" y="312" width="211" height="20" fill="#2a1a0e"/>
+    <rect x="416" y="312" width="211" height="20" fill="#000000"/>
     <text x="408" y="326" text-anchor="end" class="sm">float32</text>
     <text x="632" y="326" class="lb">94.2</text>
     <!-- tflite interp 93.1 → 156 -->
-    <rect x="416" y="342" width="156" height="20" fill="#4a4540"/>
+    <rect x="416" y="342" width="156" height="20" fill="#555555"/>
     <text x="408" y="356" text-anchor="end" class="sm">tflite int8</text>
     <text x="577" y="356" class="lb">93.1</text>
     <!-- on-device 92.8 → 141 -->
-    <rect x="416" y="372" width="141" height="20" fill="#8a8480"/>
+    <rect x="416" y="372" width="141" height="20" fill="#787878"/>
     <text x="408" y="386" text-anchor="end" class="sm">on-device</text>
     <text x="562" y="386" class="lb">92.8</text>
     <text x="668" y="424" text-anchor="end" class="cap">1.4 pp total drift · within budget</text>

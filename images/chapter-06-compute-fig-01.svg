@@ -3,18 +3,18 @@
   <desc id="d06-01">A fully connected layer y = Wx + b decomposed into a multiply and an add on the FLOP side, paired on the MAC side as a single fused multiply-accumulate instruction executed in one cycle.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: bold; fill: #1f1a14; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; fill: #1f1a14; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
-      .num { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #1f1a14; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
-      .formula { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-style: italic; fill: #1f1a14; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 16px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
+      .num { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .formula { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-style: italic; fill: #000000; }
     </style>
     <marker id="ar1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#1f1a14"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <!-- Title row -->
   <text x="350" y="34" text-anchor="middle" class="ti">FLOP vs MAC: same arithmetic, different accounting</text>
@@ -24,12 +24,12 @@
   <text x="180" y="92" text-anchor="middle" class="ti">FLOP view (frameworks count this way)</text>
 
   <!-- FLOP 1: multiply -->
-  <rect x="60" y="110" width="240" height="62" fill="#fdfcfb" stroke="#4a4540" stroke-width="1"/>
+  <rect x="60" y="110" width="240" height="62" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
   <text x="180" y="135" text-anchor="middle" class="lb">FLOP 1 — multiply</text>
   <text x="180" y="158" text-anchor="middle" class="num">a × b → t</text>
 
   <!-- FLOP 2: add -->
-  <rect x="60" y="192" width="240" height="62" fill="#fdfcfb" stroke="#4a4540" stroke-width="1"/>
+  <rect x="60" y="192" width="240" height="62" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
   <text x="180" y="217" text-anchor="middle" class="lb">FLOP 2 — add</text>
   <text x="180" y="240" text-anchor="middle" class="num">result + t → result</text>
 
@@ -38,25 +38,25 @@
   <text x="180" y="307" text-anchor="middle" class="sm">two cycles on a scalar pipeline</text>
 
   <!-- Center arrow / collapse -->
-  <path d="M 315 185 L 385 185" fill="none" stroke="#1f1a14" stroke-width="1.5" marker-end="url(#ar1)"/>
+  <path d="M 315 185 L 385 185" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#ar1)"/>
   <text x="350" y="178" text-anchor="middle" class="cap">collapses to</text>
 
   <!-- RIGHT SIDE: MAC view -->
   <text x="520" y="92" text-anchor="middle" class="ti">MAC view (hardware does this)</text>
 
   <!-- Single MAC box (taller, fused) -->
-  <rect x="400" y="110" width="240" height="144" fill="#1f1a14"/>
-  <text x="520" y="142" text-anchor="middle" class="lb" fill="#fdfcfb">1 MAC — fused multiply-accumulate</text>
-  <text x="520" y="180" text-anchor="middle" fill="#fdfcfb" font-family="'EB Garamond', Georgia, serif" font-size="18" font-weight="bold">result += a × b</text>
-  <text x="520" y="218" text-anchor="middle" class="sm" fill="#c8c4c0">one instruction</text>
-  <text x="520" y="236" text-anchor="middle" class="sm" fill="#c8c4c0">one cycle on M4/M7/A53</text>
+  <rect x="400" y="110" width="240" height="144" fill="#000000"/>
+  <text x="520" y="142" text-anchor="middle" class="lb" fill="#FFFFFF">1 MAC — fused multiply-accumulate</text>
+  <text x="520" y="180" text-anchor="middle" fill="#FFFFFF" font-family="'Real Head Pro', 'FF Real', Lato, sans-serif" font-size="18" font-weight="bold">result += a × b</text>
+  <text x="520" y="218" text-anchor="middle" class="sm" fill="#ADADAD">one instruction</text>
+  <text x="520" y="236" text-anchor="middle" class="sm" fill="#ADADAD">one cycle on M4/M7/A53</text>
 
   <!-- Total -->
   <text x="520" y="290" text-anchor="middle" class="sm">1 MAC per element</text>
   <text x="520" y="307" text-anchor="middle" class="sm">half the instruction count, same math</text>
 
   <!-- Bottom rule box: relationship -->
-  <line x1="60" y1="335" x2="640" y2="335" stroke="#8a8480" stroke-width="0.5"/>
+  <line x1="60" y1="335" x2="640" y2="335" stroke="#787878" stroke-width="0.5"/>
   <text x="60" y="358" class="lb"><tspan font-weight="bold">Rule of thumb.</tspan>  For pure multiply-add work (matmul, conv): MACs ≈ FLOPs ÷ 2.</text>
   <text x="60" y="378" class="sm">Mixed ops (activations, pooling) — count FLOPs as a conservative upper bound; the savings only apply to fused multiply-add lanes.</text>
   <text x="60" y="398" class="sm">Layer y = Wx + b with input N, output M:  FLOPs ≈ 2·N·M + M    →    MACs ≈ N·M    (the +M bias adds are uncollapsed scalar adds.)</text>

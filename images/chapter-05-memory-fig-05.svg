@@ -3,19 +3,19 @@
   <desc id="d05">Stacked horizontal bar showing the 1 MB SRAM budget of an STM32H743 after the tensor arena has been bumped to 350 KB. Segments: tensor arena 350 KB, communication buffers 200 KB, RTOS kernel and task stacks 120 KB, application heap 80 KB, globals 50 KB, remaining call-stack headroom 224 KB highlighted as overflow risk.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .seg { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #fdfcfb; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .alert { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #c8102e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .seg { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #FFFFFF; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .alert { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #C8102E; }
     </style>
     <marker id="ar5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <text x="32" y="28" class="ti">STM32H743 · 1 MB SRAM budget after arena bump</text>
   <text x="32" y="44" class="sm">arena fits at 350 KB · inference then crashes 80 ms in with stack overflow</text>
@@ -25,12 +25,12 @@
 
   <!-- bar -->
   <g>
-    <rect x="60" y="120" width="205.1" height="56" fill="#2a1a0e"/>
-    <rect x="265.1" y="120" width="117.2" height="56" fill="#4a4540"/>
-    <rect x="382.3" y="120" width="70.3" height="56" fill="#8a8480"/>
-    <rect x="452.6" y="120" width="46.9" height="56" fill="#a8a4a0"/>
-    <rect x="499.5" y="120" width="29.3" height="56" fill="#c8c4c0"/>
-    <rect x="528.8" y="120" width="131.2" height="56" fill="#fdfcfb" stroke="#c8102e" stroke-width="2"/>
+    <rect x="60" y="120" width="205.1" height="56" fill="#000000"/>
+    <rect x="265.1" y="120" width="117.2" height="56" fill="#555555"/>
+    <rect x="382.3" y="120" width="70.3" height="56" fill="#787878"/>
+    <rect x="452.6" y="120" width="46.9" height="56" fill="#ADADAD"/>
+    <rect x="499.5" y="120" width="29.3" height="56" fill="#ADADAD"/>
+    <rect x="528.8" y="120" width="131.2" height="56" fill="#FFFFFF" stroke="#C8102E" stroke-width="2"/>
   </g>
 
   <!-- segment labels inside bars -->
@@ -46,48 +46,48 @@
   <text x="476" y="146" text-anchor="middle" class="seg">heap</text>
   <text x="476" y="160" text-anchor="middle" class="seg">80 KB</text>
 
-  <text x="514.1" y="146" text-anchor="middle" class="seg" fill="#2a1a0e">globals</text>
-  <text x="514.1" y="160" text-anchor="middle" class="seg" fill="#2a1a0e">50 KB</text>
+  <text x="514.1" y="146" text-anchor="middle" class="seg" fill="#000000">globals</text>
+  <text x="514.1" y="160" text-anchor="middle" class="seg" fill="#000000">50 KB</text>
 
   <text x="594.4" y="146" text-anchor="middle" class="alert">call-stack headroom</text>
   <text x="594.4" y="160" text-anchor="middle" class="alert">224 KB → overflows</text>
 
   <!-- x axis ticks -->
-  <line x1="60" y1="190" x2="660" y2="190" stroke="#4a4540"/>
+  <line x1="60" y1="190" x2="660" y2="190" stroke="#555555"/>
   <g class="ax">
-    <line x1="60" y1="190" x2="60" y2="194" stroke="#4a4540"/>
+    <line x1="60" y1="190" x2="60" y2="194" stroke="#555555"/>
     <text x="60" y="206" text-anchor="middle">0 KB</text>
-    <line x1="206.4" y1="190" x2="206.4" y2="194" stroke="#4a4540"/>
+    <line x1="206.4" y1="190" x2="206.4" y2="194" stroke="#555555"/>
     <text x="206.4" y="206" text-anchor="middle">256</text>
-    <line x1="352.8" y1="190" x2="352.8" y2="194" stroke="#4a4540"/>
+    <line x1="352.8" y1="190" x2="352.8" y2="194" stroke="#555555"/>
     <text x="352.8" y="206" text-anchor="middle">512</text>
-    <line x1="499.2" y1="190" x2="499.2" y2="194" stroke="#4a4540"/>
+    <line x1="499.2" y1="190" x2="499.2" y2="194" stroke="#555555"/>
     <text x="499.2" y="206" text-anchor="middle">768</text>
-    <line x1="660" y1="190" x2="660" y2="194" stroke="#4a4540"/>
+    <line x1="660" y1="190" x2="660" y2="194" stroke="#555555"/>
     <text x="660" y="206" text-anchor="middle">1024 KB</text>
   </g>
 
   <!-- 80 % danger line -->
-  <line x1="540.3" y1="100" x2="540.3" y2="190" stroke="#c8860e" stroke-width="1.5" stroke-dasharray="3 3"/>
-  <text x="540.3" y="94" text-anchor="middle" class="sm" fill="#c8860e">80% threshold (819 KB)</text>
+  <line x1="540.3" y1="100" x2="540.3" y2="190" stroke="#A4804A" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="540.3" y="94" text-anchor="middle" class="sm" fill="#A4804A">80% threshold (819 KB)</text>
 
   <!-- callout boxes describing the crash -->
-  <rect x="60" y="240" width="280" height="92" fill="#fdfcfb" stroke="#c8c4c0"/>
+  <rect x="60" y="240" width="280" height="92" fill="#FFFFFF" stroke="#ADADAD"/>
   <text x="74" y="262" class="lb">what got committed</text>
   <text x="74" y="280" class="sm">arena 350 + comms 200 + RTOS 120</text>
   <text x="74" y="294" class="sm">+ heap 80 + globals 50 = 800 KB</text>
   <text x="74" y="312" class="sm">leaves 224 KB for the call stack —</text>
   <text x="74" y="326" class="sm">deeply-nested layer dispatch eats it.</text>
 
-  <rect x="360" y="240" width="300" height="92" fill="#fdfcfb" stroke="#c8102e" stroke-width="1.5"/>
-  <text x="374" y="262" class="lb" fill="#c8102e">fix: shrink the model</text>
+  <rect x="360" y="240" width="300" height="92" fill="#FFFFFF" stroke="#C8102E" stroke-width="1.5"/>
+  <text x="374" y="262" class="lb" fill="#C8102E">fix: shrink the model</text>
   <text x="374" y="280" class="sm">drop input 96² → 80² · channels 192 → 128</text>
   <text x="374" y="294" class="sm">arena measures 180 KB · accuracy 89.2 → 86.4</text>
   <text x="374" y="312" class="sm">new total 630 KB · 394 KB headroom</text>
   <text x="374" y="326" class="sm">deploy · runs</text>
 
   <!-- arrow from danger zone to fix -->
-  <line x1="594.4" y1="178" x2="594.4" y2="234" stroke="#c8102e" stroke-width="1" marker-end="url(#ar5)"/>
+  <line x1="594.4" y1="178" x2="594.4" y2="234" stroke="#C8102E" stroke-width="1" marker-end="url(#ar5)"/>
 
   <!-- caption -->
   <text x="350" y="395" text-anchor="middle" class="cap">"Fits at 80 percent" is not fit — runtime variation eats the margin.</text>

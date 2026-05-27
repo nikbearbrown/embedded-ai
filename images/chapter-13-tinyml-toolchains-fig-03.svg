@@ -3,18 +3,18 @@
   <desc id="d03">Heatmap-style matrix. Rows are TFLite Micro, Edge Impulse, STM32Cube.AI, Vela, Edge TPU compiler, ONNX Runtime. Columns are custom layers, intermediate artifacts, quantization control, vendor-tuned kernels, GUI workflow, debug access. Cells are shaded full, partial, or none.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .colhead { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #2a1a0e; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .cell-full { fill: #2a1a0e; }
-      .cell-partial { fill: #8a8480; }
-      .cell-none { fill: #e6e3df; }
-      .cell-mark { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .colhead { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #000000; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cell-full { fill: #000000; }
+      .cell-partial { fill: #787878; }
+      .cell-none { fill: #F5F5F5; }
+      .cell-mark { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; }
     </style>
   </defs>
-  <rect width="720" height="460" fill="#fdfcfb"/>
+  <rect width="720" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Toolchain feature matrix</text>
   <text x="32" y="48" class="sm">filled = first-class · half = partial / workaround · empty = not supported</text>
@@ -31,7 +31,7 @@
   </g>
 
   <!-- Grid baseline -->
-  <line x1="200" y1="128" x2="680" y2="128" stroke="#8a8480"/>
+  <line x1="200" y1="128" x2="680" y2="128" stroke="#787878"/>
 
   <!-- Row labels and cells -->
   <!-- Row y starts at 140, height 36, gap 4 -->
@@ -112,7 +112,7 @@
     <text x="220" y="436" class="sm">full · first-class support</text>
     <rect x="350" y="425" width="14" height="14" class="cell-partial"/>
     <text x="370" y="436" class="sm">partial · workaround</text>
-    <rect x="500" y="425" width="14" height="14" class="cell-none" stroke="#8a8480"/>
+    <rect x="500" y="425" width="14" height="14" class="cell-none" stroke="#787878"/>
     <text x="520" y="436" class="sm">none · not supported</text>
   </g>
 </svg>

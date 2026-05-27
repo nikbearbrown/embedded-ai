@@ -3,74 +3,74 @@
   <desc id="d11a">A central candidate-model node surrounded by five deployment-aware metrics: latency on target hardware, memory footprint at int8, energy per inference, accuracy on your dataset, and accuracy under quantization. Each spoke names how to measure and the failure mode if skipped.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Five deployment-aware metrics — what predicts embedded success</text>
   <text x="32" y="46" class="sm">Each must be measured on your hardware, with your data, before you choose.</text>
 
   <!-- Center node — candidate model -->
-  <rect x="290" y="200" width="120" height="60" fill="#2a1a0e"/>
-  <text x="350" y="225" text-anchor="middle" class="nm" fill="#fdfcfb">candidate</text>
-  <text x="350" y="240" text-anchor="middle" class="nm" fill="#fdfcfb">model</text>
-  <text x="350" y="254" text-anchor="middle" class="sm" fill="#c8c4c0">on target hardware</text>
+  <rect x="290" y="200" width="120" height="60" fill="#000000"/>
+  <text x="350" y="225" text-anchor="middle" class="nm" fill="#FFFFFF">candidate</text>
+  <text x="350" y="240" text-anchor="middle" class="nm" fill="#FFFFFF">model</text>
+  <text x="350" y="254" text-anchor="middle" class="sm" fill="#ADADAD">on target hardware</text>
 
   <!-- Spoke lines (5 metrics arranged around the center) -->
   <!-- top-left: latency -->
-  <line x1="290" y1="210" x2="160" y2="100" stroke="#4a4540" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="290" y1="210" x2="160" y2="100" stroke="#555555" stroke-width="1" stroke-dasharray="3 2"/>
   <!-- top-right: memory -->
-  <line x1="410" y1="210" x2="540" y2="100" stroke="#4a4540" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="410" y1="210" x2="540" y2="100" stroke="#555555" stroke-width="1" stroke-dasharray="3 2"/>
   <!-- left: energy -->
-  <line x1="290" y1="240" x2="160" y2="260" stroke="#4a4540" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="290" y1="240" x2="160" y2="260" stroke="#555555" stroke-width="1" stroke-dasharray="3 2"/>
   <!-- right: accuracy on your data -->
-  <line x1="410" y1="240" x2="540" y2="260" stroke="#4a4540" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="410" y1="240" x2="540" y2="260" stroke="#555555" stroke-width="1" stroke-dasharray="3 2"/>
   <!-- bottom: quantized accuracy -->
-  <line x1="350" y1="260" x2="350" y2="370" stroke="#4a4540" stroke-width="1" stroke-dasharray="3 2"/>
+  <line x1="350" y1="260" x2="350" y2="370" stroke="#555555" stroke-width="1" stroke-dasharray="3 2"/>
 
   <!-- Metric 1 — Latency (top left) -->
-  <rect x="32" y="68" width="248" height="64" fill="#fdfcfb" stroke="#8a8480" stroke-width="0.75"/>
-  <rect x="32" y="68" width="6" height="64" fill="#2a1a0e"/>
+  <rect x="32" y="68" width="248" height="64" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
+  <rect x="32" y="68" width="6" height="64" fill="#000000"/>
   <text x="48" y="86" class="nm">Latency on target hardware</text>
   <text x="48" y="102" class="sm">ms wall-clock; mean, p95, max over 100 runs</text>
   <text x="48" y="116" class="sm">skip → trust FLOPs, miss WCET deadline</text>
   <text x="48" y="128" class="cap">"FLOPs predict CPU latency badly."</text>
 
   <!-- Metric 2 — Memory (top right) -->
-  <rect x="420" y="68" width="248" height="64" fill="#fdfcfb" stroke="#8a8480" stroke-width="0.75"/>
-  <rect x="420" y="68" width="6" height="64" fill="#4a4540"/>
+  <rect x="420" y="68" width="248" height="64" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
+  <rect x="420" y="68" width="6" height="64" fill="#555555"/>
   <text x="436" y="86" class="nm">Memory footprint (int8)</text>
   <text x="436" y="102" class="sm">flash from linker map; SRAM from arena</text>
   <text x="436" y="116" class="sm">skip → param count lies, link fails</text>
   <text x="436" y="128" class="cap">"Not parameter count alone."</text>
 
   <!-- Metric 3 — Energy (left middle) -->
-  <rect x="32" y="228" width="248" height="64" fill="#f5f2ee" stroke="#8a8480" stroke-width="0.75"/>
-  <rect x="32" y="228" width="6" height="64" fill="#8a8480"/>
+  <rect x="32" y="228" width="248" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
+  <rect x="32" y="228" width="6" height="64" fill="#787878"/>
   <text x="48" y="246" class="nm">Energy per inference</text>
   <text x="48" y="262" class="sm">mJ via sense resistor + scope, full cycle</text>
   <text x="48" y="276" class="sm">skip → coin cell dies before quarter ends</text>
   <text x="48" y="288" class="cap">"Average sets battery life."</text>
 
   <!-- Metric 4 — Accuracy on your data (right middle) -->
-  <rect x="420" y="228" width="248" height="64" fill="#f5f2ee" stroke="#8a8480" stroke-width="0.75"/>
-  <rect x="420" y="228" width="6" height="64" fill="#8a8480"/>
+  <rect x="420" y="228" width="248" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
+  <rect x="420" y="228" width="6" height="64" fill="#787878"/>
   <text x="436" y="246" class="nm">Accuracy on your dataset</text>
   <text x="436" y="262" class="sm">your camera, your lighting, your noise</text>
   <text x="436" y="276" class="sm">skip → 5–20% drop from domain gap</text>
   <text x="436" y="288" class="cap">"ImageNet ≠ stamping defects."</text>
 
   <!-- Metric 5 — Quantized accuracy (bottom center) -->
-  <rect x="226" y="370" width="248" height="64" fill="#f5f2ee" stroke="#8a8480" stroke-width="0.75"/>
-  <rect x="226" y="370" width="6" height="64" fill="#c8c4c0"/>
+  <rect x="226" y="370" width="248" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
+  <rect x="226" y="370" width="6" height="64" fill="#ADADAD"/>
   <text x="242" y="388" class="nm">Accuracy under quantization</text>
   <text x="242" y="404" class="sm">float32 → int8 gap on your validation set</text>
   <text x="242" y="418" class="sm">skip → ship a model you never measured</text>

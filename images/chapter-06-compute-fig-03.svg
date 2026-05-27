@@ -3,20 +3,20 @@
   <desc id="d06-03">Five columns arranged left-to-right by capability. Each column lists pipeline depth, SIMD width, clock, peak MMAC per second, and an example chip. Cortex-M0+, Cortex-M4, Cortex-M7, Cortex-A53, and an NPU tier represented by Ethos-U55.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: bold; fill: #1f1a14; }
-      .col-ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #1f1a14; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #1f1a14; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .row-lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #4a4540; }
-      .perf { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #1f1a14; }
-      .perf-hi { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #C8102E; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 16px; font-weight: bold; fill: #000000; }
+      .col-ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .row-lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #555555; }
+      .perf { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .perf-hi { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #C8102E; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
     </style>
     <marker id="ar3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#1f1a14"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <!-- Title -->
   <text x="350" y="28" text-anchor="middle" class="ti">Processor-class ladder — peak MMAC/s rises four orders of magnitude across the tiers</text>
@@ -30,20 +30,20 @@
   <text x="22" y="320" class="row-lb">Example</text>
 
   <!-- Horizontal row separators -->
-  <line x1="100" y1="80" x2="680" y2="80" stroke="#8a8480" stroke-width="0.5"/>
-  <line x1="100" y1="125" x2="680" y2="125" stroke="#e0dcd6" stroke-width="0.5"/>
-  <line x1="100" y1="175" x2="680" y2="175" stroke="#e0dcd6" stroke-width="0.5"/>
-  <line x1="100" y1="225" x2="680" y2="225" stroke="#e0dcd6" stroke-width="0.5"/>
-  <line x1="100" y1="295" x2="680" y2="295" stroke="#e0dcd6" stroke-width="0.5"/>
-  <line x1="100" y1="345" x2="680" y2="345" stroke="#8a8480" stroke-width="0.5"/>
+  <line x1="100" y1="80" x2="680" y2="80" stroke="#787878" stroke-width="0.5"/>
+  <line x1="100" y1="125" x2="680" y2="125" stroke="#F5F5F5" stroke-width="0.5"/>
+  <line x1="100" y1="175" x2="680" y2="175" stroke="#F5F5F5" stroke-width="0.5"/>
+  <line x1="100" y1="225" x2="680" y2="225" stroke="#F5F5F5" stroke-width="0.5"/>
+  <line x1="100" y1="295" x2="680" y2="295" stroke="#F5F5F5" stroke-width="0.5"/>
+  <line x1="100" y1="345" x2="680" y2="345" stroke="#787878" stroke-width="0.5"/>
 
   <!-- Columns: 5 tiers across x = 100..680 (580 wide) → 116 wide each. Centers at 158, 274, 390, 506, 622 -->
   <!-- Column heading bar (heights scaled to capability) -->
   <!-- Capability bars at top, growing from short to tall: heights 12, 24, 38, 52, 64 px, anchored at y=72 -->
-  <rect x="116" y="60" width="84" height="12" fill="#c8c4c0"/>
-  <rect x="232" y="48" width="84" height="24" fill="#8a8480"/>
-  <rect x="348" y="34" width="84" height="38" fill="#4a4540"/>
-  <rect x="464" y="20" width="84" height="52" fill="#1f1a14"/>
+  <rect x="116" y="60" width="84" height="12" fill="#ADADAD"/>
+  <rect x="232" y="48" width="84" height="24" fill="#787878"/>
+  <rect x="348" y="34" width="84" height="38" fill="#555555"/>
+  <rect x="464" y="20" width="84" height="52" fill="#000000"/>
   <rect x="580" y="8" width="84" height="64" fill="#C8102E"/>
 
   <!-- Column titles -->
@@ -109,7 +109,7 @@
   <text x="622" y="328" text-anchor="middle" class="sm">$10–20 BOM</text>
 
   <!-- Climbing arrow under everything -->
-  <path d="M 100 380 L 660 380" fill="none" stroke="#1f1a14" stroke-width="1" marker-end="url(#ar3)"/>
+  <path d="M 100 380 L 660 380" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar3)"/>
   <text x="380" y="395" text-anchor="middle" class="lb">capability × cost × power — all rise together</text>
 
   <!-- Footnote / cap -->

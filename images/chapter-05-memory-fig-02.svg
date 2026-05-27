@@ -3,19 +3,19 @@
   <desc id="d02">Two-bank diagram. Left bank: flash storing firmware, model weights, biases, quantization scales and activation lookup tables. Right bank: SRAM storing heap, stack, globals, RTOS task control blocks, DMA buffers, activation tensors and scratch buffers. Arrows route artifacts to the correct bank.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .bk { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #fdfcfb; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .tag { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #2a1a0e; }
-      .it { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #fdfcfb; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .bk { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #FFFFFF; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .tag { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #000000; }
+      .it { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #FFFFFF; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <text x="32" y="28" class="ti">Two banks of memory, two routing decisions</text>
   <text x="32" y="44" class="sm">flash holds what never changes; SRAM holds what changes during inference</text>
@@ -23,30 +23,30 @@
   <!-- artifact column (middle) -->
   <text x="350" y="80" text-anchor="middle" class="lb">deployment artifacts</text>
   <g>
-    <rect x="290" y="92"  width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="92"  width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="107" text-anchor="middle" class="tag">firmware binary</text>
-    <rect x="290" y="118" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="118" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="133" text-anchor="middle" class="tag">model weights</text>
-    <rect x="290" y="144" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="144" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="159" text-anchor="middle" class="tag">biases + quant scales</text>
-    <rect x="290" y="170" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="170" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="185" text-anchor="middle" class="tag">activation LUTs</text>
-    <rect x="290" y="200" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="200" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="215" text-anchor="middle" class="tag">activation tensors</text>
-    <rect x="290" y="226" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="226" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="241" text-anchor="middle" class="tag">stack + heap</text>
-    <rect x="290" y="252" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="252" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="267" text-anchor="middle" class="tag">DMA buffers</text>
-    <rect x="290" y="278" width="120" height="22" fill="#fdfcfb" stroke="#4a4540"/>
+    <rect x="290" y="278" width="120" height="22" fill="#FFFFFF" stroke="#555555"/>
     <text x="350" y="293" text-anchor="middle" class="tag">RTOS TCBs + globals</text>
   </g>
 
   <!-- flash bank left -->
-  <rect x="40" y="70" width="220" height="280" fill="#2a1a0e"/>
+  <rect x="40" y="70" width="220" height="280" fill="#000000"/>
   <text x="150" y="92" text-anchor="middle" class="bk">FLASH</text>
   <text x="150" y="108" text-anchor="middle" class="it">non-volatile · read-only at runtime</text>
   <text x="150" y="122" text-anchor="middle" class="it">~100K erase cycles</text>
-  <line x1="50" y1="132" x2="250" y2="132" stroke="#8a8480" stroke-width="0.5"/>
+  <line x1="50" y1="132" x2="250" y2="132" stroke="#787878" stroke-width="0.5"/>
   <text x="60" y="150" class="it">· firmware binary</text>
   <text x="60" y="170" class="it">· model weights</text>
   <text x="60" y="190" class="it">· biases, quant scales</text>
@@ -55,11 +55,11 @@
   <text x="60" y="254" class="it">for read-only artifacts</text>
 
   <!-- SRAM bank right -->
-  <rect x="440" y="70" width="220" height="280" fill="#4a4540"/>
+  <rect x="440" y="70" width="220" height="280" fill="#555555"/>
   <text x="550" y="92" text-anchor="middle" class="bk">SRAM</text>
   <text x="550" y="108" text-anchor="middle" class="it">volatile · 1–2 cycle access</text>
   <text x="550" y="122" text-anchor="middle" class="it">writable · scarce</text>
-  <line x1="450" y1="132" x2="650" y2="132" stroke="#c8c4c0" stroke-width="0.5"/>
+  <line x1="450" y1="132" x2="650" y2="132" stroke="#ADADAD" stroke-width="0.5"/>
   <text x="460" y="150" class="it">· stack + heap</text>
   <text x="460" y="170" class="it">· globals + statics</text>
   <text x="460" y="190" class="it">· RTOS TCBs</text>
@@ -68,19 +68,19 @@
   <text x="460" y="250" class="it">· scratch buffers</text>
 
   <!-- arrows from artifacts → flash (top 4) -->
-  <line x1="290" y1="103" x2="262" y2="160" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
-  <line x1="290" y1="129" x2="262" y2="180" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
-  <line x1="290" y1="155" x2="262" y2="200" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
-  <line x1="290" y1="181" x2="262" y2="220" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="290" y1="103" x2="262" y2="160" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="290" y1="129" x2="262" y2="180" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="290" y1="155" x2="262" y2="200" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="290" y1="181" x2="262" y2="220" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
 
   <!-- arrows from artifacts → SRAM (bottom 4) -->
-  <line x1="410" y1="211" x2="438" y2="200" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
-  <line x1="410" y1="237" x2="438" y2="220" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
-  <line x1="410" y1="263" x2="438" y2="240" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
-  <line x1="410" y1="289" x2="438" y2="260" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="410" y1="211" x2="438" y2="200" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="410" y1="237" x2="438" y2="220" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="410" y1="263" x2="438" y2="240" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
+  <line x1="410" y1="289" x2="438" y2="260" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
 
   <!-- callout: XIP works for weights, never for activations -->
-  <rect x="150" y="370" width="400" height="32" fill="#fdfcfb" stroke="#c8860e" stroke-width="2"/>
+  <rect x="150" y="370" width="400" height="32" fill="#FFFFFF" stroke="#A4804A" stroke-width="2"/>
   <text x="350" y="384" text-anchor="middle" class="lb">execute-in-place from flash works for weights —</text>
   <text x="350" y="396" text-anchor="middle" class="lb">never for activations, because flash is read-only.</text>
 </svg>

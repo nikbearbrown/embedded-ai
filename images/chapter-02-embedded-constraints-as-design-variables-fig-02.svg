@@ -3,17 +3,17 @@
   <desc id="d02">Horizontal bar chart comparing inference latency for a 50 million MAC model on the STM32F411 at 830 milliseconds, the STM32H7A3 at 250 milliseconds, and the Raspberry Pi Zero 2 W at 25 milliseconds, with a 100 millisecond budget line.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .val { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .val { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <text x="350" y="32" text-anchor="middle" class="ti">Inference latency · 50 M MACs · three targets vs 100 ms budget</text>
   <text x="350" y="50" text-anchor="middle" class="sm">log-spaced axis · sustained throughput, not peak</text>
@@ -23,23 +23,23 @@
   <!-- 10 -> 100, 100 -> 385, 1000 -> 670 -->
 
   <!-- x axis ticks -->
-  <line x1="100" y1="320" x2="670" y2="320" stroke="#4a4540" stroke-width="1"/>
+  <line x1="100" y1="320" x2="670" y2="320" stroke="#555555" stroke-width="1"/>
   <g class="sm">
-    <line x1="100" y1="320" x2="100" y2="324" stroke="#4a4540"/>
+    <line x1="100" y1="320" x2="100" y2="324" stroke="#555555"/>
     <text x="100" y="336" text-anchor="middle">10 ms</text>
-    <line x1="270.4" y1="320" x2="270.4" y2="324" stroke="#4a4540"/>
+    <line x1="270.4" y1="320" x2="270.4" y2="324" stroke="#555555"/>
     <text x="270.4" y="336" text-anchor="middle">30 ms</text>
-    <line x1="385" y1="320" x2="385" y2="324" stroke="#4a4540"/>
+    <line x1="385" y1="320" x2="385" y2="324" stroke="#555555"/>
     <text x="385" y="336" text-anchor="middle">100 ms</text>
-    <line x1="555.4" y1="320" x2="555.4" y2="324" stroke="#4a4540"/>
+    <line x1="555.4" y1="320" x2="555.4" y2="324" stroke="#555555"/>
     <text x="555.4" y="336" text-anchor="middle">300 ms</text>
-    <line x1="670" y1="320" x2="670" y2="324" stroke="#4a4540"/>
+    <line x1="670" y1="320" x2="670" y2="324" stroke="#555555"/>
     <text x="670" y="336" text-anchor="middle">1000 ms</text>
   </g>
   <text x="385" y="358" text-anchor="middle" class="sm">latency (log scale)</text>
 
   <!-- 100 ms budget line -->
-  <line x1="385" y1="70" x2="385" y2="320" stroke="#2a1a0e" stroke-width="1.25" stroke-dasharray="5 3"/>
+  <line x1="385" y1="70" x2="385" y2="320" stroke="#000000" stroke-width="1.25" stroke-dasharray="5 3"/>
   <text x="385" y="64" text-anchor="middle" class="lb">100 ms budget</text>
 
   <!-- Bars: each row ~ 60 px high -->
@@ -51,7 +51,7 @@
   <g>
     <text x="92" y="105" text-anchor="end" class="lb">RPi Zero 2 W</text>
     <text x="92" y="119" text-anchor="end" class="sm">A53 · NEON · int8</text>
-    <rect x="100" y="92" width="113.4" height="26" fill="#2a1a0e"/>
+    <rect x="100" y="92" width="113.4" height="26" fill="#000000"/>
     <text x="222" y="110" class="val">~25 ms</text>
     <text x="222" y="124" class="sm">comfortable</text>
   </g>
@@ -60,7 +60,7 @@
   <g>
     <text x="92" y="172" text-anchor="end" class="lb">STM32H7A3</text>
     <text x="92" y="186" text-anchor="end" class="sm">M7 · 280 MHz · FPU</text>
-    <rect x="100" y="159" width="398.4" height="26" fill="#4a4540"/>
+    <rect x="100" y="159" width="398.4" height="26" fill="#555555"/>
     <text x="507" y="177" class="val">~250 ms</text>
     <text x="507" y="191" class="sm">plausible if int8/SIMD</text>
   </g>
@@ -69,15 +69,15 @@
   <g>
     <text x="92" y="239" text-anchor="end" class="lb">STM32F411</text>
     <text x="92" y="253" text-anchor="end" class="sm">M4 · 100 MHz · FPU</text>
-    <rect x="100" y="226" width="547" height="26" fill="#8a8480"/>
-    <text x="100" y="244" class="val" fill="#fdfcfb" dx="6">~830 ms</text>
-    <text x="660" y="244" text-anchor="end" class="sm" fill="#fdfcfb">misses budget by 8×</text>
+    <rect x="100" y="226" width="547" height="26" fill="#787878"/>
+    <text x="100" y="244" class="val" fill="#FFFFFF" dx="6">~830 ms</text>
+    <text x="660" y="244" text-anchor="end" class="sm" fill="#FFFFFF">misses budget by 8×</text>
   </g>
 
   <!-- Annotation: which side passes -->
-  <path d="M 230 290 L 350 290" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <path d="M 230 290 L 350 290" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
   <text x="290" y="282" text-anchor="middle" class="sm">clears budget</text>
-  <path d="M 540 290 L 420 290" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar2)"/>
+  <path d="M 540 290 L 420 290" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
   <text x="480" y="282" text-anchor="middle" class="sm">over budget</text>
 
   <text x="350" y="395" text-anchor="middle" class="cap">A model that runs in 25 ms on one target runs in 830 ms on another. Memory was never the question here.</text>

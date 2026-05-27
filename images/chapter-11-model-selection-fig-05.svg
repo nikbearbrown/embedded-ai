@@ -3,18 +3,18 @@
   <desc id="d11e">A constraint matrix. Five candidate models (threshold detector, random forest, small 1D CNN, large 1D CNN, two-layer LSTM) form rows. Four constraint columns score each: latency against 500 ms, SRAM against 256 KB, energy against the 2 mA average draw budget, and true-positive rate against the 95% acceptance threshold. Cells are shaded FIT, TIGHT, or FAILS. The small 1D CNN is the only all-FIT row.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
-      .vd { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .vd { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Fall-detector candidates — five models, four constraints</text>
   <text x="32" y="46" class="sm">nRF52840 · 256 KB SRAM · 500 ms deadline · 2 mA average draw · ≥95% TPR / ≤1% FPR.</text>
@@ -25,15 +25,15 @@
   <text x="346" y="80" text-anchor="middle" class="sm">SRAM vs 256 KB</text>
   <text x="474" y="80" text-anchor="middle" class="sm">Energy vs 2 mA avg</text>
   <text x="602" y="80" text-anchor="middle" class="sm">TPR vs 95% / FPR ≤ 1%</text>
-  <line x1="32" y1="86" x2="668" y2="86" stroke="#8a8480" stroke-width="0.75"/>
+  <line x1="32" y1="86" x2="668" y2="86" stroke="#787878" stroke-width="0.75"/>
 
   <!-- Legend chips -->
-  <rect x="32" y="430" width="14" height="10" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="32" y="430" width="14" height="10" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="50" y="439" class="sm">FIT (margin)</text>
-  <rect x="160" y="430" width="14" height="10" fill="#e8e2dc" stroke="#4a4540" stroke-width="1"/>
+  <rect x="160" y="430" width="14" height="10" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
   <text x="178" y="439" class="sm">TIGHT (close to limit)</text>
-  <rect x="328" y="430" width="14" height="10" fill="#2a1a0e"/>
-  <text x="346" y="439" class="sm" fill="#2a1a0e">FAILS (out of budget)</text>
+  <rect x="328" y="430" width="14" height="10" fill="#000000"/>
+  <text x="346" y="439" class="sm" fill="#000000">FAILS (out of budget)</text>
 
   <!-- Helper drawing: each row is 56 tall starting at y=98. Cells x: 160, 288, 416, 544. Each cell w=128 h=48 -->
 
@@ -42,54 +42,54 @@
   <text x="44" y="134" class="sm">hand-tuned, peak + duration</text>
   <text x="44" y="148" class="sm">classical baseline</text>
   <!-- latency: FIT -->
-  <rect x="160" y="98" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="160" y="98" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="224" y="120" text-anchor="middle" class="vd">FIT</text>
   <text x="224" y="134" text-anchor="middle" class="sm">&lt; 1 ms · 1 KB code</text>
   <!-- SRAM: FIT -->
-  <rect x="288" y="98" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="288" y="98" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="352" y="120" text-anchor="middle" class="vd">FIT</text>
   <text x="352" y="134" text-anchor="middle" class="sm">negligible</text>
   <!-- Energy: FIT -->
-  <rect x="416" y="98" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="416" y="98" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="480" y="120" text-anchor="middle" class="vd">FIT</text>
   <text x="480" y="134" text-anchor="middle" class="sm">negligible</text>
   <!-- Accuracy: FAILS -->
-  <rect x="544" y="98" width="124" height="48" fill="#2a1a0e"/>
-  <text x="606" y="120" text-anchor="middle" class="vd" fill="#fdfcfb">FAILS</text>
-  <text x="606" y="134" text-anchor="middle" class="sm" fill="#c8c4c0">78% TPR · 8% FPR</text>
+  <rect x="544" y="98" width="124" height="48" fill="#000000"/>
+  <text x="606" y="120" text-anchor="middle" class="vd" fill="#FFFFFF">FAILS</text>
+  <text x="606" y="134" text-anchor="middle" class="sm" fill="#ADADAD">78% TPR · 8% FPR</text>
 
   <!-- Row B — random forest -->
   <text x="44" y="176" class="nm">B · Random forest (50)</text>
   <text x="44" y="190" class="sm">15 engineered features</text>
   <text x="44" y="204" class="sm">per 1-second window</text>
-  <rect x="160" y="154" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="160" y="154" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="224" y="176" text-anchor="middle" class="vd">FIT</text>
   <text x="224" y="190" text-anchor="middle" class="sm">3.5 ms</text>
   <!-- SRAM: TIGHT (200KB of 256KB) -->
-  <rect x="288" y="154" width="128" height="48" fill="#e8e2dc" stroke="#4a4540" stroke-width="1"/>
+  <rect x="288" y="154" width="128" height="48" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
   <text x="352" y="176" text-anchor="middle" class="vd">TIGHT</text>
   <text x="352" y="190" text-anchor="middle" class="sm">200 KB (78%)</text>
-  <rect x="416" y="154" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="416" y="154" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="480" y="176" text-anchor="middle" class="vd">FIT</text>
   <text x="480" y="190" text-anchor="middle" class="sm">low</text>
-  <rect x="544" y="154" width="124" height="48" fill="#2a1a0e"/>
-  <text x="606" y="176" text-anchor="middle" class="vd" fill="#fdfcfb">FAILS</text>
-  <text x="606" y="190" text-anchor="middle" class="sm" fill="#c8c4c0">92% TPR · 2% FPR</text>
+  <rect x="544" y="154" width="124" height="48" fill="#000000"/>
+  <text x="606" y="176" text-anchor="middle" class="vd" fill="#FFFFFF">FAILS</text>
+  <text x="606" y="190" text-anchor="middle" class="sm" fill="#ADADAD">92% TPR · 2% FPR</text>
 
   <!-- Row C — small 1D CNN — THE WINNER -->
   <text x="44" y="232" class="nm">C · Small 1D CNN</text>
   <text x="44" y="246" class="sm">4 conv + 2 FC, 45k int8 params</text>
   <text x="44" y="260" class="sm">CMSIS-NN on M4</text>
-  <rect x="160" y="210" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="160" y="210" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="224" y="232" text-anchor="middle" class="vd">FIT</text>
   <text x="224" y="246" text-anchor="middle" class="sm">25 ms · 20× under</text>
-  <rect x="288" y="210" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="288" y="210" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="352" y="232" text-anchor="middle" class="vd">FIT</text>
   <text x="352" y="246" text-anchor="middle" class="sm">75 KB (29%)</text>
-  <rect x="416" y="210" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="416" y="210" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="480" y="232" text-anchor="middle" class="vd">FIT</text>
   <text x="480" y="246" text-anchor="middle" class="sm">0.12 mA avg · 16× under</text>
-  <rect x="544" y="210" width="124" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="544" y="210" width="124" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="606" y="232" text-anchor="middle" class="vd">FIT</text>
   <text x="606" y="246" text-anchor="middle" class="sm">96% TPR · 0.8% FPR</text>
 
@@ -97,17 +97,17 @@
   <text x="44" y="288" class="nm">D · Large 1D CNN</text>
   <text x="44" y="302" class="sm">6 conv + 3 FC, 180k params</text>
   <text x="44" y="316" class="sm">accuracy looks great</text>
-  <rect x="160" y="266" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="160" y="266" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="224" y="288" text-anchor="middle" class="vd">FIT</text>
   <text x="224" y="302" text-anchor="middle" class="sm">85 ms</text>
   <!-- SRAM: FAILS (260KB > 256KB) -->
-  <rect x="288" y="266" width="128" height="48" fill="#2a1a0e"/>
-  <text x="352" y="288" text-anchor="middle" class="vd" fill="#fdfcfb">FAILS</text>
-  <text x="352" y="302" text-anchor="middle" class="sm" fill="#c8c4c0">260 KB · 4 KB over</text>
-  <rect x="416" y="266" width="128" height="48" fill="#e8e2dc" stroke="#4a4540" stroke-width="1"/>
+  <rect x="288" y="266" width="128" height="48" fill="#000000"/>
+  <text x="352" y="288" text-anchor="middle" class="vd" fill="#FFFFFF">FAILS</text>
+  <text x="352" y="302" text-anchor="middle" class="sm" fill="#ADADAD">260 KB · 4 KB over</text>
+  <rect x="416" y="266" width="128" height="48" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
   <text x="480" y="288" text-anchor="middle" class="vd">—</text>
   <text x="480" y="302" text-anchor="middle" class="sm">moot · won't load</text>
-  <rect x="544" y="266" width="124" height="48" fill="#e8e2dc" stroke="#4a4540" stroke-width="1"/>
+  <rect x="544" y="266" width="124" height="48" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
   <text x="606" y="288" text-anchor="middle" class="vd">—</text>
   <text x="606" y="302" text-anchor="middle" class="sm">98% TPR (paper only)</text>
 
@@ -115,22 +115,22 @@
   <text x="44" y="344" class="nm">E · 2-layer LSTM (32u)</text>
   <text x="44" y="358" class="sm">60k params · sequential ops</text>
   <text x="44" y="372" class="sm">viable but pays for it</text>
-  <rect x="160" y="322" width="128" height="48" fill="#e8e2dc" stroke="#4a4540" stroke-width="1"/>
+  <rect x="160" y="322" width="128" height="48" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
   <text x="224" y="344" text-anchor="middle" class="vd">TIGHT</text>
   <text x="224" y="358" text-anchor="middle" class="sm">120 ms · 4× over C</text>
-  <rect x="288" y="322" width="128" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="288" y="322" width="128" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="352" y="344" text-anchor="middle" class="vd">FIT</text>
   <text x="352" y="358" text-anchor="middle" class="sm">150 KB</text>
-  <rect x="416" y="322" width="128" height="48" fill="#e8e2dc" stroke="#4a4540" stroke-width="1"/>
+  <rect x="416" y="322" width="128" height="48" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
   <text x="480" y="344" text-anchor="middle" class="vd">TIGHT</text>
   <text x="480" y="358" text-anchor="middle" class="sm">5× C's energy</text>
-  <rect x="544" y="322" width="124" height="48" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="1.25"/>
+  <rect x="544" y="322" width="124" height="48" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
   <text x="606" y="344" text-anchor="middle" class="vd">FIT</text>
   <text x="606" y="358" text-anchor="middle" class="sm">97.5% TPR · 0.5% FPR</text>
 
   <!-- Winner arrow -->
   <path d="M 24 234 L 14 234 L 14 234 L 24 234" fill="none"/>
-  <path d="M 22 232 L 14 232 L 14 234 L 22 234" fill="#2a1a0e" stroke="#2a1a0e"/>
+  <path d="M 22 232 L 14 232 L 14 234 L 22 234" fill="#000000" stroke="#000000"/>
   <text x="10" y="246" text-anchor="middle" transform="rotate(-90 10 246)" class="lb">ship this row</text>
 
   <text x="350" y="408" text-anchor="middle" class="cap">Model C is the only row green on every column. D fails on memory by 4 KB; E pays for accuracy the spec doesn't require.</text>

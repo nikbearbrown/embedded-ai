@@ -3,22 +3,22 @@
   <desc id="d02">Block diagram of a microNPU. External memory on the left connects through a DMA engine to a local SRAM scratchpad. The scratchpad feeds a 16-by-16 grid of MAC processing elements. The MAC array writes back to an accumulator and then to the scratchpad. A thin sequencer block on the right issues control signals to all four blocks.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .blk { fill: #fdfcfb; stroke: #2a1a0e; stroke-width: 1.25; }
-      .blk-em { fill: #fdfcfb; stroke: #2a1a0e; stroke-width: 2; }
-      .pe { fill: #c8c4c0; stroke: #4a4540; stroke-width: 0.5; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .blk { fill: #FFFFFF; stroke: #000000; stroke-width: 1.25; }
+      .blk-em { fill: #FFFFFF; stroke: #000000; stroke-width: 2; }
+      .pe { fill: #ADADAD; stroke: #555555; stroke-width: 0.5; }
     </style>
     <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
     </marker>
     <marker id="ar-ctrl" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#8a8480"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#787878"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">microNPU dataflow — weights and activations to MACs, back to memory</text>
   <text x="32" y="48" class="sm">representative 16×16 MAC array with on-chip scratchpad and DMA</text>
@@ -134,17 +134,17 @@
   <text x="640" y="222" text-anchor="middle" class="sm">controller</text>
 
   <!-- Arrows: External -> DMA -> Scratchpad -> MAC -> Scratchpad -->
-  <line x1="140" y1="210" x2="166" y2="210" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
-  <line x1="250" y1="210" x2="276" y2="210" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
-  <line x1="380" y1="210" x2="406" y2="210" stroke="#2a1a0e" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="140" y1="210" x2="166" y2="210" stroke="#000000" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="250" y1="210" x2="276" y2="210" stroke="#000000" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="380" y1="210" x2="406" y2="210" stroke="#000000" stroke-width="1.5" marker-end="url(#ar)"/>
   <!-- writeback curve from MAC array back to scratchpad (top) -->
-  <path d="M 500 116 C 500 90, 330 90, 330 116" fill="none" stroke="#2a1a0e" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+  <path d="M 500 116 C 500 90, 330 90, 330 116" fill="none" stroke="#000000" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar)"/>
   <text x="415" y="86" text-anchor="middle" class="sm">accumulator writeback</text>
 
   <!-- Control lines from sequencer (gray dashed) -->
-  <line x1="610" y1="195" x2="500" y2="120" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
-  <line x1="610" y1="215" x2="380" y2="215" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
-  <line x1="610" y1="230" x2="252" y2="225" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
+  <line x1="610" y1="195" x2="500" y2="120" stroke="#787878" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
+  <line x1="610" y1="215" x2="380" y2="215" stroke="#787878" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
+  <line x1="610" y1="230" x2="252" y2="225" stroke="#787878" stroke-width="0.75" stroke-dasharray="2 3" marker-end="url(#ar-ctrl)"/>
   <text x="640" y="260" text-anchor="middle" class="sm">no per-cycle</text>
   <text x="640" y="273" text-anchor="middle" class="sm">instruction fetch</text>
 

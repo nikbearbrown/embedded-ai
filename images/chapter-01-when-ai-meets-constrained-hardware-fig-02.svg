@@ -3,26 +3,26 @@
   <desc id="d02">Three stacked horizontal bars compare used resources to available budget for the wristband case: memory (240 of 256 KB, pass), latency/duty cycle (11 percent of 30 second window, pass), and power/battery life (130 of 336 hours required, fail). The first two pass, the last fails.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
-      .verdict { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .verdict { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <text x="32" y="28" class="ti">Wristband arrhythmia detector — three constraints, one binding failure</text>
   <text x="32" y="44" class="sm">Cortex-M-class MCU · 256 KB SRAM · 64 MHz no-FPU · 220 mAh coin cell · 14-day target</text>
 
   <!-- common scale: 0 to 100% on x, from 200 to 620 (420 px) -->
   <!-- frame -->
-  <line x1="200" y1="70" x2="200" y2="320" stroke="#8a8480" stroke-width="0.75"/>
-  <line x1="620" y1="70" x2="620" y2="320" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="3 3"/>
+  <line x1="200" y1="70" x2="200" y2="320" stroke="#787878" stroke-width="0.75"/>
+  <line x1="620" y1="70" x2="620" y2="320" stroke="#787878" stroke-width="0.75" stroke-dasharray="3 3"/>
   <text x="200" y="64" class="sm">0%</text>
   <text x="620" y="64" text-anchor="end" class="sm">100% of budget</text>
 
@@ -32,19 +32,19 @@
   <text x="32" y="128" class="sm">vs SRAM</text>
 
   <!-- background bar -->
-  <rect x="200" y="86" width="420" height="36" fill="#f5f2ee" stroke="#c8c4c0" stroke-width="0.5"/>
+  <rect x="200" y="86" width="420" height="36" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
   <!-- weights segment: 180/256 = 70.3% -->
-  <rect x="200" y="86" width="295.3" height="36" fill="#2a1a0e"/>
+  <rect x="200" y="86" width="295.3" height="36" fill="#000000"/>
   <!-- activations segment: 60/256 = 23.4% -->
-  <rect x="495.3" y="86" width="98.4" height="36" fill="#4a4540"/>
+  <rect x="495.3" y="86" width="98.4" height="36" fill="#555555"/>
   <!-- headroom segment: 16/256 = 6.3% -->
-  <rect x="593.7" y="86" width="26.3" height="36" fill="#c8c4c0"/>
+  <rect x="593.7" y="86" width="26.3" height="36" fill="#ADADAD"/>
 
-  <text x="220" y="108" class="lb" fill="#fdfcfb">weights 180 KB</text>
-  <text x="500" y="108" class="sm" fill="#fdfcfb">acts 60 KB</text>
+  <text x="220" y="108" class="lb" fill="#FFFFFF">weights 180 KB</text>
+  <text x="500" y="108" class="sm" fill="#FFFFFF">acts 60 KB</text>
   <text x="606" y="108" text-anchor="middle" class="sm">hd</text>
 
-  <text x="630" y="104" class="verdict" fill="#2a1a0e">PASS</text>
+  <text x="630" y="104" class="verdict" fill="#000000">PASS</text>
   <text x="630" y="118" class="sm">16 KB headroom</text>
 
   <!-- ROW 2: Latency / duty cycle -->
@@ -52,16 +52,16 @@
   <text x="32" y="190" class="sm">3.4 s inference</text>
   <text x="32" y="204" class="sm">vs 30 s window</text>
 
-  <rect x="200" y="162" width="420" height="36" fill="#f5f2ee" stroke="#c8c4c0" stroke-width="0.5"/>
+  <rect x="200" y="162" width="420" height="36" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
   <!-- active: 3.4/30 = 11.3% -->
-  <rect x="200" y="162" width="47.5" height="36" fill="#4a4540"/>
+  <rect x="200" y="162" width="47.5" height="36" fill="#555555"/>
   <!-- sleep: 88.7% -->
-  <rect x="247.5" y="162" width="372.5" height="36" fill="#c8c4c0"/>
+  <rect x="247.5" y="162" width="372.5" height="36" fill="#ADADAD"/>
 
-  <text x="223" y="184" text-anchor="middle" class="sm" fill="#fdfcfb">11%</text>
+  <text x="223" y="184" text-anchor="middle" class="sm" fill="#FFFFFF">11%</text>
   <text x="434" y="184" text-anchor="middle" class="sm">89% asleep — headroom</text>
 
-  <text x="630" y="180" class="verdict" fill="#2a1a0e">PASS</text>
+  <text x="630" y="180" class="verdict" fill="#000000">PASS</text>
   <text x="630" y="194" class="sm">duty cycle fits</text>
 
   <!-- ROW 3: Power / battery life -->
@@ -69,25 +69,25 @@
   <text x="32" y="266" class="sm">1.7 mA avg → 130 h</text>
   <text x="32" y="280" class="sm">vs 336 h required</text>
 
-  <rect x="200" y="238" width="420" height="36" fill="#f5f2ee" stroke="#c8c4c0" stroke-width="0.5"/>
+  <rect x="200" y="238" width="420" height="36" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
   <!-- delivered: 130/336 = 38.7% (relative to required) -->
   <!-- We're showing as % of required, so required = 100% = 420 px -->
-  <rect x="200" y="238" width="162.5" height="36" fill="#2a1a0e"/>
+  <rect x="200" y="238" width="162.5" height="36" fill="#000000"/>
   <!-- shortfall: 206/336 = 61.3% -->
-  <rect x="362.5" y="238" width="257.5" height="36" fill="#fdfcfb" stroke="#2a1a0e" stroke-width="0.75" stroke-dasharray="3 2"/>
+  <rect x="362.5" y="238" width="257.5" height="36" fill="#FFFFFF" stroke="#000000" stroke-width="0.75" stroke-dasharray="3 2"/>
 
-  <text x="281" y="260" text-anchor="middle" class="sm" fill="#fdfcfb">130 h delivered</text>
+  <text x="281" y="260" text-anchor="middle" class="sm" fill="#FFFFFF">130 h delivered</text>
   <text x="491" y="260" text-anchor="middle" class="lb">206 h short</text>
 
-  <text x="630" y="256" class="verdict" fill="#2a1a0e">FAIL</text>
+  <text x="630" y="256" class="verdict" fill="#000000">FAIL</text>
   <text x="630" y="270" class="sm">5 days, not 14</text>
 
   <!-- binding-constraint callout -->
-  <path d="M 660 256 L 680 256 L 680 304 L 360 304" fill="none" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+  <path d="M 660 256 L 680 256 L 680 304 L 360 304" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
   <text x="510" y="318" text-anchor="middle" class="lb">power is the binding constraint — the design must change here, not in memory or latency</text>
 
   <!-- Summary band -->
-  <rect x="32" y="340" width="636" height="46" fill="#f5f2ee" stroke="#c8c4c0" stroke-width="0.5"/>
+  <rect x="32" y="340" width="636" height="46" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
   <text x="48" y="358" class="nm">The model ran. The hardware worked. The design was wrong.</text>
   <text x="48" y="374" class="sm">Two passes and one fail — and the one fail kills the product. The doorbell story in miniature: every constraint must be quantified before deployment, not after.</text>
 

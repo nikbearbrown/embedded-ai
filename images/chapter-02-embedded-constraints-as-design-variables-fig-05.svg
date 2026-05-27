@@ -3,14 +3,14 @@
   <desc id="d05">A four-axis radar chart comparing ESP32-S3, STM32L4R5, and Raspberry Pi Zero 2 W on memory headroom, compute margin, projected battery life on a log scale with a six-month target marked, and cost. The Pi clears compute and memory but collapses on battery life.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9.5px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .axL { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10.5px; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9.5px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .axL { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10.5px; fill: #000000; }
     </style>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="350" y="28" text-anchor="middle" class="ti">Three candidates for a six-month canopy sensor — where each one clears or fails</text>
   <text x="350" y="44" text-anchor="middle" class="sm">four axes · 0 at center · 1.0 at outer ring · battery life on log scale</text>
@@ -20,14 +20,14 @@
   <!-- 4 axes at 90 deg increments. top: (260, 90); right: (420, 250); bottom: (260, 410); left: (100, 250) -->
 
   <!-- Rings -->
-  <g fill="none" stroke="#c8c4c0" stroke-width="0.75">
+  <g fill="none" stroke="#ADADAD" stroke-width="0.75">
     <polygon points="260,210 300,250 260,290 220,250"/>
     <polygon points="260,170 340,250 260,330 180,250"/>
     <polygon points="260,130 380,250 260,370 140,250"/>
     <polygon points="260,90 420,250 260,410 100,250"/>
   </g>
   <!-- Axes -->
-  <g stroke="#8a8480" stroke-width="0.75">
+  <g stroke="#787878" stroke-width="0.75">
     <line x1="260" y1="250" x2="260" y2="90"/>
     <line x1="260" y1="250" x2="420" y2="250"/>
     <line x1="260" y1="250" x2="260" y2="410"/>
@@ -51,8 +51,8 @@
   <!-- 6-month target marker on battery axis. Battery axis runs 260,250 → 260,410. -->
   <!-- Map log10(life_days): 1 day -> 0.0 at center, 365 days -> 1.0 at outer. log10(365)=2.562. -->
   <!-- 6-month (180 days) target. log10(180)=2.255 / 2.562 = 0.880. y = 250 + 0.880 * 160 = 390.8 -->
-  <circle cx="260" cy="390.8" r="4" fill="none" stroke="#c8102e" stroke-width="1.5"/>
-  <text x="270" y="394" class="lb" fill="#c8102e">6-mo target</text>
+  <circle cx="260" cy="390.8" r="4" fill="none" stroke="#C8102E" stroke-width="1.5"/>
+  <text x="270" y="394" class="lb" fill="#C8102E">6-mo target</text>
 
   <!-- DATA -->
   <!-- ESP32-S3: memory 0.90, compute 0.95, battery 0.99 (19 yr), cost 0.78 ($4.50) -->
@@ -80,46 +80,46 @@
 
   <!-- ESP32-S3 polygon — red -->
   <polygon points="260,106 412,250 260,408.4 135.2,250"
-           fill="#c8102e" fill-opacity="0.18" stroke="#c8102e" stroke-width="1.75"/>
+           fill="#C8102E" fill-opacity="0.18" stroke="#C8102E" stroke-width="1.75"/>
 
   <!-- STM32L4R5 polygon — ink -->
   <polygon points="260,114 359.2,250 260,410 148,250"
-           fill="#2a1a0e" fill-opacity="0.15" stroke="#2a1a0e" stroke-width="1.75" stroke-dasharray="5 3"/>
+           fill="#000000" fill-opacity="0.15" stroke="#000000" stroke-width="1.75" stroke-dasharray="5 3"/>
 
   <!-- RPi polygon — secondary gray -->
   <polygon points="260,90 420,250 260,258 220,250"
-           fill="#8a8480" fill-opacity="0.18" stroke="#8a8480" stroke-width="1.75" stroke-dasharray="2 2"/>
+           fill="#787878" fill-opacity="0.18" stroke="#787878" stroke-width="1.75" stroke-dasharray="2 2"/>
 
   <!-- Vertex dots -->
-  <g fill="#c8102e">
+  <g fill="#C8102E">
     <circle cx="260" cy="106" r="3.5"/><circle cx="412" cy="250" r="3.5"/>
     <circle cx="260" cy="408.4" r="3.5"/><circle cx="135.2" cy="250" r="3.5"/>
   </g>
-  <g fill="#2a1a0e">
+  <g fill="#000000">
     <circle cx="260" cy="114" r="3.5"/><circle cx="359.2" cy="250" r="3.5"/>
     <circle cx="260" cy="410" r="3.5"/><circle cx="148" cy="250" r="3.5"/>
   </g>
-  <g fill="#8a8480">
+  <g fill="#787878">
     <circle cx="260" cy="90" r="3.5"/><circle cx="420" cy="250" r="3.5"/>
     <circle cx="260" cy="258" r="3.5"/><circle cx="220" cy="250" r="3.5"/>
   </g>
 
   <!-- Legend -->
   <g>
-    <rect x="490" y="100" width="180" height="120" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.75"/>
+    <rect x="490" y="100" width="180" height="120" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
     <text x="500" y="118" class="lb">platforms</text>
 
-    <rect x="500" y="128" width="14" height="10" fill="#c8102e" fill-opacity="0.18" stroke="#c8102e" stroke-width="1.5"/>
+    <rect x="500" y="128" width="14" height="10" fill="#C8102E" fill-opacity="0.18" stroke="#C8102E" stroke-width="1.5"/>
     <text x="520" y="137" class="lb">ESP32-S3</text>
     <text x="520" y="150" class="sm">$4.50 · 19 yr · viable</text>
 
-    <rect x="500" y="158" width="14" height="10" fill="#2a1a0e" fill-opacity="0.15" stroke="#2a1a0e" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <rect x="500" y="158" width="14" height="10" fill="#000000" fill-opacity="0.15" stroke="#000000" stroke-width="1.5" stroke-dasharray="3 2"/>
     <text x="520" y="167" class="lb">STM32L4R5</text>
     <text x="520" y="180" class="sm">$6.00 · &gt;6 mo · viable</text>
 
-    <rect x="500" y="188" width="14" height="10" fill="#8a8480" fill-opacity="0.18" stroke="#8a8480" stroke-width="1.5" stroke-dasharray="2 2"/>
+    <rect x="500" y="188" width="14" height="10" fill="#787878" fill-opacity="0.18" stroke="#787878" stroke-width="1.5" stroke-dasharray="2 2"/>
     <text x="520" y="197" class="lb">RPi Zero 2 W</text>
-    <text x="520" y="210" class="sm" fill="#c8102e">$15 · ~1.4 d · fails power</text>
+    <text x="520" y="210" class="sm" fill="#C8102E">$15 · ~1.4 d · fails power</text>
   </g>
 
   <text x="350" y="450" text-anchor="middle" class="cap">The Pi clears memory and compute by wide margins, then collapses on battery life. Constraints are conjunctive.</text>

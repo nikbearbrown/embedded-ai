@@ -1,100 +1,160 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="t03 d03">
-  <title id="t03">Memory hierarchy access cost — where activations live decides inference time</title>
-  <desc id="d03">Horizontal bar chart of approximate cycles per access for registers, L1 cache, on-chip SRAM, external PSRAM, and flash. A second series shows accesses-per-MAC for a 3×3 convolution layer, illustrating why placement of activations dominates latency.</desc>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 720 440">
+  <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
-      .val { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .st0, .st1, .st2, .st3, .st4, .st5 {
+        fill: none;
+      }
+
+      .st6, .st7, .st8, .st9, .st10, .st11, .st12, .st13 {
+        isolation: isolate;
+      }
+
+      .st6, .st14, .st11 {
+        font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif;
+      }
+
+      .st6, .st9, .st15, .st13 {
+        fill: #555555;
+      }
+
+      .st6, .st9, .st10 {
+        font-size: 10px;
+      }
+
+      .st7, .st16, .st11, .st12 {
+        fill: #000000;
+      }
+
+      .st7, .st12 {
+        font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif;
+        font-weight: 700;
+      }
+
+      .st7, .st13 {
+        font-size: 11px;
+      }
+
+      .st1 {
+        stroke: #C8102E;
+      }
+
+      .st1, .st2 {
+        stroke-width: .7px;
+      }
+
+      .st17 {
+        fill: #C8102E;
+      }
+
+      .st8 {
+        opacity: .5;
+      }
+
+      .st8, .st18 {
+        fill: #787878;
+      }
+
+      .st19 {
+        font-family: MyriadPro-Regular, 'Myriad Pro';
+      }
+
+      .st10 {
+        fill: #555555;
+      }
+
+      .st10, .st13 {
+        font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif;
+        font-style: italic;
+      }
+
+      .st2 {
+        stroke: #787878;
+      }
+
+      .st11 {
+        font-size: 12px;
+      }
+
+      .st12 {
+        font-size: 14px;
+      }
+
+      .st20 {
+        fill: #FFFFFF;
+      }
+
+      .st3 {
+        stroke-width: .5px;
+      }
+
+      .st3, .st4, .st5 {
+        stroke: #555555;
+      }
+
+      .st5 {
+        stroke-width: .6px;
+      }
     </style>
-    <marker id="ar3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
-    </marker>
   </defs>
-  <rect width="720" height="440" fill="#fdfcfb"/>
-
-  <text x="24" y="30" class="ti">Cycles per memory access — by tier</text>
-  <text x="24" y="48" class="nm">approximate values on Cortex-M class processors; 3×3 conv reference: 9 input reads per output pixel</text>
-
-  <!-- column headers -->
-  <text x="156" y="78" class="sm" text-anchor="end">tier</text>
-  <text x="184" y="78" class="sm">cycles per access  (log-like, max 20)</text>
-  <text x="540" y="78" class="sm" text-anchor="end">accesses/MAC</text>
-  <text x="556" y="78" class="sm">in a 3×3 conv layer</text>
-
-  <!-- baseline -->
-  <line x1="160" y1="84" x2="160" y2="372" stroke="#8a8480" stroke-width="0.7"/>
-
-  <!-- scale: 1 cyc = 16 px, range 0–20, so 320 px max width to 480 -->
-  <!-- tier rows -->
-
-  <!-- Row 1: Registers, ~0 cyc -->
-  <text x="156" y="108" class="lb" text-anchor="end">registers</text>
-  <rect x="160" y="96" width="4" height="18" fill="#2a1a0e"/>
-  <text x="170" y="109" class="val">≈ 0</text>
-  <text x="540" y="109" text-anchor="end" class="lb">0 (held)</text>
-  <text x="556" y="109" class="sm">reused while in registers</text>
-
-  <!-- Row 2: L1 cache, 1.5 cyc avg -->
-  <text x="156" y="144" class="lb" text-anchor="end">L1 cache</text>
-  <rect x="160" y="132" width="24" height="18" fill="#2a1a0e"/>
-  <text x="190" y="145" class="val">1–2</text>
-  <text x="540" y="145" text-anchor="end" class="lb">0.1–0.3</text>
-  <text x="556" y="145" class="sm">when tiles fit (M7 + L1, blocked)</text>
-
-  <!-- Row 3: On-chip SRAM, 3 cyc -->
-  <text x="156" y="180" class="lb" text-anchor="end">on-chip SRAM</text>
-  <rect x="160" y="168" width="48" height="18" fill="#4a4540"/>
-  <text x="214" y="181" class="val">2–4</text>
-  <text x="540" y="181" text-anchor="end" class="lb">1–3</text>
-  <text x="556" y="181" class="sm">typical M4 / M7 activation path</text>
-
-  <!-- Row 4: External PSRAM, 15 cyc -->
-  <text x="156" y="216" class="lb" text-anchor="end">external PSRAM</text>
-  <rect x="160" y="204" width="240" height="18" fill="#8a1f1f"/>
-  <text x="406" y="217" class="val">10–20</text>
-  <text x="540" y="217" text-anchor="end" class="lb" fill="#8a1f1f">3–6 (spill)</text>
-  <text x="556" y="217" class="sm" fill="#8a1f1f">where the order-of-magnitude lives</text>
-
-  <!-- Row 5: Flash, varies -->
-  <text x="156" y="252" class="lb" text-anchor="end">flash (XIP)</text>
-  <rect x="160" y="240" width="100" height="18" fill="#8a8480"/>
-  <rect x="260" y="240" width="60" height="18" fill="#8a8480" opacity="0.5"/>
-  <text x="326" y="253" class="val">5–20  (highly variable)</text>
-  <text x="540" y="253" text-anchor="end" class="lb">— (weights)</text>
-  <text x="556" y="253" class="sm">weights live here; activations should not</text>
-
-  <!-- scale tick marks for cycles -->
-  <line x1="160" y1="280" x2="480" y2="280" stroke="#4a4540" stroke-width="0.5"/>
+  <rect class="st20" width="720" height="440"/>
+  <text class="st12" transform="translate(24 30)"><tspan x="0" y="0">Cycles per memory access — by tier</tspan></text>
+  <text class="st10" transform="translate(24 48)"><tspan x="0" y="0">approximate values on Cortex-M class processors; 3×3 conv reference: 9 input reads per output pixel</tspan></text>
+  <text class="st6" transform="translate(142.54 78)"><tspan x="0" y="0">tier</tspan></text>
+  <text class="st6" transform="translate(184 78)"><tspan x="0" y="0">cycles per access (log-like, max 20)</tspan></text>
+  <text class="st6" transform="translate(487.86 78)"><tspan x="0" y="0">accesses/MAC</tspan></text>
+  <text class="st6" transform="translate(556 78)"><tspan x="0" y="0">in a 3×3 conv layer</tspan></text>
+  <line class="st2" x1="160" y1="84" x2="160" y2="372"/>
+  <text class="st11" transform="translate(117.94 108)"><tspan x="0" y="0">registers</tspan></text>
+  <rect class="st16" x="160" y="96" width="4" height="18"/>
+  <text class="st7" transform="translate(170 109)"><tspan x="0" y="0">≈ 0</tspan></text>
+  <text class="st11" transform="translate(503.99 109)"><tspan x="0" y="0">0 (held)</tspan></text>
+  <text class="st6" transform="translate(556 109)"><tspan x="0" y="0">reused while in registers</tspan></text>
+  <text class="st11" transform="translate(117.59 144)"><tspan x="0" y="0">L1 cache</tspan></text>
+  <rect class="st16" x="160" y="132" width="24" height="18"/>
+  <text class="st7" transform="translate(190 145)"><tspan x="0" y="0">1–2</tspan></text>
+  <text class="st11" transform="translate(509.74 145)"><tspan x="0" y="0">0.1–0.3</tspan></text>
+  <text class="st6" transform="translate(556 145)"><tspan x="0" y="0">when tiles fit (M7 + L1, blocked)</tspan></text>
+  <text class="st11" transform="translate(86.35 180)"><tspan x="0" y="0">on-chip SRAM</tspan></text>
+  <rect class="st15" x="160" y="168" width="48" height="18"/>
+  <text class="st7" transform="translate(214 181)"><tspan x="0" y="0">2–4</tspan></text>
+  <text class="st11" transform="translate(526.92 181)"><tspan x="0" y="0">1–3</tspan></text>
+  <text class="st6" transform="translate(556 181)"><tspan x="0" y="0">typical M4 / M7 activation path</tspan></text>
+  <text class="st11" transform="translate(79.12 216)"><tspan x="0" y="0">external PSRAM</tspan></text>
+  <rect class="st17" x="160" y="204" width="240" height="18"/>
+  <text class="st7" transform="translate(406 217)"><tspan x="0" y="0">10–20</tspan></text>
+  <text class="st11" transform="translate(496.15 217)"><tspan x="0" y="0">3–6 (spill)</tspan></text>
+  <text class="st6" transform="translate(556 217)"><tspan x="0" y="0">where the order-of-magnitude lives</tspan></text>
+  <text class="st11" transform="translate(105.4 252)"><tspan x="0" y="0">flash (XIP)</tspan></text>
+  <rect class="st18" x="160" y="240" width="100" height="18"/>
+  <rect class="st8" x="260" y="240" width="60" height="18"/>
+  <text class="st7" transform="translate(326 253)"><tspan x="0" y="0">5–20 (highly variable)</tspan></text>
+  <text class="st11" transform="translate(483.22 253)"><tspan x="0" y="0">— (weights)</tspan></text>
+  <text class="st6" transform="translate(556 253)"><tspan x="0" y="0">weights live here; activations should not</tspan></text>
+  <line class="st3" x1="160" y1="280" x2="480" y2="280"/>
   <g>
-    <line x1="160" y1="278" x2="160" y2="284" stroke="#4a4540"/>
-    <text x="160" y="298" class="sm" text-anchor="middle">0</text>
-    <line x1="240" y1="278" x2="240" y2="284" stroke="#4a4540"/>
-    <text x="240" y="298" class="sm" text-anchor="middle">5</text>
-    <line x1="320" y1="278" x2="320" y2="284" stroke="#4a4540"/>
-    <text x="320" y="298" class="sm" text-anchor="middle">10</text>
-    <line x1="400" y1="278" x2="400" y2="284" stroke="#4a4540"/>
-    <text x="400" y="298" class="sm" text-anchor="middle">15</text>
-    <line x1="480" y1="278" x2="480" y2="284" stroke="#4a4540"/>
-    <text x="480" y="298" class="sm" text-anchor="middle">20</text>
+    <line class="st4" x1="160" y1="278" x2="160" y2="284"/>
+    <text class="st6" transform="translate(157.45 298)"><tspan x="0" y="0">0</tspan></text>
+    <line class="st4" x1="240" y1="278" x2="240" y2="284"/>
+    <text class="st6" transform="translate(238.36 298)"><tspan x="0" y="0">5</tspan></text>
+    <line class="st4" x1="320" y1="278" x2="320" y2="284"/>
+    <text class="st6" transform="translate(316.07 298)"><tspan x="0" y="0">10</tspan></text>
+    <line class="st4" x1="400" y1="278" x2="400" y2="284"/>
+    <text class="st6" transform="translate(396.98 298)"><tspan x="0" y="0">15</tspan></text>
+    <line class="st4" x1="480" y1="278" x2="480" y2="284"/>
+    <text class="st6" transform="translate(475.38 298)"><tspan x="0" y="0">20</tspan></text>
   </g>
-  <text x="320" y="312" class="sm" text-anchor="middle">cycles per access</text>
-
-  <!-- callout: spill cost -->
-  <path d="M 400 222 Q 420 340 110 360" fill="none" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
-  <rect x="20" y="346" width="320" height="60" fill="none" stroke="#8a1f1f" stroke-width="0.7"/>
-  <text x="32" y="365" class="lb" fill="#8a1f1f">why placement of activations decides everything</text>
-  <text x="32" y="383" class="sm">96 × 96 × 32 × 9 × 32 ≈ 84 M accesses in one conv layer.</text>
-  <text x="32" y="399" class="sm">at 15 cyc/access in PSRAM, that is ≈ 12.6 s of memory traffic.</text>
-
-  <!-- right callout -->
-  <rect x="380" y="346" width="320" height="60" fill="none" stroke="#4a4540" stroke-width="0.6"/>
-  <text x="392" y="365" class="lb">two simple checks before optimization</text>
-  <text x="392" y="383" class="sm">1. count accesses per MAC for the dominant layer.</text>
-  <text x="392" y="399" class="sm">2. confirm where each tensor actually lives at run time.</text>
-
-  <text x="360" y="430" text-anchor="middle" class="cap">The compute did not change. The memory pattern did, and the memory pattern is what dominated.</text>
+  <text class="st6" transform="translate(290.18 312)"><tspan x="0" y="0">cycles per access</tspan></text>
+  <path class="st0" d=""/>
+  <path class="st16" d="M110,267" marker-end="url(#ar3)"/>
+  <rect class="st1" x="20" y="346" width="320" height="60"/>
+  <text class="st11" transform="translate(32.22 366.41)"><tspan x="0" y="0">why placement of activations decides everything</tspan></text>
+  <text class="st9" transform="translate(32 383)"><tspan class="st14" x="0" y="0">96 × 96 × 32 × 9 × 32 </tspan><tspan class="st19" x="71.77" y="0">≈</tspan><tspan class="st14" x="77.73" y="0" xml:space="preserve"> 84 M accesses in one conv layer.</tspan></text>
+  <text class="st9" transform="translate(32 399)"><tspan class="st14" x="0" y="0">at 15 cyc/access in PSRAM, that is </tspan><tspan class="st19" x="127.18" y="0">≈</tspan><tspan class="st14" x="133.14" y="0" xml:space="preserve"> 12.6 s of memory traffic.</tspan></text>
+  <rect class="st5" x="380" y="346" width="320" height="60"/>
+  <text class="st11" transform="translate(392 365)"><tspan x="0" y="0">two simple checks before optimization</tspan></text>
+  <text class="st6" transform="translate(392 383)"><tspan x="0" y="0">1. count accesses per MAC for the dominant layer.</tspan></text>
+  <text class="st6" transform="translate(392 399)"><tspan x="0" y="0">2. confirm where each tensor actually lives at run time.</tspan></text>
+  <text class="st13" transform="translate(152.32 430)"><tspan x="0" y="0">The compute did not change. The memory pattern did, and the memory pattern is what dominated.</tspan></text>
 </svg>

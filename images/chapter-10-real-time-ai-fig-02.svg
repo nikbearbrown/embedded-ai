@@ -3,19 +3,19 @@
   <desc id="d10f2">Histogram of inference execution times with a long right tail. Vertical guides mark mean at 38 ms, p95 at 47 ms, p99 at 53 ms, and worst-case observed at 62 ms. Annotations call out the gap between mean and worst-case as the hard real-time problem.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
-      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 9px; fill: #4a4540; }
-      .gd { stroke: #c8c4c0; stroke-width: 0.5; stroke-dasharray: 2 3; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; fill: #555555; }
+      .gd { stroke: #ADADAD; stroke-width: 0.5; stroke-dasharray: 2 3; }
     </style>
     <marker id="ar1f2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#fdfcfb"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">10,000 inference runs of the same model — the mean is honest, the deadline is not</text>
   <text x="32" y="48" class="sm">Cortex-M7 at 400 MHz · 1D CNN · same model, same workload, varying cache and scene complexity</text>
@@ -28,8 +28,8 @@
   <line x1="80" y1="260" x2="640" y2="260" class="gd"/>
 
   <!-- axes -->
-  <line x1="80" y1="320" x2="640" y2="320" stroke="#4a4540"/>
-  <line x1="80" y1="80"  x2="80"  y2="320" stroke="#4a4540"/>
+  <line x1="80" y1="320" x2="640" y2="320" stroke="#555555"/>
+  <line x1="80" y1="80"  x2="80"  y2="320" stroke="#555555"/>
 
   <!-- y-axis tick labels (frequency, normalized) -->
   <text x="74" y="324" text-anchor="end" class="ax">0</text>
@@ -52,7 +52,7 @@
   <!-- Histogram bars - simulated unimodal with long right tail -->
   <!-- Each bar 13 px wide, 1 px gap; bins of 1 ms; x at 25,26,27,...,64 -->
   <!-- Heights chosen to look like a real measurement with peak near 36-38 ms and long tail to 62 -->
-  <g fill="#2a1a0e">
+  <g fill="#000000">
     <rect x="80"  y="318" width="13" height="2"/>   <!--25-->
     <rect x="94"  y="314" width="13" height="6"/>   <!--26-->
     <rect x="108" y="306" width="13" height="14"/>  <!--27-->
@@ -97,32 +97,32 @@
 
   <!-- Vertical marker lines -->
   <!-- mean = 38 ms → x = 80 + (38-25)*14 = 262 -->
-  <line x1="262" y1="60" x2="262" y2="320" stroke="#4a4540" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="262" y1="60" x2="262" y2="320" stroke="#555555" stroke-width="1" stroke-dasharray="4 3"/>
   <text x="262" y="56" text-anchor="middle" class="nm">mean</text>
   <text x="262" y="70" text-anchor="middle" class="sm">38 ms</text>
 
   <!-- p95 = 47 ms → x = 80 + 22*14 = 388 -->
-  <line x1="388" y1="60" x2="388" y2="320" stroke="#4a4540" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="388" y1="60" x2="388" y2="320" stroke="#555555" stroke-width="1" stroke-dasharray="4 3"/>
   <text x="388" y="56" text-anchor="middle" class="nm">p95</text>
   <text x="388" y="70" text-anchor="middle" class="sm">47 ms</text>
 
   <!-- p99 = 53 ms → x = 80 + 28*14 = 472 -->
-  <line x1="472" y1="60" x2="472" y2="320" stroke="#4a4540" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="472" y1="60" x2="472" y2="320" stroke="#555555" stroke-width="1" stroke-dasharray="4 3"/>
   <text x="472" y="56" text-anchor="middle" class="nm">p99</text>
   <text x="472" y="70" text-anchor="middle" class="sm">53 ms</text>
 
   <!-- worst = 62 ms → x = 598 -->
-  <line x1="598" y1="60" x2="598" y2="320" stroke="#2a1a0e" stroke-width="1.5"/>
+  <line x1="598" y1="60" x2="598" y2="320" stroke="#000000" stroke-width="1.5"/>
   <text x="598" y="56" text-anchor="middle" class="nm">worst observed</text>
   <text x="598" y="70" text-anchor="middle" class="sm">62 ms</text>
 
   <!-- annotation: tail -->
-  <path d="M 450 250 Q 520 260 580 300" fill="none" stroke="#2a1a0e" stroke-width="0.75" stroke-dasharray="3 2"/>
+  <path d="M 450 250 Q 520 260 580 300" fill="none" stroke="#000000" stroke-width="0.75" stroke-dasharray="3 2"/>
   <text x="478" y="244" class="sm">the tail you cannot reason about from the mean</text>
 
   <!-- annotation: gap between mean and worst -->
-  <line x1="262" y1="380" x2="598" y2="380" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar1f2)"/>
-  <line x1="262" y1="376" x2="262" y2="384" stroke="#2a1a0e" stroke-width="1"/>
+  <line x1="262" y1="380" x2="598" y2="380" stroke="#000000" stroke-width="1" marker-end="url(#ar1f2)"/>
+  <line x1="262" y1="376" x2="262" y2="384" stroke="#000000" stroke-width="1"/>
   <text x="430" y="396" text-anchor="middle" class="nm">+24 ms — the variability the deadline has to absorb</text>
   <text x="430" y="410" text-anchor="middle" class="sm">a 1.6× headroom between mean and observed worst-case, before any safety margin</text>
 

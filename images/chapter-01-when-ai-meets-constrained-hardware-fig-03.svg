@@ -3,17 +3,17 @@
   <desc id="d03">A topology diagram with a sensor on the left and a cloud datacenter on the right, with three concentric inference-placement rings around the sensor: on-device edge (under ten milliseconds, no network), fog or gateway (ten to fifty milliseconds, LAN), and cloud (fifty to five hundred milliseconds, WAN). Each ring is annotated with latency, what physically leaves the device, and which of latency, privacy, connectivity, and cost it satisfies.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#fdfcfb"/>
+  <rect width="700" height="440" fill="#FFFFFF"/>
 
   <text x="32" y="28" class="ti">Where does the inference run? Three options, three latency floors.</text>
   <text x="32" y="44" class="sm">Sensor at the left, datacenter at the right — concentric rings mark how far the data has to travel.</text>
@@ -22,41 +22,41 @@
   <!-- Cloud outer arc to right side -->
 
   <!-- Cloud arc (outer) -->
-  <circle cx="130" cy="230" r="230" fill="none" stroke="#c8c4c0" stroke-width="0.75" stroke-dasharray="3 3"/>
+  <circle cx="130" cy="230" r="230" fill="none" stroke="#ADADAD" stroke-width="0.75" stroke-dasharray="3 3"/>
   <!-- Fog arc (mid) -->
-  <circle cx="130" cy="230" r="130" fill="none" stroke="#8a8480" stroke-width="0.75" stroke-dasharray="3 3"/>
+  <circle cx="130" cy="230" r="130" fill="none" stroke="#787878" stroke-width="0.75" stroke-dasharray="3 3"/>
   <!-- Edge arc (inner) -->
-  <circle cx="130" cy="230" r="55" fill="none" stroke="#4a4540" stroke-width="1"/>
+  <circle cx="130" cy="230" r="55" fill="none" stroke="#555555" stroke-width="1"/>
 
   <!-- Edge ring fill (very subtle) -->
-  <circle cx="130" cy="230" r="55" fill="#f5f2ee" opacity="0.6"/>
+  <circle cx="130" cy="230" r="55" fill="#F5F5F5" opacity="0.6"/>
 
   <!-- Sensor node -->
-  <rect x="110" y="210" width="40" height="40" fill="#2a1a0e" rx="2"/>
-  <circle cx="130" cy="230" r="6" fill="#fdfcfb"/>
+  <rect x="110" y="210" width="40" height="40" fill="#000000" rx="2"/>
+  <circle cx="130" cy="230" r="6" fill="#FFFFFF"/>
   <text x="130" y="268" text-anchor="middle" class="nm">sensor</text>
   <text x="130" y="282" text-anchor="middle" class="sm">camera · mic · ECG</text>
 
   <!-- Gateway node on fog ring -->
-  <rect x="230" y="158" width="36" height="28" fill="#4a4540" rx="2"/>
-  <text x="248" y="176" text-anchor="middle" class="sm" fill="#fdfcfb">GW</text>
+  <rect x="230" y="158" width="36" height="28" fill="#555555" rx="2"/>
+  <text x="248" y="176" text-anchor="middle" class="sm" fill="#FFFFFF">GW</text>
   <text x="248" y="200" text-anchor="middle" class="nm">gateway</text>
   <text x="248" y="214" text-anchor="middle" class="sm">router · hub</text>
 
   <!-- Cloud datacenter on the right -->
   <g transform="translate(560, 220)">
-    <path d="M -40 -10 Q -40 -28 -20 -28 Q -16 -42 0 -42 Q 16 -42 22 -30 Q 40 -32 40 -14 Q 50 -10 50 0 L -40 0 Z" fill="#2a1a0e"/>
-    <rect x="-28" y="0" width="68" height="22" fill="#4a4540"/>
-    <line x1="-24" y1="6" x2="36" y2="6" stroke="#fdfcfb" stroke-width="0.5"/>
-    <line x1="-24" y1="12" x2="36" y2="12" stroke="#fdfcfb" stroke-width="0.5"/>
-    <line x1="-24" y1="18" x2="36" y2="18" stroke="#fdfcfb" stroke-width="0.5"/>
+    <path d="M -40 -10 Q -40 -28 -20 -28 Q -16 -42 0 -42 Q 16 -42 22 -30 Q 40 -32 40 -14 Q 50 -10 50 0 L -40 0 Z" fill="#000000"/>
+    <rect x="-28" y="0" width="68" height="22" fill="#555555"/>
+    <line x1="-24" y1="6" x2="36" y2="6" stroke="#FFFFFF" stroke-width="0.5"/>
+    <line x1="-24" y1="12" x2="36" y2="12" stroke="#FFFFFF" stroke-width="0.5"/>
+    <line x1="-24" y1="18" x2="36" y2="18" stroke="#FFFFFF" stroke-width="0.5"/>
   </g>
   <text x="565" y="270" text-anchor="middle" class="nm">cloud datacenter</text>
   <text x="565" y="284" text-anchor="middle" class="sm">unbounded compute</text>
 
   <!-- Connections -->
-  <line x1="150" y1="225" x2="232" y2="180" stroke="#2a1a0e" stroke-width="1" marker-end="url(#ar3)"/>
-  <line x1="266" y1="180" x2="528" y2="218" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
+  <line x1="150" y1="225" x2="232" y2="180" stroke="#000000" stroke-width="1" marker-end="url(#ar3)"/>
+  <line x1="266" y1="180" x2="528" y2="218" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
 
   <!-- Ring labels along upper arcs -->
   <text x="130" y="166" text-anchor="middle" class="nm">on-device edge</text>
@@ -70,8 +70,8 @@
 
   <!-- Annotation panels below -->
   <!-- Edge box -->
-  <rect x="32" y="320" width="200" height="98" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.75"/>
-  <rect x="32" y="320" width="6" height="98" fill="#2a1a0e"/>
+  <rect x="32" y="320" width="200" height="98" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
+  <rect x="32" y="320" width="6" height="98" fill="#000000"/>
   <text x="48" y="338" class="nm">edge — runs on the sensor</text>
   <text x="48" y="354" class="sm">what leaves: only the result</text>
   <text x="48" y="370" class="sm">satisfies: latency, privacy,</text>
@@ -79,8 +79,8 @@
   <text x="48" y="406" class="sm">violates: compute, memory headroom</text>
 
   <!-- Fog box -->
-  <rect x="248" y="320" width="200" height="98" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.75"/>
-  <rect x="248" y="320" width="6" height="98" fill="#4a4540"/>
+  <rect x="248" y="320" width="200" height="98" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
+  <rect x="248" y="320" width="6" height="98" fill="#555555"/>
   <text x="264" y="338" class="nm">fog — runs on the LAN</text>
   <text x="264" y="354" class="sm">what leaves: features or raw</text>
   <text x="264" y="370" class="sm">satisfies: latency (mostly),</text>
@@ -88,8 +88,8 @@
   <text x="264" y="406" class="sm">violates: connectivity if LAN drops</text>
 
   <!-- Cloud box -->
-  <rect x="464" y="320" width="204" height="98" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.75"/>
-  <rect x="464" y="320" width="6" height="98" fill="#8a8480"/>
+  <rect x="464" y="320" width="204" height="98" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
+  <rect x="464" y="320" width="6" height="98" fill="#787878"/>
   <text x="480" y="338" class="nm">cloud — runs in datacenter</text>
   <text x="480" y="354" class="sm">what leaves: raw sensor data</text>
   <text x="480" y="370" class="sm">satisfies: compute, memory,</text>

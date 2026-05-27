@@ -3,23 +3,23 @@
   <desc id="d03">Horizontal log-scale chart of four radio bandwidth ranges from LoRaWAN to WiFi. Three payload markers — a 96x96 RGB image, a 32x32 image, and a 16-element feature vector — show which radios can finish transmitting within a 500 ms latency budget.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
-      .ax { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
-      .pay { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #2a1a0e; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
-      .badge { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-weight: bold; fill: #fdfcfb; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
+      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .pay { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #000000; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .badge { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
     </style>
     <marker id="ar3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#2a1a0e"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
     </marker>
     <marker id="arRed3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#8a1f1f"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#C8102E"/>
     </marker>
   </defs>
-  <rect width="760" height="440" fill="#fdfcfb"/>
+  <rect width="760" height="440" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">What survives 500 ms? Bandwidth on log scale, with payload requirements overlaid</text>
   <text x="32" y="50" class="nm">x = uplink bandwidth (kbps, log10). a payload needs more bps than its label to fit in 500 ms.</text>
@@ -29,7 +29,7 @@
   <!-- log10 0.1 → x=90; log10 1 → 195; 10 → 300; 100 → 405; 1000 → 510; 10000 → 615; 100000 → 720 -->
 
   <!-- Gridlines -->
-  <g stroke="#c8c4c0" stroke-width="0.6">
+  <g stroke="#ADADAD" stroke-width="0.6">
     <line x1="90"  y1="80" x2="90"  y2="330"/>
     <line x1="195" y1="80" x2="195" y2="330"/>
     <line x1="300" y1="80" x2="300" y2="330"/>
@@ -40,7 +40,7 @@
   </g>
 
   <!-- x axis -->
-  <line x1="90" y1="330" x2="720" y2="330" stroke="#4a4540" stroke-width="1"/>
+  <line x1="90" y1="330" x2="720" y2="330" stroke="#555555" stroke-width="1"/>
   <text x="90"  y="346" text-anchor="middle" class="ax">0.1</text>
   <text x="195" y="346" text-anchor="middle" class="ax">1</text>
   <text x="300" y="346" text-anchor="middle" class="ax">10</text>
@@ -59,26 +59,26 @@
   -->
 
   <!-- LoRaWAN row, y=100 -->
-  <rect x="140" y="92"  width="234" height="22" fill="#2a1a0e"/>
+  <rect x="140" y="92"  width="234" height="22" fill="#000000"/>
   <text x="148" y="107" class="badge">LoRaWAN</text>
   <text x="84" y="107" text-anchor="end" class="lb">LoRaWAN</text>
   <text x="380" y="107" class="sm">0.3 – 50 kbps</text>
 
   <!-- NB-IoT row, y=130 -->
-  <rect x="331" y="122" width="116" height="22" fill="#4a4540"/>
+  <rect x="331" y="122" width="116" height="22" fill="#555555"/>
   <text x="339" y="137" class="badge">NB-IoT</text>
   <text x="84" y="137" text-anchor="end" class="lb">NB-IoT</text>
   <text x="455" y="137" class="sm">20 – 250 kbps</text>
 
   <!-- LTE Cat-M1 row, y=160 -->
-  <rect x="247" y="152" width="263" height="22" fill="#8a8480"/>
+  <rect x="247" y="152" width="263" height="22" fill="#787878"/>
   <text x="255" y="167" class="badge">LTE Cat-M1</text>
   <text x="84" y="167" text-anchor="end" class="lb">LTE Cat-M1</text>
   <text x="518" y="167" class="sm">~50 – 1 000 kbps</text>
 
   <!-- WiFi row, y=190 -->
-  <rect x="510" y="182" width="210" height="22" fill="#c8c4c0"/>
-  <text x="518" y="197" class="badge" fill="#2a1a0e">WiFi (2.4 GHz)</text>
+  <rect x="510" y="182" width="210" height="22" fill="#ADADAD"/>
+  <text x="518" y="197" class="badge" fill="#000000">WiFi (2.4 GHz)</text>
   <text x="84" y="197" text-anchor="end" class="lb">WiFi</text>
   <text x="595" y="197" class="sm" text-anchor="end">1 – 100 Mbps</text>
 
@@ -91,20 +91,20 @@
   <!-- payload axis markers as vertical dashed lines + diamond -->
   <g>
     <!-- 96x96 -->
-    <line x1="473" y1="80" x2="473" y2="330" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="3 3"/>
-    <polygon points="473,225 481,233 473,241 465,233" fill="#8a1f1f"/>
-    <text x="473" y="222" text-anchor="middle" class="pay" fill="#8a1f1f">96×96 RGB · 27 KB</text>
-    <text x="473" y="254" text-anchor="middle" class="sm" fill="#8a1f1f">needs ≥ 442 kbps to clear 500 ms</text>
+    <line x1="473" y1="80" x2="473" y2="330" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 3"/>
+    <polygon points="473,225 481,233 473,241 465,233" fill="#C8102E"/>
+    <text x="473" y="222" text-anchor="middle" class="pay" fill="#C8102E">96×96 RGB · 27 KB</text>
+    <text x="473" y="254" text-anchor="middle" class="sm" fill="#C8102E">needs ≥ 442 kbps to clear 500 ms</text>
 
     <!-- 32x32 -->
-    <line x1="372" y1="80" x2="372" y2="330" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="3 3"/>
-    <polygon points="372,270 380,278 372,286 364,278" fill="#8a1f1f"/>
-    <text x="372" y="267" text-anchor="middle" class="pay" fill="#8a1f1f">32×32 RGB · 3 KB</text>
-    <text x="372" y="299" text-anchor="middle" class="sm" fill="#8a1f1f">needs ≥ 49 kbps to clear 500 ms</text>
+    <line x1="372" y1="80" x2="372" y2="330" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 3"/>
+    <polygon points="372,270 380,278 372,286 364,278" fill="#C8102E"/>
+    <text x="372" y="267" text-anchor="middle" class="pay" fill="#C8102E">32×32 RGB · 3 KB</text>
+    <text x="372" y="299" text-anchor="middle" class="sm" fill="#C8102E">needs ≥ 49 kbps to clear 500 ms</text>
 
     <!-- 16 feature -->
-    <line x1="195" y1="80" x2="195" y2="330" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="3 3"/>
-    <polygon points="195,225 203,233 195,241 187,233" fill="#2a1a0e"/>
+    <line x1="195" y1="80" x2="195" y2="330" stroke="#000000" stroke-width="1" stroke-dasharray="3 3"/>
+    <polygon points="195,225 203,233 195,241 187,233" fill="#000000"/>
     <text x="208" y="222" text-anchor="start" class="pay">16-feat · 64 B</text>
     <text x="208" y="254" text-anchor="start" class="sm">needs ≥ 1 kbps — passes on every radio</text>
   </g>

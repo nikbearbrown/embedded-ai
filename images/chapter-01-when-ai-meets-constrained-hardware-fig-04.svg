@@ -3,20 +3,20 @@
   <desc id="d04">Four vertices arranged as a tetrahedron-like diamond: memory at top, compute at right, power at bottom, real-time at left. Each of the six edges is labeled with the named trade that links the two vertices — for example, memory and compute are linked by "quantize int8: fewer bytes, faster matmul, accuracy down"; power and real-time are linked by "lower duty cycle: lower current, higher latency".</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #4a4540; }
-      .vx { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 13px; font-weight: bold; fill: #fdfcfb; }
-      .vxd { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #f5f2ee; }
-      .edge-label { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #2a1a0e; }
-      .edge-effect { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; font-style: italic; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .vx { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #FFFFFF; }
+      .vxd { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #F5F5F5; }
+      .edge-label { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #000000; }
+      .edge-effect { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; font-style: italic; }
     </style>
     <marker id="ar4" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
-      <polygon points="0 0, 6 2.5, 0 5" fill="#8a8480"/>
+      <polygon points="0 0, 6 2.5, 0 5" fill="#787878"/>
     </marker>
   </defs>
-  <rect width="700" height="480" fill="#fdfcfb"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
   <text x="32" y="28" class="ti">Four constraints, six couplings — pull one lever, name what it costs the others</text>
   <text x="32" y="44" class="sm">Each vertex is a budget. Each edge is the trade that exists between two budgets. No lever is free.</text>
@@ -29,18 +29,18 @@
   <!-- real-time (left):  140, 270 -->
 
   <!-- Outer edges of the diamond -->
-  <line x1="350" y1="110" x2="560" y2="270" stroke="#8a8480" stroke-width="1.25"/>
-  <line x1="560" y1="270" x2="350" y2="430" stroke="#8a8480" stroke-width="1.25"/>
-  <line x1="350" y1="430" x2="140" y2="270" stroke="#8a8480" stroke-width="1.25"/>
-  <line x1="140" y1="270" x2="350" y2="110" stroke="#8a8480" stroke-width="1.25"/>
+  <line x1="350" y1="110" x2="560" y2="270" stroke="#787878" stroke-width="1.25"/>
+  <line x1="560" y1="270" x2="350" y2="430" stroke="#787878" stroke-width="1.25"/>
+  <line x1="350" y1="430" x2="140" y2="270" stroke="#787878" stroke-width="1.25"/>
+  <line x1="140" y1="270" x2="350" y2="110" stroke="#787878" stroke-width="1.25"/>
   <!-- Diagonals -->
-  <line x1="350" y1="110" x2="350" y2="430" stroke="#c8c4c0" stroke-width="1" stroke-dasharray="3 3"/>
-  <line x1="140" y1="270" x2="560" y2="270" stroke="#c8c4c0" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="350" y1="110" x2="350" y2="430" stroke="#ADADAD" stroke-width="1" stroke-dasharray="3 3"/>
+  <line x1="140" y1="270" x2="560" y2="270" stroke="#ADADAD" stroke-width="1" stroke-dasharray="3 3"/>
 
   <!-- Edge labels -->
   <!-- memory ↔ compute (top-right) -->
   <g transform="translate(470, 175)">
-    <rect x="-72" y="-22" width="144" height="44" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-72" y="-22" width="144" height="44" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="0" y="-6" text-anchor="middle" class="edge-label">quantize int8</text>
     <text x="0" y="8" text-anchor="middle" class="edge-effect">bytes ↓ matmul ↑</text>
     <text x="0" y="18" text-anchor="middle" class="edge-effect">accuracy ↓</text>
@@ -48,7 +48,7 @@
 
   <!-- compute ↔ power (bottom-right) -->
   <g transform="translate(470, 365)">
-    <rect x="-72" y="-22" width="144" height="44" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-72" y="-22" width="144" height="44" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="0" y="-6" text-anchor="middle" class="edge-label">lower clock</text>
     <text x="0" y="8" text-anchor="middle" class="edge-effect">mA ↓ inference ↑</text>
     <text x="0" y="18" text-anchor="middle" class="edge-effect">latency cost</text>
@@ -56,7 +56,7 @@
 
   <!-- power ↔ real-time (bottom-left) -->
   <g transform="translate(230, 365)">
-    <rect x="-72" y="-22" width="144" height="44" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-72" y="-22" width="144" height="44" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="0" y="-6" text-anchor="middle" class="edge-label">lower duty cycle</text>
     <text x="0" y="8" text-anchor="middle" class="edge-effect">avg current ↓</text>
     <text x="0" y="18" text-anchor="middle" class="edge-effect">response ↑</text>
@@ -64,7 +64,7 @@
 
   <!-- real-time ↔ memory (top-left) -->
   <g transform="translate(230, 175)">
-    <rect x="-72" y="-22" width="144" height="44" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-72" y="-22" width="144" height="44" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="0" y="-6" text-anchor="middle" class="edge-label">weights in flash</text>
     <text x="0" y="8" text-anchor="middle" class="edge-effect">SRAM ↓ fetch ↑</text>
     <text x="0" y="18" text-anchor="middle" class="edge-effect">WCET harder</text>
@@ -72,7 +72,7 @@
 
   <!-- diagonal: memory ↔ power (vertical) -->
   <g transform="translate(360, 270)">
-    <rect x="-2" y="-22" width="98" height="44" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-2" y="-22" width="98" height="44" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="47" y="-6" text-anchor="middle" class="edge-label">prune weights</text>
     <text x="47" y="8" text-anchor="middle" class="edge-effect">flash ↓</text>
     <text x="47" y="18" text-anchor="middle" class="edge-effect">retraining cost</text>
@@ -80,35 +80,35 @@
 
   <!-- diagonal: compute ↔ real-time (horizontal) -->
   <g transform="translate(350, 245)">
-    <rect x="-72" y="-18" width="144" height="22" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-72" y="-18" width="144" height="22" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="0" y="-2" text-anchor="middle" class="edge-label">NN accelerator</text>
   </g>
   <g transform="translate(350, 290)">
-    <rect x="-72" y="-2" width="144" height="22" fill="#fdfcfb" stroke="#c8c4c0" stroke-width="0.5"/>
+    <rect x="-72" y="-2" width="144" height="22" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
     <text x="0" y="14" text-anchor="middle" class="edge-effect">latency ↓ cost ↑</text>
   </g>
 
   <!-- Vertices -->
   <!-- memory (top) -->
-  <circle cx="350" cy="110" r="46" fill="#2a1a0e"/>
+  <circle cx="350" cy="110" r="46" fill="#000000"/>
   <text x="350" y="106" text-anchor="middle" class="vx">memory</text>
   <text x="350" y="122" text-anchor="middle" class="vxd">SRAM · flash</text>
   <text x="350" y="134" text-anchor="middle" class="vxd">what you store</text>
 
   <!-- compute (right) -->
-  <circle cx="560" cy="270" r="46" fill="#4a4540"/>
+  <circle cx="560" cy="270" r="46" fill="#555555"/>
   <text x="560" y="266" text-anchor="middle" class="vx">compute</text>
   <text x="560" y="282" text-anchor="middle" class="vxd">MHz · FLOPS</text>
   <text x="560" y="294" text-anchor="middle" class="vxd">how fast</text>
 
   <!-- power (bottom) -->
-  <circle cx="350" cy="430" r="46" fill="#2a1a0e"/>
+  <circle cx="350" cy="430" r="46" fill="#000000"/>
   <text x="350" y="426" text-anchor="middle" class="vx">power</text>
   <text x="350" y="442" text-anchor="middle" class="vxd">mW · mAh</text>
   <text x="350" y="454" text-anchor="middle" class="vxd">how long</text>
 
   <!-- real-time (left) -->
-  <circle cx="140" cy="270" r="46" fill="#4a4540"/>
+  <circle cx="140" cy="270" r="46" fill="#555555"/>
   <text x="140" y="266" text-anchor="middle" class="vx">real-time</text>
   <text x="140" y="282" text-anchor="middle" class="vxd">WCET · jitter</text>
   <text x="140" y="294" text-anchor="middle" class="vxd">by when</text>

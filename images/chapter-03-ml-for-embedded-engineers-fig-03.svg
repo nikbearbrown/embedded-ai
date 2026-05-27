@@ -3,17 +3,17 @@
   <desc id="d03">Left panel: a flattened pixel vector with dense crossing lines to outputs, labeled nineteen million weights, seventy-six megabytes. Right panel: a two-dimensional image grid with a three-by-three filter sliding to four positions, labeled nine shared weights per filter reused across the image.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; fill: #4a4540; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
-      .em { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .em { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#fdfcfb"/>
+  <rect width="700" height="420" fill="#FFFFFF"/>
 
   <!-- ============ LEFT PANEL: FULLY CONNECTED ============ -->
   <text x="32" y="32" class="ti">Fully connected</text>
@@ -21,11 +21,11 @@
 
   <!-- flattened input column -->
   <g>
-    <rect x="60" y="80" width="20" height="240" fill="#f2ede6" stroke="#c8c4c0"/>
+    <rect x="60" y="80" width="20" height="240" fill="#F5F5F5" stroke="#ADADAD"/>
     <text x="70" y="74" text-anchor="middle" class="sm">150,528</text>
     <text x="70" y="336" text-anchor="middle" class="sm">inputs</text>
     <!-- dots along column -->
-    <g fill="#2a1a0e">
+    <g fill="#000000">
       <circle cx="70" cy="95"  r="2"/>
       <circle cx="70" cy="115" r="2"/>
       <circle cx="70" cy="135" r="2"/>
@@ -43,10 +43,10 @@
 
   <!-- output column -->
   <g>
-    <rect x="280" y="160" width="20" height="80" fill="#f2ede6" stroke="#c8c4c0"/>
+    <rect x="280" y="160" width="20" height="80" fill="#F5F5F5" stroke="#ADADAD"/>
     <text x="290" y="154" text-anchor="middle" class="sm">128</text>
     <text x="290" y="256" text-anchor="middle" class="sm">outputs</text>
-    <g fill="#2a1a0e">
+    <g fill="#000000">
       <circle cx="290" cy="175" r="2"/>
       <circle cx="290" cy="195" r="2"/>
       <circle cx="290" cy="215" r="2"/>
@@ -55,7 +55,7 @@
   </g>
 
   <!-- dense connecting lines -->
-  <g stroke="#8a8480" stroke-width="0.4" opacity="0.55">
+  <g stroke="#787878" stroke-width="0.4" opacity="0.55">
     <line x1="80" y1="95"  x2="280" y2="175"/>
     <line x1="80" y1="95"  x2="280" y2="195"/>
     <line x1="80" y1="95"  x2="280" y2="215"/>
@@ -83,12 +83,12 @@
   </g>
 
   <!-- cost callout -->
-  <rect x="60" y="350" width="280" height="36" fill="#2a1a0e"/>
-  <text x="200" y="368" text-anchor="middle" class="em" fill="#fdfcfb">19,267,584 weights</text>
-  <text x="200" y="382" text-anchor="middle" class="sm" fill="#fdfcfb">≈ 76 MB float32 — dead on arrival</text>
+  <rect x="60" y="350" width="280" height="36" fill="#000000"/>
+  <text x="200" y="368" text-anchor="middle" class="em" fill="#FFFFFF">19,267,584 weights</text>
+  <text x="200" y="382" text-anchor="middle" class="sm" fill="#FFFFFF">≈ 76 MB float32 — dead on arrival</text>
 
   <!-- divider -->
-  <line x1="360" y1="20" x2="360" y2="400" stroke="#c8c4c0" stroke-width="0.75"/>
+  <line x1="360" y1="20" x2="360" y2="400" stroke="#ADADAD" stroke-width="0.75"/>
 
   <!-- ============ RIGHT PANEL: CONVOLUTION ============ -->
   <text x="384" y="32" class="ti">Convolution</text>
@@ -96,9 +96,9 @@
 
   <!-- image grid (7x7 pixels for clarity) -->
   <g>
-    <g stroke="#c8c4c0" stroke-width="0.6">
+    <g stroke="#ADADAD" stroke-width="0.6">
       <!-- 7x7 grid, cell 24 px, starting at 400,80 -->
-      <rect x="400" y="80"  width="168" height="168" fill="#f2ede6"/>
+      <rect x="400" y="80"  width="168" height="168" fill="#F5F5F5"/>
       <line x1="424" y1="80" x2="424" y2="248"/>
       <line x1="448" y1="80" x2="448" y2="248"/>
       <line x1="472" y1="80" x2="472" y2="248"/>
@@ -116,25 +116,25 @@
   </g>
 
   <!-- 3x3 filter at four positions (shown as outlined squares) -->
-  <g stroke="#2a1a0e" stroke-width="1.8" fill="none">
+  <g stroke="#000000" stroke-width="1.8" fill="none">
     <rect x="400" y="80"  width="72" height="72"/>
   </g>
-  <g stroke="#4a4540" stroke-width="1" fill="none" stroke-dasharray="3 3">
+  <g stroke="#555555" stroke-width="1" fill="none" stroke-dasharray="3 3">
     <rect x="448" y="104" width="72" height="72"/>
     <rect x="496" y="128" width="72" height="72"/>
     <rect x="448" y="176" width="72" height="72"/>
   </g>
 
   <!-- arrow showing slide direction -->
-  <path d="M 425 116 Q 470 140, 510 168" fill="none" stroke="#2a1a0e" stroke-width="1.2" stroke-dasharray="2 3" marker-end="url(#ar)"/>
+  <path d="M 425 116 Q 470 140, 510 168" fill="none" stroke="#000000" stroke-width="1.2" stroke-dasharray="2 3" marker-end="url(#ar)"/>
   <text x="612" y="100" text-anchor="middle" class="sm">3×3 filter</text>
-  <line x1="568" y1="92" x2="600" y2="92" stroke="#2a1a0e" stroke-width="1.4"/>
+  <line x1="568" y1="92" x2="600" y2="92" stroke="#000000" stroke-width="1.4"/>
   <text x="612" y="118" text-anchor="middle" class="sm">slides across</text>
   <text x="612" y="132" text-anchor="middle" class="sm">every position</text>
 
   <!-- 9 shared weights pictured below -->
   <text x="384" y="280" class="lb">shared weights (one filter)</text>
-  <g stroke="#2a1a0e" stroke-width="1" fill="#2a1a0e">
+  <g stroke="#000000" stroke-width="1" fill="#000000">
     <rect x="384" y="290" width="14" height="14"/>
     <rect x="402" y="290" width="14" height="14"/>
     <rect x="420" y="290" width="14" height="14"/>
@@ -148,9 +148,9 @@
   <text x="448" y="316" class="sm">9 weights · reused everywhere</text>
 
   <!-- cost callout -->
-  <rect x="380" y="350" width="280" height="36" fill="#2a1a0e"/>
-  <text x="520" y="368" text-anchor="middle" class="em" fill="#fdfcfb">9 weights per filter</text>
-  <text x="520" y="382" text-anchor="middle" class="sm" fill="#fdfcfb">× number of filters — orders of magnitude cheaper</text>
+  <rect x="380" y="350" width="280" height="36" fill="#000000"/>
+  <text x="520" y="368" text-anchor="middle" class="em" fill="#FFFFFF">9 weights per filter</text>
+  <text x="520" y="382" text-anchor="middle" class="sm" fill="#FFFFFF">× number of filters — orders of magnitude cheaper</text>
 
   <!-- caption -->
   <text x="350" y="410" text-anchor="middle" class="cap">Weight sharing preserves 2D structure and collapses parameter count.</text>

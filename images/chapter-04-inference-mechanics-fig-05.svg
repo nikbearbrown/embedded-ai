@@ -3,18 +3,18 @@
   <desc id="d05">Horizontal bars showing 367 ms theoretical prediction, 1200 ms first deployment with reference kernels, 420 ms after CMSIS-NN, 140 ms after activations fit in on-chip SRAM, and 45 ms after int8 quantization, with the optimization applied at each step.</desc>
   <defs>
     <style>
-      .ti { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 14px; font-weight: bold; fill: #2a1a0e; }
-      .lb { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 12px; fill: #2a1a0e; }
-      .sm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; fill: #4a4540; }
-      .nm { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 10px; font-style: italic; fill: #6a6560; }
-      .cap { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-style: italic; fill: #4a4540; }
-      .val { font-family: 'EB Garamond', Georgia, 'Times New Roman', serif; font-size: 11px; font-weight: bold; fill: #2a1a0e; }
+      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
+      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
+      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .val { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
     </style>
     <marker id="ar5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#2a1a0e"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="760" height="440" fill="#fdfcfb"/>
+  <rect width="760" height="440" fill="#FFFFFF"/>
 
   <text x="24" y="30" class="ti">Keyword-spotting deployment — latency at each optimization step</text>
   <text x="24" y="48" class="nm">Arduino Nano 33 BLE Sense · 64 MHz Cortex-M4 · TFLite Micro</text>
@@ -22,21 +22,21 @@
   <!-- 100 ms target line -->
   <!-- scale: 0 ms = x 220, 1200 ms = x 720; 500 px / 1200 ms = 0.4167 px/ms -->
   <!-- target at 100 ms = 220 + 41.67 = ~262 -->
-  <line x1="261.7" y1="84" x2="261.7" y2="380" stroke="#8a1f1f" stroke-width="1" stroke-dasharray="4 3"/>
-  <text x="261.7" y="78" text-anchor="middle" class="sm" fill="#8a1f1f">100 ms target</text>
+  <line x1="261.7" y1="84" x2="261.7" y2="380" stroke="#C8102E" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="261.7" y="78" text-anchor="middle" class="sm" fill="#C8102E">100 ms target</text>
 
   <!-- x axis bottom -->
-  <line x1="220" y1="380" x2="720" y2="380" stroke="#4a4540" stroke-width="0.7"/>
+  <line x1="220" y1="380" x2="720" y2="380" stroke="#555555" stroke-width="0.7"/>
   <g>
-    <line x1="220" y1="378" x2="220" y2="384" stroke="#4a4540"/>
+    <line x1="220" y1="378" x2="220" y2="384" stroke="#555555"/>
     <text x="220" y="396" class="sm" text-anchor="middle">0</text>
-    <line x1="345" y1="378" x2="345" y2="384" stroke="#4a4540"/>
+    <line x1="345" y1="378" x2="345" y2="384" stroke="#555555"/>
     <text x="345" y="396" class="sm" text-anchor="middle">300</text>
-    <line x1="470" y1="378" x2="470" y2="384" stroke="#4a4540"/>
+    <line x1="470" y1="378" x2="470" y2="384" stroke="#555555"/>
     <text x="470" y="396" class="sm" text-anchor="middle">600</text>
-    <line x1="595" y1="378" x2="595" y2="384" stroke="#4a4540"/>
+    <line x1="595" y1="378" x2="595" y2="384" stroke="#555555"/>
     <text x="595" y="396" class="sm" text-anchor="middle">900</text>
-    <line x1="720" y1="378" x2="720" y2="384" stroke="#4a4540"/>
+    <line x1="720" y1="378" x2="720" y2="384" stroke="#555555"/>
     <text x="720" y="396" class="sm" text-anchor="middle">1200</text>
   </g>
   <text x="470" y="410" text-anchor="middle" class="sm">milliseconds per inference</text>
@@ -44,40 +44,40 @@
   <!-- five bars -->
   <!-- Row 1: prediction 367 ms -->
   <text x="212" y="113" text-anchor="end" class="lb">1. theoretical prediction</text>
-  <rect x="220" y="100" width="153" height="22" fill="#bcb6a8" stroke="#2a1a0e" stroke-width="0.4"/>
+  <rect x="220" y="100" width="153" height="22" fill="#ADADAD" stroke="#000000" stroke-width="0.4"/>
   <text x="383" y="115" class="val">367 ms</text>
   <text x="430" y="115" class="sm">22 M MAC / 60 MMAC·s — naive throughput math</text>
 
   <!-- Row 2: first deploy 1200 ms (off the chart? 1200 = 220 + 500 = 720) -->
   <text x="212" y="153" text-anchor="end" class="lb">2. first deploy — reference kernels</text>
-  <rect x="220" y="140" width="500" height="22" fill="#8a1f1f" stroke="#2a1a0e" stroke-width="0.4"/>
+  <rect x="220" y="140" width="500" height="22" fill="#C8102E" stroke="#000000" stroke-width="0.4"/>
   <text x="724" y="155" class="val">1200 ms</text>
-  <text x="430" y="172" class="sm" fill="#8a1f1f">reference C kernels — no FPU, no SIMD — 3× hit</text>
+  <text x="430" y="172" class="sm" fill="#C8102E">reference C kernels — no FPU, no SIMD — 3× hit</text>
 
   <!-- Row 3: CMSIS-NN 420 ms -->
   <text x="212" y="195" text-anchor="end" class="lb">3. swap to CMSIS-NN</text>
-  <rect x="220" y="182" width="175" height="22" fill="#4a4540" stroke="#2a1a0e" stroke-width="0.4"/>
+  <rect x="220" y="182" width="175" height="22" fill="#555555" stroke="#000000" stroke-width="0.4"/>
   <text x="405" y="197" class="val">420 ms</text>
   <text x="430" y="214" class="sm">DSP/SIMD path engaged; close to predicted, still over budget</text>
 
   <!-- Row 4: on-chip SRAM 140 ms -->
   <text x="212" y="237" text-anchor="end" class="lb">4. shrink so activations fit on chip</text>
-  <rect x="220" y="224" width="58" height="22" fill="#4a4540" stroke="#2a1a0e" stroke-width="0.4"/>
+  <rect x="220" y="224" width="58" height="22" fill="#555555" stroke="#000000" stroke-width="0.4"/>
   <text x="288" y="239" class="val">140 ms</text>
   <text x="430" y="256" class="sm">feature maps 32 → 16; activations drop to 28 KB; PSRAM spill ends</text>
 
   <!-- Row 5: int8 quant 45 ms -->
   <text x="212" y="279" text-anchor="end" class="lb">5. post-training int8 quantization</text>
-  <rect x="220" y="266" width="19" height="22" fill="#2a1a0e" stroke="#2a1a0e" stroke-width="0.4"/>
+  <rect x="220" y="266" width="19" height="22" fill="#000000" stroke="#000000" stroke-width="0.4"/>
   <text x="249" y="281" class="val">45 ms</text>
   <text x="430" y="298" class="sm">SIMD 4× throughput; accuracy 94.2 → 92.8 (well within budget)</text>
 
   <!-- ratio annotation -->
-  <path d="M 720 100 Q 740 200 245 270" fill="none" stroke="#2a1a0e" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar5)"/>
+  <path d="M 720 100 Q 740 200 245 270" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar5)"/>
   <text x="690" y="92" class="lb" text-anchor="end">26× faster — same model, same chip</text>
 
   <!-- gap callout -->
-  <rect x="20" y="316" width="720" height="44" fill="none" stroke="#4a4540" stroke-width="0.6"/>
+  <rect x="20" y="316" width="720" height="44" fill="none" stroke="#555555" stroke-width="0.6"/>
   <text x="32" y="334" class="lb">prediction → reality → optimization</text>
   <text x="32" y="350" class="sm">the theoretical estimate was directionally correct and quantitatively wrong by 25× at first run. profiling closed the gap twice — kernels, then memory layout — and quantization closed the rest.</text>
 
