@@ -1077,4 +1077,4 @@ This hardware reference is a living document. For the latest specs, always consu
 
 ---
 
-*[<- Appendix B](./appendix-b-ml-quick-reference.md) | [Table of Contents](../README.md) | [Appendix D ->](./appendix-d-toolchain-setup.md)*
+*[<- Appendix B](./91-appendix-b-ml-quick-reference.md) | [Table of Contents](../README.md) | [Appendix D ->](./93-appendix-d-toolchain-setup.md)*

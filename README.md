@@ -39,24 +39,24 @@ reader exactly what to expect from each chapter.
 | Chapter | Title | File |
 |---------|-------|------|
 | Intro | Introduction | [chapters/00-introduction.md](chapters/00-introduction.md) |
-| App | Appendix A: Embedded Systems Quick Reference | [chapters/appendix-a-embedded-quick-reference.md](chapters/appendix-a-embedded-quick-reference.md) |
-| App | Appendix B: Machine Learning Quick Reference | [chapters/appendix-b-ml-quick-reference.md](chapters/appendix-b-ml-quick-reference.md) |
-| App | Appendix C: Hardware Reference — AI-Capable Microcontroller and SoC Comparison | [chapters/appendix-c-hardware-reference.md](chapters/appendix-c-hardware-reference.md) |
-| App | Appendix D: Toolchain Setup Guides | [chapters/appendix-d-toolchain-setup.md](chapters/appendix-d-toolchain-setup.md) |
-| 1 | Chapter 1 — When AI Meets Constrained Hardware | [chapters/chapter-01-when-ai-meets-constrained-hardware.md](chapters/chapter-01-when-ai-meets-constrained-hardware.md) |
-| 2 | Chapter 2 — Embedded Constraints as Design Variables | [chapters/chapter-02-embedded-constraints-as-design-variables.md](chapters/chapter-02-embedded-constraints-as-design-variables.md) |
-| 3 | Chapter 3 — Machine Learning for Embedded Engineers | [chapters/chapter-03-ml-for-embedded-engineers.md](chapters/chapter-03-ml-for-embedded-engineers.md) |
-| 4 | Chapter 4 — Inference Mechanics | [chapters/chapter-04-inference-mechanics.md](chapters/chapter-04-inference-mechanics.md) |
-| 5 | Chapter 5 — Memory | [chapters/chapter-05-memory.md](chapters/chapter-05-memory.md) |
-| 6 | Chapter 6 — Compute | [chapters/chapter-06-compute.md](chapters/chapter-06-compute.md) |
-| 7 | Chapter 7 — Power and Energy | [chapters/chapter-07-power-and-energy.md](chapters/chapter-07-power-and-energy.md) |
-| 8 | Chapter 8 — Hardware for AI | [chapters/chapter-08-hardware-for-ai.md](chapters/chapter-08-hardware-for-ai.md) |
-| 9 | Chapter 9 — Communication and the Edge-Cloud Spectrum | [chapters/chapter-09-communication-edge-cloud.md](chapters/chapter-09-communication-edge-cloud.md) |
-| 10 | Chapter 10 — Real-Time AI | [chapters/chapter-10-real-time-ai.md](chapters/chapter-10-real-time-ai.md) |
-| 11 | Chapter 11 — Selecting Models for Constrained Deployment | [chapters/chapter-11-model-selection.md](chapters/chapter-11-model-selection.md) |
-| 12 | Chapter 12 — Optimizing Models: Quantization, Pruning, and Distillation | [chapters/chapter-12-model-optimization.md](chapters/chapter-12-model-optimization.md) |
-| 13 | Chapter 13 — TinyML Toolchains and Deployment Pipelines | [chapters/chapter-13-tinyml-toolchains.md](chapters/chapter-13-tinyml-toolchains.md) |
-| 14 | Chapter 14 — Integration Case Studies: Full Design Decisions | [chapters/chapter-14-integration-case-studies.md](chapters/chapter-14-integration-case-studies.md) |
+| App | Appendix A: Embedded Systems Quick Reference | [chapters/90-appendix-a-embedded-quick-reference.md](chapters/90-appendix-a-embedded-quick-reference.md) |
+| App | Appendix B: Machine Learning Quick Reference | [chapters/91-appendix-b-ml-quick-reference.md](chapters/91-appendix-b-ml-quick-reference.md) |
+| App | Appendix C: Hardware Reference — AI-Capable Microcontroller and SoC Comparison | [chapters/92-appendix-c-hardware-reference.md](chapters/92-appendix-c-hardware-reference.md) |
+| App | Appendix D: Toolchain Setup Guides | [chapters/93-appendix-d-toolchain-setup.md](chapters/93-appendix-d-toolchain-setup.md) |
+| 1 | Chapter 1 — When AI Meets Constrained Hardware | [chapters/01-chapter-when-ai-meets-constrained-hardware.md](chapters/01-chapter-when-ai-meets-constrained-hardware.md) |
+| 2 | Chapter 2 — Embedded Constraints as Design Variables | [chapters/02-chapter-embedded-constraints-as-design-variables.md](chapters/02-chapter-embedded-constraints-as-design-variables.md) |
+| 3 | Chapter 3 — Machine Learning for Embedded Engineers | [chapters/03-chapter-ml-for-embedded-engineers.md](chapters/03-chapter-ml-for-embedded-engineers.md) |
+| 4 | Chapter 4 — Inference Mechanics | [chapters/04-chapter-inference-mechanics.md](chapters/04-chapter-inference-mechanics.md) |
+| 5 | Chapter 5 — Memory | [chapters/05-chapter-memory.md](chapters/05-chapter-memory.md) |
+| 6 | Chapter 6 — Compute | [chapters/06-chapter-compute.md](chapters/06-chapter-compute.md) |
+| 7 | Chapter 7 — Power and Energy | [chapters/07-chapter-power-and-energy.md](chapters/07-chapter-power-and-energy.md) |
+| 8 | Chapter 8 — Hardware for AI | [chapters/08-chapter-hardware-for-ai.md](chapters/08-chapter-hardware-for-ai.md) |
+| 9 | Chapter 9 — Communication and the Edge-Cloud Spectrum | [chapters/09-chapter-communication-edge-cloud.md](chapters/09-chapter-communication-edge-cloud.md) |
+| 10 | Chapter 10 — Real-Time AI | [chapters/10-chapter-real-time-ai.md](chapters/10-chapter-real-time-ai.md) |
+| 11 | Chapter 11 — Selecting Models for Constrained Deployment | [chapters/11-chapter-model-selection.md](chapters/11-chapter-model-selection.md) |
+| 12 | Chapter 12 — Optimizing Models: Quantization, Pruning, and Distillation | [chapters/12-chapter-model-optimization.md](chapters/12-chapter-model-optimization.md) |
+| 13 | Chapter 13 — TinyML Toolchains and Deployment Pipelines | [chapters/13-chapter-tinyml-toolchains.md](chapters/13-chapter-tinyml-toolchains.md) |
+| 14 | Chapter 14 — Integration Case Studies: Full Design Decisions | [chapters/14-chapter-integration-case-studies.md](chapters/14-chapter-integration-case-studies.md) |
 
 ---
 

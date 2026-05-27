@@ -581,4 +581,4 @@ This appendix provides the ML knowledge needed to evaluate, select, and deploy m
 
 ---
 
-*[<- Appendix A](./appendix-a-embedded-quick-reference.md) | [Table of Contents](../README.md) | [Appendix C ->](./appendix-c-hardware-reference.md)*
+*[<- Appendix A](./90-appendix-a-embedded-quick-reference.md) | [Table of Contents](../README.md) | [Appendix C ->](./92-appendix-c-hardware-reference.md)*

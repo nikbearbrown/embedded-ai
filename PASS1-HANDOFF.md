@@ -32,24 +32,24 @@ On hold. Bear is locating the spec. Do not run Pass 2 until spec is provided.
 
 | Order | Filename | Source words | Rewritten words | Status |
 |---|---|---|---|---|
-| 01 | `chapter-01-when-ai-meets-constrained-hardware.md` | 3,493 | 2,498 | **DONE** |
-| 02 | `chapter-02-embedded-constraints-as-design-variables.md` | 5,175 | 2,630 | **DONE** |
-| 03 | `chapter-03-ml-for-embedded-engineers.md` | 3,823 | 2,313 | **DONE** |
-| 04 | `chapter-04-inference-mechanics.md` | 4,376 | 2,755 | **DONE** |
-| 05 | `chapter-05-memory.md` | 3,899 | 2,341 | **DONE** |
-| 06 | `chapter-06-compute.md` | 3,398 | 2,356 | **DONE** |
-| 07 | `chapter-07-power-and-energy.md` | 4,337 | 2,383 | **DONE** |
-| 08 | `chapter-08-hardware-for-ai.md` | 3,351 | 2,318 | **DONE** |
-| 09 | `chapter-09-communication-edge-cloud.md` | 3,439 | ~2,400 | **DONE** |
-| 10 | `chapter-10-real-time-ai.md` | 3,884 | ~2,800 | **DONE** |
-| 11 | `chapter-11-model-selection.md` | 3,585 | ~2,500 | **DONE** |
-| 12 | `chapter-12-model-optimization.md` | 3,085 | ~2,500 | **DONE** |
-| 13 | `chapter-13-tinyml-toolchains.md` | 2,883 | ~2,500 | **DONE** |
-| 14 | `chapter-14-integration-case-studies.md` | 4,832 | ~3,000 | **DONE** |
-| 15 | `appendix-a-embedded-quick-reference.md` | 2,030 | — | pending (recommend skip — see appendix note) |
-| 16 | `appendix-b-ml-quick-reference.md` | 2,160 | — | pending (recommend skip) |
-| 17 | `appendix-c-hardware-reference.md` | 1,496 | — | pending (recommend skip) |
-| 18 | `appendix-d-toolchain-setup.md` | 1,949 | — | pending (recommend skip) |
+| 01 | `01-chapter-when-ai-meets-constrained-hardware.md` | 3,493 | 2,498 | **DONE** |
+| 02 | `02-chapter-embedded-constraints-as-design-variables.md` | 5,175 | 2,630 | **DONE** |
+| 03 | `03-chapter-ml-for-embedded-engineers.md` | 3,823 | 2,313 | **DONE** |
+| 04 | `04-chapter-inference-mechanics.md` | 4,376 | 2,755 | **DONE** |
+| 05 | `05-chapter-memory.md` | 3,899 | 2,341 | **DONE** |
+| 06 | `06-chapter-compute.md` | 3,398 | 2,356 | **DONE** |
+| 07 | `07-chapter-power-and-energy.md` | 4,337 | 2,383 | **DONE** |
+| 08 | `08-chapter-hardware-for-ai.md` | 3,351 | 2,318 | **DONE** |
+| 09 | `09-chapter-communication-edge-cloud.md` | 3,439 | ~2,400 | **DONE** |
+| 10 | `10-chapter-real-time-ai.md` | 3,884 | ~2,800 | **DONE** |
+| 11 | `11-chapter-model-selection.md` | 3,585 | ~2,500 | **DONE** |
+| 12 | `12-chapter-model-optimization.md` | 3,085 | ~2,500 | **DONE** |
+| 13 | `13-chapter-tinyml-toolchains.md` | 2,883 | ~2,500 | **DONE** |
+| 14 | `14-chapter-integration-case-studies.md` | 4,832 | ~3,000 | **DONE** |
+| 15 | `90-appendix-a-embedded-quick-reference.md` | 2,030 | — | pending (recommend skip — see appendix note) |
+| 16 | `91-appendix-b-ml-quick-reference.md` | 2,160 | — | pending (recommend skip) |
+| 17 | `92-appendix-c-hardware-reference.md` | 1,496 | — | pending (recommend skip) |
+| 18 | `93-appendix-d-toolchain-setup.md` | 1,949 | — | pending (recommend skip) |
 
 Total source: ~60,200 words. Done so far: 7 chapters, ~17,300 rewritten words.
 

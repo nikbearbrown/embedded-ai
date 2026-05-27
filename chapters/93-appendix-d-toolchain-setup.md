@@ -788,4 +788,4 @@ ThThis is the book contents now add all this
 
 ---
 
-*[<- Appendix C](./appendix-c-hardware-reference.md) | [Table of Contents](../README.md)*
+*[<- Appendix C](./92-appendix-c-hardware-reference.md) | [Table of Contents](../README.md)*

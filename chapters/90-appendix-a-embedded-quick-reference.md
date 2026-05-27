@@ -1013,4 +1013,4 @@ This appendix provides the calculation templates and reference tables needed for
 
 ---
 
-*[<- Chapter 14](./chapter-14-integration-case-studies.md) | [Table of Contents](../README.md) | [Appendix B ->](./appendix-b-ml-quick-reference.md)*
+*[<- Chapter 14](./14-chapter-integration-case-studies.md) | [Table of Contents](../README.md) | [Appendix B ->](./91-appendix-b-ml-quick-reference.md)*
