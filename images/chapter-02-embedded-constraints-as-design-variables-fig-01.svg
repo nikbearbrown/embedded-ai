@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t01 d01">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" role="img" aria-labelledby="t01 d01">
   <title id="t01">nRF52840 memory budget — flash and SRAM under inference workload</title>
   <desc id="d01">Stacked-bar memory map of the nRF52840 microcontroller. Left bar shows 1 MB flash split into firmware, int8 weights versus float32 weights overflow. Right bar shows 256 KB SRAM split into BLE stack, activations, application heap and stack, with remaining headroom.</desc>
   <defs>
@@ -13,7 +13,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="500" fill="#FFFFFF"/>
 
   <!-- Header -->
   <text x="350" y="28" text-anchor="middle" class="ti">nRF52840 memory map — does the model fit in the right region?</text>
@@ -48,7 +48,7 @@
   </g>
   <path d="M 220 145 L 240 145" stroke="#000000" stroke-width="1" marker-end="url(#ar1)"/>
   <text x="262" y="100" text-anchor="middle" class="lb">over budget</text>
-  <text x="262" y="430" text-anchor="middle" class="sm">float32: 1.2 MB · fails</text>
+  <text x="260" y="438" text-anchor="middle" class="sm">float32: 1.2 MB · fails</text>
 
   <!-- RIGHT — SRAM (256 KB) -->
   <text x="500" y="75" text-anchor="middle" class="ti">SRAM · 256 KB</text>
@@ -80,5 +80,6 @@
   <text x="678" y="290" text-anchor="middle" class="sm">→ fails</text>
 
   <!-- caption -->
-  <text x="350" y="430" text-anchor="middle" class="cap">"Does the model fit" splits into two questions: weights in flash, activations in SRAM.</text>
+  <text x="350" y="456" text-anchor="middle" class="cap">"Does the model fit" splits into two questions: weights in flash, activations in SRAM.</text>
+  <text x="350" y="476" text-anchor="middle" class="sm">BLE stack shown as 30 KB assumes a minimal BLE configuration; richer stacks leave less SRAM headroom.</text>
 </svg>

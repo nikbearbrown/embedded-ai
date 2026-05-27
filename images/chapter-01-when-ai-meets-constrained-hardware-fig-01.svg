@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t01 d01">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" role="img" aria-labelledby="t01 d01">
   <title id="t01">Hardware-class taxonomy ladder — four tiers of compute, with the embedded boundary drawn</title>
   <desc id="d01">A vertical ladder of four hardware tiers from desktop/server down to deeply embedded MCU, each tier annotated with typical SRAM, power draw, and what the tier can or cannot recover from when resources are exceeded. The lower two tiers are bracketed as the embedded region.</desc>
   <defs>
@@ -13,82 +13,82 @@
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="900" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Hardware-class ladder — where "embedded" begins, and what each tier can recover from</text>
 
   <!-- column headers -->
   <text x="44"  y="60" class="sm">Tier</text>
-  <text x="240" y="60" class="sm">Typical SRAM</text>
-  <text x="370" y="60" class="sm">Typical power</text>
-  <text x="500" y="60" class="sm">When resources exceeded</text>
+  <text x="400" y="60" class="sm">Typical SRAM</text>
+  <text x="530" y="60" class="sm">Typical power</text>
+  <text x="670" y="60" class="sm">When resources exceeded</text>
 
   <!-- divider under headers -->
-  <line x1="32" y1="68" x2="668" y2="68" stroke="#787878" stroke-width="0.75"/>
+  <line x1="32" y1="68" x2="868" y2="68" stroke="#787878" stroke-width="0.75"/>
 
   <!-- Tier 1 — Desktop / server -->
-  <rect x="32" y="80" width="636" height="64" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
+  <rect x="32" y="80" width="836" height="64" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
   <rect x="32" y="80" width="6" height="64" fill="#000000"/>
   <text x="48" y="100" class="nm">Desktop / server</text>
   <text x="48" y="116" class="sm">x86, Xeon, A100 — general-purpose, virtualized</text>
   <text x="48" y="132" class="sm">examples: cloud node, workstation</text>
-  <text x="240" y="116" class="lb">unbounded (TB)</text>
-  <text x="240" y="132" class="sm">swap to disk</text>
-  <text x="370" y="116" class="lb">~100 W</text>
-  <text x="370" y="132" class="sm">wall socket</text>
-  <text x="500" y="116" class="sm">autoscale, swap, retry</text>
-  <text x="500" y="132" class="sm">graceful degradation</text>
+  <text x="400" y="116" class="lb">unbounded (TB)</text>
+  <text x="400" y="132" class="sm">swap to disk</text>
+  <text x="530" y="116" class="lb">~100 W</text>
+  <text x="530" y="132" class="sm">wall socket</text>
+  <text x="670" y="116" class="sm">autoscale, swap, retry</text>
+  <text x="670" y="132" class="sm">graceful degradation</text>
 
   <!-- Tier 2 — Single-board computer -->
-  <rect x="32" y="152" width="636" height="64" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
+  <rect x="32" y="152" width="836" height="64" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
   <rect x="32" y="152" width="6" height="64" fill="#555555"/>
   <text x="48" y="172" class="nm">Single-board computer</text>
   <text x="48" y="188" class="sm">Raspberry Pi 4, Jetson Nano — Linux kernel, MMU</text>
   <text x="48" y="204" class="sm">examples: edge gateway, kiosk</text>
-  <text x="240" y="188" class="lb">~4 GB</text>
-  <text x="240" y="204" class="sm">DRAM + flash</text>
-  <text x="370" y="188" class="lb">~5 W</text>
-  <text x="370" y="204" class="sm">USB-C, PoE</text>
-  <text x="500" y="188" class="sm">throttle, swap (slow)</text>
-  <text x="500" y="204" class="sm">thermal slowdown</text>
+  <text x="400" y="188" class="lb">~4 GB</text>
+  <text x="400" y="204" class="sm">DRAM + flash</text>
+  <text x="530" y="188" class="lb">~5 W</text>
+  <text x="530" y="204" class="sm">USB-C, PoE</text>
+  <text x="670" y="188" class="sm">throttle, swap (slow)</text>
+  <text x="670" y="204" class="sm">thermal slowdown</text>
 
   <!-- Tier 3 — Application MCU -->
-  <rect x="32" y="224" width="636" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
+  <rect x="32" y="224" width="836" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
   <rect x="32" y="224" width="6" height="64" fill="#787878"/>
   <text x="48" y="244" class="nm">Application MCU</text>
-  <text x="48" y="260" class="sm">Cortex-M4 / M7, ESP32 — FPU, DSP, bare-metal or RTOS</text>
+  <text x="48" y="260" class="sm">Cortex-M4 / M7 class — FPU, DSP, bare-metal or RTOS</text>
   <text x="48" y="276" class="sm">examples: wearable, smart sensor</text>
-  <text x="240" y="260" class="lb">~256 KB</text>
-  <text x="240" y="276" class="sm">SRAM, no swap</text>
-  <text x="370" y="260" class="lb">~50 mW</text>
-  <text x="370" y="276" class="sm">coin cell, AA</text>
-  <text x="500" y="260" class="sm">hard fault, reset</text>
-  <text x="500" y="276" class="sm">no graceful path</text>
+  <text x="400" y="260" class="lb">~256 KB</text>
+  <text x="400" y="276" class="sm">SRAM, no swap</text>
+  <text x="530" y="260" class="lb">~50 mW</text>
+  <text x="530" y="276" class="sm">coin cell, AA</text>
+  <text x="670" y="260" class="sm">hard fault, reset</text>
+  <text x="670" y="276" class="sm">no graceful path</text>
 
   <!-- Tier 4 — Deeply embedded MCU -->
-  <rect x="32" y="296" width="636" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
+  <rect x="32" y="296" width="836" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
   <rect x="32" y="296" width="6" height="64" fill="#ADADAD"/>
   <text x="48" y="316" class="nm">Deeply embedded MCU</text>
-  <text x="48" y="332" class="sm">Cortex-M0+, Arduino Nano 33 — no FPU, no MMU</text>
+  <text x="48" y="332" class="sm">Cortex-M0+, Arduino Nano 33 IoT — no FPU, no MMU</text>
   <text x="48" y="348" class="sm">examples: hearing aid, beacon</text>
-  <text x="240" y="332" class="lb">~32 KB</text>
-  <text x="240" y="348" class="sm">SRAM only</text>
-  <text x="370" y="332" class="lb">~10 mW</text>
-  <text x="370" y="348" class="sm">harvested, button cell</text>
-  <text x="500" y="332" class="sm">silent stack overflow</text>
-  <text x="500" y="348" class="sm">brownout, dead device</text>
+  <text x="400" y="332" class="lb">~32 KB</text>
+  <text x="400" y="348" class="sm">SRAM only</text>
+  <text x="530" y="332" class="lb">~10 mW</text>
+  <text x="530" y="348" class="sm">harvested, button cell</text>
+  <text x="670" y="332" class="sm">silent stack overflow</text>
+  <text x="670" y="348" class="sm">brownout, dead device</text>
 
   <!-- Embedded boundary bracket -->
   <path d="M 20 224 L 14 224 L 14 360 L 20 360" fill="none" stroke="#000000" stroke-width="1.25"/>
   <text x="10" y="296" text-anchor="middle" transform="rotate(-90 10 296)" class="lb">embedded region</text>
 
   <!-- Boundary annotation -->
-  <line x1="32" y1="220" x2="668" y2="220" stroke="#000000" stroke-width="0.75" stroke-dasharray="4 3"/>
-  <text x="668" y="216" text-anchor="end" class="sm">↑ general-purpose · ↓ purpose-built, resources fixed</text>
+  <line x1="32" y1="220" x2="868" y2="220" stroke="#000000" stroke-width="0.75" stroke-dasharray="4 3"/>
+  <text x="868" y="216" text-anchor="end" class="sm">↑ general-purpose · ↓ purpose-built, resources fixed</text>
 
   <!-- Bottom commentary arrow -->
-  <path d="M 80 388 L 80 410 L 600 410 L 600 388" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar1)"/>
-  <text x="340" y="425" text-anchor="middle" class="lb">moving down the ladder: more application-specific, fewer recovery paths, tighter coupling to physical limits</text>
+  <path d="M 80 388 L 80 410 L 800 410 L 800 388" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar1)"/>
+  <text x="440" y="425" text-anchor="middle" class="lb">moving down the ladder: more application-specific, fewer recovery paths, tighter coupling to physical limits</text>
 
-  <text x="350" y="448" text-anchor="middle" class="cap">The word "embedded" begins where the system can no longer rescue itself from exceeded resources.</text>
+  <text x="450" y="448" text-anchor="middle" class="cap">The word "embedded" begins where the system can no longer rescue itself from exceeded resources.</text>
 </svg>
