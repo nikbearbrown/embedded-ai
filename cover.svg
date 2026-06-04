@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2560" width="1600" height="2560" preserveAspectRatio="xMidYMid meet" shape-rendering="geometricPrecision">
+  <g id="background"><rect x="0" y="0" width="1600" height="2560" fill="#1B6B5A"/></g>
+  <g id="symbol-fragments" transform="rotate(2, 800, 850)">
+    <polygon points="270,1421 526,550 425,651" fill="#F5F0E8"/>
+    <polygon points="270,1421 341,158 278,221" fill="#F5F0E8"/>
+    <polygon points="270,1421 318,187 265,241" fill="#F5F0E8"/>
+    <polygon points="270,1421 824,907 768,963" fill="#F5F0E8"/>
+    <polygon points="270,1421 579,198 532,245" fill="#F5C518"/>
+    <polygon points="270,1421 786,559 725,620" fill="#F5F0E8"/>
+    <polygon points="270,1421 909,414 804,520" fill="#F5F0E8"/>
+    <polygon points="270,1421 679,318 627,370" fill="#F5F0E8"/>
+    <polygon points="270,1421 533,186 474,244" fill="#F5F0E8"/>
+    <polygon points="270,1421 576,1238 519,1295" fill="#F5C518"/>
+    <polygon points="270,1421 317,381 279,418" fill="#F5F0E8"/>
+    <polygon points="270,1421 741,510 651,600" fill="#F5F0E8"/>
+    <polygon points="270,1421 792,896 738,951" fill="#F5F0E8"/>
+    <polygon points="270,1421 739,182 643,278" fill="#F5F0E8"/>
+    <polygon points="270,1421 1137,826 1063,901" fill="#F5C518"/>
+    <polygon points="325,1503 224,1493 186,1431 182,1352 270,1348 365,1361 362,1431" fill="#F5F0E8"/>
+  </g>
+  <g id="title-letterforms">
+    <text x="120" y="1510" font-family="Arial Black, Arial, sans-serif" font-size="250" font-weight="900" letter-spacing="0" fill="#F5F0E8" textLength="1300" lengthAdjust="spacingAndGlyphs">EMBEDDED</text>
+    <text x="120" y="1768" font-family="Arial Black, Arial, sans-serif" font-size="250" font-weight="900" letter-spacing="0" fill="#F5C518">AI</text>
+  </g>
+</svg>
