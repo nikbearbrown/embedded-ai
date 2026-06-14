@@ -1,95 +1,107 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t02 d02">
-  <title id="t02">Cascading budget waterfall — wristband arrhythmia detector against its three constraints</title>
-  <desc id="d02">Three stacked horizontal bars compare used resources to available budget for the wristband case: memory (240 of 256 KB, pass), latency/duty cycle (11 percent of 30 second window, pass), and power/battery life (130 of 336 hours required, fail). The first two pass, the last fails.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" role="img" aria-labelledby="t02 d02">
+  <title id="t02">Wristband Constraint Waterfall</title>
+  <desc id="d02">Three horizontal budget bars for a wristband arrhythmia detector: memory (PASS), duty cycle (PASS), power (FAIL — binding constraint).</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .verdict { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; }
+      .ti      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .sub     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .sm      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .bar-lbl { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; }
+      .verdict { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; }
+      .cap     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .leg     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px; fill: #444444; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
+    <marker id="ar-sm" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 6 2.5, 0 5" fill="#555555"/>
+    </marker>
   </defs>
-  <rect width="700" height="420" fill="#FFFFFF"/>
 
-  <text x="32" y="28" class="ti">Wristband arrhythmia detector — three constraints, one binding failure</text>
-  <text x="32" y="44" class="sm">Cortex-M-class MCU · 256 KB SRAM · 64 MHz no-FPU · 220 mAh coin cell · 14-day target</text>
+  <rect width="860" height="400" fill="#FFFFFF"/>
 
-  <!-- common scale: 0 to 100% on x, from 200 to 620 (420 px) -->
-  <!-- frame -->
-  <line x1="200" y1="70" x2="200" y2="320" stroke="#787878" stroke-width="0.75"/>
-  <line x1="620" y1="70" x2="620" y2="320" stroke="#787878" stroke-width="0.75" stroke-dasharray="3 3"/>
-  <text x="200" y="64" class="sm">0%</text>
-  <text x="620" y="64" text-anchor="end" class="sm">100% of budget</text>
+  <!-- Title -->
+  <text x="32" y="24" class="ti">Wristband Constraint Waterfall</text>
+  <text x="32" y="38" class="sub">Cortex-M MCU · 256 KB SRAM · 64 MHz no-FPU · 220 mAh coin cell · 14-day target</text>
 
-  <!-- ROW 1: Memory -->
-  <text x="32" y="98"  class="nm">Memory</text>
-  <text x="32" y="114" class="sm">weights + activations</text>
-  <text x="32" y="128" class="sm">vs SRAM</text>
+  <!-- Scale: bars x=185→650, scale labels at y=52 -->
+  <text x="178" y="52" text-anchor="end" class="sm">0%</text>
+  <text x="650" y="52" text-anchor="end" class="sm">100% of budget</text>
+  <line x1="185" y1="56" x2="185" y2="266" stroke="#888888" stroke-width="0.75"/>
+  <line x1="650" y1="56" x2="650" y2="266" stroke="#888888" stroke-width="0.75" stroke-dasharray="4 3"/>
 
-  <!-- background bar -->
-  <rect x="200" y="86" width="420" height="36" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <!-- weights segment: 180/256 = 70.3% -->
-  <rect x="200" y="86" width="295.3" height="36" fill="#000000"/>
-  <!-- activations segment: 60/256 = 23.4% -->
-  <rect x="495.3" y="86" width="98.4" height="36" fill="#555555"/>
-  <!-- headroom segment: 16/256 = 6.3% -->
-  <rect x="593.7" y="86" width="26.3" height="36" fill="#ADADAD"/>
+  <!-- ══ ROW 1 — Memory (y=58–94) ══
+       weights 180/256=70.3%→326.9px  activations 60/256=23.4%→108.9px  headroom 16/256=6.3%→29.2px -->
+  <text x="32" y="74"  class="nm">Memory</text>
+  <text x="32" y="87"  class="sm">Weights + activations</text>
+  <text x="32" y="100" class="sm">vs 256 KB SRAM</text>
 
-  <text x="220" y="108" class="lb" fill="#FFFFFF">weights 180 KB</text>
-  <text x="500" y="108" class="sm" fill="#FFFFFF">acts 60 KB</text>
-  <text x="606" y="108" text-anchor="middle" class="sm">hd</text>
+  <rect x="185" y="58" width="465" height="36" fill="#F0F0F0" stroke="#BBBBBB" stroke-width="0.5"/>
+  <rect x="185" y="58" width="326.9" height="36" fill="#111111"/>
+  <rect x="511.9" y="58" width="108.9" height="36" fill="#666666"/>
+  <rect x="620.8" y="58" width="29.2"  height="36" fill="#E0E0E0" stroke="#777777" stroke-width="1" stroke-dasharray="3 2"/>
 
-  <text x="630" y="104" class="verdict" fill="#000000">PASS</text>
-  <text x="630" y="118" class="sm">16 KB headroom</text>
+  <text x="348"  y="80" text-anchor="middle" class="bar-lbl" fill="#FFFFFF">Weights — 180 KB</text>
+  <text x="566"  y="80" text-anchor="middle" class="bar-lbl" fill="#FFFFFF">Acts — 60 KB</text>
 
-  <!-- ROW 2: Latency / duty cycle -->
-  <text x="32" y="174" class="nm">Latency / duty</text>
-  <text x="32" y="190" class="sm">3.4 s inference</text>
-  <text x="32" y="204" class="sm">vs 30 s window</text>
+  <!-- headroom callout: label goes to the right of the budget line, away from "100% of budget" -->
+  <line x1="635.4" y1="94" x2="635.4" y2="100" stroke="#777777" stroke-width="0.8" marker-end="url(#ar-sm)"/>
+  <text x="635.4" y="112" text-anchor="middle" class="leg" fill="#444444">16 KB headroom</text>
 
-  <rect x="200" y="162" width="420" height="36" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <!-- active: 3.4/30 = 11.3% -->
-  <rect x="200" y="162" width="47.5" height="36" fill="#555555"/>
-  <!-- sleep: 88.7% -->
-  <rect x="247.5" y="162" width="372.5" height="36" fill="#ADADAD"/>
+  <!-- legend -->
+  <rect x="185" y="100" width="9" height="7" fill="#111111"/>
+  <text x="198"  y="107" class="leg">Weights 180 KB (70%)</text>
+  <rect x="330"  y="100" width="9" height="7" fill="#666666"/>
+  <text x="343"  y="107" class="leg">Activations 60 KB (23%)</text>
+  <rect x="490"  y="100" width="9" height="7" fill="#E0E0E0" stroke="#777777" stroke-width="0.8" stroke-dasharray="2 1"/>
+  <text x="503"  y="107" class="leg">Headroom 16 KB (6%)</text>
 
-  <text x="223" y="184" text-anchor="middle" class="sm" fill="#FFFFFF">11%</text>
-  <text x="434" y="184" text-anchor="middle" class="sm">89% asleep — headroom</text>
+  <text x="665" y="72"  class="verdict">PASS</text>
+  <text x="665" y="86"  class="sm">16 KB spare</text>
 
-  <text x="630" y="180" class="verdict" fill="#000000">PASS</text>
-  <text x="630" y="194" class="sm">duty cycle fits</text>
+  <!-- ══ ROW 2 — Duty Cycle (y=122–158) ══
+       active 3.4/30=11.3%→52.5px  sleep 88.7%→412.5px -->
+  <text x="32" y="138" class="nm">Duty Cycle</text>
+  <text x="32" y="151" class="sm">3.4 s inference per</text>
+  <text x="32" y="164" class="sm">30 s sampling window</text>
 
-  <!-- ROW 3: Power / battery life -->
-  <text x="32" y="250" class="nm">Power / battery</text>
-  <text x="32" y="266" class="sm">1.7 mA avg → 130 h</text>
-  <text x="32" y="280" class="sm">vs 336 h required</text>
+  <rect x="185" y="122" width="465" height="36" fill="#F0F0F0" stroke="#BBBBBB" stroke-width="0.5"/>
+  <rect x="185" y="122" width="52.5"  height="36" fill="#444444"/>
+  <rect x="237.5" y="122" width="412.5" height="36" fill="#BBBBBB"/>
 
-  <rect x="200" y="238" width="420" height="36" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <!-- delivered: 130/336 = 38.7% (relative to required) -->
-  <!-- We're showing as % of required, so required = 100% = 420 px -->
-  <rect x="200" y="238" width="162.5" height="36" fill="#000000"/>
-  <!-- shortfall: 206/336 = 61.3% -->
-  <rect x="362.5" y="238" width="257.5" height="36" fill="#FFFFFF" stroke="#000000" stroke-width="0.75" stroke-dasharray="3 2"/>
+  <text x="211" y="144" text-anchor="middle" class="bar-lbl" fill="#FFFFFF">11%</text>
+  <text x="444" y="144" text-anchor="middle" class="bar-lbl" fill="#555555">89% idle — headroom</text>
 
-  <text x="281" y="260" text-anchor="middle" class="sm" fill="#FFFFFF">130 h delivered</text>
-  <text x="491" y="260" text-anchor="middle" class="lb">206 h short</text>
+  <text x="665" y="136" class="verdict">PASS</text>
+  <text x="665" y="150" class="sm">duty cycle fits</text>
 
-  <text x="630" y="256" class="verdict" fill="#000000">FAIL</text>
-  <text x="630" y="270" class="sm">5 days, not 14</text>
+  <!-- ══ ROW 3 — Power (y=186–222) ══
+       delivered 130/336=38.7%→180px  shortfall 61.3%→285px -->
+  <text x="32" y="202" class="nm">Power</text>
+  <text x="32" y="215" class="sm">Actual: 1.7 mA avg → 130 h</text>
+  <text x="32" y="228" class="sm">Needed: 0.65 mA avg → 336 h</text>
 
-  <!-- binding-constraint callout -->
-  <path d="M 660 256 L 680 256 L 680 304 L 360 304" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
-  <text x="510" y="318" text-anchor="middle" class="lb">power is the binding constraint — the design must change here, not in memory or latency</text>
+  <rect x="185" y="186" width="465" height="36" fill="#F0F0F0" stroke="#BBBBBB" stroke-width="0.5"/>
+  <rect x="185" y="186" width="180"  height="36" fill="#111111"/>
+  <rect x="365" y="186" width="285"  height="36" fill="#FFFFFF" stroke="#111111" stroke-width="1" stroke-dasharray="4 2"/>
 
-  <!-- Summary band -->
-  <rect x="32" y="340" width="636" height="46" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="48" y="358" class="nm">The model ran. The hardware worked. The design was wrong.</text>
-  <text x="48" y="374" class="sm">Two passes and one fail — and the one fail kills the product. The doorbell story in miniature: every constraint must be quantified before deployment, not after.</text>
+  <text x="275" y="208" text-anchor="middle" class="bar-lbl" fill="#FFFFFF">130 h delivered</text>
+  <text x="507" y="208" text-anchor="middle" class="bar-lbl" fill="#333333">206 h short (need 336 h)</text>
 
-  <text x="350" y="406" text-anchor="middle" class="cap">Same calculation, every project. Memory fits. Latency fits. Power decides.</text>
+  <text x="665" y="200" class="verdict">FAIL</text>
+  <text x="665" y="214" class="sm">5 days, not 14</text>
+
+  <!-- Callout arrow — from inside shortfall bar downward, left to shortfall region; stays inside x=650 -->
+  <path d="M 480 222 L 480 244 L 340 244" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+  <text x="420" y="258" text-anchor="middle" class="sm">Power is the binding constraint — redesign here</text>
+
+  <!-- Summary box -->
+  <rect x="32" y="270" width="796" height="44" fill="#F5F5F5" stroke="#BBBBBB" stroke-width="0.5"/>
+  <text x="48" y="288" class="nm">The model ran. The hardware worked. The design was wrong.</text>
+  <text x="48" y="304" class="sm">Two passes, one fail — the one fail kills the product. Every constraint must be quantified before deployment, not after.</text>
+
+  <!-- Caption -->
+  <text x="430" y="332" text-anchor="middle" class="cap">Same calculation, every project. Memory fits. Duty cycle fits. Power decides.</text>
 </svg>
