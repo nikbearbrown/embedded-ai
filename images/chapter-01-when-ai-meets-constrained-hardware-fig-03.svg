@@ -1,101 +1,131 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t03 d03">
-  <title id="t03">Edge, fog, and cloud — three places inference can run, three different physics</title>
-  <desc id="d03">A topology diagram with a sensor on the left and a cloud datacenter on the right, with three concentric inference-placement rings around the sensor: on-device edge (under ten milliseconds, no network), fog or gateway (ten to fifty milliseconds, LAN), and cloud (fifty to five hundred milliseconds, WAN). Each ring is annotated with latency, what physically leaves the device, and which of latency, privacy, connectivity, and cost it satisfies.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 410" role="img" aria-labelledby="t03 d03">
+  <title id="t03">Where Does Inference Run?</title>
+  <desc id="d03">Three inference placement options left to right: on-device edge, fog/gateway, cloud datacenter.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .sub { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #444444; }
+      .wh  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #FFFFFF; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
     </style>
-    <marker id="ar3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#444444"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
 
-  <text x="32" y="28" class="ti">Where does the inference run? Three options, three latency floors.</text>
-  <text x="32" y="44" class="sm">Sensor at the left, datacenter at the right — concentric rings mark how far the data has to travel.</text>
+  <rect width="760" height="410" fill="#FFFFFF"/>
 
-  <!-- Three concentric rings centered at sensor (130, 220) -->
-  <!-- Cloud outer arc to right side -->
+  <!-- Title -->
+  <text x="380" y="26" text-anchor="middle" class="ti">Where Does Inference Run?</text>
+  <text x="380" y="42" text-anchor="middle" class="sub">Three placement options — each trades latency, privacy, connectivity, and compute differently.</text>
 
-  <!-- Cloud arc (outer) -->
-  <circle cx="130" cy="230" r="230" fill="none" stroke="#ADADAD" stroke-width="0.75" stroke-dasharray="3 3"/>
-  <!-- Fog arc (mid) -->
-  <circle cx="130" cy="230" r="130" fill="none" stroke="#787878" stroke-width="0.75" stroke-dasharray="3 3"/>
-  <!-- Edge arc (inner) -->
-  <circle cx="130" cy="230" r="55" fill="none" stroke="#555555" stroke-width="1"/>
+  <!--
+    Layout: 3 equal columns, card width=210, gap=25, margin=20
+    Col1 center=125  card x=20
+    Col2 center=380  card x=275
+    Col3 center=635  card x=530
+    Nodes centered at col centers
+  -->
 
-  <!-- Edge ring fill (very subtle) -->
-  <circle cx="130" cy="230" r="55" fill="#F5F5F5" opacity="0.6"/>
+  <!-- ══ NODES (y=68–130) ══ -->
 
-  <!-- Sensor node -->
-  <rect x="110" y="210" width="40" height="40" fill="#000000" rx="2"/>
-  <circle cx="130" cy="230" r="6" fill="#FFFFFF"/>
-  <text x="130" y="268" text-anchor="middle" class="nm">sensor</text>
-  <text x="130" y="282" text-anchor="middle" class="sm">camera · mic · ECG</text>
+  <!-- SENSOR (center x=125) -->
+  <rect x="95" y="68" width="60" height="60" rx="4" fill="#111111"/>
+  <circle cx="125" cy="98" r="10" fill="#FFFFFF"/>
+  <circle cx="125" cy="98" r="4"  fill="#111111"/>
+  <text x="125" y="144" text-anchor="middle" class="nm">Sensor</text>
+  <text x="125" y="157" text-anchor="middle" class="sm">camera · mic · ECG</text>
 
-  <!-- Gateway node on fog ring -->
-  <rect x="230" y="158" width="36" height="28" fill="#555555" rx="2"/>
-  <text x="248" y="176" text-anchor="middle" class="sm" fill="#FFFFFF">GW</text>
-  <text x="248" y="200" text-anchor="middle" class="nm">gateway</text>
-  <text x="248" y="214" text-anchor="middle" class="sm">router · hub</text>
+  <!-- Arrow sensor → gateway, label above midpoint -->
+  <line x1="157" y1="98" x2="340" y2="98" stroke="#444444" stroke-width="1.2" marker-end="url(#arr)"/>
+  <text x="248" y="91" text-anchor="middle" class="sm">features / raw</text>
 
-  <!-- Cloud datacenter on the right -->
-  <g transform="translate(560, 220)">
-    <path d="M -40 -10 Q -40 -28 -20 -28 Q -16 -42 0 -42 Q 16 -42 22 -30 Q 40 -32 40 -14 Q 50 -10 50 0 L -40 0 Z" fill="#000000"/>
-    <rect x="-28" y="0" width="68" height="22" fill="#555555"/>
-    <line x1="-24" y1="6" x2="36" y2="6" stroke="#FFFFFF" stroke-width="0.5"/>
-    <line x1="-24" y1="12" x2="36" y2="12" stroke="#FFFFFF" stroke-width="0.5"/>
-    <line x1="-24" y1="18" x2="36" y2="18" stroke="#FFFFFF" stroke-width="0.5"/>
-  </g>
-  <text x="565" y="270" text-anchor="middle" class="nm">cloud datacenter</text>
-  <text x="565" y="284" text-anchor="middle" class="sm">unbounded compute</text>
+  <!-- GATEWAY (center x=380) -->
+  <rect x="352" y="72" width="56" height="52" rx="4" fill="#555555"/>
+  <rect x="360" y="80" width="40" height="6" rx="1" fill="#AAAAAA"/>
+  <rect x="360" y="90" width="40" height="6" rx="1" fill="#AAAAAA"/>
+  <rect x="360" y="100" width="40" height="6" rx="1" fill="#AAAAAA"/>
+  <text x="380" y="140" text-anchor="middle" class="nm">Gateway</text>
+  <text x="380" y="153" text-anchor="middle" class="sm">router · hub · Pi</text>
 
-  <!-- Connections -->
-  <line x1="150" y1="225" x2="232" y2="180" stroke="#000000" stroke-width="1" marker-end="url(#ar3)"/>
-  <line x1="266" y1="180" x2="528" y2="218" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
+  <!-- Arrow gateway → cloud, dashed -->
+  <line x1="410" y1="98" x2="596" y2="98" stroke="#444444" stroke-width="1.2" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+  <text x="503" y="91" text-anchor="middle" class="sm">raw sensor data</text>
 
-  <!-- Ring labels along upper arcs -->
-  <text x="130" y="166" text-anchor="middle" class="nm">on-device edge</text>
-  <text x="130" y="180" text-anchor="middle" class="sm">&lt; 10 ms · no network</text>
+  <!-- CLOUD (center x=635) -->
+  <ellipse cx="635" cy="84"  rx="36" ry="16" fill="#333333"/>
+  <ellipse cx="613" cy="91"  rx="20" ry="13" fill="#333333"/>
+  <ellipse cx="657" cy="90"  rx="20" ry="13" fill="#333333"/>
+  <rect    x="594" y="89"  width="82" height="20" fill="#333333"/>
+  <rect    x="608" y="103" width="54" height="16" rx="2" fill="#666666"/>
+  <line x1="613" y1="108" x2="658" y2="108" stroke="#BBBBBB" stroke-width="0.8"/>
+  <line x1="613" y1="114" x2="658" y2="114" stroke="#BBBBBB" stroke-width="0.8"/>
+  <text x="635" y="136" text-anchor="middle" class="nm">Cloud</text>
+  <text x="635" y="149" text-anchor="middle" class="sm">datacenter · unbounded</text>
 
-  <text x="260" y="100" text-anchor="middle" class="nm">fog / gateway</text>
-  <text x="260" y="114" text-anchor="middle" class="sm">10–50 ms · LAN</text>
+  <!-- ══ LATENCY BAND (y=170–188) ══ -->
+  <text x="20" y="185" class="sm" font-weight="bold">Latency:</text>
+  <!-- Edge band under col1 -->
+  <rect x="20"  y="170" width="210" height="18" rx="2" fill="#111111"/>
+  <text x="125" y="182" text-anchor="middle" class="wh">&lt; 10 ms · no network</text>
+  <!-- Fog band under col2 -->
+  <rect x="275" y="170" width="210" height="18" rx="2" fill="#666666"/>
+  <text x="380" y="182" text-anchor="middle" class="wh">10 – 50 ms · LAN</text>
+  <!-- Cloud band under col3 -->
+  <rect x="530" y="170" width="210" height="18" rx="2" fill="#AAAAAA"/>
+  <text x="635" y="182" text-anchor="middle" class="sm" fill="#111111">50 – 500+ ms · WAN</text>
 
-  <text x="455" y="40" text-anchor="middle" class="nm">cloud</text>
-  <text x="455" y="54" text-anchor="middle" class="sm">50–500+ ms · WAN / cellular</text>
+  <!-- Connector lines: node → band → card -->
+  <line x1="125" y1="160" x2="125" y2="200" stroke="#CCCCCC" stroke-width="0.75" stroke-dasharray="3 2"/>
+  <line x1="380" y1="156" x2="380" y2="200" stroke="#CCCCCC" stroke-width="0.75" stroke-dasharray="3 2"/>
+  <line x1="635" y1="152" x2="635" y2="200" stroke="#CCCCCC" stroke-width="0.75" stroke-dasharray="3 2"/>
 
-  <!-- Annotation panels below -->
-  <!-- Edge box -->
-  <rect x="32" y="320" width="200" height="98" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
-  <rect x="32" y="320" width="6" height="98" fill="#000000"/>
-  <text x="48" y="338" class="nm">edge — runs on the sensor</text>
-  <text x="48" y="354" class="sm">what leaves: only the result</text>
-  <text x="48" y="370" class="sm">satisfies: latency, privacy,</text>
-  <text x="48" y="384" class="sm">connectivity, cost</text>
-  <text x="48" y="406" class="sm">violates: compute, memory headroom</text>
+  <!-- ══ CARDS (y=200–358) card width=210 ══ -->
 
-  <!-- Fog box -->
-  <rect x="248" y="320" width="200" height="98" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
-  <rect x="248" y="320" width="6" height="98" fill="#555555"/>
-  <text x="264" y="338" class="nm">fog — runs on the LAN</text>
-  <text x="264" y="354" class="sm">what leaves: features or raw</text>
-  <text x="264" y="370" class="sm">satisfies: latency (mostly),</text>
-  <text x="264" y="384" class="sm">partial privacy</text>
-  <text x="264" y="406" class="sm">violates: connectivity if LAN drops</text>
+  <!-- EDGE CARD (x=20, center=125) -->
+  <rect x="20"  y="200" width="210" height="158" rx="3" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75"/>
+  <rect x="20"  y="200" width="210" height="26"  rx="3" fill="#111111"/>
+  <rect x="20"  y="214" width="210" height="12"  fill="#111111"/>
+  <text x="125" y="217" text-anchor="middle" class="wh" font-weight="bold">On-Device Edge</text>
+  <text x="36"  y="242" class="nm">Where:</text>
+  <text x="36"  y="256" class="sm">runs on the sensor itself</text>
+  <text x="36"  y="274" class="nm">Data sent:</text>
+  <text x="36"  y="288" class="sm">result only (no raw data)</text>
+  <text x="36"  y="306" class="nm">✓ Satisfies:</text>
+  <text x="36"  y="320" class="sm">latency · privacy · connectivity</text>
+  <text x="36"  y="334" class="nm">✗ Challenged by:</text>
+  <text x="36"  y="348" class="sm">compute · memory limits</text>
 
-  <!-- Cloud box -->
-  <rect x="464" y="320" width="204" height="98" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
-  <rect x="464" y="320" width="6" height="98" fill="#787878"/>
-  <text x="480" y="338" class="nm">cloud — runs in datacenter</text>
-  <text x="480" y="354" class="sm">what leaves: raw sensor data</text>
-  <text x="480" y="370" class="sm">satisfies: compute, memory,</text>
-  <text x="480" y="384" class="sm">model size, retraining</text>
-  <text x="480" y="406" class="sm">violates: latency, privacy, cost</text>
+  <!-- FOG CARD (x=275, center=380) -->
+  <rect x="275" y="200" width="210" height="158" rx="3" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75"/>
+  <rect x="275" y="200" width="210" height="26"  rx="3" fill="#555555"/>
+  <rect x="275" y="214" width="210" height="12"  fill="#555555"/>
+  <text x="380" y="217" text-anchor="middle" class="wh" font-weight="bold">Fog / Gateway</text>
+  <text x="291" y="242" class="nm">Where:</text>
+  <text x="291" y="256" class="sm">LAN router or hub</text>
+  <text x="291" y="274" class="nm">Data sent:</text>
+  <text x="291" y="288" class="sm">features or raw</text>
+  <text x="291" y="306" class="nm">✓ Satisfies:</text>
+  <text x="291" y="320" class="sm">latency (mostly) · partial privacy</text>
+  <text x="291" y="334" class="nm">✗ Challenged by:</text>
+  <text x="291" y="348" class="sm">connectivity if LAN drops</text>
+
+  <!-- CLOUD CARD (x=530, center=635) -->
+  <rect x="530" y="200" width="210" height="158" rx="3" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75"/>
+  <rect x="530" y="200" width="210" height="26"  rx="3" fill="#888888"/>
+  <rect x="530" y="214" width="210" height="12"  fill="#888888"/>
+  <text x="635" y="217" text-anchor="middle" class="wh" font-weight="bold">Cloud Datacenter</text>
+  <text x="546" y="242" class="nm">Where:</text>
+  <text x="546" y="256" class="sm">remote datacenter</text>
+  <text x="546" y="274" class="nm">Data sent:</text>
+  <text x="546" y="288" class="sm">raw sensor data</text>
+  <text x="546" y="306" class="nm">✓ Satisfies:</text>
+  <text x="546" y="320" class="sm">compute · memory · retraining</text>
+  <text x="546" y="334" class="nm">✗ Challenged by:</text>
+  <text x="546" y="348" class="sm">latency · privacy · cost</text>
 
   <!-- Caption -->
-  <text x="350" y="436" text-anchor="middle" class="cap">Placement is not preference; for some applications, the latency floor or privacy law makes the choice for you.</text>
+  <text x="380" y="392" text-anchor="middle" class="cap">Placement is not preference — for some applications, latency floor or privacy law makes the choice for you.</text>
 </svg>
