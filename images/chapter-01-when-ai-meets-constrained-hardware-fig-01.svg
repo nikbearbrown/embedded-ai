@@ -1,94 +1,169 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" role="img" aria-labelledby="t01 d01">
-  <title id="t01">Hardware-class taxonomy ladder — four tiers of compute, with the embedded boundary drawn</title>
-  <desc id="d01">A vertical ladder of four hardware tiers from desktop/server down to deeply embedded MCU, each tier annotated with typical SRAM, power draw, and what the tier can or cannot recover from when resources are exceeded. The lower two tiers are bracketed as the embedded region.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t01 d01">
+  <title id="t01">Embedded Hardware Ladder</title>
+  <desc id="d01">A visual ladder of four hardware tiers from desktop/server at the top down to deeply embedded MCU at the bottom. Each rung shows typical SRAM, power draw, and failure behavior. The lower two tiers are shaded as the embedded region.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
+      .hdr { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #444444; letter-spacing: 0.08em; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #000000; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #444444; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #666666; }
+      .bkt { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #000000; letter-spacing: 0.06em; }
     </style>
-    <marker id="ar1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+    <!-- downward arrow -->
+    <marker id="arr-down" markerWidth="8" markerHeight="6" refX="4" refY="6" orient="auto">
+      <polygon points="0 0, 8 0, 4 6" fill="#000000"/>
+    </marker>
+    <!-- right arrow -->
+    <marker id="arr-right" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#222222"/>
     </marker>
   </defs>
-  <rect width="900" height="460" fill="#FFFFFF"/>
 
-  <text x="32" y="30" class="ti">Hardware-class ladder — where "embedded" begins, and what each tier can recover from</text>
+  <!-- background -->
+  <rect width="960" height="560" fill="#FFFFFF"/>
 
-  <!-- column headers -->
-  <text x="44"  y="60" class="sm">Tier</text>
-  <text x="400" y="60" class="sm">Typical SRAM</text>
-  <text x="530" y="60" class="sm">Typical power</text>
-  <text x="670" y="60" class="sm">When resources exceeded</text>
+  <!-- ══════════════════════════════════════════════
+       TITLE
+  ══════════════════════════════════════════════ -->
+  <text x="48" y="36" class="ti">Embedded Hardware Ladder</text>
+  <text x="48" y="54" class="sm">Four tiers of compute — from general-purpose servers to deeply constrained microcontrollers</text>
 
-  <!-- divider under headers -->
-  <line x1="32" y1="68" x2="868" y2="68" stroke="#787878" stroke-width="0.75"/>
+  <!-- ══════════════════════════════════════════════
+       LADDER RAILS  (two vertical lines)
+       Left rail x=120, Right rail x=860
+       Rungs at y = 100, 180, 260, 340  (height 64 each)
+  ══════════════════════════════════════════════ -->
 
-  <!-- Tier 1 — Desktop / server -->
-  <rect x="32" y="80" width="836" height="64" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
-  <rect x="32" y="80" width="6" height="64" fill="#000000"/>
-  <text x="48" y="100" class="nm">Desktop / server</text>
-  <text x="48" y="116" class="sm">x86, Xeon, A100 — general-purpose, virtualized</text>
-  <text x="48" y="132" class="sm">examples: cloud node, workstation</text>
-  <text x="400" y="116" class="lb">unbounded (TB)</text>
-  <text x="400" y="132" class="sm">swap to disk</text>
-  <text x="530" y="116" class="lb">~100 W</text>
-  <text x="530" y="132" class="sm">wall socket</text>
-  <text x="670" y="116" class="sm">autoscale, swap, retry</text>
-  <text x="670" y="132" class="sm">graceful degradation</text>
+  <!-- Left rail -->
+  <line x1="120" y1="82" x2="120" y2="404" stroke="#222222" stroke-width="3"/>
+  <!-- Right rail -->
+  <line x1="860" y1="82" x2="860" y2="404" stroke="#222222" stroke-width="3"/>
 
-  <!-- Tier 2 — Single-board computer -->
-  <rect x="32" y="152" width="836" height="64" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.75"/>
-  <rect x="32" y="152" width="6" height="64" fill="#555555"/>
-  <text x="48" y="172" class="nm">Single-board computer</text>
-  <text x="48" y="188" class="sm">Raspberry Pi 4, Jetson Nano — Linux kernel, MMU</text>
-  <text x="48" y="204" class="sm">examples: edge gateway, kiosk</text>
-  <text x="400" y="188" class="lb">~4 GB</text>
-  <text x="400" y="204" class="sm">DRAM + flash</text>
-  <text x="530" y="188" class="lb">~5 W</text>
-  <text x="530" y="204" class="sm">USB-C, PoE</text>
-  <text x="670" y="188" class="sm">throttle, swap (slow)</text>
-  <text x="670" y="204" class="sm">thermal slowdown</text>
+  <!-- Downward arrow on left rail -->
+  <line x1="120" y1="404" x2="120" y2="428" stroke="#222222" stroke-width="3" marker-end="url(#arr-down)"/>
+  <!-- Downward arrow on right rail -->
+  <line x1="860" y1="404" x2="860" y2="428" stroke="#222222" stroke-width="3" marker-end="url(#arr-down)"/>
 
-  <!-- Tier 3 — Application MCU -->
-  <rect x="32" y="224" width="836" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
-  <rect x="32" y="224" width="6" height="64" fill="#787878"/>
-  <text x="48" y="244" class="nm">Application MCU</text>
-  <text x="48" y="260" class="sm">Cortex-M4 / M7 class — FPU, DSP, bare-metal or RTOS</text>
-  <text x="48" y="276" class="sm">examples: wearable, smart sensor</text>
-  <text x="400" y="260" class="lb">~256 KB</text>
-  <text x="400" y="276" class="sm">SRAM, no swap</text>
-  <text x="530" y="260" class="lb">~50 mW</text>
-  <text x="530" y="276" class="sm">coin cell, AA</text>
-  <text x="670" y="260" class="sm">hard fault, reset</text>
-  <text x="670" y="276" class="sm">no graceful path</text>
+  <!-- ── Column headers (inside rails) ── -->
+  <text x="200" y="78" class="hdr">TIER</text>
+  <text x="490" y="78" class="hdr" text-anchor="middle">TYPICAL SRAM</text>
+  <text x="650" y="78" class="hdr" text-anchor="middle">TYPICAL POWER</text>
+  <text x="820" y="78" class="hdr" text-anchor="end">FAILURE BEHAVIOR</text>
 
-  <!-- Tier 4 — Deeply embedded MCU -->
-  <rect x="32" y="296" width="836" height="64" fill="#F5F5F5" stroke="#787878" stroke-width="0.75"/>
-  <rect x="32" y="296" width="6" height="64" fill="#ADADAD"/>
-  <text x="48" y="316" class="nm">Deeply embedded MCU</text>
-  <text x="48" y="332" class="sm">Cortex-M0+, Arduino Nano 33 IoT — no FPU, no MMU</text>
-  <text x="48" y="348" class="sm">examples: hearing aid, beacon</text>
-  <text x="400" y="332" class="lb">~32 KB</text>
-  <text x="400" y="348" class="sm">SRAM only</text>
-  <text x="530" y="332" class="lb">~10 mW</text>
-  <text x="530" y="348" class="sm">harvested, button cell</text>
-  <text x="670" y="332" class="sm">silent stack overflow</text>
-  <text x="670" y="348" class="sm">brownout, dead device</text>
+  <!-- ══════════════════════════════════════════════
+       RUNG 1 — Desktop / Server  (lightest = white)
+  ══════════════════════════════════════════════ -->
+  <!-- Rung crossbar top -->
+  <line x1="120" y1="88" x2="860" y2="88" stroke="#222222" stroke-width="2"/>
+  <!-- Rung fill -->
+  <rect x="121" y="89" width="738" height="78" fill="#FFFFFF"/>
+  <!-- Rung crossbar bottom -->
+  <line x1="120" y1="167" x2="860" y2="167" stroke="#222222" stroke-width="2"/>
 
-  <!-- Embedded boundary bracket -->
-  <path d="M 20 224 L 14 224 L 14 360 L 20 360" fill="none" stroke="#000000" stroke-width="1.25"/>
-  <text x="10" y="296" text-anchor="middle" transform="rotate(-90 10 296)" class="lb">embedded region</text>
+  <!-- Tier badge -->
+  <rect x="130" y="96" width="8" height="62" fill="#111111"/>
+  <text x="148" y="114" class="nm">Desktop / Server</text>
+  <text x="148" y="130" class="sm">x86, Xeon, A100 · general-purpose, virtualized</text>
+  <text x="148" y="145" class="sm">e.g. cloud node, workstation</text>
+  <text x="148" y="159" class="sm" fill="#777777">Tier 1</text>
 
-  <!-- Boundary annotation -->
-  <line x1="32" y1="220" x2="868" y2="220" stroke="#000000" stroke-width="0.75" stroke-dasharray="4 3"/>
-  <text x="868" y="216" text-anchor="end" class="sm">↑ general-purpose · ↓ purpose-built, resources fixed</text>
+  <text x="490" y="122" class="lb" text-anchor="middle">Unbounded (TB+)</text>
+  <text x="490" y="138" class="sm" text-anchor="middle">swap to disk</text>
 
-  <!-- Bottom commentary arrow -->
-  <path d="M 80 388 L 80 410 L 800 410 L 800 388" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar1)"/>
-  <text x="440" y="425" text-anchor="middle" class="lb">moving down the ladder: more application-specific, fewer recovery paths, tighter coupling to physical limits</text>
+  <text x="650" y="122" class="lb" text-anchor="middle">~100 W</text>
+  <text x="650" y="138" class="sm" text-anchor="middle">wall socket</text>
 
-  <text x="450" y="448" text-anchor="middle" class="cap">The word "embedded" begins where the system can no longer rescue itself from exceeded resources.</text>
+  <text x="820" y="122" class="lb" text-anchor="end">Autoscale · swap · retry</text>
+  <text x="820" y="138" class="sm" text-anchor="end">graceful degradation</text>
+
+  <!-- ══════════════════════════════════════════════
+       RUNG 2 — Single-Board Computer  (light gray)
+  ══════════════════════════════════════════════ -->
+  <rect x="121" y="168" width="738" height="78" fill="#EEEEEE"/>
+  <line x1="120" y1="246" x2="860" y2="246" stroke="#222222" stroke-width="2"/>
+
+  <rect x="130" y="175" width="8" height="62" fill="#444444"/>
+  <text x="148" y="193" class="nm">Single-Board Computer</text>
+  <text x="148" y="209" class="sm">Raspberry Pi 4, Jetson Nano · Linux kernel, MMU</text>
+  <text x="148" y="224" class="sm">e.g. edge gateway, kiosk</text>
+  <text x="148" y="238" class="sm" fill="#777777">Tier 2</text>
+
+  <text x="490" y="201" class="lb" text-anchor="middle">~4 GB</text>
+  <text x="490" y="217" class="sm" text-anchor="middle">DRAM + flash</text>
+
+  <text x="650" y="201" class="lb" text-anchor="middle">~5 W</text>
+  <text x="650" y="217" class="sm" text-anchor="middle">USB-C, PoE</text>
+
+  <text x="820" y="201" class="lb" text-anchor="end">Throttle · swap (slow)</text>
+  <text x="820" y="217" class="sm" text-anchor="end">thermal slowdown</text>
+
+  <!-- ══════════════════════════════════════════════
+       EMBEDDED REGION STARTS HERE
+       Dashed divider line with label
+  ══════════════════════════════════════════════ -->
+  <line x1="80" y1="247" x2="900" y2="247" stroke="#000000" stroke-width="1" stroke-dasharray="6 4"/>
+  <text x="490" y="260" text-anchor="middle" class="bkt">▼  EMBEDDED REGION  ▼</text>
+
+  <!-- ══════════════════════════════════════════════
+       RUNG 3 — Application MCU  (medium gray)
+  ══════════════════════════════════════════════ -->
+  <line x1="120" y1="265" x2="860" y2="265" stroke="#222222" stroke-width="2"/>
+  <rect x="121" y="266" width="738" height="78" fill="#CCCCCC"/>
+  <line x1="120" y1="344" x2="860" y2="344" stroke="#222222" stroke-width="2"/>
+
+  <rect x="130" y="273" width="8" height="62" fill="#777777"/>
+  <text x="148" y="291" class="nm">Application MCU</text>
+  <text x="148" y="307" class="sm">Cortex-M4 / M7 · FPU, DSP · bare-metal or RTOS</text>
+  <text x="148" y="322" class="sm">e.g. wearable, smart sensor</text>
+  <text x="148" y="336" class="sm" fill="#555555">Tier 3</text>
+
+  <text x="490" y="299" class="lb" text-anchor="middle">~256 KB</text>
+  <text x="490" y="315" class="sm" text-anchor="middle">SRAM, no swap</text>
+
+  <text x="650" y="299" class="lb" text-anchor="middle">~50 mW</text>
+  <text x="650" y="315" class="sm" text-anchor="middle">coin cell, AA</text>
+
+  <text x="820" y="299" class="lb" text-anchor="end">Hard fault · reset</text>
+  <text x="820" y="315" class="sm" text-anchor="end">no graceful path</text>
+
+  <!-- ══════════════════════════════════════════════
+       RUNG 4 — Deeply Embedded MCU  (dark gray)
+  ══════════════════════════════════════════════ -->
+  <rect x="121" y="345" width="738" height="78" fill="#999999"/>
+  <line x1="120" y1="423" x2="860" y2="423" stroke="#222222" stroke-width="2"/>
+
+  <rect x="130" y="352" width="8" height="62" fill="#333333"/>
+  <text x="148" y="370" class="nm">Deeply Embedded MCU</text>
+  <text x="148" y="386" class="sm">Cortex-M0+, Arduino Nano 33 IoT · no FPU, no MMU</text>
+  <text x="148" y="401" class="sm">e.g. hearing aid, beacon</text>
+  <text x="148" y="415" class="sm" fill="#333333">Tier 4</text>
+
+  <text x="490" y="378" class="lb" text-anchor="middle">~32 KB</text>
+  <text x="490" y="394" class="sm" text-anchor="middle">SRAM only</text>
+
+  <text x="650" y="378" class="lb" text-anchor="middle">~10 mW</text>
+  <text x="650" y="394" class="sm" text-anchor="middle">harvested / button cell</text>
+
+  <text x="820" y="378" class="lb" text-anchor="end">Silent stack overflow</text>
+  <text x="820" y="394" class="sm" text-anchor="end">brownout · dead device</text>
+
+  <!-- ══════════════════════════════════════════════
+       EMBEDDED BRACKET  (left of rails)
+  ══════════════════════════════════════════════ -->
+  <path d="M 90 265 L 78 265 L 78 423 L 90 423" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <text x="66" y="344" text-anchor="middle" transform="rotate(-90 66 344)" class="bkt">EMBEDDED</text>
+
+  <!-- ══════════════════════════════════════════════
+       DIRECTION LABELS below arrows
+  ══════════════════════════════════════════════ -->
+  <text x="120" y="450" text-anchor="middle" class="sm">more constrained</text>
+  <text x="860" y="450" text-anchor="middle" class="sm">more constrained</text>
+
+  <!-- ══════════════════════════════════════════════
+       CAPTION
+  ══════════════════════════════════════════════ -->
+  <text x="490" y="490" text-anchor="middle" class="cap">Moving down the ladder: resources shrink, recovery options disappear, and physical limits dominate every design decision.</text>
+  <text x="490" y="506" text-anchor="middle" class="cap">"Embedded" begins where the system can no longer rescue itself from exceeded resources.</text>
 </svg>
