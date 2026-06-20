@@ -1,125 +1,143 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t05 d05">
-  <title id="t05">Keyword-spotter feasibility scorecard — two candidate MCUs against four constraints</title>
-  <desc id="d05">A side-by-side scorecard comparing Target A (Cortex-M4 80 MHz, 256 KB SRAM, FPU, $3) and Target B (Cortex-M0+ 48 MHz, 32 KB SRAM, no FPU, $0.80) across four feasibility rows: memory fit, latency vs the 100 ms budget, battery life vs the 7-day target, and unit cost. Target A passes all four; Target B fails memory and latency.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 480" role="img" aria-labelledby="t05 d05">
+  <title id="t05">Keyword-Spotter Feasibility Scorecard</title>
+  <desc id="d05">Side-by-side scorecard comparing Target A (Cortex-M4, passes all 4) and Target B (Cortex-M0+, fails memory and latency).</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .hdr { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #FFFFFF; }
-      .hdrsub { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #F5F5F5; }
-      .num { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .verdict-pass { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .verdict-fail { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; letter-spacing: 0.5px; }
+      .ti         { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .sub        { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .hdr        { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #FFFFFF; }
+      .hdrsub     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  fill: #DDDDDD; }
+      .nm         { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .sm         { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .num        { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
+      .pass       { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #111111; }
+      .fail       { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #111111; }
+      .cap        { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
     </style>
+    <marker id="ov" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#111111"/>
+    </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
 
-  <text x="32" y="28" class="ti">Keyword-spotter — same model, two MCUs, four constraints</text>
-  <text x="32" y="44" class="sm">Model: 42 K params · 180 KB · 1.8 M ops · 100 ms budget · 7-day battery · 1000 mAh Li-ion</text>
+  <rect width="860" height="480" fill="#FFFFFF"/>
 
-  <!-- Column header bands -->
-  <!-- Left header (constraint column) -->
-  <rect x="32" y="60" width="220" height="50" fill="#555555"/>
-  <text x="48" y="80" class="hdr">Constraint</text>
-  <text x="48" y="98" class="hdrsub">measured against the budget</text>
+  <!-- Title -->
+  <text x="430" y="24" text-anchor="middle" class="ti">Keyword-Spotter — Same Model, Two MCUs, Four Constraints</text>
+  <text x="430" y="40" text-anchor="middle" class="sub">Model: 42 K params · 180 KB · 1.8 M ops · 100 ms budget · 7-day battery · 1000 mAh Li-ion</text>
 
-  <!-- Target A header -->
-  <rect x="252" y="60" width="208" height="50" fill="#000000"/>
-  <text x="356" y="80" text-anchor="middle" class="hdr">Target A</text>
-  <text x="356" y="98" text-anchor="middle" class="hdrsub">Cortex-M4 · 80 MHz · 256 KB · FPU · $3</text>
+  <!--
+    Columns:
+      Constraint: x=20  w=185  → right=205
+      Target A:   x=215 w=300  → right=515
+      Target B:   x=525 w=300  → right=825
+    Rows (h=70 each):
+      Header:  y=54  h=56
+      Row 1:   y=114 h=70
+      Row 2:   y=184 h=70
+      Row 3:   y=254 h=70
+      Row 4:   y=324 h=70
+      Verdict: y=394 h=48
+    Caption: y=458
+  -->
 
-  <!-- Target B header -->
-  <rect x="460" y="60" width="208" height="50" fill="#000000"/>
-  <text x="564" y="80" text-anchor="middle" class="hdr">Target B</text>
-  <text x="564" y="98" text-anchor="middle" class="hdrsub">Cortex-M0+ · 48 MHz · 32 KB · no FPU · $0.80</text>
+  <!-- ══ HEADER ROW ══ -->
+  <rect x="20"  y="54" width="185" height="56" fill="#333333"/>
+  <text x="28"  y="74" class="hdr">Constraint</text>
+  <text x="28"  y="90" class="hdrsub">measured against budget</text>
 
-  <!-- ROW 1 — Memory fit -->
-  <rect x="32" y="118" width="220" height="56" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="48" y="138" class="nm">Memory fit</text>
-  <text x="48" y="154" class="sm">180 KB needed</text>
-  <text x="48" y="168" class="sm">vs available SRAM</text>
+  <rect x="215" y="54" width="300" height="56" fill="#111111"/>
+  <text x="365" y="72" text-anchor="middle" class="hdr">Target A</text>
+  <text x="365" y="86" text-anchor="middle" class="hdrsub">Cortex-M4 · 80 MHz · 256 KB SRAM · FPU · $3.00</text>
+  <text x="365" y="100" text-anchor="middle" class="hdrsub">all four constraints ✓</text>
 
-  <rect x="252" y="118" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="356" y="140" text-anchor="middle" class="num">180 / 256 KB</text>
-  <!-- mini bar -->
-  <rect x="282" y="148" width="148" height="8" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <rect x="282" y="148" width="104" height="8" fill="#000000"/>
-  <text x="356" y="168" text-anchor="middle" class="verdict-pass">PASS — 76 KB headroom</text>
+  <rect x="525" y="54" width="300" height="56" fill="#666666"/>
+  <text x="675" y="72" text-anchor="middle" class="hdr">Target B</text>
+  <text x="675" y="86" text-anchor="middle" class="hdrsub">Cortex-M0+ · 48 MHz · 32 KB SRAM · no FPU · $0.80</text>
+  <text x="675" y="100" text-anchor="middle" class="hdrsub">fails memory + latency</text>
 
-  <rect x="460" y="118" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="564" y="140" text-anchor="middle" class="num">180 / 32 KB</text>
-  <rect x="490" y="148" width="148" height="8" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <rect x="490" y="148" width="148" height="8" fill="#555555"/>
+  <!-- ══ ROW 1 — Memory fit ══ -->
+  <rect x="20"  y="114" width="185" height="70" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="30"  y="132" class="nm">Memory fit</text>
+  <text x="30"  y="147" class="sm">180 KB model needed</text>
+  <text x="30"  y="160" class="sm">vs available SRAM</text>
+
+  <rect x="215" y="114" width="300" height="70" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="365" y="133" text-anchor="middle" class="num">180 / 256 KB</text>
+  <rect x="250" y="140" width="230" height="8" fill="#EEEEEE" stroke="#CCCCCC" stroke-width="0.5"/>
+  <rect x="250" y="140" width="161.7" height="8" fill="#111111"/>
+  <text x="365" y="166" text-anchor="middle" class="pass">✓ PASS — 76 KB headroom</text>
+
+  <rect x="525" y="114" width="300" height="70" fill="#FAFAFA" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="675" y="133" text-anchor="middle" class="num">180 / 32 KB</text>
+  <rect x="560" y="140" width="230" height="8" fill="#EEEEEE" stroke="#CCCCCC" stroke-width="0.5"/>
+  <rect x="560" y="140" width="230" height="8" fill="#777777"/>
   <!-- overflow arrow -->
-  <path d="M 638 152 L 656 152 L 654 148 M 656 152 L 654 156" fill="none" stroke="#000000" stroke-width="1"/>
-  <text x="564" y="168" text-anchor="middle" class="verdict-fail">FAIL — 5.6× over</text>
+  <line x1="790" y1="144" x2="806" y2="144" stroke="#111111" stroke-width="1.5" marker-end="url(#ov)"/>
+  <text x="675" y="166" text-anchor="middle" class="fail">✗ FAIL — 5.6× over budget</text>
 
-  <!-- ROW 2 — Latency -->
-  <rect x="32" y="178" width="220" height="56" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="48" y="198" class="nm">Latency</text>
-  <text x="48" y="214" class="sm">1.8 M ops</text>
-  <text x="48" y="228" class="sm">vs 100 ms budget</text>
+  <!-- ══ ROW 2 — Latency ══ -->
+  <rect x="20"  y="184" width="185" height="70" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="30"  y="202" class="nm">Latency</text>
+  <text x="30"  y="217" class="sm">1.8 M ops to run</text>
+  <text x="30"  y="230" class="sm">vs 100 ms budget</text>
 
-  <rect x="252" y="178" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="356" y="200" text-anchor="middle" class="num">22 / 100 ms</text>
-  <rect x="282" y="208" width="148" height="8" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <rect x="282" y="208" width="32.5" height="8" fill="#000000"/>
-  <text x="356" y="228" text-anchor="middle" class="verdict-pass">PASS — 78 ms margin</text>
+  <rect x="215" y="184" width="300" height="70" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="365" y="203" text-anchor="middle" class="num">22 / 100 ms</text>
+  <rect x="250" y="210" width="230" height="8" fill="#EEEEEE" stroke="#CCCCCC" stroke-width="0.5"/>
+  <rect x="250" y="210" width="50.6" height="8" fill="#111111"/>
+  <text x="365" y="236" text-anchor="middle" class="pass">✓ PASS — 78 ms margin</text>
 
-  <rect x="460" y="178" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="564" y="200" text-anchor="middle" class="num">375 / 100 ms</text>
-  <rect x="490" y="208" width="148" height="8" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <rect x="490" y="208" width="148" height="8" fill="#555555"/>
-  <path d="M 638 212 L 656 212 L 654 208 M 656 212 L 654 216" fill="none" stroke="#000000" stroke-width="1"/>
-  <text x="564" y="228" text-anchor="middle" class="verdict-fail">FAIL — FPU emulation</text>
+  <rect x="525" y="184" width="300" height="70" fill="#FAFAFA" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="675" y="203" text-anchor="middle" class="num">375 / 100 ms</text>
+  <rect x="560" y="210" width="230" height="8" fill="#EEEEEE" stroke="#CCCCCC" stroke-width="0.5"/>
+  <rect x="560" y="210" width="230" height="8" fill="#777777"/>
+  <line x1="790" y1="214" x2="806" y2="214" stroke="#111111" stroke-width="1.5" marker-end="url(#ov)"/>
+  <text x="675" y="236" text-anchor="middle" class="fail">✗ FAIL — no FPU, 3.75× over</text>
 
-  <!-- ROW 3 — Battery life -->
-  <rect x="32" y="238" width="220" height="56" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="48" y="258" class="nm">Battery life</text>
-  <text x="48" y="274" class="sm">avg current → hours</text>
-  <text x="48" y="288" class="sm">vs 168 h (7 days)</text>
+  <!-- ══ ROW 3 — Battery life ══ -->
+  <rect x="20"  y="254" width="185" height="70" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="30"  y="272" class="nm">Battery life</text>
+  <text x="30"  y="287" class="sm">avg current → hours</text>
+  <text x="30"  y="300" class="sm">target: 168 h (7 days)</text>
 
-  <rect x="252" y="238" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="356" y="260" text-anchor="middle" class="num">4.4 mA · 227 h</text>
-  <rect x="282" y="268" width="148" height="8" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <rect x="282" y="268" width="109.4" height="8" fill="#000000"/>
-  <!-- target marker at 168/227 ratio = 73.9% of bar; but bar represents delivered? Show target on 168/227 -->
-  <line x1="391.4" y1="264" x2="391.4" y2="280" stroke="#000000" stroke-width="0.75" stroke-dasharray="2 2"/>
-  <text x="356" y="288" text-anchor="middle" class="verdict-pass">PASS — 9 days, tight</text>
+  <rect x="215" y="254" width="300" height="70" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="365" y="273" text-anchor="middle" class="num">4.4 mA avg → 227 h</text>
+  <rect x="250" y="280" width="230" height="8" fill="#EEEEEE" stroke="#CCCCCC" stroke-width="0.5"/>
+  <rect x="250" y="280" width="170.6" height="8" fill="#111111"/>
+  <line x1="420.5" y1="276" x2="420.5" y2="292" stroke="#555555" stroke-width="1" stroke-dasharray="2 2"/>
+  <text x="365" y="306" text-anchor="middle" class="pass">✓ PASS — 9 days (tight)</text>
 
-  <rect x="460" y="238" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="564" y="260" text-anchor="middle" class="num">n / a</text>
-  <text x="564" y="278" text-anchor="middle" class="sm">model does not run</text>
-  <text x="564" y="290" text-anchor="middle" class="sm">— power analysis blocked</text>
+  <rect x="525" y="254" width="300" height="70" fill="#FAFAFA" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="675" y="277" text-anchor="middle" class="num">n/a</text>
+  <text x="675" y="295" text-anchor="middle" class="sm">model does not run —</text>
+  <text x="675" y="309" text-anchor="middle" class="sm">power analysis blocked</text>
 
-  <!-- ROW 4 — Unit cost -->
-  <rect x="32" y="298" width="220" height="56" fill="#F5F5F5" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="48" y="318" class="nm">Unit cost</text>
-  <text x="48" y="334" class="sm">BOM impact</text>
-  <text x="48" y="348" class="sm">at consumer volume</text>
+  <!-- ══ ROW 4 — Unit cost ══ -->
+  <rect x="20"  y="324" width="185" height="70" fill="#F5F5F5" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="30"  y="342" class="nm">Unit cost</text>
+  <text x="30"  y="357" class="sm">BOM impact</text>
+  <text x="30"  y="370" class="sm">at consumer volume</text>
 
-  <rect x="252" y="298" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="356" y="324" text-anchor="middle" class="num">$3.00</text>
-  <text x="356" y="344" text-anchor="middle" class="sm">3.75× more than B</text>
+  <rect x="215" y="324" width="300" height="70" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="365" y="350" text-anchor="middle" class="num">$3.00</text>
+  <text x="365" y="368" text-anchor="middle" class="sm">3.75× more than Target B</text>
 
-  <rect x="460" y="298" width="208" height="56" fill="#FFFFFF" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="564" y="324" text-anchor="middle" class="num">$0.80</text>
-  <text x="564" y="344" text-anchor="middle" class="sm">cheap — if it ran</text>
+  <rect x="525" y="324" width="300" height="70" fill="#FAFAFA" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="675" y="350" text-anchor="middle" class="num">$0.80</text>
+  <text x="675" y="368" text-anchor="middle" class="sm">cheap — but it does not run</text>
 
-  <!-- Verdict band -->
-  <rect x="32" y="362" width="220" height="38" fill="#000000"/>
-  <text x="48" y="385" class="hdr">overall verdict</text>
+  <!-- ══ VERDICT ROW ══ -->
+  <rect x="20"  y="394" width="185" height="48" fill="#111111"/>
+  <text x="112" y="424" text-anchor="middle" class="hdr">Overall Verdict</text>
 
-  <rect x="252" y="362" width="208" height="38" fill="#F5F5F5" stroke="#000000" stroke-width="1"/>
-  <text x="356" y="380" text-anchor="middle" class="nm">SHIPS — costs more</text>
-  <text x="356" y="394" text-anchor="middle" class="sm">2 / 4 constraints with margin</text>
+  <rect x="215" y="394" width="300" height="48" fill="#EEEEEE" stroke="#111111" stroke-width="1"/>
+  <text x="365" y="412" text-anchor="middle" class="nm">SHIPS — costs more</text>
+  <text x="365" y="430" text-anchor="middle" class="sm">passes all 4 constraints</text>
 
-  <rect x="460" y="362" width="208" height="38" fill="#F5F5F5" stroke="#000000" stroke-width="1"/>
-  <text x="564" y="380" text-anchor="middle" class="nm">DOES NOT RUN — needs model surgery</text>
-  <text x="564" y="394" text-anchor="middle" class="sm">quantize · prune · re-architect</text>
+  <rect x="525" y="394" width="300" height="48" fill="#EEEEEE" stroke="#111111" stroke-width="1"/>
+  <text x="675" y="412" text-anchor="middle" class="nm">DOES NOT RUN</text>
+  <text x="675" y="430" text-anchor="middle" class="sm">quantize · prune · re-architect first</text>
 
-  <text x="350" y="424" text-anchor="middle" class="cap">The cheaper part is one-quarter the cost. Whether it ships depends on whether you can shrink the model without breaking accuracy.</text>
+  <!-- Caption -->
+  <text x="430" y="466" text-anchor="middle" class="cap">The cheaper part costs one-quarter as much. Whether it ships depends on whether you can shrink the model without breaking accuracy.</text>
 </svg>
