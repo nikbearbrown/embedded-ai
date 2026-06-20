@@ -1,121 +1,121 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="t02 d02">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="t02 d02">
   <title id="t02">Matrix-multiplication tiling — memory-bound stream vs. cache-blocked reuse</title>
-  <desc id="d02">Two panels comparing a naive 128 by 128 by 10 multiply against a 64 by 64 cache-blocked tiling. The naive pass streams every element of A from SRAM once per output column; the blocked pass keeps each sub-block in cache and reuses it many times.</desc>
+  <desc id="d02">Two panels comparing a naive 128x128x10 multiply against a 64x64 cache-blocked tiling. The naive pass streams every element of A from SRAM once per output column; the blocked pass keeps each sub-block in cache and reuses it many times.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="720" height="440" fill="#FFFFFF"/>
+  <rect width="720" height="460" fill="#FFFFFF"/>
 
   <text x="24" y="30" class="ti">Same MAC count. Different memory pattern. Order-of-magnitude difference.</text>
 
   <!-- LEFT PANEL: naive stream -->
-  <text x="24" y="60" class="ti">Naive — stream A once per output column</text>
-  <text x="24" y="76" class="sm">memory-bound on Cortex-M4 with no cache</text>
+  <text x="24" y="58" class="ti">Naive — stream A once per output column</text>
+  <text x="24" y="74" class="sm">memory-bound on Cortex-M4 with no cache</text>
 
   <!-- Matrix A 128x128 -->
-  <text x="24" y="100" class="sm">A  (128 × 128)</text>
-  <rect x="24" y="106" width="120" height="120" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
-  <!-- horizontal scan lines indicating streaming reads -->
-  <g stroke="#C8102E" stroke-width="0.5" opacity="0.55">
-    <line x1="24" y1="116" x2="144" y2="116"/>
-    <line x1="24" y1="128" x2="144" y2="128"/>
-    <line x1="24" y1="140" x2="144" y2="140"/>
-    <line x1="24" y1="152" x2="144" y2="152"/>
-    <line x1="24" y1="164" x2="144" y2="164"/>
-    <line x1="24" y1="176" x2="144" y2="176"/>
-    <line x1="24" y1="188" x2="144" y2="188"/>
-    <line x1="24" y1="200" x2="144" y2="200"/>
-    <line x1="24" y1="212" x2="144" y2="212"/>
+  <text x="24" y="98" class="sm">A  (128 x 128)</text>
+  <rect x="24" y="104" width="120" height="120" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <!-- horizontal scan lines indicating streaming reads (dark gray) -->
+  <g stroke="#888888" stroke-width="0.6" opacity="0.8">
+    <line x1="24" y1="114" x2="144" y2="114"/>
+    <line x1="24" y1="126" x2="144" y2="126"/>
+    <line x1="24" y1="138" x2="144" y2="138"/>
+    <line x1="24" y1="150" x2="144" y2="150"/>
+    <line x1="24" y1="162" x2="144" y2="162"/>
+    <line x1="24" y1="174" x2="144" y2="174"/>
+    <line x1="24" y1="186" x2="144" y2="186"/>
+    <line x1="24" y1="198" x2="144" y2="198"/>
+    <line x1="24" y1="210" x2="144" y2="210"/>
   </g>
 
   <!-- times sign -->
-  <text x="160" y="172" class="ti">×</text>
+  <text x="158" y="170" class="ti">x</text>
 
   <!-- Matrix B 128x10 -->
-  <text x="176" y="100" class="sm">B  (128 × 10)</text>
-  <rect x="176" y="106" width="36" height="120" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
-  <line x1="180" y1="106" x2="180" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="184" y1="106" x2="184" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="188" y1="106" x2="188" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="192" y1="106" x2="192" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="196" y1="106" x2="196" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="200" y1="106" x2="200" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="204" y1="106" x2="204" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
-  <line x1="208" y1="106" x2="208" y2="226" stroke="#555555" stroke-width="0.4" opacity="0.4"/>
+  <text x="174" y="98" class="sm">B  (128 x 10)</text>
+  <rect x="174" y="104" width="36" height="120" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <g stroke="#AAAAAA" stroke-width="0.5" opacity="0.6">
+    <line x1="178" y1="104" x2="178" y2="224"/>
+    <line x1="182" y1="104" x2="182" y2="224"/>
+    <line x1="186" y1="104" x2="186" y2="224"/>
+    <line x1="190" y1="104" x2="190" y2="224"/>
+    <line x1="194" y1="104" x2="194" y2="224"/>
+    <line x1="198" y1="104" x2="198" y2="224"/>
+    <line x1="202" y1="104" x2="202" y2="224"/>
+    <line x1="206" y1="104" x2="206" y2="224"/>
+  </g>
 
   <!-- equals -->
-  <text x="226" y="172" class="ti">=</text>
+  <text x="223" y="170" class="ti">=</text>
 
   <!-- Output C -->
-  <text x="244" y="100" class="sm">C  (128 × 10)</text>
-  <rect x="244" y="106" width="36" height="120" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <text x="242" y="98" class="sm">C  (128 x 10)</text>
+  <rect x="242" y="104" width="36" height="120" fill="#F5F5F5" stroke="#555555" stroke-width="1"/>
 
-  <!-- annotation -->
-  <line x1="84" y1="226" x2="84" y2="252" stroke="#C8102E" stroke-width="1" marker-end="url(#ar2)"/>
-  <text x="84" y="270" text-anchor="middle" class="lb" fill="#C8102E">A read 10× — once per output column</text>
-  <text x="84" y="286" text-anchor="middle" class="sm">≈ 16,384 SRAM reads × 2 cyc = 32,768 cyc just for traffic</text>
+  <!-- annotation arrow -->
+  <line x1="84" y1="224" x2="84" y2="250" stroke="#333333" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="84" y="268" text-anchor="middle" class="lb">A read 10x — once per output column</text>
+  <text x="84" y="284" text-anchor="middle" class="sm">~16,384 SRAM reads x 2 cyc = 32,768 cyc traffic</text>
 
-  <!-- cost summary -->
-  <rect x="24" y="306" width="320" height="90" fill="none" stroke="#555555" stroke-width="0.6"/>
-  <text x="34" y="324" class="lb">compute  163,840 MAC × 1 cyc = 163,840 cyc</text>
-  <text x="34" y="342" class="lb" fill="#C8102E">memory  32,768 cyc (≈ 20% overhead)</text>
-  <text x="34" y="360" class="sm">measured time ≈ 3–5 ms on a 100 MHz M4</text>
-  <text x="34" y="380" class="nm">memory-bound: cycles spent waiting on SRAM, not multiplying</text>
+  <!-- cost summary left -->
+  <rect x="24" y="304" width="320" height="88" fill="#F5F5F5" stroke="#AAAAAA" stroke-width="0.7"/>
+  <text x="34" y="322" class="lb">compute  163,840 MAC x 1 cyc = 163,840 cyc</text>
+  <text x="34" y="340" class="lb">memory   32,768 cyc (~20% overhead)</text>
+  <text x="34" y="358" class="sm">measured time ~3-5 ms on a 100 MHz M4</text>
+  <text x="34" y="376" class="nm">memory-bound: cycles spent waiting on SRAM</text>
 
   <!-- divider -->
-  <line x1="370" y1="40" x2="370" y2="420" stroke="#ADADAD" stroke-width="0.75"/>
+  <line x1="370" y1="40" x2="370" y2="420" stroke="#BBBBBB" stroke-width="0.75"/>
 
   <!-- RIGHT PANEL: cache-blocked -->
-  <text x="386" y="60" class="ti">Tiled — load 64 × 64 sub-block once, reuse many times</text>
-  <text x="386" y="76" class="sm">cache-blocked on Cortex-M7 with 16 KB L1</text>
+  <text x="386" y="58" class="ti">Tiled — load 64x64 sub-block once, reuse many times</text>
+  <text x="386" y="74" class="sm">cache-blocked on Cortex-M7 with 16 KB L1</text>
 
   <!-- Matrix A tiled -->
-  <text x="386" y="100" class="sm">A  (128 × 128)  in 64 × 64 tiles</text>
-  <g>
-    <rect x="386" y="106" width="60" height="60" fill="#F5F5F5" stroke="#000000" stroke-width="1.3"/>
-    <rect x="446" y="106" width="60" height="60" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
-    <rect x="386" y="166" width="60" height="60" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
-    <rect x="446" y="166" width="60" height="60" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
-  </g>
-  <text x="416" y="140" text-anchor="middle" class="lb">in cache</text>
-  <text x="416" y="155" text-anchor="middle" class="sm">reused × many</text>
+  <text x="386" y="98" class="sm">A  (128 x 128) in 64x64 tiles</text>
+  <rect x="386" y="104" width="60" height="60" fill="#DDDDDD" stroke="#333333" stroke-width="1.3"/>
+  <rect x="446" y="104" width="60" height="60" fill="#FFFFFF" stroke="#888888" stroke-width="1"/>
+  <rect x="386" y="164" width="60" height="60" fill="#FFFFFF" stroke="#888888" stroke-width="1"/>
+  <rect x="446" y="164" width="60" height="60" fill="#FFFFFF" stroke="#888888" stroke-width="1"/>
+  <text x="416" y="138" text-anchor="middle" class="lb">in cache</text>
+  <text x="416" y="153" text-anchor="middle" class="sm">reused x many</text>
 
   <!-- times sign -->
-  <text x="520" y="172" class="ti">×</text>
+  <text x="520" y="170" class="ti">x</text>
 
-  <!-- Matrix B tiled (small) -->
-  <text x="540" y="100" class="sm">B</text>
-  <rect x="540" y="106" width="30" height="60" fill="#F5F5F5" stroke="#000000" stroke-width="1.3"/>
-  <rect x="540" y="166" width="30" height="60" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <!-- Matrix B tiled -->
+  <text x="540" y="98" class="sm">B</text>
+  <rect x="540" y="104" width="30" height="60" fill="#DDDDDD" stroke="#333333" stroke-width="1.3"/>
+  <rect x="540" y="164" width="30" height="60" fill="#FFFFFF" stroke="#888888" stroke-width="1"/>
 
   <!-- equals -->
-  <text x="584" y="172" class="ti">=</text>
+  <text x="584" y="170" class="ti">=</text>
 
   <!-- output tile -->
-  <text x="604" y="100" class="sm">C tile</text>
-  <rect x="604" y="106" width="30" height="60" fill="#F5F5F5" stroke="#000000" stroke-width="1.3"/>
-  <rect x="604" y="166" width="30" height="60" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <text x="604" y="98" class="sm">C tile</text>
+  <rect x="604" y="104" width="30" height="60" fill="#DDDDDD" stroke="#333333" stroke-width="1.3"/>
+  <rect x="604" y="164" width="30" height="60" fill="#FFFFFF" stroke="#888888" stroke-width="1"/>
 
-  <!-- annotation -->
-  <line x1="416" y1="226" x2="416" y2="252" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
-  <text x="416" y="270" text-anchor="middle" class="lb">load each tile once, use it 64 times</text>
-  <text x="416" y="286" text-anchor="middle" class="sm">reads/MAC drops from ≈ 0.20 to ≈ 0.003</text>
+  <!-- annotation arrow -->
+  <line x1="450" y1="224" x2="450" y2="250" stroke="#333333" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="450" y="268" text-anchor="middle" class="lb">load each tile once, use it 64 times</text>
+  <text x="450" y="284" text-anchor="middle" class="sm">reads/MAC drops from ~0.20 to ~0.003</text>
 
   <!-- cost summary right -->
-  <rect x="386" y="306" width="320" height="90" fill="none" stroke="#555555" stroke-width="0.6"/>
-  <text x="396" y="324" class="lb">compute  163,840 MAC × 1 cyc = 163,840 cyc</text>
-  <text x="396" y="342" class="lb">memory  ≈ 500 cyc (negligible)</text>
-  <text x="396" y="360" class="sm">measured time ≈ 1.7 ms on a 100 MHz M7</text>
-  <text x="396" y="380" class="nm">compute-bound: at last, the FPU is the bottleneck</text>
+  <rect x="386" y="304" width="310" height="88" fill="#F5F5F5" stroke="#AAAAAA" stroke-width="0.7"/>
+  <text x="396" y="322" class="lb">compute  163,840 MAC x 1 cyc = 163,840 cyc</text>
+  <text x="396" y="340" class="lb">memory   ~500 cyc (negligible)</text>
+  <text x="396" y="358" class="sm">measured time ~1.7 ms on a 100 MHz M7</text>
+  <text x="396" y="376" class="nm">compute-bound: at last, the FPU is the bottleneck</text>
 
-  <text x="360" y="430" text-anchor="middle" class="cap">Identical MAC count. Locality is the lever. Same chip family — different cache hierarchy — different result.</text>
+  <text x="360" y="442" text-anchor="middle" class="cap">Identical MAC count. Locality is the lever. Same chip family — different cache hierarchy — different result.</text>
 </svg>

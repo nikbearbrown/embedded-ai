@@ -1,48 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t06-05 d06-05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06-05 d06-05">
   <title id="t06-05">Latency-accuracy Pareto plot — three gesture-recognition variants against deadline and accuracy floor</title>
-  <desc id="d06-05">Latency on the x-axis (log) versus accuracy percentage on the y-axis. Three models A, B, and C trace a Pareto frontier. A vertical line marks the 250 ms deadline; a horizontal line marks the 88 percent accuracy floor; the feasible region in the upper-left corner is shaded.</desc>
+  <desc id="d06-05">Latency on the x-axis (log) versus accuracy percentage on the y-axis. Three models A, B, and C trace a Pareto frontier. A vertical dashed line marks the 250 ms deadline; a horizontal dashed line marks the 88 percent accuracy floor; the feasible region in the upper-left corner is shaded.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
-      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
-      .pt { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .feas { fill: #C8102E; fill-opacity: 0.08; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #333333; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #666666; }
+      .ax  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #666666; }
+      .pt  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #111111; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666666; }
     </style>
     <marker id="ar5" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
   <text x="350" y="28" text-anchor="middle" class="ti">Pareto frontier — latency vs accuracy, three gesture models on Cortex-M4 @ 100 MHz</text>
 
-  <!-- Plot area: x = 80..640 (560 wide), y = 60..360 (300 tall) -->
-  <!-- X log: 100ms (x=80) to 3000ms (x=640). log10(100)=2, log10(3000)=3.477. Span 1.477 / 560 → 379.1 px per decade. -->
-  <!-- Y linear: 80% (y=360) to 96% (y=60). 16 units across 300 px = 18.75 px per percent. -->
+  <!-- Plot area: x=80..640 (560 wide), y=60..360 (300 tall) -->
+  <!-- X log: 100ms to 3000ms. log10(100)=2, log10(3000)=3.477. Span 1.477 over 560 px = 379.1 px/decade -->
+  <!-- Y linear: 80% (y=360) to 96% (y=60). 16 units / 300 px = 18.75 px/% -->
+  <!-- Deadline 250ms: x = 80 + (log10(250)-2)*379.1 = 80+150.9 = 230.9 -->
+  <!-- 88% floor: y = 360 - 8*18.75 = 210 -->
 
-  <!-- Helper: x(ms) = 80 + (log10(ms)-2)*379.1; y(acc) = 360 - (acc-80)*18.75 -->
-  <!-- Deadline 250 ms: x = 80 + (log10(250)-2)*379.1 = 80 + 0.398*379.1 = 80 + 150.9 = 230.9 -->
-  <!-- 88% floor: y = 360 - 8*18.75 = 360 - 150 = 210 -->
+  <!-- Feasible region shading (upper-left): x<230.9, y<210 -->
+  <rect x="80" y="60" width="150.9" height="150" fill="#DDDDDD" fill-opacity="0.5"/>
+  <text x="155" y="100" text-anchor="middle" class="cap">feasible region</text>
+  <text x="155" y="114" text-anchor="middle" class="cap">(≤250 ms AND ≥88%)</text>
 
-  <!-- Feasibility band: x < 230.9 AND y < 210 (upper-left rect from x=80 to 230.9, y=60 to 210) -->
-  <rect x="80" y="60" width="150.9" height="150" class="feas"/>
-  <text x="155" y="100" text-anchor="middle" class="cap" fill="#C8102E">feasible region</text>
-  <text x="155" y="115" text-anchor="middle" class="cap" fill="#C8102E">(≤ 250 ms AND ≥ 88%)</text>
+  <!-- Light gridlines -->
+  <line x1="80" y1="60" x2="80" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="80" y1="60" x2="640" y2="60" stroke="#DDDDDD" stroke-width="0.5"/>
 
-  <!-- Gridlines (light) -->
-  <line x1="80" y1="60" x2="80" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="80" y1="60" x2="640" y2="60" stroke="#F5F5F5" stroke-width="0.5"/>
+  <!-- Axes -->
+  <line x1="80" y1="60" x2="80" y2="360" stroke="#555555" stroke-width="1"/>
+  <line x1="80" y1="360" x2="640" y2="360" stroke="#555555" stroke-width="1"/>
 
-  <!-- X ticks at 100, 200, 500, 1000, 2000 ms -->
-  <!-- x(100) = 80; x(200) = 80 + 0.301*379.1 = 80 + 114.1 = 194.1 -->
-  <!-- x(500) = 80 + 0.699*379.1 = 80 + 265.0 = 345.0 -->
-  <!-- x(1000) = 80 + 1*379.1 = 459.1 -->
-  <!-- x(2000) = 80 + 1.301*379.1 = 80 + 493.1 = 573.1 -->
-  <line x1="80" y1="360" x2="80" y2="364" stroke="#555555"/>
-  <text x="80" y="378" text-anchor="middle" class="ax">100</text>
+  <!-- X ticks: 100=80, 200=194.1, 500=345.0, 1000=459.1, 2000=573.1 -->
+  <line x1="80"    y1="360" x2="80"    y2="364" stroke="#555555"/>
+  <text x="80"    y="378" text-anchor="middle" class="ax">100</text>
   <line x1="194.1" y1="360" x2="194.1" y2="364" stroke="#555555"/>
   <text x="194.1" y="378" text-anchor="middle" class="ax">200</text>
   <line x1="345.0" y1="360" x2="345.0" y2="364" stroke="#555555"/>
@@ -53,55 +50,48 @@
   <text x="573.1" y="378" text-anchor="middle" class="ax">2000</text>
   <text x="360" y="398" text-anchor="middle" class="lb">Inference latency (ms, log scale)</text>
 
-  <!-- Y ticks at 84, 88, 92, 96 -->
-  <!-- y(84) = 360-4*18.75 = 360-75 = 285 -->
-  <!-- y(88) = 210 -->
-  <!-- y(92) = 360 - 12*18.75 = 360-225 = 135 -->
-  <!-- y(96) = 60 -->
+  <!-- Y ticks: 84%=285, 88%=210, 92%=135, 96%=60 -->
   <line x1="76" y1="285" x2="80" y2="285" stroke="#555555"/>
   <text x="72" y="289" text-anchor="end" class="ax">84</text>
   <line x1="76" y1="210" x2="80" y2="210" stroke="#555555"/>
   <text x="72" y="214" text-anchor="end" class="ax">88</text>
   <line x1="76" y1="135" x2="80" y2="135" stroke="#555555"/>
   <text x="72" y="139" text-anchor="end" class="ax">92</text>
-  <line x1="76" y1="60" x2="80" y2="60" stroke="#555555"/>
-  <text x="72" y="64" text-anchor="end" class="ax">96</text>
+  <line x1="76" y1="60"  x2="80" y2="60"  stroke="#555555"/>
+  <text x="72" y="64"  text-anchor="end" class="ax">96</text>
   <text x="30" y="210" text-anchor="middle" class="lb" transform="rotate(-90 30 210)">Accuracy (%)</text>
 
-  <!-- Axes -->
-  <line x1="80" y1="60" x2="80" y2="360" stroke="#555555" stroke-width="1"/>
-  <line x1="80" y1="360" x2="640" y2="360" stroke="#555555" stroke-width="1"/>
+  <!-- Deadline vertical dashed line at x=230.9 -->
+  <line x1="230.9" y1="60" x2="230.9" y2="360" stroke="#333333" stroke-width="1.25" stroke-dasharray="5 4"/>
+  <text x="233" y="78" class="sm">250 ms deadline</text>
 
-  <!-- Deadline vertical line at x=230.9 -->
-  <line x1="230.9" y1="60" x2="230.9" y2="360" stroke="#000000" stroke-width="1.25" stroke-dasharray="5 4"/>
-  <text x="232" y="78" class="sm">250 ms deadline</text>
+  <!-- 88% accuracy floor horizontal dashed line at y=210 -->
+  <line x1="80" y1="210" x2="640" y2="210" stroke="#333333" stroke-width="1.25" stroke-dasharray="5 4"/>
+  <text x="635" y="206" text-anchor="end" class="sm">88% accuracy floor</text>
 
-  <!-- 88% horizontal line at y=210 -->
-  <line x1="80" y1="210" x2="640" y2="210" stroke="#000000" stroke-width="1.25" stroke-dasharray="5 4"/>
-  <text x="635" y="205" text-anchor="end" class="sm">88% accuracy floor</text>
+  <!-- Pareto frontier dashed connector: C → B → A -->
+  <!-- C: 200ms, 84% → x=194.1, y=285 -->
+  <!-- B: 583ms, 89% → x=370.4, y=191.25 -->
+  <!-- A: 1333ms, 92% → x=506.4, y=135 -->
+  <path d="M 194.1 285 L 370.4 191.25 L 506.4 135" fill="none" stroke="#AAAAAA" stroke-width="1" stroke-dasharray="3 3"/>
 
-  <!-- Compute model coordinates -->
-  <!-- A: 1333 ms, 92% → x = 80 + (log10(1333)-2)*379.1 = 80 + 1.125*379.1 = 80 + 426.4 = 506.4; y = 135 -->
-  <!-- B: 583 ms, 89%  → x = 80 + (log10(583)-2)*379.1 = 80 + 0.766*379.1 = 80 + 290.4 = 370.4; y = 360 - 9*18.75 = 360 - 168.75 = 191.25 -->
-  <!-- C: 200 ms, 84%  → x = 194.1; y = 285 -->
-
-  <!-- Frontier connecting C -> B -> A -->
-  <path d="M 194.1 285 L 370.4 191.25 L 506.4 135" fill="none" stroke="#787878" stroke-width="1" stroke-dasharray="2 3"/>
-
-  <!-- Points -->
-  <circle cx="506.4" cy="135" r="6.5" fill="#000000"/>
-  <text x="517" y="129" class="pt">A — 80 M MAC, 92%</text>
+  <!-- Point A — fails deadline -->
+  <circle cx="506.4" cy="135" r="6.5" fill="#555555"/>
+  <text x="517" y="130" class="pt">A — 80 M MAC, 92%</text>
   <text x="517" y="146" class="sm">1,333 ms — fails deadline</text>
 
-  <circle cx="370.4" cy="191.25" r="6.5" fill="#000000"/>
+  <!-- Point B — fails deadline -->
+  <circle cx="370.4" cy="191.25" r="6.5" fill="#888888"/>
   <text x="382" y="186" class="pt">B — 35 M MAC, 89%</text>
-  <text x="382" y="203" class="sm">583 ms — fails deadline</text>
+  <text x="382" y="202" class="sm">583 ms — fails deadline</text>
 
-  <circle cx="194.1" cy="285" r="6.5" fill="#C8102E"/>
+  <!-- Point C — fails accuracy -->
+  <circle cx="194.1" cy="285" r="6.5" fill="#BBBBBB" stroke="#555555" stroke-width="1"/>
   <text x="206" y="280" class="pt">C — 12 M MAC, 84%</text>
-  <text x="206" y="297" class="sm">200 ms — fails accuracy</text>
+  <text x="206" y="296" class="sm">200 ms — fails accuracy floor</text>
 
   <!-- Caption -->
-  <text x="350" y="430" text-anchor="middle" class="cap">None of A, B, C is feasible on this hardware: A and B miss the deadline, C misses the accuracy floor.</text>
-  <text x="350" y="448" text-anchor="middle" class="cap">Move the frontier outward (faster MCU, NAS-tuned model) or renegotiate one of the two thresholds.</text>
+  <text x="350" y="432" text-anchor="middle" class="cap">None of A, B, C is feasible on this hardware: A and B miss the deadline, C misses the accuracy floor.</text>
+  <text x="350" y="450" text-anchor="middle" class="cap">Move the frontier outward (faster MCU, NAS-tuned model) or renegotiate one of the two thresholds.</text>
+  <text x="350" y="468" text-anchor="middle" class="cap">Figure 6-5. Pareto frontier: latency vs accuracy for three gesture-recognition model variants.</text>
 </svg>

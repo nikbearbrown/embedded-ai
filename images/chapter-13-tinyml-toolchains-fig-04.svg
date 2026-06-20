@@ -1,34 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t04 d04">
   <title id="t04">Three-stage accuracy bisection from Python source to device</title>
   <desc id="d04">A horizontal bar chart of accuracy at three pipeline stages — Python source 94.2 percent, TFLite interpreter 93.1 percent, on-device 92.8 percent — with the two deltas labelled and the four candidate root causes mapped to the gap they explain.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .delta { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #C8102E; font-style: italic; }
-      .gap-rule { stroke: #C8102E; stroke-dasharray: 4 3; fill: none; }
+      .ti    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .lb    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap   { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .delta { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #333333; font-style: italic; }
+      .gap-rule { stroke: #444444; stroke-dasharray: 4 3; fill: none; }
     </style>
     <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#C8102E"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Three-stage accuracy bisection</text>
   <text x="32" y="48" class="sm">measure the same validation set at each stage · the gap that appears first localizes the bug</text>
 
-  <!-- bar layout: bars stacked vertically, value axis horizontal 90–95% -->
-  <!-- axis x from 80 to 580 maps 90 → 95 -->
-  <!-- pixels per 0.1pp = (580-80)/(95-90)*0.1 = 10px -->
-  <!-- Source 94.2 → x ends at 80 + (94.2-90)*100 = 80 + 420 = 500 -->
-  <!-- TFLite 93.1 → 80 + 310 = 390 -->
-  <!-- Device  92.8 → 80 + 280 = 360 -->
-
   <!-- axis baseline -->
   <line x1="80" y1="320" x2="580" y2="320" stroke="#555555"/>
-  <!-- x ticks at 90, 91, 92, 93, 94, 95 -->
+  <!-- x ticks at 90..95 -->
   <g class="sm">
     <line x1="80"  y1="318" x2="80"  y2="324" stroke="#555555"/>
     <text x="80"  y="338" text-anchor="middle">90</text>
@@ -45,54 +38,52 @@
     <text x="330" y="358" text-anchor="middle">accuracy on validation set (%)</text>
   </g>
 
-  <!-- vertical gridlines at each tick -->
-  <g stroke="#ADADAD" stroke-width="0.5">
+  <!-- vertical gridlines -->
+  <g stroke="#DDDDDD" stroke-width="0.75">
     <line x1="180" y1="80" x2="180" y2="318"/>
     <line x1="280" y1="80" x2="280" y2="318"/>
     <line x1="380" y1="80" x2="380" y2="318"/>
     <line x1="480" y1="80" x2="480" y2="318"/>
   </g>
 
-  <!-- Stage 1 — Python source 94.2 -->
-  <rect x="80" y="100" width="420" height="42" fill="#000000"/>
+  <!-- Stage 1 — Python source 94.2 → bar width 420 -->
+  <rect x="80" y="100" width="420" height="42" fill="#111111"/>
   <text x="74" y="120" text-anchor="end" class="lb">Stage 1</text>
   <text x="74" y="134" text-anchor="end" class="sm">Python source model</text>
   <text x="510" y="120" class="lb">94.2 %</text>
   <text x="510" y="134" class="sm">trained model in framework</text>
 
-  <!-- Stage 2 — TFLite interpreter 93.1 -->
+  <!-- Stage 2 — TFLite interpreter 93.1 → bar width 310 -->
   <rect x="80" y="170" width="310" height="42" fill="#555555"/>
   <text x="74" y="190" text-anchor="end" class="lb">Stage 2</text>
   <text x="74" y="204" text-anchor="end" class="sm">TFLite Python interp.</text>
   <text x="400" y="190" class="lb">93.1 %</text>
   <text x="400" y="204" class="sm">post-conversion · still in Python</text>
 
-  <!-- Stage 3 — On-device 92.8 -->
-  <rect x="80" y="240" width="280" height="42" fill="#787878"/>
+  <!-- Stage 3 — On-device 92.8 → bar width 280 -->
+  <rect x="80" y="240" width="280" height="42" fill="#888888"/>
   <text x="74" y="260" text-anchor="end" class="lb">Stage 3</text>
   <text x="74" y="274" text-anchor="end" class="sm">On-device inference</text>
   <text x="370" y="260" class="lb">92.8 %</text>
   <text x="370" y="274" class="sm">measured on the MCU</text>
 
-  <!-- Delta 1 — between stage 1 and stage 2 -->
+  <!-- Delta 1 bracket -->
   <path d="M 500 88 L 500 84 L 390 84 L 390 88" class="gap-rule"/>
-  <text x="445" y="78" text-anchor="middle" class="delta">Δ 1.1 pp — conversion + optimization gap</text>
+  <text x="445" y="78" text-anchor="middle" class="delta">delta 1.1 pp — conversion + optimization gap</text>
 
-  <!-- Delta 2 — between stage 2 and stage 3 -->
+  <!-- Delta 2 bracket -->
   <path d="M 390 158 L 390 154 L 360 154 L 360 158" class="gap-rule"/>
-  <text x="375" y="148" text-anchor="middle" class="delta">Δ 0.3 pp — compile + runtime gap</text>
+  <text x="375" y="148" text-anchor="middle" class="delta">delta 0.3 pp — compile + runtime gap</text>
 
-  <!-- Root cause callouts to the right -->
-  <text x="32" y="384" class="lb">Root causes by gap:</text>
-  <g>
-    <!-- Gap 1 causes -->
-    <rect x="32" y="392" width="316" height="40" fill="none" stroke="#787878" stroke-dasharray="3 2"/>
-    <text x="40" y="406" class="sm">gap 1 (conversion + optimization):</text>
-    <text x="40" y="420" class="sm">calibration set · layer fusion · operator mismatch</text>
+  <!-- Root cause callouts -->
+  <text x="32" y="390" class="lb">Root causes by gap:</text>
+  <rect x="32" y="398" width="316" height="40" fill="none" stroke="#888888" stroke-dasharray="3 2"/>
+  <text x="40" y="412" class="sm">gap 1 (conversion + optimization):</text>
+  <text x="40" y="428" class="sm">calibration set · layer fusion · operator mismatch</text>
 
-    <!-- Gap 2 causes -->
-    <rect x="356" y="392" width="312" height="40" fill="none" stroke="#787878" stroke-dasharray="3 2"/>
-    <text x="364" y="406" class="sm">gap 2 (compile + runtime):</text>
-    <text x="364" y="420" class="sm">float-precision drift · alignment fault · kernel bug</text>
-  </g>
+  <rect x="356" y="398" width="312" height="40" fill="none" stroke="#888888" stroke-dasharray="3 2"/>
+  <text x="364" y="412" class="sm">gap 2 (compile + runtime):</text>
+  <text x="364" y="428" class="sm">float-precision drift · alignment fault · kernel bug</text>
+
+  <text x="350" y="452" text-anchor="middle" class="cap">Bisect by measuring the same validation set at each stage — the gap that appears first localizes the bug.</text>
 </svg>

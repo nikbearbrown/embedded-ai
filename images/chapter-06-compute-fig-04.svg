@@ -1,137 +1,126 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t06-04 d06-04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t06-04 d06-04">
   <title id="t06-04">SIMD lane diagram — one 32-bit register, four 8-bit MACs in parallel</title>
-  <desc id="d06-04">Scalar path on top shows four sequential single-byte multiply-add instructions across four cycles. SIMD path below shows the same four byte-MACs packed into one 32-bit instruction completing in a single cycle for a 4× throughput gain at identical clock.</desc>
+  <desc id="d06-04">Scalar path on top shows four sequential single-byte multiply-add instructions across four cycles. SIMD path below shows the same four byte-MACs packed into one 32-bit instruction completing in a single cycle for a 4x throughput gain at identical clock.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .reg { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .byte { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #000000; }
-      .cyc { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .gain { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #C8102E; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #333333; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #666666; }
+      .reg { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #333333; }
+      .byte{ font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #111111; }
+      .cyc { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666666; }
+      .gain{ font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666666; }
     </style>
     <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#FFFFFF"/>
+  <rect width="700" height="440" fill="#FFFFFF"/>
 
   <text x="350" y="28" text-anchor="middle" class="ti">SIMD is the single biggest lever — same clock, four times the work</text>
 
   <!-- TOP: Scalar path -->
-  <text x="34" y="62" class="reg">Scalar Cortex-M4 (no SIMD)</text>
-  <text x="34" y="77" class="sm">four MAC instructions, four cycles, 100 MMAC/s peak</text>
+  <text x="34" y="60" class="reg">Scalar Cortex-M4 (no SIMD)</text>
+  <text x="34" y="75" class="sm">four MAC instructions, four cycles — 100 MMAC/s peak</text>
 
-  <!-- Four cycles drawn as four boxes -->
-  <!-- Each cycle: input bytes a_i, b_i shown in tiny boxes, → arrow → result. Width 130, gap 12, start x = 40 -->
+  <!-- Four cycle boxes, each 130 wide with 12 gap, starting x=40 -->
   <g>
-    <rect x="40" y="92" width="130" height="78" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
-    <text x="105" y="106" text-anchor="middle" class="cyc">cycle 1</text>
-    <rect x="50" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="60" y="129" text-anchor="middle" class="byte">a₀</text>
-    <text x="80" y="129" text-anchor="middle" class="sm">×</text>
-    <rect x="90" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="100" y="129" text-anchor="middle" class="byte">b₀</text>
-    <text x="120" y="129" text-anchor="middle" class="sm">+=</text>
-    <rect x="135" y="115" width="28" height="20" fill="#ADADAD" stroke="#000000"/>
-    <text x="149" y="129" text-anchor="middle" class="byte">acc</text>
-    <text x="105" y="158" text-anchor="middle" class="sm">MUL + ADD</text>
+    <rect x="40" y="90" width="130" height="78" fill="#F5F5F5" stroke="#AAAAAA" stroke-width="0.75"/>
+    <text x="105" y="104" text-anchor="middle" class="cyc">cycle 1</text>
+    <rect x="50" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="60" y="127" text-anchor="middle" class="byte">a₀</text>
+    <text x="80" y="127" text-anchor="middle" class="sm">×</text>
+    <rect x="90" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="100" y="127" text-anchor="middle" class="byte">b₀</text>
+    <text x="120" y="127" text-anchor="middle" class="sm">+=</text>
+    <rect x="135" y="113" width="28" height="20" fill="#DDDDDD" stroke="#888888"/>
+    <text x="149" y="127" text-anchor="middle" class="byte">acc</text>
+    <text x="105" y="156" text-anchor="middle" class="sm">MUL + ADD</text>
   </g>
-
   <g>
-    <rect x="182" y="92" width="130" height="78" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
-    <text x="247" y="106" text-anchor="middle" class="cyc">cycle 2</text>
-    <rect x="192" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="202" y="129" text-anchor="middle" class="byte">a₁</text>
-    <text x="222" y="129" text-anchor="middle" class="sm">×</text>
-    <rect x="232" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="242" y="129" text-anchor="middle" class="byte">b₁</text>
-    <text x="262" y="129" text-anchor="middle" class="sm">+=</text>
-    <rect x="277" y="115" width="28" height="20" fill="#ADADAD" stroke="#000000"/>
-    <text x="291" y="129" text-anchor="middle" class="byte">acc</text>
-    <text x="247" y="158" text-anchor="middle" class="sm">MUL + ADD</text>
+    <rect x="182" y="90" width="130" height="78" fill="#F5F5F5" stroke="#AAAAAA" stroke-width="0.75"/>
+    <text x="247" y="104" text-anchor="middle" class="cyc">cycle 2</text>
+    <rect x="192" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="202" y="127" text-anchor="middle" class="byte">a₁</text>
+    <text x="222" y="127" text-anchor="middle" class="sm">×</text>
+    <rect x="232" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="242" y="127" text-anchor="middle" class="byte">b₁</text>
+    <text x="262" y="127" text-anchor="middle" class="sm">+=</text>
+    <rect x="277" y="113" width="28" height="20" fill="#DDDDDD" stroke="#888888"/>
+    <text x="291" y="127" text-anchor="middle" class="byte">acc</text>
+    <text x="247" y="156" text-anchor="middle" class="sm">MUL + ADD</text>
   </g>
-
   <g>
-    <rect x="324" y="92" width="130" height="78" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
-    <text x="389" y="106" text-anchor="middle" class="cyc">cycle 3</text>
-    <rect x="334" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="344" y="129" text-anchor="middle" class="byte">a₂</text>
-    <text x="364" y="129" text-anchor="middle" class="sm">×</text>
-    <rect x="374" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="384" y="129" text-anchor="middle" class="byte">b₂</text>
-    <text x="404" y="129" text-anchor="middle" class="sm">+=</text>
-    <rect x="419" y="115" width="28" height="20" fill="#ADADAD" stroke="#000000"/>
-    <text x="433" y="129" text-anchor="middle" class="byte">acc</text>
-    <text x="389" y="158" text-anchor="middle" class="sm">MUL + ADD</text>
+    <rect x="324" y="90" width="130" height="78" fill="#F5F5F5" stroke="#AAAAAA" stroke-width="0.75"/>
+    <text x="389" y="104" text-anchor="middle" class="cyc">cycle 3</text>
+    <rect x="334" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="344" y="127" text-anchor="middle" class="byte">a₂</text>
+    <text x="364" y="127" text-anchor="middle" class="sm">×</text>
+    <rect x="374" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="384" y="127" text-anchor="middle" class="byte">b₂</text>
+    <text x="404" y="127" text-anchor="middle" class="sm">+=</text>
+    <rect x="419" y="113" width="28" height="20" fill="#DDDDDD" stroke="#888888"/>
+    <text x="433" y="127" text-anchor="middle" class="byte">acc</text>
+    <text x="389" y="156" text-anchor="middle" class="sm">MUL + ADD</text>
   </g>
-
   <g>
-    <rect x="466" y="92" width="130" height="78" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
-    <text x="531" y="106" text-anchor="middle" class="cyc">cycle 4</text>
-    <rect x="476" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="486" y="129" text-anchor="middle" class="byte">a₃</text>
-    <text x="506" y="129" text-anchor="middle" class="sm">×</text>
-    <rect x="516" y="115" width="20" height="20" fill="#FFFFFF" stroke="#000000"/>
-    <text x="526" y="129" text-anchor="middle" class="byte">b₃</text>
-    <text x="546" y="129" text-anchor="middle" class="sm">+=</text>
-    <rect x="561" y="115" width="28" height="20" fill="#ADADAD" stroke="#000000"/>
-    <text x="575" y="129" text-anchor="middle" class="byte">acc</text>
-    <text x="531" y="158" text-anchor="middle" class="sm">MUL + ADD</text>
+    <rect x="466" y="90" width="130" height="78" fill="#F5F5F5" stroke="#AAAAAA" stroke-width="0.75"/>
+    <text x="531" y="104" text-anchor="middle" class="cyc">cycle 4</text>
+    <rect x="476" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="486" y="127" text-anchor="middle" class="byte">a₃</text>
+    <text x="506" y="127" text-anchor="middle" class="sm">×</text>
+    <rect x="516" y="113" width="20" height="20" fill="#FFFFFF" stroke="#888888"/>
+    <text x="526" y="127" text-anchor="middle" class="byte">b₃</text>
+    <text x="546" y="127" text-anchor="middle" class="sm">+=</text>
+    <rect x="561" y="113" width="28" height="20" fill="#DDDDDD" stroke="#888888"/>
+    <text x="575" y="127" text-anchor="middle" class="byte">acc</text>
+    <text x="531" y="156" text-anchor="middle" class="sm">MUL + ADD</text>
   </g>
+  <text x="612" y="133" class="lb">4 cycles</text>
 
-  <!-- Total label scalar -->
-  <text x="612" y="135" class="lb">4 cycles</text>
-
-  <!-- DIVIDER -->
-  <line x1="40" y1="200" x2="660" y2="200" stroke="#ADADAD" stroke-width="0.5"/>
+  <!-- Divider -->
+  <line x1="40" y1="200" x2="660" y2="200" stroke="#BBBBBB" stroke-width="0.5"/>
 
   <!-- BOTTOM: SIMD path -->
-  <text x="34" y="226" class="reg">SIMD Cortex-M4 with DSP extensions (SMLAD-style)</text>
-  <text x="34" y="241" class="sm">one packed instruction, one cycle, 400 MMAC/s peak</text>
+  <text x="34" y="224" class="reg">SIMD Cortex-M4 with DSP extensions (SMLAD-style)</text>
+  <text x="34" y="239" class="sm">one packed instruction, one cycle — 400 MMAC/s peak</text>
 
-  <!-- Single 32-bit register split into 4 lanes -->
-  <!-- Two registers Ra and Rb, each width 472 px, divided into 4 lanes of 118 -->
-  <g>
-    <!-- Register Ra label -->
-    <text x="34" y="276" class="lb">Ra (32-bit)</text>
-    <!-- Ra register split into 4 8-bit lanes -->
-    <rect x="124" y="260" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="183" y="278" text-anchor="middle" class="byte">a₀</text>
-    <rect x="242" y="260" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="301" y="278" text-anchor="middle" class="byte">a₁</text>
-    <rect x="360" y="260" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="419" y="278" text-anchor="middle" class="byte">a₂</text>
-    <rect x="478" y="260" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="537" y="278" text-anchor="middle" class="byte">a₃</text>
-    <text x="617" y="278" class="sm">8 bits each</text>
-  </g>
+  <!-- Register Ra: 4 lanes of 8-bit -->
+  <text x="34" y="274" class="lb">Ra (32-bit)</text>
+  <rect x="124" y="258" width="118" height="28" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <text x="183" y="276" text-anchor="middle" class="byte">a₀</text>
+  <rect x="242" y="258" width="118" height="28" fill="#DDDDDD" stroke="#555555" stroke-width="1"/>
+  <text x="301" y="276" text-anchor="middle" class="byte">a₁</text>
+  <rect x="360" y="258" width="118" height="28" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <text x="419" y="276" text-anchor="middle" class="byte">a₂</text>
+  <rect x="478" y="258" width="118" height="28" fill="#DDDDDD" stroke="#555555" stroke-width="1"/>
+  <text x="537" y="276" text-anchor="middle" class="byte">a₃</text>
+  <text x="617" y="276" class="sm">8 bits each</text>
 
-  <g>
-    <text x="34" y="316" class="lb">Rb (32-bit)</text>
-    <rect x="124" y="300" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="183" y="318" text-anchor="middle" class="byte">b₀</text>
-    <rect x="242" y="300" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="301" y="318" text-anchor="middle" class="byte">b₁</text>
-    <rect x="360" y="300" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="419" y="318" text-anchor="middle" class="byte">b₂</text>
-    <rect x="478" y="300" width="118" height="28" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-    <text x="537" y="318" text-anchor="middle" class="byte">b₃</text>
-  </g>
+  <!-- Register Rb: 4 lanes of 8-bit -->
+  <text x="34" y="314" class="lb">Rb (32-bit)</text>
+  <rect x="124" y="298" width="118" height="28" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <text x="183" y="316" text-anchor="middle" class="byte">b₀</text>
+  <rect x="242" y="298" width="118" height="28" fill="#DDDDDD" stroke="#555555" stroke-width="1"/>
+  <text x="301" y="316" text-anchor="middle" class="byte">b₁</text>
+  <rect x="360" y="298" width="118" height="28" fill="#FFFFFF" stroke="#555555" stroke-width="1"/>
+  <text x="419" y="316" text-anchor="middle" class="byte">b₂</text>
+  <rect x="478" y="298" width="118" height="28" fill="#DDDDDD" stroke="#555555" stroke-width="1"/>
+  <text x="537" y="316" text-anchor="middle" class="byte">b₃</text>
 
-  <!-- Arrows from each lane pair down to accumulator -->
-  <path d="M 183 330 L 183 352" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
-  <path d="M 301 330 L 301 352" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
-  <path d="M 419 330 L 419 352" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
-  <path d="M 537 330 L 537 352" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
+  <!-- Down arrows from each lane to accumulator -->
+  <path d="M 183 328 L 183 350" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ar4)"/>
+  <path d="M 301 328 L 301 350" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ar4)"/>
+  <path d="M 419 328 L 419 350" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ar4)"/>
+  <path d="M 537 328 L 537 350" fill="none" stroke="#555555" stroke-width="1" marker-end="url(#ar4)"/>
 
-  <!-- Accumulator (single 32-bit result) -->
-  <rect x="124" y="354" width="472" height="28" fill="#000000"/>
-  <text x="360" y="372" text-anchor="middle" class="byte" fill="#FFFFFF">acc += a₀·b₀ + a₁·b₁ + a₂·b₂ + a₃·b₃   (one SMLAD-style instruction)</text>
-  <text x="617" y="372" class="sm">1 cycle</text>
+  <!-- Accumulator bar -->
+  <rect x="124" y="352" width="472" height="28" fill="#333333"/>
+  <text x="360" y="370" text-anchor="middle" font-family="Lato, 'Helvetica Neue', Arial, sans-serif" font-size="10px" fill="#FFFFFF">acc += a₀·b₀ + a₁·b₁ + a₂·b₂ + a₃·b₃   (one SMLAD-style instruction)</text>
+  <text x="617" y="370" class="sm">1 cycle</text>
 
-  <!-- 4× gain badge -->
+  <!-- Gain label -->
   <text x="350" y="408" text-anchor="middle" class="gain">4× throughput at identical clock</text>
+  <text x="350" y="426" text-anchor="middle" class="cap">Figure 6-4. SIMD packs four 8-bit MACs into one 32-bit instruction — same clock, 4× the work.</text>
 </svg>

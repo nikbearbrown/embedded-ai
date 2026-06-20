@@ -1,76 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t10f4 d10f4">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t10f4 d10f4">
   <title id="t10f4">AI failure-mode matrix — six failure modes against the ASIL D threshold of less than ten to the minus eight per hour</title>
-  <desc id="d10f4">A six-row matrix where rows are AI failure modes (false negative, false positive, latency violation, adversarial misclassification, distribution shift, numerical instability) and columns are typical probability, severity, ASIL D acceptability, and the required mitigation. Cells are shaded in warm grayscale to encode whether the failure mode is acceptable for ASIL D unmitigated.</desc>
+  <desc id="d10f4">A six-row matrix where rows are AI failure modes and columns are typical probability, severity, ASIL D acceptability, and required mitigation. Cells are shaded in grayscale to encode whether the failure mode is acceptable for ASIL D unmitigated.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .eb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; letter-spacing: 0.5px; fill: #555555; }
-      .hdr { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #000000; }
+      .ti { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .lb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; }
+      .eb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px; letter-spacing: 0.5px; fill: #555555; }
+      .hdr { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #111111; }
     </style>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
-  <text x="32" y="30" class="ti">AI failure modes against the ASIL D bar — &lt;10⁻⁸ failures per hour, unmitigated, is required</text>
-  <text x="32" y="48" class="sm">Darker cells fail the bar. Lighter cells either meet it or are economic rather than safety failures. None of these are passable unmitigated.</text>
+  <text x="32" y="30" class="ti">AI failure modes against the ASIL D bar — &lt;10⁻⁸ failures per hour, unmitigated</text>
+  <text x="32" y="48" class="sm">Darker cells fail the bar. Lighter cells are economic rather than safety failures. None are passable unmitigated.</text>
 
-  <!-- Column headers row at y=70 to 90; col widths -->
-  <!-- Cols: failure mode (x=32, w=176), probability (x=210, w=104), severity (x=316, w=100), ASIL D OK (x=418, w=88), mitigation (x=508, w=160) -->
-  <rect x="32" y="68" width="636" height="24" fill="#F5F5F5" stroke="#787878"/>
+  <!-- Column headers -->
+  <rect x="32" y="68" width="636" height="24" fill="#F5F5F5" stroke="#888888"/>
   <text x="40"  y="84" class="hdr">FAILURE MODE</text>
   <text x="218" y="84" class="hdr">TYPICAL PROBABILITY</text>
   <text x="324" y="84" class="hdr">SEVERITY</text>
   <text x="426" y="84" class="hdr">ASIL D OK?</text>
   <text x="516" y="84" class="hdr">REQUIRED MITIGATION</text>
 
-  <!-- Row 1: false negative — fails badly (very dark) -->
+  <!-- Row 1: false negative -->
   <g>
-    <rect x="32" y="92" width="178" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
-    <rect x="32" y="92" width="6" height="48" fill="#000000"/>
+    <rect x="32" y="92" width="178" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <rect x="32" y="92" width="6" height="48" fill="#111111"/>
     <text x="48" y="110" class="lb">False negative</text>
     <text x="48" y="124" class="sm">pedestrian detector misses</text>
     <text x="48" y="136" class="sm">pedestrian — no braking</text>
 
-    <rect x="210" y="92" width="106" height="48" fill="#000000" stroke="#000000"/>
+    <rect x="210" y="92" width="106" height="48" fill="#111111" stroke="#111111"/>
     <text x="263" y="118" text-anchor="middle" class="lb" fill="#FFFFFF">~10⁻²</text>
-    <text x="263" y="132" text-anchor="middle" class="sm" fill="#ADADAD">10⁶× above bar</text>
+    <text x="263" y="132" text-anchor="middle" class="sm" fill="#BBBBBB">10⁶× above bar</text>
 
-    <rect x="316" y="92" width="102" height="48" fill="#555555" stroke="#555555"/>
+    <rect x="316" y="92" width="102" height="48" fill="#333333" stroke="#333333"/>
     <text x="367" y="118" text-anchor="middle" class="lb" fill="#FFFFFF">catastrophic</text>
-    <text x="367" y="132" text-anchor="middle" class="sm" fill="#ADADAD">life-critical</text>
+    <text x="367" y="132" text-anchor="middle" class="sm" fill="#BBBBBB">life-critical</text>
 
-    <rect x="418" y="92" width="90" height="48" fill="#000000" stroke="#000000"/>
+    <rect x="418" y="92" width="90" height="48" fill="#111111" stroke="#111111"/>
     <text x="463" y="122" text-anchor="middle" class="nm" fill="#FFFFFF">NO</text>
 
-    <rect x="508" y="92" width="160" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
+    <rect x="508" y="92" width="160" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
     <text x="516" y="110" class="sm">redundant voting +</text>
     <text x="516" y="122" class="sm">hierarchical fallback</text>
     <text x="516" y="134" class="sm">on independent sensor</text>
   </g>
 
-  <!-- Row 2: false positive — economic, not safety -->
+  <!-- Row 2: false positive -->
   <g>
-    <rect x="32" y="140" width="178" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
-    <rect x="32" y="140" width="6" height="48" fill="#787878"/>
+    <rect x="32" y="140" width="178" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <rect x="32" y="140" width="6" height="48" fill="#888888"/>
     <text x="48" y="158" class="lb">False positive</text>
-    <text x="48" y="172" class="sm">detector flags healthy</text>
-    <text x="48" y="184" class="sm">motor — unnecessary stop</text>
+    <text x="48" y="172" class="sm">flags healthy motor —</text>
+    <text x="48" y="184" class="sm">unnecessary stop</text>
 
-    <rect x="210" y="140" width="106" height="48" fill="#ADADAD" stroke="#787878"/>
+    <rect x="210" y="140" width="106" height="48" fill="#AAAAAA" stroke="#888888"/>
     <text x="263" y="166" text-anchor="middle" class="lb">~10⁻³</text>
     <text x="263" y="180" text-anchor="middle" class="sm">not a safety bar</text>
 
-    <rect x="316" y="140" width="102" height="48" fill="#ADADAD" stroke="#787878"/>
+    <rect x="316" y="140" width="102" height="48" fill="#AAAAAA" stroke="#888888"/>
     <text x="367" y="166" text-anchor="middle" class="lb">economic</text>
     <text x="367" y="180" text-anchor="middle" class="sm">production loss</text>
 
-    <rect x="418" y="140" width="90" height="48" fill="#F5F5F5" stroke="#787878"/>
-    <text x="463" y="170" text-anchor="middle" class="nm">N/A</text>
+    <rect x="418" y="140" width="90" height="48" fill="#F5F5F5" stroke="#888888"/>
+    <text x="463" y="170" text-anchor="middle" class="nm" fill="#111111">N/A</text>
 
-    <rect x="508" y="140" width="160" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
+    <rect x="508" y="140" width="160" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
     <text x="516" y="158" class="sm">confidence gating;</text>
     <text x="516" y="170" class="sm">tune threshold</text>
     <text x="516" y="182" class="sm">against business cost</text>
@@ -78,24 +77,24 @@
 
   <!-- Row 3: latency violation -->
   <g>
-    <rect x="32" y="188" width="178" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
-    <rect x="32" y="188" width="6" height="48" fill="#000000"/>
+    <rect x="32" y="188" width="178" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <rect x="32" y="188" width="6" height="48" fill="#111111"/>
     <text x="48" y="206" class="lb">Latency violation</text>
     <text x="48" y="220" class="sm">correct output, too late —</text>
     <text x="48" y="232" class="sm">obstacle at 5 m, decision at 2 m</text>
 
-    <rect x="210" y="188" width="106" height="48" fill="#000000" stroke="#000000"/>
+    <rect x="210" y="188" width="106" height="48" fill="#111111" stroke="#111111"/>
     <text x="263" y="214" text-anchor="middle" class="lb" fill="#FFFFFF">depends on WCET</text>
-    <text x="263" y="228" text-anchor="middle" class="sm" fill="#ADADAD">often unbounded</text>
+    <text x="263" y="228" text-anchor="middle" class="sm" fill="#BBBBBB">often unbounded</text>
 
-    <rect x="316" y="188" width="102" height="48" fill="#555555" stroke="#555555"/>
+    <rect x="316" y="188" width="102" height="48" fill="#333333" stroke="#333333"/>
     <text x="367" y="214" text-anchor="middle" class="lb" fill="#FFFFFF">catastrophic</text>
-    <text x="367" y="228" text-anchor="middle" class="sm" fill="#ADADAD">same as no output</text>
+    <text x="367" y="228" text-anchor="middle" class="sm" fill="#BBBBBB">same as no output</text>
 
-    <rect x="418" y="188" width="90" height="48" fill="#000000" stroke="#000000"/>
+    <rect x="418" y="188" width="90" height="48" fill="#111111" stroke="#111111"/>
     <text x="463" y="218" text-anchor="middle" class="nm" fill="#FFFFFF">NO</text>
 
-    <rect x="508" y="188" width="160" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
+    <rect x="508" y="188" width="160" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
     <text x="516" y="206" class="sm">bounded execution +</text>
     <text x="516" y="218" class="sm">advisory pattern;</text>
     <text x="516" y="230" class="sm">remove AI from critical path</text>
@@ -103,24 +102,24 @@
 
   <!-- Row 4: adversarial -->
   <g>
-    <rect x="32" y="236" width="178" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
-    <rect x="32" y="236" width="6" height="48" fill="#000000"/>
+    <rect x="32" y="236" width="178" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <rect x="32" y="236" width="6" height="48" fill="#111111"/>
     <text x="48" y="254" class="lb">Adversarial misclassification</text>
     <text x="48" y="268" class="sm">stop sign with stickers</text>
     <text x="48" y="280" class="sm">reads as speed limit</text>
 
     <rect x="210" y="236" width="106" height="48" fill="#555555" stroke="#555555"/>
     <text x="263" y="262" text-anchor="middle" class="lb" fill="#FFFFFF">low in field</text>
-    <text x="263" y="276" text-anchor="middle" class="sm" fill="#ADADAD">unbounded in attack</text>
+    <text x="263" y="276" text-anchor="middle" class="sm" fill="#BBBBBB">unbounded in attack</text>
 
-    <rect x="316" y="236" width="102" height="48" fill="#555555" stroke="#555555"/>
+    <rect x="316" y="236" width="102" height="48" fill="#333333" stroke="#333333"/>
     <text x="367" y="262" text-anchor="middle" class="lb" fill="#FFFFFF">catastrophic</text>
-    <text x="367" y="276" text-anchor="middle" class="sm" fill="#ADADAD">targeted harm</text>
+    <text x="367" y="276" text-anchor="middle" class="sm" fill="#BBBBBB">targeted harm</text>
 
-    <rect x="418" y="236" width="90" height="48" fill="#000000" stroke="#000000"/>
+    <rect x="418" y="236" width="90" height="48" fill="#111111" stroke="#111111"/>
     <text x="463" y="266" text-anchor="middle" class="nm" fill="#FFFFFF">NO</text>
 
-    <rect x="508" y="236" width="160" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
+    <rect x="508" y="236" width="160" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
     <text x="516" y="254" class="sm">redundant voting with</text>
     <text x="516" y="266" class="sm">diverse architectures;</text>
     <text x="516" y="278" class="sm">sensor cross-check</text>
@@ -128,24 +127,24 @@
 
   <!-- Row 5: distribution shift -->
   <g>
-    <rect x="32" y="284" width="178" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
-    <rect x="32" y="284" width="6" height="48" fill="#000000"/>
+    <rect x="32" y="284" width="178" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <rect x="32" y="284" width="6" height="48" fill="#111111"/>
     <text x="48" y="302" class="lb">Distribution shift</text>
     <text x="48" y="316" class="sm">trained on adults; misses</text>
     <text x="48" y="328" class="sm">children, wheelchair users</text>
 
     <rect x="210" y="284" width="106" height="48" fill="#555555" stroke="#555555"/>
     <text x="263" y="310" text-anchor="middle" class="lb" fill="#FFFFFF">unknown</text>
-    <text x="263" y="324" text-anchor="middle" class="sm" fill="#ADADAD">cannot prove completeness</text>
+    <text x="263" y="324" text-anchor="middle" class="sm" fill="#BBBBBB">cannot prove completeness</text>
 
-    <rect x="316" y="284" width="102" height="48" fill="#555555" stroke="#555555"/>
+    <rect x="316" y="284" width="102" height="48" fill="#333333" stroke="#333333"/>
     <text x="367" y="310" text-anchor="middle" class="lb" fill="#FFFFFF">catastrophic</text>
-    <text x="367" y="324" text-anchor="middle" class="sm" fill="#ADADAD">silent failure</text>
+    <text x="367" y="324" text-anchor="middle" class="sm" fill="#BBBBBB">silent failure</text>
 
-    <rect x="418" y="284" width="90" height="48" fill="#000000" stroke="#000000"/>
+    <rect x="418" y="284" width="90" height="48" fill="#111111" stroke="#111111"/>
     <text x="463" y="314" text-anchor="middle" class="nm" fill="#FFFFFF">NO</text>
 
-    <rect x="508" y="284" width="160" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
+    <rect x="508" y="284" width="160" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
     <text x="516" y="302" class="sm">SOTIF / ISO/PAS 21448</text>
     <text x="516" y="314" class="sm">out-of-distribution monitor;</text>
     <text x="516" y="326" class="sm">conservative fallback</text>
@@ -153,24 +152,24 @@
 
   <!-- Row 6: numerical instability -->
   <g>
-    <rect x="32" y="332" width="178" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
-    <rect x="32" y="332" width="6" height="48" fill="#555555"/>
+    <rect x="32" y="332" width="178" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <rect x="32" y="332" width="6" height="48" fill="#666666"/>
     <text x="48" y="350" class="lb">Numerical instability</text>
     <text x="48" y="364" class="sm">quantization drifts; predicts</text>
     <text x="48" y="376" class="sm">−5% when truth is +5%</text>
 
-    <rect x="210" y="332" width="106" height="48" fill="#787878" stroke="#555555"/>
+    <rect x="210" y="332" width="106" height="48" fill="#888888" stroke="#666666"/>
     <text x="263" y="358" text-anchor="middle" class="lb" fill="#FFFFFF">10⁻⁴ to 10⁻²</text>
-    <text x="263" y="372" text-anchor="middle" class="sm" fill="#ADADAD">target-dependent</text>
+    <text x="263" y="372" text-anchor="middle" class="sm" fill="#DDDDDD">target-dependent</text>
 
-    <rect x="316" y="332" width="102" height="48" fill="#787878" stroke="#555555"/>
+    <rect x="316" y="332" width="102" height="48" fill="#888888" stroke="#666666"/>
     <text x="367" y="358" text-anchor="middle" class="lb" fill="#FFFFFF">depends on app</text>
-    <text x="367" y="372" text-anchor="middle" class="sm" fill="#ADADAD">moderate to high</text>
+    <text x="367" y="372" text-anchor="middle" class="sm" fill="#DDDDDD">moderate to high</text>
 
-    <rect x="418" y="332" width="90" height="48" fill="#555555" stroke="#555555"/>
+    <rect x="418" y="332" width="90" height="48" fill="#666666" stroke="#666666"/>
     <text x="463" y="362" text-anchor="middle" class="nm" fill="#FFFFFF">RARELY</text>
 
-    <rect x="508" y="332" width="160" height="48" fill="#FFFFFF" stroke="#ADADAD"/>
+    <rect x="508" y="332" width="160" height="48" fill="#FFFFFF" stroke="#BBBBBB"/>
     <text x="516" y="350" class="sm">post-training validation;</text>
     <text x="516" y="362" class="sm">range clamps; track</text>
     <text x="516" y="374" class="sm">accumulator widening</text>
@@ -178,14 +177,14 @@
 
   <!-- Legend strip -->
   <text x="32" y="402" class="eb">SHADING</text>
-  <rect x="80" y="394" width="14" height="10" fill="#000000"/>
+  <rect x="80" y="394" width="14" height="10" fill="#111111"/>
   <text x="98" y="403" class="sm">fails ASIL D unmitigated</text>
-  <rect x="220" y="394" width="14" height="10" fill="#555555"/>
-  <text x="238" y="403" class="sm">catastrophic when triggered</text>
-  <rect x="380" y="394" width="14" height="10" fill="#787878"/>
-  <text x="398" y="403" class="sm">moderate / app-dependent</text>
-  <rect x="540" y="394" width="14" height="10" fill="#ADADAD"/>
-  <text x="558" y="403" class="sm">economic, not safety</text>
+  <rect x="230" y="394" width="14" height="10" fill="#444444"/>
+  <text x="248" y="403" class="sm">catastrophic when triggered</text>
+  <rect x="398" y="394" width="14" height="10" fill="#888888"/>
+  <text x="416" y="403" class="sm">moderate / app-dependent</text>
+  <rect x="558" y="394" width="14" height="10" fill="#AAAAAA"/>
+  <text x="576" y="403" class="sm">economic, not safety</text>
 
-  <text x="350" y="438" text-anchor="middle" class="cap">Probability times severity has to land below 10⁻⁸/hr for ASIL D. Five of six rows do not, and AI is the source. Mitigations bridge the gap, not the model.</text>
+  <text x="350" y="460" text-anchor="middle" class="cap">Probability times severity must land below 10⁻⁸/hr for ASIL D. Five of six rows do not, and AI is the source. Mitigations bridge the gap, not the model.</text>
 </svg>

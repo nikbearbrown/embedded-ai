@@ -1,123 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" role="img" aria-labelledby="t05 d05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="t05 d05">
   <title id="t05">MobileNetV2 split-inference — activation size shrinks before bandwidth has to lift it</title>
-  <desc id="d05">A horizontal stack of MobileNetV2 layer blocks with activation tensor sizes annotated below each block. A dashed split-cut line between block 6 and block 7 separates the device side from the cloud side. Bandwidth arrows mark what crosses the cut.</desc>
+  <desc id="d05">A horizontal stack of MobileNetV2 layer blocks with activation tensor sizes annotated below each block. A dashed split-cut line between block 6 and block 7 separates the device side from the cloud side.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .h2 { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .badge { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
+      .ti    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .lb    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #111111; }
+      .h2    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+      .sm    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap   { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .badge { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
     </style>
     <marker id="ar5" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
-    </marker>
-    <marker id="ar5Red" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#C8102E"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="760" height="440" fill="#FFFFFF"/>
+  <rect width="760" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">Split inference — cut where the activation is small, not where the model is half</text>
-  <text x="32" y="50" class="nm">MobileNetV2, 224×224×3 input, int8 activations. blocks 1–6 device, 7–13 + head cloud.</text>
+  <text x="32" y="50" class="nm">MobileNetV2, 224×224×3 input, int8 activations. Blocks 1–6 on device, 7–13 + head on cloud.</text>
 
-  <!-- DEVICE side label (left) -->
-  <rect x="32" y="80" width="356" height="18" fill="#000000"/>
-  <text x="40" y="93" class="badge">DEVICE — ESP32-S3, blocks 1 to 6 · 30 M MACs · 180 ms</text>
-  <!-- CLOUD side label (right) -->
-  <rect x="404" y="80" width="324" height="18" fill="#555555"/>
-  <text x="412" y="93" class="badge">CLOUD — server, blocks 7 to 13 + head · 20 M MACs · 20 ms</text>
+  <!-- DEVICE side label -->
+  <rect x="32" y="80" width="318" height="18" fill="#111111"/>
+  <text x="40" y="93" class="badge">DEVICE — ESP32-S3 · blocks 1–6 · 30 M MACs · 180 ms</text>
 
-  <!-- Layer blocks. Heights encode activation tensor size (relative). Sizes (KB int8):
-       Input 150, Conv1 100, Block 3 19, Block 6 8, Block 13 4, Head 4
-       Use a sqrt or log scale would compress too much; use sqrt with floor for visibility.
-       Bar heights: H = 20 + sqrt(size) * 8   (so 150→118, 100→100, 19→55, 8→43, 4→36)
-       Compute: 150 → 20+8*12.247=117.97; 100→20+8*10=100; 19→20+8*4.36=54.85; 8→20+8*2.828=42.6; 4→20+8*2=36
-       y bottom = 290; y top = 290 - H. Block widths 52, gap 12. x starts 40.
-       Positions: [40, 104, 168, 232, 296, 360, 416 cloud, 480, 544, 608, 672]
-       Use 6 device blocks (Input/Conv1, B1, B3, B6 split-cut after block 6) + cloud blocks (B7, B10, B13, head). Simpler: 6 boxes device side. -->
+  <!-- CLOUD side label -->
+  <rect x="366" y="80" width="362" height="18" fill="#555555"/>
+  <text x="374" y="93" class="badge">CLOUD — server · blocks 7–13 + head · 20 M MACs · 20 ms</text>
 
-  <!-- DEVICE BLOCK ROW -->
-  <!-- Input (150 KB) -->
-  <rect x="40"  y="172" width="52" height="118" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-  <text x="66" y="195" text-anchor="middle" class="h2">Input</text>
-  <text x="66" y="210" text-anchor="middle" class="sm">224×224×3</text>
-  <text x="66" y="225" text-anchor="middle" class="sm">RGB pixels</text>
-  <text x="66" y="282" text-anchor="middle" class="sm">150 KB</text>
+  <!-- DEVICE blocks (bar height encodes activation size via sqrt scale, bottom at y=290) -->
+  <!-- Input 150 KB → H=118, y=172 -->
+  <rect x="40"  y="172" width="52" height="118" fill="#F5F5F5" stroke="#111111" stroke-width="1.5"/>
+  <text x="66"  y="193" text-anchor="middle" class="h2">Input</text>
+  <text x="66"  y="208" text-anchor="middle" class="sm">224×224×3</text>
+  <text x="66"  y="282" text-anchor="middle" class="sm">150 KB</text>
 
-  <!-- Conv1 (100 KB) -->
-  <rect x="104" y="190" width="52" height="100" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-  <text x="130" y="213" text-anchor="middle" class="h2">Conv1</text>
-  <text x="130" y="228" text-anchor="middle" class="sm">112² × 32</text>
+  <!-- Conv1 100 KB → H=100, y=190 -->
+  <rect x="104" y="190" width="52" height="100" fill="#F5F5F5" stroke="#111111" stroke-width="1.5"/>
+  <text x="130" y="211" text-anchor="middle" class="h2">Conv1</text>
+  <text x="130" y="225" text-anchor="middle" class="sm">112²×32</text>
   <text x="130" y="282" text-anchor="middle" class="sm">100 KB</text>
 
-  <!-- Block 3 (19 KB) -->
-  <rect x="168" y="235.15" width="52" height="54.85" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-  <text x="194" y="252" text-anchor="middle" class="h2">Block 3</text>
-  <text x="194" y="266" text-anchor="middle" class="sm">28² × 96</text>
+  <!-- Block 3: 19 KB → H=55, y=235 -->
+  <rect x="168" y="235" width="52" height="55" fill="#F5F5F5" stroke="#333333" stroke-width="1.5"/>
+  <text x="194" y="253" text-anchor="middle" class="h2">Block 3</text>
+  <text x="194" y="267" text-anchor="middle" class="sm">28²×96</text>
   <text x="194" y="282" text-anchor="middle" class="sm">19 KB</text>
 
-  <!-- Block 6 (8 KB) — the split point -->
-  <rect x="232" y="247.4" width="52" height="42.6" fill="#FFFFFF" stroke="#C8102E" stroke-width="2"/>
-  <text x="258" y="262" text-anchor="middle" class="h2" fill="#C8102E">Block 6</text>
-  <text x="258" y="275" text-anchor="middle" class="sm" fill="#C8102E">14² × 160</text>
-  <text x="258" y="287" text-anchor="middle" class="sm" fill="#C8102E">8 KB</text>
+  <!-- Block 6: 8 KB → H=43, y=247 — split point, darker border -->
+  <rect x="232" y="247" width="52" height="43" fill="#DDDDDD" stroke="#111111" stroke-width="2"/>
+  <text x="258" y="263" text-anchor="middle" class="h2">Block 6</text>
+  <text x="258" y="276" text-anchor="middle" class="sm">14²×160</text>
+  <text x="258" y="288" text-anchor="middle" class="sm">8 KB ←cut</text>
 
-  <!-- The split-cut line -->
-  <line x1="296" y1="110" x2="296" y2="330" stroke="#C8102E" stroke-width="1.5" stroke-dasharray="6 4"/>
-  <text x="296" y="124" text-anchor="middle" class="lb" fill="#C8102E">split cut</text>
+  <!-- Split-cut dashed line -->
+  <line x1="296" y1="108" x2="296" y2="330" stroke="#333333" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="296" y="122" text-anchor="middle" class="lb">split cut</text>
 
-  <!-- CLOUD BLOCK ROW -->
-  <!-- Block 10 (≈6 KB → height 39.6) — kept for visual stepdown -->
-  <rect x="320" y="254" width="52" height="36" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
-  <text x="346" y="270" text-anchor="middle" class="h2">Block 10</text>
-  <text x="346" y="282" text-anchor="middle" class="sm">≈ 6 KB</text>
+  <!-- CLOUD blocks -->
+  <!-- Block 10: ~6 KB → H=39, y=251 -->
+  <rect x="320" y="251" width="52" height="39" fill="#F5F5F5" stroke="#555555" stroke-width="1.5"/>
+  <text x="346" y="267" text-anchor="middle" class="h2">Block 10</text>
+  <text x="346" y="282" text-anchor="middle" class="sm">~6 KB</text>
 
-  <!-- Block 13 (4 KB) -->
-  <rect x="384" y="254" width="52" height="36" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+  <!-- Block 13: 4 KB → H=36, y=254 -->
+  <rect x="384" y="254" width="52" height="36" fill="#F5F5F5" stroke="#555555" stroke-width="1.5"/>
   <text x="410" y="270" text-anchor="middle" class="h2">Block 13</text>
   <text x="410" y="282" text-anchor="middle" class="sm">4 KB</text>
 
-  <!-- Head (4 KB - logits) -->
-  <rect x="448" y="254" width="52" height="36" fill="#FFFFFF" stroke="#555555" stroke-width="1.5"/>
+  <!-- Head: logits -->
+  <rect x="448" y="254" width="52" height="36" fill="#F5F5F5" stroke="#555555" stroke-width="1.5"/>
   <text x="474" y="270" text-anchor="middle" class="h2">Head</text>
   <text x="474" y="282" text-anchor="middle" class="sm">1 000 cls</text>
 
-  <!-- flow arrows -->
-  <g stroke="#000000" stroke-width="1" fill="none">
-    <line x1="92"  y1="231" x2="103" y2="231" marker-end="url(#ar5)"/>
-    <line x1="156" y1="262" x2="167" y2="262" marker-end="url(#ar5)"/>
-    <line x1="220" y1="268" x2="231" y2="268" marker-end="url(#ar5)"/>
-    <!-- across cut: red, labeled with 8 KB -->
-    <line x1="284" y1="268" x2="319" y2="271" stroke="#C8102E" stroke-width="1.5" marker-end="url(#ar5Red)"/>
-    <line x1="372" y1="271" x2="383" y2="271" marker-end="url(#ar5)"/>
-    <line x1="436" y1="271" x2="447" y2="271" marker-end="url(#ar5)"/>
-  </g>
+  <!-- Flow arrows -->
+  <line x1="92"  y1="231" x2="103" y2="231" stroke="#333333" stroke-width="1" marker-end="url(#ar5)"/>
+  <line x1="156" y1="262" x2="167" y2="262" stroke="#333333" stroke-width="1" marker-end="url(#ar5)"/>
+  <line x1="220" y1="268" x2="231" y2="268" stroke="#333333" stroke-width="1" marker-end="url(#ar5)"/>
+  <!-- across cut -->
+  <line x1="284" y1="268" x2="319" y2="268" stroke="#111111" stroke-width="1.5" marker-end="url(#ar5)"/>
+  <line x1="372" y1="271" x2="383" y2="271" stroke="#333333" stroke-width="1" marker-end="url(#ar5)"/>
+  <line x1="436" y1="271" x2="447" y2="271" stroke="#333333" stroke-width="1" marker-end="url(#ar5)"/>
 
-  <!-- bandwidth callouts around the split cut -->
-  <text x="302" y="156" class="lb" fill="#C8102E">↑ uplink: 8 KB int8 activations</text>
-  <text x="302" y="172" class="sm" fill="#C8102E">96 ms at 1 Mbps WiFi · 6.4 s at 10 kbps LoRaWAN</text>
+  <!-- Bandwidth callouts -->
+  <text x="302" y="148" class="lb">↑ uplink: 8 KB int8 activations</text>
+  <text x="302" y="163" class="sm">96 ms at 1 Mbps WiFi · 6.4 s at 10 kbps LoRaWAN</text>
+  <text x="302" y="182" class="lb">↓ downlink: 4 KB logits</text>
+  <text x="302" y="197" class="sm">32 ms at 1 Mbps WiFi</text>
 
-  <text x="302" y="190" class="lb" fill="#C8102E">↓ downlink: 4 KB logits</text>
-  <text x="302" y="206" class="sm" fill="#C8102E">32 ms at 1 Mbps WiFi</text>
+  <!-- Latency comparison strip -->
+  <text x="32" y="342" class="lb">End-to-end latency comparison</text>
+  <rect x="40"  y="354" width="220" height="20" fill="#777777"/>
+  <text x="50"  y="368" class="badge">FULL ON-DEVICE · 450 ms</text>
+  <rect x="40"  y="378" width="158" height="20" fill="#111111"/>
+  <text x="50"  y="392" class="badge">SPLIT · 328 ms · 1.4× faster</text>
+  <rect x="40"  y="402" width="500" height="20" fill="#BBBBBB"/>
+  <text x="50"  y="416" class="badge" fill="#111111">FULL CLOUD (raw 150 KB up) · 1 200 ms · 3.7× slower</text>
 
-  <!-- comparison strip across the bottom -->
-  <text x="32" y="346" class="lb">End-to-end latency comparison</text>
-  <g>
-    <!-- full on-device -->
-    <rect x="40"  y="358" width="220" height="20" fill="#787878"/>
-    <text x="50"  y="372" class="badge">FULL ON-DEVICE · 450 ms</text>
-    <!-- split -->
-    <rect x="40"  y="382" width="158" height="20" fill="#000000"/>
-    <text x="50"  y="396" class="badge">SPLIT · 328 ms · 1.4× faster</text>
-    <!-- full cloud -->
-    <rect x="40"  y="406" width="500" height="20" fill="#ADADAD"/>
-    <text x="50"  y="420" class="badge" fill="#000000">FULL CLOUD (raw 150 KB up) · 1 200 ms · 3.7× slower</text>
-  </g>
+  <text x="270" y="368" class="sm">device runs full model</text>
+  <text x="204" y="392" class="sm">blocks 1–6 on device, rest on server</text>
+  <text x="546" y="416" class="sm">device sends raw image, server runs all</text>
 
-  <text x="555" y="372" class="sm">device runs the full model itself</text>
-  <text x="555" y="396" class="sm">device runs blocks 1–6, server the rest</text>
-  <text x="555" y="420" class="sm">device sends raw image, server runs all</text>
+  <text x="380" y="444" text-anchor="middle" class="cap">Cut where the activation tensor is smallest, not where the parameter count is equal.</text>
 </svg>

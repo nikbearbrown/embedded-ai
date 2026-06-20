@@ -1,174 +1,169 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t06 d06">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06 d06">
   <title id="t06">MobileNetV2-0.5 case study — flash, SRAM, latency, and accuracy across compression steps</title>
-  <desc id="d06">Four small-multiple bar panels tracking the chapter's case study across four states: FP32 baseline, INT8 post-training quantization, plus 25 percent structured pruning, and finally plus distillation. Each panel marks the device threshold: 2 megabyte flash ceiling, 1 megabyte SRAM ceiling, 250 millisecond latency ceiling, and 88 percent accuracy floor.</desc>
+  <desc id="d06">Four small-multiple bar panels tracking the case study across four states: FP32 baseline, INT8 PTQ, plus 25% structured pruning, and plus distillation. Each panel marks the device threshold.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .ph { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; fill: #555555; }
-      .val { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #000000; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .threshold { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; font-weight: bold; fill: #C8102E; }
+      .ti    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .ph    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #111111; }
+      .lb    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #333333; }
+      .sm    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  fill: #555555; }
+      .val   { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #111111; }
+      .nm    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap   { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .thresh{ font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  font-weight: bold; fill: #444444; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0,8 3,0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
-  <text x="32" y="30" class="ti">MobileNetV2-0.5 on the STM32H7 — the route from "almost fits" to "ships with margin"</text>
-  <text x="32" y="48" class="nm">four metrics · four states · thresholds drawn in red · ship state earns headroom for the next firmware update</text>
+  <text x="32" y="30" class="ti">MobileNetV2-0.5 on the STM32H7 — from "almost fits" to "ships with margin"</text>
+  <text x="32" y="48" class="nm">four metrics · four states · threshold lines drawn · ship state earns headroom for the next firmware update</text>
 
-  <!-- legend: state labels across all panels at top -->
-  <g>
-    <rect x="32" y="64" width="12" height="10" fill="#ADADAD"/><text x="48" y="73" class="sm">FP32 baseline</text>
-    <rect x="170" y="64" width="12" height="10" fill="#787878"/><text x="186" y="73" class="sm">+ INT8 PTQ</text>
-    <rect x="290" y="64" width="12" height="10" fill="#555555"/><text x="306" y="73" class="sm">+ 25% structured pruning</text>
-    <rect x="490" y="64" width="12" height="10" fill="#000000"/><text x="506" y="73" class="sm">+ distillation (ship)</text>
-  </g>
+  <!-- legend -->
+  <rect x="32"  y="62" width="12" height="10" fill="#BBBBBB"/><text x="48"  y="71" class="sm">FP32 baseline</text>
+  <rect x="170" y="62" width="12" height="10" fill="#888888"/><text x="186" y="71" class="sm">+ INT8 PTQ</text>
+  <rect x="290" y="62" width="12" height="10" fill="#555555"/><text x="306" y="71" class="sm">+ 25% structured pruning</text>
+  <rect x="490" y="62" width="12" height="10" fill="#111111"/><text x="506" y="71" class="sm">+ distillation (ship)</text>
 
-  <!-- ============ PANEL 1: Flash (MB), ceiling 2 MB ============ -->
+  <!-- ============ PANEL 1: Flash (MB) ============ -->
   <g transform="translate(0,0)">
-    <text x="115" y="102" text-anchor="middle" class="ph">Flash (MB)</text>
-    <!-- chart area: x 50..180, y 110..280 -->
-    <line x1="50" y1="280" x2="180" y2="280" stroke="#000000" stroke-width="1"/>
-    <line x1="50" y1="280" x2="50" y2="110" stroke="#000000" stroke-width="1"/>
-    <!-- y ticks: 0 → 280, 5 → 110, scale: 1 unit = 34px -->
-    <line x1="48" y1="280" x2="50" y2="280" stroke="#555555"/><text x="44" y="283" text-anchor="end" class="sm">0</text>
-    <line x1="48" y1="246" x2="50" y2="246" stroke="#555555"/><text x="44" y="249" text-anchor="end" class="sm">1</text>
-    <line x1="48" y1="212" x2="50" y2="212" stroke="#555555"/><text x="44" y="215" text-anchor="end" class="sm">2</text>
-    <line x1="48" y1="178" x2="50" y2="178" stroke="#555555"/><text x="44" y="181" text-anchor="end" class="sm">3</text>
-    <line x1="48" y1="144" x2="50" y2="144" stroke="#555555"/><text x="44" y="147" text-anchor="end" class="sm">4</text>
-    <line x1="48" y1="110" x2="50" y2="110" stroke="#555555"/><text x="44" y="113" text-anchor="end" class="sm">5</text>
-    <!-- 2 MB ceiling line -->
-    <line x1="50" y1="212" x2="180" y2="212" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 2"/>
-    <text x="178" y="208" text-anchor="end" class="threshold">2 MB ceiling</text>
-    <!-- FP32: 4.6 MB → y = 280 - 4.6*34 = 123.6, h=156.4 -->
-    <rect x="60"  y="123.6" width="22" height="156.4" fill="#ADADAD"/>
-    <text x="71"  y="118" text-anchor="middle" class="val">4.6</text>
-    <!-- INT8 PTQ: 2.1 MB → y=280-71.4=208.6, h=71.4 -->
-    <rect x="86"  y="208.6" width="22" height="71.4" fill="#787878"/>
-    <text x="97"  y="203" text-anchor="middle" class="val">2.1</text>
-    <!-- +25% pruning: 1.725 MB → y=280-58.65=221.35, h=58.65 -->
-    <rect x="112" y="221.35" width="22" height="58.65" fill="#555555"/>
-    <text x="123" y="216" text-anchor="middle" class="val">1.73</text>
-    <!-- +distill: 1.725 MB unchanged -->
-    <rect x="138" y="221.35" width="22" height="58.65" fill="#000000"/>
-    <text x="149" y="216" text-anchor="middle" class="val">1.73</text>
-    <text x="115" y="298" text-anchor="middle" class="sm">over → over → fits → fits</text>
+    <text x="115" y="100" text-anchor="middle" class="ph">Flash (MB)</text>
+    <line x1="50" y1="280" x2="180" y2="280" stroke="#333333" stroke-width="1"/>
+    <line x1="50" y1="280" x2="50"  y2="110" stroke="#333333" stroke-width="1"/>
+    <!-- ticks: 0–5, 1 unit = 34px -->
+    <line x1="48" y1="280" x2="50" y2="280" stroke="#666666"/><text x="44" y="283" text-anchor="end" class="sm">0</text>
+    <line x1="48" y1="246" x2="50" y2="246" stroke="#666666"/><text x="44" y="249" text-anchor="end" class="sm">1</text>
+    <line x1="48" y1="212" x2="50" y2="212" stroke="#666666"/><text x="44" y="215" text-anchor="end" class="sm">2</text>
+    <line x1="48" y1="178" x2="50" y2="178" stroke="#666666"/><text x="44" y="181" text-anchor="end" class="sm">3</text>
+    <line x1="48" y1="144" x2="50" y2="144" stroke="#666666"/><text x="44" y="147" text-anchor="end" class="sm">4</text>
+    <line x1="48" y1="110" x2="50" y2="110" stroke="#666666"/><text x="44" y="113" text-anchor="end" class="sm">5</text>
+    <!-- 2 MB ceiling -->
+    <line x1="50" y1="212" x2="180" y2="212" stroke="#444444" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="178" y="208" text-anchor="end" class="thresh">2 MB ceiling</text>
+    <!-- FP32: 4.6 MB → y=280-4.6*34=123.6 -->
+    <rect x="60"  y="123.6" width="22" height="156.4" fill="#BBBBBB"/>
+    <text x="71"  y="118"   text-anchor="middle" class="val">4.6</text>
+    <!-- INT8 PTQ: 2.1 MB → y=280-71.4=208.6 -->
+    <rect x="86"  y="208.6" width="22" height="71.4"  fill="#888888"/>
+    <text x="97"  y="203"   text-anchor="middle" class="val">2.1</text>
+    <!-- +pruning: 1.73 MB → y=280-58.8=221.2 -->
+    <rect x="112" y="221.2" width="22" height="58.8"  fill="#555555"/>
+    <text x="123" y="216"   text-anchor="middle" class="val">1.73</text>
+    <!-- +distill: same -->
+    <rect x="138" y="221.2" width="22" height="58.8"  fill="#111111"/>
+    <text x="149" y="216"   text-anchor="middle" class="val">1.73</text>
+    <text x="115" y="297"   text-anchor="middle" class="sm">over → over → fits → fits</text>
   </g>
 
-  <!-- ============ PANEL 2: SRAM (KB), ceiling 1024 ============ -->
+  <!-- ============ PANEL 2: SRAM (KB) ============ -->
   <g transform="translate(180,0)">
-    <text x="115" y="102" text-anchor="middle" class="ph">SRAM activations (KB)</text>
-    <line x1="50" y1="280" x2="180" y2="280" stroke="#000000" stroke-width="1"/>
-    <line x1="50" y1="280" x2="50" y2="110" stroke="#000000" stroke-width="1"/>
-    <!-- y ticks: 0,200,400,600,800,1000; 1 KB = 0.17 px → 200 KB = 34 px -->
-    <line x1="48" y1="280" x2="50" y2="280" stroke="#555555"/><text x="44" y="283" text-anchor="end" class="sm">0</text>
-    <line x1="48" y1="246" x2="50" y2="246" stroke="#555555"/><text x="44" y="249" text-anchor="end" class="sm">200</text>
-    <line x1="48" y1="212" x2="50" y2="212" stroke="#555555"/><text x="44" y="215" text-anchor="end" class="sm">400</text>
-    <line x1="48" y1="178" x2="50" y2="178" stroke="#555555"/><text x="44" y="181" text-anchor="end" class="sm">600</text>
-    <line x1="48" y1="144" x2="50" y2="144" stroke="#555555"/><text x="44" y="147" text-anchor="end" class="sm">800</text>
-    <line x1="48" y1="110" x2="50" y2="110" stroke="#555555"/><text x="44" y="113" text-anchor="end" class="sm">1000</text>
-    <!-- 1024 KB ceiling close to top -->
-    <line x1="50" y1="105.92" x2="180" y2="105.92" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 2"/>
-    <text x="178" y="102" text-anchor="end" class="threshold">1024 KB ceiling</text>
-    <!-- FP32: 1120 KB activations would over-ceiling — but baseline is FP32 → impossible to deploy. Show ~1120 capped, or 700KB realistic? Chapter says SRAM fine at 280 KB after INT8. So FP32 activations ~ 4x more = ~1120 KB. Cap visually -->
-    <!-- FP32 1120 → y=280-1120*0.17=89.6, but that's above 105.92. Show as red overflow. -->
-    <rect x="60"  y="89.6" width="22" height="190.4" fill="#ADADAD"/>
-    <text x="71"  y="84" text-anchor="middle" class="val" fill="#C8102E">~1120</text>
-    <!-- INT8 PTQ: 280 KB → y=280-47.6=232.4, h=47.6 -->
-    <rect x="86"  y="232.4" width="22" height="47.6" fill="#787878"/>
-    <text x="97"  y="227" text-anchor="middle" class="val">280</text>
-    <!-- +25% pruning: 210 KB → y=280-35.7=244.3, h=35.7 -->
+    <text x="115" y="100" text-anchor="middle" class="ph">SRAM activations (KB)</text>
+    <line x1="50" y1="280" x2="180" y2="280" stroke="#333333" stroke-width="1"/>
+    <line x1="50" y1="280" x2="50"  y2="110" stroke="#333333" stroke-width="1"/>
+    <!-- ticks: 0–1000, 200 KB = 34px -->
+    <line x1="48" y1="280" x2="50" y2="280" stroke="#666666"/><text x="44" y="283" text-anchor="end" class="sm">0</text>
+    <line x1="48" y1="246" x2="50" y2="246" stroke="#666666"/><text x="44" y="249" text-anchor="end" class="sm">200</text>
+    <line x1="48" y1="212" x2="50" y2="212" stroke="#666666"/><text x="44" y="215" text-anchor="end" class="sm">400</text>
+    <line x1="48" y1="178" x2="50" y2="178" stroke="#666666"/><text x="44" y="181" text-anchor="end" class="sm">600</text>
+    <line x1="48" y1="144" x2="50" y2="144" stroke="#666666"/><text x="44" y="147" text-anchor="end" class="sm">800</text>
+    <line x1="48" y1="110" x2="50" y2="110" stroke="#666666"/><text x="44" y="113" text-anchor="end" class="sm">1000</text>
+    <!-- 1024 KB ceiling ≈ y=110 -->
+    <line x1="50" y1="112" x2="180" y2="112" stroke="#444444" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="178" y="108" text-anchor="end" class="thresh">1024 KB ceiling</text>
+    <!-- FP32: ~1120 KB → capped at chart top -->
+    <rect x="60"  y="110"  width="22" height="170" fill="#BBBBBB"/>
+    <text x="71"  y="105"  text-anchor="middle" class="val" fill="#444444">~1120</text>
+    <!-- INT8: 280 KB → y=280-280*0.17=232.4 -->
+    <rect x="86"  y="232.4" width="22" height="47.6" fill="#888888"/>
+    <text x="97"  y="227"   text-anchor="middle" class="val">280</text>
+    <!-- +pruning: 210 KB → y=280-35.7=244.3 -->
     <rect x="112" y="244.3" width="22" height="35.7" fill="#555555"/>
-    <text x="123" y="239" text-anchor="middle" class="val">210</text>
-    <!-- +distill: 210 unchanged -->
-    <rect x="138" y="244.3" width="22" height="35.7" fill="#000000"/>
-    <text x="149" y="239" text-anchor="middle" class="val">210</text>
-    <text x="115" y="298" text-anchor="middle" class="sm">over → fits → fits → fits</text>
+    <text x="123" y="239"   text-anchor="middle" class="val">210</text>
+    <!-- +distill: same -->
+    <rect x="138" y="244.3" width="22" height="35.7" fill="#111111"/>
+    <text x="149" y="239"   text-anchor="middle" class="val">210</text>
+    <text x="115" y="297"   text-anchor="middle" class="sm">over → fits → fits → fits</text>
   </g>
 
-  <!-- ============ PANEL 3: Latency (ms), ceiling 250 ============ -->
+  <!-- ============ PANEL 3: Latency (ms) ============ -->
   <g transform="translate(360,0)">
-    <text x="115" y="102" text-anchor="middle" class="ph">Latency (ms)</text>
-    <line x1="50" y1="280" x2="180" y2="280" stroke="#000000" stroke-width="1"/>
-    <line x1="50" y1="280" x2="50" y2="110" stroke="#000000" stroke-width="1"/>
-    <!-- y ticks: 0,100,200,300,400. scale: 100 ms = 42.5 px -->
-    <line x1="48" y1="280" x2="50" y2="280" stroke="#555555"/><text x="44" y="283" text-anchor="end" class="sm">0</text>
-    <line x1="48" y1="237.5" x2="50" y2="237.5" stroke="#555555"/><text x="44" y="240" text-anchor="end" class="sm">100</text>
-    <line x1="48" y1="195" x2="50" y2="195" stroke="#555555"/><text x="44" y="198" text-anchor="end" class="sm">200</text>
-    <line x1="48" y1="152.5" x2="50" y2="152.5" stroke="#555555"/><text x="44" y="155" text-anchor="end" class="sm">300</text>
-    <line x1="48" y1="110" x2="50" y2="110" stroke="#555555"/><text x="44" y="113" text-anchor="end" class="sm">400</text>
+    <text x="115" y="100" text-anchor="middle" class="ph">Latency (ms)</text>
+    <line x1="50" y1="280" x2="180" y2="280" stroke="#333333" stroke-width="1"/>
+    <line x1="50" y1="280" x2="50"  y2="110" stroke="#333333" stroke-width="1"/>
+    <!-- ticks: 0–400, 100 ms = 42.5px -->
+    <line x1="48" y1="280"   x2="50" y2="280"   stroke="#666666"/><text x="44" y="283"   text-anchor="end" class="sm">0</text>
+    <line x1="48" y1="237.5" x2="50" y2="237.5" stroke="#666666"/><text x="44" y="240.5" text-anchor="end" class="sm">100</text>
+    <line x1="48" y1="195"   x2="50" y2="195"   stroke="#666666"/><text x="44" y="198"   text-anchor="end" class="sm">200</text>
+    <line x1="48" y1="152.5" x2="50" y2="152.5" stroke="#666666"/><text x="44" y="155.5" text-anchor="end" class="sm">300</text>
+    <line x1="48" y1="110"   x2="50" y2="110"   stroke="#666666"/><text x="44" y="113"   text-anchor="end" class="sm">400</text>
     <!-- 250 ms ceiling: y=280-250*0.425=173.75 -->
-    <line x1="50" y1="173.75" x2="180" y2="173.75" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 2"/>
-    <text x="178" y="170" text-anchor="end" class="threshold">250 ms ceiling</text>
-    <!-- FP32: ~ 1200 ms (cap at 400 visually) — show overflow -->
-    <rect x="60"  y="110" width="22" height="170" fill="#ADADAD"/>
-    <text x="71"  y="104" text-anchor="middle" class="val" fill="#C8102E">~1200</text>
-    <!-- INT8 PTQ: 320 ms → y=280-136=144, h=136 -->
-    <rect x="86"  y="144" width="22" height="136" fill="#787878"/>
-    <text x="97"  y="139" text-anchor="middle" class="val">320</text>
-    <!-- +25% pruning: 240 → y=280-102=178, h=102 -->
-    <rect x="112" y="178" width="22" height="102" fill="#555555"/>
-    <text x="123" y="173" text-anchor="middle" class="val">240</text>
-    <!-- +distill: 240 unchanged -->
-    <rect x="138" y="178" width="22" height="102" fill="#000000"/>
-    <text x="149" y="173" text-anchor="middle" class="val">240</text>
-    <text x="115" y="298" text-anchor="middle" class="sm">over → over → fits → fits</text>
+    <line x1="50" y1="173.75" x2="180" y2="173.75" stroke="#444444" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="178" y="170" text-anchor="end" class="thresh">250 ms ceiling</text>
+    <!-- FP32: ~1200 ms — overflow shown capped -->
+    <rect x="60"  y="110"  width="22" height="170" fill="#BBBBBB"/>
+    <text x="71"  y="105"  text-anchor="middle" class="val" fill="#444444">~1200</text>
+    <!-- INT8: 320 ms → y=280-136=144 -->
+    <rect x="86"  y="144"  width="22" height="136" fill="#888888"/>
+    <text x="97"  y="139"  text-anchor="middle" class="val">320</text>
+    <!-- +pruning: 240 ms → y=280-102=178 -->
+    <rect x="112" y="178"  width="22" height="102" fill="#555555"/>
+    <text x="123" y="173"  text-anchor="middle" class="val">240</text>
+    <!-- +distill: same -->
+    <rect x="138" y="178"  width="22" height="102" fill="#111111"/>
+    <text x="149" y="173"  text-anchor="middle" class="val">240</text>
+    <text x="115" y="297"  text-anchor="middle" class="sm">over → over → fits → fits</text>
   </g>
 
-  <!-- ============ PANEL 4: Accuracy (%), floor 88 ============ -->
+  <!-- ============ PANEL 4: Accuracy (%) ============ -->
   <g transform="translate(540,0)">
-    <text x="80" y="102" text-anchor="middle" class="ph">Accuracy (%)</text>
-    <line x1="40" y1="280" x2="150" y2="280" stroke="#000000" stroke-width="1"/>
-    <line x1="40" y1="280" x2="40" y2="110" stroke="#000000" stroke-width="1"/>
-    <!-- y ticks: 85,90,95,100 (zoomed range) -->
-    <line x1="38" y1="280" x2="40" y2="280" stroke="#555555"/><text x="34" y="283" text-anchor="end" class="sm">85</text>
-    <line x1="38" y1="223" x2="40" y2="223" stroke="#555555"/><text x="34" y="226" text-anchor="end" class="sm">90</text>
-    <line x1="38" y1="166" x2="40" y2="166" stroke="#555555"/><text x="34" y="169" text-anchor="end" class="sm">95</text>
-    <line x1="38" y1="110" x2="40" y2="110" stroke="#555555"/><text x="34" y="113" text-anchor="end" class="sm">100</text>
+    <text x="80" y="100" text-anchor="middle" class="ph">Accuracy (%)</text>
+    <line x1="40" y1="280" x2="150" y2="280" stroke="#333333" stroke-width="1"/>
+    <line x1="40" y1="280" x2="40"  y2="110" stroke="#333333" stroke-width="1"/>
+    <!-- zoomed 85–100, 1 unit = 11.4px -->
+    <line x1="38" y1="280" x2="40" y2="280" stroke="#666666"/><text x="34" y="283" text-anchor="end" class="sm">85</text>
+    <line x1="38" y1="223" x2="40" y2="223" stroke="#666666"/><text x="34" y="226" text-anchor="end" class="sm">90</text>
+    <line x1="38" y1="166" x2="40" y2="166" stroke="#666666"/><text x="34" y="169" text-anchor="end" class="sm">95</text>
+    <line x1="38" y1="110" x2="40" y2="110" stroke="#666666"/><text x="34" y="113" text-anchor="end" class="sm">100</text>
     <text x="148" y="106" text-anchor="end" class="sm">(zoomed 85–100)</text>
-    <!-- 88% floor: y=280-(88-85)*11.4=246 -->
-    <line x1="40" y1="245.8" x2="150" y2="245.8" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 2"/>
-    <text x="148" y="242" text-anchor="end" class="threshold">88% floor</text>
-    <!-- FP32: 91.5 → y=280-(91.5-85)*11.4=205.9, h=74.1 -->
-    <rect x="48"  y="205.9" width="20" height="74.1" fill="#ADADAD"/>
-    <text x="58"  y="200" text-anchor="middle" class="val">91.5</text>
-    <!-- INT8 PTQ: 89.2 → y=280-(89.2-85)*11.4=232.1, h=47.9 -->
-    <rect x="72"  y="232.1" width="20" height="47.9" fill="#787878"/>
-    <text x="82"  y="227" text-anchor="middle" class="val">89.2</text>
-    <!-- +25% pruning: 89.8 → y=280-(89.8-85)*11.4=225.3, h=54.7 -->
+    <!-- 88% floor: y=280-(88-85)*11.4=245.8 -->
+    <line x1="40" y1="245.8" x2="150" y2="245.8" stroke="#444444" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="148" y="242" text-anchor="end" class="thresh">88% floor</text>
+    <!-- FP32: 91.5% → y=280-(91.5-85)*11.4=205.9 -->
+    <rect x="48"  y="205.9" width="20" height="74.1" fill="#BBBBBB"/>
+    <text x="58"  y="200"   text-anchor="middle" class="val">91.5</text>
+    <!-- INT8: 89.2% → y=280-(89.2-85)*11.4=232.1 -->
+    <rect x="72"  y="232.1" width="20" height="47.9" fill="#888888"/>
+    <text x="82"  y="226"   text-anchor="middle" class="val">89.2</text>
+    <!-- +pruning: 89.8% → y=280-(89.8-85)*11.4=225.3 -->
     <rect x="96"  y="225.3" width="20" height="54.7" fill="#555555"/>
-    <text x="106" y="220" text-anchor="middle" class="val">89.8</text>
-    <!-- +distill: 90.6 → y=280-(90.6-85)*11.4=216.2, h=63.8 -->
-    <rect x="120" y="216.2" width="20" height="63.8" fill="#000000"/>
-    <text x="130" y="211" text-anchor="middle" class="val">90.6</text>
-    <text x="80" y="298" text-anchor="middle" class="sm">above floor in every state</text>
+    <text x="106" y="220"   text-anchor="middle" class="val">89.8</text>
+    <!-- +distill: 90.6% → y=280-(90.6-85)*11.4=216.2 -->
+    <rect x="120" y="216.2" width="20" height="63.8" fill="#111111"/>
+    <text x="130" y="211"   text-anchor="middle" class="val">90.6</text>
+    <text x="80"  y="297"   text-anchor="middle" class="sm">above floor in every state</text>
   </g>
 
-  <!-- ============ FOOTER: stage labels ============ -->
-  <g>
-    <text x="115" y="338" text-anchor="middle" class="sm">FP32 baseline</text>
-    <text x="295" y="338" text-anchor="middle" class="sm">+ INT8 PTQ</text>
-    <text x="475" y="338" text-anchor="middle" class="sm">+ 25% pruning</text>
-    <text x="620" y="338" text-anchor="middle" class="sm">+ distillation</text>
+  <!-- ============ FOOTER: stage labels and arrows ============ -->
+  <text x="115" y="332" text-anchor="middle" class="sm">FP32 baseline</text>
+  <text x="295" y="332" text-anchor="middle" class="sm">+ INT8 PTQ</text>
+  <text x="475" y="332" text-anchor="middle" class="sm">+ 25% pruning</text>
+  <text x="620" y="332" text-anchor="middle" class="sm">+ distillation</text>
 
-    <!-- progression arrows -->
-    <line x1="155" y1="350" x2="245" y2="350" stroke="#000000" stroke-width="1" marker-end="url(#ar)"/>
-    <line x1="335" y1="350" x2="425" y2="350" stroke="#000000" stroke-width="1" marker-end="url(#ar)"/>
-    <line x1="515" y1="350" x2="580" y2="350" stroke="#000000" stroke-width="1" marker-end="url(#ar)"/>
+  <line x1="155" y1="344" x2="245" y2="344" stroke="#333333" stroke-width="1" marker-end="url(#ar)"/>
+  <line x1="335" y1="344" x2="425" y2="344" stroke="#333333" stroke-width="1" marker-end="url(#ar)"/>
+  <line x1="515" y1="344" x2="580" y2="344" stroke="#333333" stroke-width="1" marker-end="url(#ar)"/>
 
-    <text x="200" y="368" text-anchor="middle" class="sm">75% weight cut</text>
-    <text x="380" y="368" text-anchor="middle" class="sm">earns the fit</text>
-    <text x="548" y="368" text-anchor="middle" class="sm">earns the margin</text>
-  </g>
+  <text x="200" y="362" text-anchor="middle" class="sm">75% weight cut</text>
+  <text x="380" y="362" text-anchor="middle" class="sm">earns the fit</text>
+  <text x="548" y="362" text-anchor="middle" class="sm">earns the margin</text>
 
-  <!-- ============ THE SHIP STATE summary ============ -->
-  <rect x="32" y="386" width="636" height="50" fill="#FFFFFF" stroke="#000000" stroke-width="1"/>
-  <text x="46" y="404" class="ph">SHIP STATE</text>
-  <text x="46" y="422" class="lb">1.125 M int8 params · 1.725 MB flash · 290 KB SRAM · 240 ms latency · 90.6% accuracy</text>
-  <text x="46" y="436" class="sm">all four constraints met · 10 ms latency margin · 2.6 percentage points above accuracy floor</text>
+  <!-- SHIP STATE summary box -->
+  <rect x="32" y="382" width="636" height="52" fill="#F5F5F5" stroke="#333333" stroke-width="1"/>
+  <text x="46" y="400" class="ph">SHIP STATE</text>
+  <text x="46" y="418" class="lb">1.125 M int8 params · 1.725 MB flash · 210 KB SRAM · 240 ms latency · 90.6% accuracy</text>
+  <text x="46" y="432" class="sm">all four constraints met · 10 ms latency margin · 2.6 pp above accuracy floor</text>
+
+  <text x="350" y="462" text-anchor="middle" class="cap">Each compression step earns a constraint. Distillation recovers accuracy lost to quantisation and pruning.</text>
 </svg>

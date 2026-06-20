@@ -1,116 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" role="img" aria-labelledby="t04 d04">
   <title id="t04">Accuracy versus structured pruning rate — the cliff past 70 percent</title>
-  <desc id="d04">A curve showing model accuracy declining as the percentage of channels removed increases from 0 to 90 percent. The slope is gentle through 20 percent, increases through 40 percent, becomes steep at 60 percent, and collapses past 70 percent. A shaded band marks the 20 to 40 percent sweet spot for embedded compression.</desc>
+  <desc id="d04">A curve showing model accuracy declining as the percentage of channels removed increases from 0 to 90 percent. The slope is gentle through 20 percent, steepens through 60 percent, and collapses past 70 percent. A shaded band marks the 20 to 40 percent sweet spot.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .badge { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
-      .ax-title { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
+      .ti     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .lb     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #333333; }
+      .sm     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap    { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .ax-lbl { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #555555; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0,8 3,0 6" fill="#555555"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="450" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">Pruning accuracy curve — the cliff is real, but not where you'd guess</text>
-  <text x="32" y="50" class="nm">structured channel pruning on a typical over-parameterized embedded CNN · accuracy drop relative to unpruned baseline</text>
+  <text x="32" y="50" class="nm">structured channel pruning on a typical over-parameterised embedded CNN · accuracy relative to unpruned baseline</text>
 
-  <!-- chart frame -->
-  <!-- x axis 0..90% pruning at x=70..650 (range 580). y axis accuracy 0..100% at y=380..90 (range 290). -->
-  <!-- sweet spot band 20–40% -->
-  <rect x="198.9" y="90" width="128.9" height="290" fill="#A4804A" fill-opacity="0.12"/>
-  <text x="263" y="106" text-anchor="middle" class="lb" fill="#A4804A">sweet spot for embedded</text>
-  <text x="263" y="120" text-anchor="middle" class="sm">20–40% · barely-felt accuracy cost</text>
+  <!-- sweet spot band 20–40% — light gray -->
+  <rect x="198.9" y="90" width="128.9" height="290" fill="#DDDDDD" fill-opacity="0.6"/>
+  <text x="263" y="106" text-anchor="middle" class="lb">sweet spot for embedded</text>
+  <text x="263" y="119" text-anchor="middle" class="sm">20–40% · barely-felt accuracy cost</text>
 
-  <!-- cliff zone past 70% -->
-  <rect x="521.1" y="90" width="128.9" height="290" fill="#C8102E" fill-opacity="0.10"/>
-  <text x="585" y="106" text-anchor="middle" class="lb" fill="#C8102E">accuracy collapse</text>
-  <text x="585" y="120" text-anchor="middle" class="sm">unless network was wildly over-built</text>
+  <!-- cliff zone past 70% — darker gray -->
+  <rect x="521.1" y="90" width="128.9" height="290" fill="#BBBBBB" fill-opacity="0.45"/>
+  <text x="585" y="106" text-anchor="middle" class="lb">accuracy collapse</text>
+  <text x="585" y="119" text-anchor="middle" class="sm">unless network was wildly over-built</text>
 
   <!-- axes -->
-  <line x1="70" y1="380" x2="650" y2="380" stroke="#000000" stroke-width="1"/>
-  <line x1="70" y1="90"  x2="70"  y2="380" stroke="#000000" stroke-width="1"/>
+  <line x1="70" y1="380" x2="650" y2="380" stroke="#333333" stroke-width="1"/>
+  <line x1="70" y1="90"  x2="70"  y2="380" stroke="#333333" stroke-width="1"/>
 
-  <!-- x ticks: 0, 20, 40, 60, 80% -->
-  <g>
-    <line x1="70"   y1="378" x2="70"   y2="382" stroke="#000000"/>
-    <line x1="198.9" y1="378" x2="198.9" y2="382" stroke="#000000"/>
-    <line x1="327.8" y1="378" x2="327.8" y2="382" stroke="#000000"/>
-    <line x1="456.7" y1="378" x2="456.7" y2="382" stroke="#000000"/>
-    <line x1="585.6" y1="378" x2="585.6" y2="382" stroke="#000000"/>
-    <text x="70"    y="396" text-anchor="middle" class="sm">0%</text>
-    <text x="198.9" y="396" text-anchor="middle" class="sm">20%</text>
-    <text x="327.8" y="396" text-anchor="middle" class="sm">40%</text>
-    <text x="456.7" y="396" text-anchor="middle" class="sm">60%</text>
-    <text x="585.6" y="396" text-anchor="middle" class="sm">80%</text>
-  </g>
-  <text x="360" y="416" text-anchor="middle" class="ax-title">channels removed</text>
+  <!-- x ticks -->
+  <line x1="70"    y1="378" x2="70"    y2="382" stroke="#333333"/>
+  <line x1="198.9" y1="378" x2="198.9" y2="382" stroke="#333333"/>
+  <line x1="327.8" y1="378" x2="327.8" y2="382" stroke="#333333"/>
+  <line x1="456.7" y1="378" x2="456.7" y2="382" stroke="#333333"/>
+  <line x1="585.6" y1="378" x2="585.6" y2="382" stroke="#333333"/>
+  <text x="70"    y="395" text-anchor="middle" class="sm">0%</text>
+  <text x="198.9" y="395" text-anchor="middle" class="sm">20%</text>
+  <text x="327.8" y="395" text-anchor="middle" class="sm">40%</text>
+  <text x="456.7" y="395" text-anchor="middle" class="sm">60%</text>
+  <text x="585.6" y="395" text-anchor="middle" class="sm">80%</text>
+  <text x="360"   y="414" text-anchor="middle" class="ax-lbl">channels removed</text>
 
-  <!-- y ticks: 0, 50, 90, 95, 100 (focused on top range) -->
-  <g>
-    <line x1="68" y1="380" x2="70" y2="380" stroke="#000000"/>
-    <text x="64" y="383" text-anchor="end" class="sm">0</text>
-    <line x1="68" y1="235" x2="70" y2="235" stroke="#000000"/>
-    <text x="64" y="238" text-anchor="end" class="sm">50</text>
-    <line x1="68" y1="148" x2="70" y2="148" stroke="#000000"/>
-    <text x="64" y="151" text-anchor="end" class="sm">80</text>
-    <line x1="68" y1="119" x2="70" y2="119" stroke="#000000"/>
-    <text x="64" y="122" text-anchor="end" class="sm">90</text>
-    <line x1="68" y1="90"  x2="70" y2="90"  stroke="#000000"/>
-    <text x="64" y="93"  text-anchor="end" class="sm">100</text>
-  </g>
-  <text x="30" y="235" text-anchor="middle" transform="rotate(-90 30 235)" class="ax-title">accuracy retained (%)</text>
+  <!-- y ticks -->
+  <line x1="68" y1="380" x2="70" y2="380" stroke="#333333"/><text x="64" y="383" text-anchor="end" class="sm">0</text>
+  <line x1="68" y1="235" x2="70" y2="235" stroke="#333333"/><text x="64" y="238" text-anchor="end" class="sm">50</text>
+  <line x1="68" y1="148" x2="70" y2="148" stroke="#333333"/><text x="64" y="151" text-anchor="end" class="sm">80</text>
+  <line x1="68" y1="119" x2="70" y2="119" stroke="#333333"/><text x="64" y="122" text-anchor="end" class="sm">90</text>
+  <line x1="68" y1="90"  x2="70" y2="90"  stroke="#333333"/><text x="64" y="93"  text-anchor="end" class="sm">100</text>
+  <text x="30" y="235" text-anchor="middle" transform="rotate(-90 30 235)" class="ax-lbl">accuracy retained (%)</text>
 
-  <!-- horizontal reference line at 88% accuracy threshold (acceptance floor in chapter) -->
-  <line x1="70" y1="125" x2="650" y2="125" stroke="#A4804A" stroke-width="1" stroke-dasharray="4 3"/>
-  <text x="650" y="121" text-anchor="end" class="sm" fill="#A4804A">acceptance threshold</text>
+  <!-- acceptance threshold line -->
+  <line x1="70" y1="125" x2="650" y2="125" stroke="#888888" stroke-width="1" stroke-dasharray="4 3"/>
+  <text x="648" y="121" text-anchor="end" class="sm">acceptance threshold</text>
 
-  <!-- the accuracy curve: 0%→100, 20%→99, 40%→96, 60%→90, 70%→83, 80%→50, 90%→20 -->
-  <!-- x mapping: pct * 6.444 + 70; y mapping: (100 - acc) * 2.9 + 90 -->
-  <!-- 0%: x=70, y=90 -->
-  <!-- 10%: 99.5 → x=134.4, y=91.5 -->
-  <!-- 20%: 99   → x=198.9, y=93 -->
-  <!-- 30%: 97.5 → x=263.3, y=97.3 -->
-  <!-- 40%: 96   → x=327.8, y=101.6 -->
-  <!-- 50%: 93   → x=392.2, y=110.3 -->
-  <!-- 60%: 90   → x=456.7, y=119 -->
-  <!-- 70%: 83   → x=521.1, y=139.3 -->
-  <!-- 80%: 50   → x=585.6, y=235 -->
-  <!-- 90%: 20   → x=650, y=322 -->
-  <path d="M 70,90 C 110,90 134.4,91.5 198.9,93 C 230,94 263.3,97.3 327.8,101.6 C 360,107 392.2,110.3 456.7,119 C 490,125 521.1,139.3 585.6,235 C 615,275 635,310 650,322"
-        fill="none" stroke="#000000" stroke-width="2"/>
+  <!-- accuracy curve -->
+  <path d="M 70,90 C 110,90 134,91.5 198.9,93 C 230,94 263,97 327.8,101.6 C 360,107 392,110 456.7,119 C 490,125 521.1,139 585.6,235 C 615,275 635,310 650,322"
+        fill="none" stroke="#111111" stroke-width="2.2"/>
 
   <!-- data points -->
-  <g fill="#000000">
-    <circle cx="70"    cy="90"    r="3"/>
-    <circle cx="198.9" cy="93"    r="3"/>
-    <circle cx="327.8" cy="101.6" r="3"/>
-    <circle cx="456.7" cy="119"   r="3"/>
-    <circle cx="521.1" cy="139.3" r="3"/>
-    <circle cx="585.6" cy="235"   r="3"/>
+  <g fill="#111111">
+    <circle cx="70"    cy="90"    r="3.5"/>
+    <circle cx="198.9" cy="93"    r="3.5"/>
+    <circle cx="327.8" cy="101.6" r="3.5"/>
+    <circle cx="456.7" cy="119"   r="3.5"/>
+    <circle cx="521.1" cy="139"   r="3.5"/>
+    <circle cx="585.6" cy="235"   r="3.5"/>
   </g>
 
-  <!-- annotations -->
-  <!-- 20%: <1% cost -->
-  <path d="M 198.9 93 L 230 160" fill="none" stroke="#555555" stroke-width="0.8" stroke-dasharray="2 2"/>
-  <text x="232" y="170" class="sm">first 20% costs &lt;1%</text>
+  <!-- annotation callouts -->
+  <path d="M 198.9 93 L 230 162" fill="none" stroke="#888888" stroke-width="0.8" stroke-dasharray="2 2"/>
+  <text x="232" y="172" class="sm">first 20% costs &lt;1%</text>
 
-  <!-- 40%: 2–4% band -->
-  <path d="M 327.8 101.6 L 360 200" fill="none" stroke="#555555" stroke-width="0.8" stroke-dasharray="2 2"/>
-  <text x="362" y="210" class="sm">next 20% costs 2–4%</text>
+  <path d="M 327.8 101.6 L 355 200" fill="none" stroke="#888888" stroke-width="0.8" stroke-dasharray="2 2"/>
+  <text x="357" y="210" class="sm">next 20% costs 2–4%</text>
 
-  <!-- 60%: 5–10% -->
-  <path d="M 456.7 119 L 470 250" fill="none" stroke="#555555" stroke-width="0.8" stroke-dasharray="2 2"/>
-  <text x="472" y="260" class="sm">60% costs 5–10%</text>
+  <path d="M 456.7 119 L 468 248" fill="none" stroke="#888888" stroke-width="0.8" stroke-dasharray="2 2"/>
+  <text x="470" y="258" class="sm">60% costs 5–10%</text>
 
-  <!-- 70% cliff -->
-  <path d="M 521.1 139.3 L 540 300" fill="none" stroke="#C8102E" stroke-width="0.8" stroke-dasharray="2 2" marker-end="url(#ar)"/>
-  <text x="542" y="312" class="sm" fill="#C8102E">cliff arrives — switch to distillation</text>
+  <path d="M 521.1 139 L 538 295" fill="none" stroke="#555555" stroke-width="0.8" stroke-dasharray="2 2" marker-end="url(#ar)"/>
+  <text x="540" y="307" class="sm" font-weight="bold" fill="#444444">cliff — switch to distillation</text>
 
-  <text x="360" y="436" text-anchor="middle" class="cap">Past 60% compression, the right move is not more pruning — it's distilling onto a smaller architecture designed to be small.</text>
+  <text x="350" y="436" text-anchor="middle" class="cap">Past 60% compression, the right move is not more pruning — it is distilling onto a smaller architecture designed to be small.</text>
 </svg>

@@ -1,108 +1,107 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t02 d02">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" role="img" aria-labelledby="t02 d02">
   <title id="t02">Quantization options compared — FP32 baseline vs PTQ vs QAT across three axes</title>
-  <desc id="d02">Three small-multiple bar panels showing accuracy drop, model size, and engineering cost for the FP32 baseline, post-training quantization, and quantization-aware training. PTQ shows three to ten percent accuracy drop, four-fold size reduction, minutes of cost. QAT shows one to three percent accuracy drop, the same size reduction, hours to days of cost.</desc>
+  <desc id="d02">Three small-multiple bar panels showing accuracy drop, model size, and engineering cost for FP32 baseline, post-training quantization, and quantization-aware training.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .ph { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .val { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .ph  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #333333; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .val { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0,8 3,0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="450" fill="#FFFFFF"/>
 
   <text x="32" y="32" class="ti">Three trade-off axes for the FP32 → INT8 conversion</text>
   <text x="32" y="50" class="nm">same model · three deployment paths · the cost of accuracy buys you faster shipping</text>
 
-  <!-- color key -->
-  <rect x="32" y="66" width="14" height="10" fill="#ADADAD"/>
-  <text x="50" y="75" class="sm">FP32 baseline</text>
-  <rect x="160" y="66" width="14" height="10" fill="#787878"/>
-  <text x="178" y="75" class="sm">Post-training (PTQ)</text>
-  <rect x="320" y="66" width="14" height="10" fill="#000000"/>
-  <text x="338" y="75" class="sm">Quantization-aware (QAT)</text>
+  <!-- legend -->
+  <rect x="32"  y="64" width="14" height="10" fill="#BBBBBB"/>
+  <text x="50"  y="73" class="sm">FP32 baseline</text>
+  <rect x="160" y="64" width="14" height="10" fill="#777777"/>
+  <text x="178" y="73" class="sm">Post-training (PTQ)</text>
+  <rect x="320" y="64" width="14" height="10" fill="#333333"/>
+  <text x="338" y="73" class="sm">Quantization-aware (QAT)</text>
 
-  <!-- ============ PANEL 1: Accuracy drop ============ -->
+  <!-- PANEL 1: Accuracy drop -->
   <text x="115" y="106" text-anchor="middle" class="ph">Accuracy drop (%)</text>
   <text x="115" y="120" text-anchor="middle" class="sm">lower is better</text>
-  <line x1="50" y1="290" x2="180" y2="290" stroke="#000000" stroke-width="1"/>
-  <line x1="50" y1="290" x2="50" y2="130" stroke="#000000" stroke-width="1"/>
-  <!-- y axis ticks 0,5,10 -->
-  <line x1="48" y1="290" x2="50" y2="290" stroke="#555555"/><text x="44" y="293" text-anchor="end" class="sm">0</text>
-  <line x1="48" y1="210" x2="50" y2="210" stroke="#555555"/><text x="44" y="213" text-anchor="end" class="sm">5</text>
-  <line x1="48" y1="130" x2="50" y2="130" stroke="#555555"/><text x="44" y="133" text-anchor="end" class="sm">10</text>
-  <!-- bars: FP32=0, PTQ low=3 / high=10 (range bar), QAT low=1 / high=3 -->
-  <rect x="60"  y="290" width="30" height="0"  fill="#ADADAD"/>
-  <text x="75"  y="304" text-anchor="middle" class="sm">FP32</text>
-  <text x="75"  y="284" text-anchor="middle" class="val">0</text>
-  <!-- PTQ range bar 3–10 -->
-  <rect x="100" y="130" width="30" height="112" fill="#787878"/>
-  <rect x="100" y="242" width="30" height="48"  fill="#787878" fill-opacity="0.45"/>
-  <text x="115" y="304" text-anchor="middle" class="sm">PTQ</text>
-  <text x="115" y="124" text-anchor="middle" class="val">3–10</text>
-  <!-- QAT range bar 1–3 -->
-  <rect x="140" y="242" width="30" height="32" fill="#000000"/>
-  <rect x="140" y="274" width="30" height="16" fill="#000000" fill-opacity="0.45"/>
-  <text x="155" y="304" text-anchor="middle" class="sm">QAT</text>
-  <text x="155" y="236" text-anchor="middle" class="val">1–3</text>
-  <text x="115" y="324" text-anchor="middle" class="nm">solid = best · faded = worst</text>
+  <line x1="50" y1="295" x2="180" y2="295" stroke="#333333" stroke-width="1"/>
+  <line x1="50" y1="295" x2="50"  y2="130" stroke="#333333" stroke-width="1"/>
+  <line x1="48" y1="295" x2="50" y2="295" stroke="#666666"/><text x="44" y="298" text-anchor="end" class="sm">0</text>
+  <line x1="48" y1="215" x2="50" y2="215" stroke="#666666"/><text x="44" y="218" text-anchor="end" class="sm">5</text>
+  <line x1="48" y1="130" x2="50" y2="130" stroke="#666666"/><text x="44" y="133" text-anchor="end" class="sm">10</text>
 
-  <!-- ============ PANEL 2: Model size (MB) ============ -->
+  <!-- FP32: 0 drop -->
+  <rect x="60"  y="295" width="30" height="0"   fill="#BBBBBB"/>
+  <text x="75"  y="309" text-anchor="middle" class="sm">FP32</text>
+  <text x="75"  y="289" text-anchor="middle" class="val">0</text>
+  <!-- PTQ: 3–10% range -->
+  <rect x="100" y="130" width="30" height="117" fill="#777777"/>
+  <rect x="100" y="247" width="30" height="48"  fill="#777777" fill-opacity="0.4"/>
+  <text x="115" y="309" text-anchor="middle" class="sm">PTQ</text>
+  <text x="115" y="124" text-anchor="middle" class="val">3–10%</text>
+  <!-- QAT: 1–3% range -->
+  <rect x="140" y="247" width="30" height="32"  fill="#333333"/>
+  <rect x="140" y="279" width="30" height="16"  fill="#333333" fill-opacity="0.4"/>
+  <text x="155" y="309" text-anchor="middle" class="sm">QAT</text>
+  <text x="155" y="241" text-anchor="middle" class="val">1–3%</text>
+  <text x="115" y="328" text-anchor="middle" class="nm">solid = best · faded = worst</text>
+
+  <!-- PANEL 2: Model size -->
   <text x="350" y="106" text-anchor="middle" class="ph">Model size (MB)</text>
   <text x="350" y="120" text-anchor="middle" class="sm">lower is better · same for PTQ and QAT</text>
-  <line x1="285" y1="290" x2="415" y2="290" stroke="#000000" stroke-width="1"/>
-  <line x1="285" y1="290" x2="285" y2="130" stroke="#000000" stroke-width="1"/>
-  <line x1="283" y1="290" x2="285" y2="290" stroke="#555555"/><text x="279" y="293" text-anchor="end" class="sm">0</text>
-  <line x1="283" y1="210" x2="285" y2="210" stroke="#555555"/><text x="279" y="213" text-anchor="end" class="sm">2</text>
-  <line x1="283" y1="130" x2="285" y2="130" stroke="#555555"/><text x="279" y="133" text-anchor="end" class="sm">4</text>
-  <!-- FP32=4MB → 160px tall -->
-  <rect x="295" y="130" width="30" height="160" fill="#ADADAD"/>
-  <text x="310" y="304" text-anchor="middle" class="sm">FP32</text>
+  <line x1="285" y1="295" x2="415" y2="295" stroke="#333333" stroke-width="1"/>
+  <line x1="285" y1="295" x2="285" y2="130" stroke="#333333" stroke-width="1"/>
+  <line x1="283" y1="295" x2="285" y2="295" stroke="#666666"/><text x="279" y="298" text-anchor="end" class="sm">0</text>
+  <line x1="283" y1="215" x2="285" y2="215" stroke="#666666"/><text x="279" y="218" text-anchor="end" class="sm">2</text>
+  <line x1="283" y1="130" x2="285" y2="130" stroke="#666666"/><text x="279" y="133" text-anchor="end" class="sm">4</text>
+  <!-- FP32: 4 MB -->
+  <rect x="295" y="130" width="30" height="165" fill="#BBBBBB"/>
+  <text x="310" y="309" text-anchor="middle" class="sm">FP32</text>
   <text x="310" y="124" text-anchor="middle" class="val">4.0</text>
-  <!-- PTQ=1MB → 40px tall -->
-  <rect x="335" y="250" width="30" height="40" fill="#787878"/>
-  <text x="350" y="304" text-anchor="middle" class="sm">PTQ</text>
-  <text x="350" y="244" text-anchor="middle" class="val">1.0</text>
-  <!-- QAT=1MB → 40px tall -->
-  <rect x="375" y="250" width="30" height="40" fill="#000000"/>
-  <text x="390" y="304" text-anchor="middle" class="sm">QAT</text>
-  <text x="390" y="244" text-anchor="middle" class="val">1.0</text>
-  <text x="350" y="324" text-anchor="middle" class="nm">int8 weights are one quarter of float32</text>
+  <!-- PTQ: 1 MB -->
+  <rect x="335" y="254" width="30" height="41"  fill="#777777"/>
+  <text x="350" y="309" text-anchor="middle" class="sm">PTQ</text>
+  <text x="350" y="248" text-anchor="middle" class="val">1.0</text>
+  <!-- QAT: 1 MB -->
+  <rect x="375" y="254" width="30" height="41"  fill="#333333"/>
+  <text x="390" y="309" text-anchor="middle" class="sm">QAT</text>
+  <text x="390" y="248" text-anchor="middle" class="val">1.0</text>
+  <text x="350" y="328" text-anchor="middle" class="nm">int8 weights are one quarter of float32</text>
 
-  <!-- ============ PANEL 3: Engineering cost ============ -->
-  <text x="585" y="106" text-anchor="middle" class="ph">Engineering cost (hours)</text>
+  <!-- PANEL 3: Engineering cost (log scale) -->
+  <text x="585" y="106" text-anchor="middle" class="ph">Engineering cost</text>
   <text x="585" y="120" text-anchor="middle" class="sm">log scale · lower is better</text>
-  <line x1="520" y1="290" x2="650" y2="290" stroke="#000000" stroke-width="1"/>
-  <line x1="520" y1="290" x2="520" y2="130" stroke="#000000" stroke-width="1"/>
-  <!-- log ticks: 0.01h, 1h, 100h -->
-  <line x1="518" y1="290" x2="520" y2="290" stroke="#555555"/><text x="514" y="293" text-anchor="end" class="sm">0.01h</text>
-  <line x1="518" y1="210" x2="520" y2="210" stroke="#555555"/><text x="514" y="213" text-anchor="end" class="sm">1h</text>
-  <line x1="518" y1="130" x2="520" y2="130" stroke="#555555"/><text x="514" y="133" text-anchor="end" class="sm">100h</text>
-  <!-- FP32 baseline cost = trained model already exists, near zero on log -->
-  <rect x="530" y="278" width="30" height="12" fill="#ADADAD"/>
-  <text x="545" y="304" text-anchor="middle" class="sm">FP32</text>
-  <text x="545" y="272" text-anchor="middle" class="val">~0</text>
-  <!-- PTQ ~ 0.1h (minutes) → log midway between 0.01 and 1: y ≈ 250 -->
-  <rect x="570" y="250" width="30" height="40" fill="#787878"/>
-  <text x="585" y="304" text-anchor="middle" class="sm">PTQ</text>
-  <text x="585" y="244" text-anchor="middle" class="val">min</text>
-  <!-- QAT ~ 10–50h → near top: y ≈ 150 -->
-  <rect x="610" y="150" width="30" height="140" fill="#000000"/>
-  <text x="625" y="304" text-anchor="middle" class="sm">QAT</text>
-  <text x="625" y="144" text-anchor="middle" class="val">days</text>
-  <text x="585" y="324" text-anchor="middle" class="nm">QAT pays in compute and dataset access</text>
+  <line x1="520" y1="295" x2="650" y2="295" stroke="#333333" stroke-width="1"/>
+  <line x1="520" y1="295" x2="520" y2="130" stroke="#333333" stroke-width="1"/>
+  <line x1="518" y1="295" x2="520" y2="295" stroke="#666666"/><text x="514" y="298" text-anchor="end" class="sm">0.01h</text>
+  <line x1="518" y1="215" x2="520" y2="215" stroke="#666666"/><text x="514" y="218" text-anchor="end" class="sm">1h</text>
+  <line x1="518" y1="130" x2="520" y2="130" stroke="#666666"/><text x="514" y="133" text-anchor="end" class="sm">100h</text>
+  <!-- FP32: near zero -->
+  <rect x="530" y="283" width="30" height="12"  fill="#BBBBBB"/>
+  <text x="545" y="309" text-anchor="middle" class="sm">FP32</text>
+  <text x="545" y="277" text-anchor="middle" class="val">~0</text>
+  <!-- PTQ: minutes -->
+  <rect x="570" y="254" width="30" height="41"  fill="#777777"/>
+  <text x="585" y="309" text-anchor="middle" class="sm">PTQ</text>
+  <text x="585" y="248" text-anchor="middle" class="val">min</text>
+  <!-- QAT: days -->
+  <rect x="610" y="152" width="30" height="143" fill="#333333"/>
+  <text x="625" y="309" text-anchor="middle" class="sm">QAT</text>
+  <text x="625" y="146" text-anchor="middle" class="val">days</text>
+  <text x="585" y="328" text-anchor="middle" class="nm">QAT pays in compute and dataset access</text>
 
-  <!-- decision arrow at bottom -->
-  <path d="M 200 388 L 360 388" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <text x="280" y="380" text-anchor="middle" class="lb">use PTQ first</text>
-  <path d="M 380 388 L 540 388" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <text x="460" y="380" text-anchor="middle" class="lb">upgrade to QAT if accuracy drop is too costly</text>
+  <!-- decision flow -->
+  <path d="M 200 390 L 355 390" fill="none" stroke="#333333" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="278" y="382" text-anchor="middle" class="lb">use PTQ first</text>
+  <path d="M 375 390 L 530 390" fill="none" stroke="#333333" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="453" y="382" text-anchor="middle" class="lb">upgrade to QAT if accuracy drop is too costly</text>
 
-  <text x="350" y="426" text-anchor="middle" class="cap">PTQ buys speed of conversion. QAT buys accuracy. Both cost the same in deployed bytes.</text>
+  <text x="350" y="430" text-anchor="middle" class="cap">PTQ buys speed of conversion. QAT buys accuracy. Both cost the same in deployed bytes.</text>
 </svg>

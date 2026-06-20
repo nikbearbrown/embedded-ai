@@ -1,51 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t10f3 d10f3">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t10f3 d10f3">
   <title id="t10f3">Five design patterns for putting AI inside real-time systems without putting it on the critical path</title>
-  <desc id="d10f3">Five small block diagrams arranged in a grid. Each names the pattern (advisory, bounded with rejection, confidence gating, redundant voting, hierarchical safety) and shows the AI block, the supervisor or fallback block, and the arrow to the actuator, with the failure mode the pattern mitigates labeled underneath.</desc>
+  <desc id="d10f3">Five small block diagrams arranged in a grid. Each names the pattern and shows the AI block, supervisor or fallback block, and the arrow to the actuator, with the failure mode labeled underneath.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .eb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 9px; letter-spacing: 0.4px; fill: #555555; }
-      .ai-box { fill: #F5F5F5; stroke: #555555; stroke-width: 0.75; }
-      .safe-box { fill: #FFFFFF; stroke: #000000; stroke-width: 1.25; }
-      .act-box { fill: #000000; stroke: #000000; }
+      .ti { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .lb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #111111; }
+      .sm { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+      .eb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px; letter-spacing: 0.4px; fill: #555555; }
+      .ai-box { fill: #F5F5F5; stroke: #666666; stroke-width: 0.75; }
+      .safe-box { fill: #FFFFFF; stroke: #111111; stroke-width: 1.25; }
+      .act-box { fill: #333333; stroke: #333333; }
     </style>
     <marker id="ar1f3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#111111"/>
     </marker>
     <marker id="ar2f3" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
-      <polygon points="0 0, 6 2, 0 4" fill="#555555"/>
+      <polygon points="0 0, 6 2, 0 4" fill="#666666"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Five patterns — the AI is never the part that guarantees safety</text>
-  <text x="32" y="48" class="sm">Each diagram: AI block (gray), supervisor or deterministic fallback (heavy outline), actuator (filled). The pattern names the failure mode it mitigates.</text>
-
-  <!-- Grid: 3 columns × 2 rows. Cells are ~210 wide, 170 tall. Top row y=64, bottom y=244 -->
+  <text x="32" y="48" class="sm">Each diagram: AI block (light gray), supervisor or deterministic fallback (heavy outline), actuator (dark). The pattern names the failure mode it mitigates.</text>
 
   <!-- Pattern 1: Advisory -->
   <g transform="translate(32,64)">
     <text x="0" y="0" class="eb">PATTERN 1</text>
     <text x="0" y="14" class="nm">Advisory, not command</text>
-    <!-- AI -->
     <rect x="6" y="28" width="74" height="38" class="ai-box"/>
     <text x="43" y="44" text-anchor="middle" class="lb">AI</text>
     <text x="43" y="58" text-anchor="middle" class="sm">suggests</text>
-    <!-- arrow to supervisor -->
-    <line x1="80" y1="47" x2="106" y2="47" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
-    <!-- Supervisor -->
+    <line x1="80" y1="47" x2="106" y2="47" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
     <rect x="106" y="28" width="84" height="38" class="safe-box"/>
     <text x="148" y="44" text-anchor="middle" class="lb">supervisor</text>
     <text x="148" y="58" text-anchor="middle" class="sm">deterministic</text>
-    <!-- arrow to actuator -->
-    <line x1="148" y1="66" x2="148" y2="92" stroke="#000000" stroke-width="1" marker-end="url(#ar1f3)"/>
+    <line x1="148" y1="66" x2="148" y2="92" stroke="#111111" stroke-width="1" marker-end="url(#ar1f3)"/>
     <rect x="118" y="92" width="60" height="20" class="act-box"/>
     <text x="148" y="106" text-anchor="middle" class="lb" fill="#FFFFFF">actuator</text>
-    <!-- mitigation -->
     <text x="98" y="138" text-anchor="middle" class="sm">mitigates: AI false output</text>
     <text x="98" y="150" text-anchor="middle" class="sm">supervisor owns the decision</text>
   </g>
@@ -57,16 +50,15 @@
     <rect x="6" y="28" width="74" height="38" class="ai-box"/>
     <text x="43" y="44" text-anchor="middle" class="lb">AI</text>
     <text x="43" y="58" text-anchor="middle" class="sm">+ timer</text>
-    <!-- branch labels -->
-    <line x1="80" y1="40" x2="110" y2="32" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="80" y1="40" x2="110" y2="32" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
     <text x="86" y="28" class="sm">in time</text>
-    <line x1="80" y1="54" x2="110" y2="62" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="80" y1="54" x2="110" y2="62" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
     <text x="86" y="72" class="sm">timeout</text>
     <rect x="112" y="22" width="80" height="20" class="safe-box"/>
     <text x="152" y="36" text-anchor="middle" class="lb">use result</text>
     <rect x="112" y="58" width="80" height="20" class="safe-box"/>
     <text x="152" y="72" text-anchor="middle" class="lb">return UNKNOWN</text>
-    <line x1="152" y1="78" x2="152" y2="92" stroke="#000000" stroke-width="1" marker-end="url(#ar1f3)"/>
+    <line x1="152" y1="78" x2="152" y2="92" stroke="#111111" stroke-width="1" marker-end="url(#ar1f3)"/>
     <rect x="122" y="92" width="60" height="20" class="act-box"/>
     <text x="152" y="106" text-anchor="middle" class="lb" fill="#FFFFFF">safe state</text>
     <text x="98" y="138" text-anchor="middle" class="sm">mitigates: latency violation</text>
@@ -80,19 +72,19 @@
     <rect x="6" y="28" width="80" height="38" class="ai-box"/>
     <text x="46" y="44" text-anchor="middle" class="lb">AI</text>
     <text x="46" y="58" text-anchor="middle" class="sm">class + score</text>
-    <line x1="86" y1="40" x2="116" y2="32" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="86" y1="40" x2="116" y2="32" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
     <text x="92" y="28" class="sm">≥ 0.98</text>
-    <line x1="86" y1="54" x2="116" y2="62" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="86" y1="54" x2="116" y2="62" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
     <text x="92" y="72" class="sm">&lt; 0.98</text>
     <rect x="118" y="22" width="74" height="20" class="safe-box"/>
     <text x="155" y="36" text-anchor="middle" class="lb">act</text>
     <rect x="118" y="58" width="74" height="20" class="safe-box"/>
     <text x="155" y="72" text-anchor="middle" class="lb">flag, no-op</text>
-    <line x1="155" y1="42" x2="155" y2="92" stroke="#000000" stroke-width="1" marker-end="url(#ar1f3)"/>
+    <line x1="155" y1="42" x2="155" y2="92" stroke="#111111" stroke-width="1" marker-end="url(#ar1f3)"/>
     <rect x="125" y="92" width="60" height="20" class="act-box"/>
     <text x="155" y="106" text-anchor="middle" class="lb" fill="#FFFFFF">actuator</text>
     <text x="98" y="138" text-anchor="middle" class="sm">mitigates: false positives</text>
-    <text x="98" y="150" text-anchor="middle" class="sm">unsure ⇒ do not act</text>
+    <text x="98" y="150" text-anchor="middle" class="sm">unsure =&gt; do not act</text>
   </g>
 
   <!-- Pattern 4: Redundant voting -->
@@ -105,12 +97,12 @@
     <text x="31" y="66" text-anchor="middle" class="sm">model B</text>
     <rect x="6" y="76" width="50" height="20" class="ai-box"/>
     <text x="31" y="90" text-anchor="middle" class="sm">model C</text>
-    <line x1="56" y1="38" x2="98" y2="58" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
-    <line x1="56" y1="62" x2="98" y2="62" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
-    <line x1="56" y1="86" x2="98" y2="66" stroke="#555555" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="56" y1="38" x2="98" y2="58" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="56" y1="62" x2="98" y2="62" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
+    <line x1="56" y1="86" x2="98" y2="66" stroke="#666666" stroke-width="1" marker-end="url(#ar2f3)"/>
     <rect x="100" y="50" width="84" height="28" class="safe-box"/>
     <text x="142" y="68" text-anchor="middle" class="lb">2-of-3 vote</text>
-    <line x1="142" y1="78" x2="142" y2="108" stroke="#000000" stroke-width="1" marker-end="url(#ar1f3)"/>
+    <line x1="142" y1="78" x2="142" y2="108" stroke="#111111" stroke-width="1" marker-end="url(#ar1f3)"/>
     <rect x="112" y="108" width="60" height="20" class="act-box"/>
     <text x="142" y="122" text-anchor="middle" class="lb" fill="#FFFFFF">actuator</text>
     <text x="98" y="152" text-anchor="middle" class="sm">mitigates: model-specific failures,</text>
@@ -125,10 +117,9 @@
     <text x="98" y="42" text-anchor="middle" class="sm">AI · perception (complex, ms-scale)</text>
     <rect x="6" y="52" width="184" height="20" class="safe-box"/>
     <text x="98" y="66" text-anchor="middle" class="sm">rule-based threshold (deterministic)</text>
-    <rect x="6" y="76" width="184" height="20" fill="#000000" stroke="#000000"/>
+    <rect x="6" y="76" width="184" height="20" fill="#333333" stroke="#333333"/>
     <text x="98" y="90" text-anchor="middle" class="sm" fill="#FFFFFF">hardware trip (mechanical)</text>
-    <!-- vertical stacking arrow -->
-    <line x1="200" y1="38" x2="200" y2="92" stroke="#000000" stroke-width="1" marker-end="url(#ar1f3)"/>
+    <line x1="200" y1="38" x2="200" y2="92" stroke="#111111" stroke-width="1" marker-end="url(#ar1f3)"/>
     <text x="206" y="56" class="sm">if AI</text>
     <text x="206" y="68" class="sm">misses,</text>
     <text x="206" y="80" class="sm">next</text>
@@ -138,19 +129,19 @@
     <text x="98" y="150" text-anchor="middle" class="sm">simpler layers below are certifiable</text>
   </g>
 
-  <!-- Right cell: failure-mode coverage legend -->
+  <!-- Coverage legend -->
   <g transform="translate(472,244)">
     <text x="0" y="0" class="eb">COVERAGE</text>
     <text x="0" y="14" class="nm">What each pattern catches</text>
-    <rect x="0" y="22" width="200" height="118" fill="#FFFFFF" stroke="#ADADAD"/>
-    <text x="8" y="38" class="sm">P1 advisory ……… false output</text>
-    <text x="8" y="54" class="sm">P2 bounded ……… latency violation</text>
-    <text x="8" y="70" class="sm">P3 gating ……… false positive</text>
-    <text x="8" y="86" class="sm">P4 voting ……… adversarial / model bug</text>
-    <text x="8" y="102" class="sm">P5 layers ……… everything above, in depth</text>
-    <text x="8" y="124" class="sm">Compose freely — most</text>
-    <text x="8" y="134" class="sm">real systems use two or three.</text>
+    <rect x="0" y="22" width="200" height="118" fill="#FFFFFF" stroke="#BBBBBB"/>
+    <text x="8" y="38" class="sm">P1 advisory ......... false output</text>
+    <text x="8" y="54" class="sm">P2 bounded ......... latency violation</text>
+    <text x="8" y="70" class="sm">P3 gating ......... false positive</text>
+    <text x="8" y="86" class="sm">P4 voting ......... adversarial / model bug</text>
+    <text x="8" y="102" class="sm">P5 layers ......... everything above, in depth</text>
+    <text x="8" y="124" class="sm">Compose freely — most real</text>
+    <text x="8" y="134" class="sm">systems use two or three.</text>
   </g>
 
-  <text x="350" y="438" text-anchor="middle" class="cap">The AI is on the diagram. The safety guarantee is on the heavy-outlined block next to it.</text>
+  <text x="350" y="458" text-anchor="middle" class="cap">The AI is on the diagram. The safety guarantee is on the heavy-outlined block next to it.</text>
 </svg>

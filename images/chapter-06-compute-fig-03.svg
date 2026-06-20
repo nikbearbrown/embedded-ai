@@ -1,50 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t06-03 d06-03">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06-03 d06-03">
   <title id="t06-03">Processor-class ladder — five tiers from Cortex-M0+ through NPU accelerator</title>
   <desc id="d06-03">Five columns arranged left-to-right by capability. Each column lists pipeline depth, SIMD width, clock, peak MMAC per second, and an example chip. Cortex-M0+, Cortex-M4, Cortex-M7, Cortex-A53, and an NPU tier represented by Ethos-U55.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 16px; font-weight: bold; fill: #000000; }
-      .col-ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .row-lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #555555; }
-      .perf { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .perf-hi { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #C8102E; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .ti { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .col-ti { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .lb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #333333; }
+      .sm { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #666666; }
+      .row-lb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #666666; }
+      .perf { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .perf-hi { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666666; }
     </style>
     <marker id="ar3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
   <!-- Title -->
-  <text x="350" y="28" text-anchor="middle" class="ti">Processor-class ladder — peak MMAC/s rises four orders of magnitude across the tiers</text>
+  <text x="350" y="26" text-anchor="middle" class="ti">Processor-class ladder — peak MMAC/s rises four orders of magnitude across the tiers</text>
 
   <!-- Row labels (left gutter) -->
   <text x="22" y="105" class="row-lb">Pipeline</text>
   <text x="22" y="155" class="row-lb">SIMD</text>
   <text x="22" y="205" class="row-lb">Clock</text>
   <text x="22" y="255" class="row-lb">Peak</text>
-  <text x="22" y="270" class="row-lb">MMAC/s</text>
+  <text x="22" y="269" class="row-lb">MMAC/s</text>
   <text x="22" y="320" class="row-lb">Example</text>
 
-  <!-- Horizontal row separators -->
-  <line x1="100" y1="80" x2="680" y2="80" stroke="#787878" stroke-width="0.5"/>
-  <line x1="100" y1="125" x2="680" y2="125" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="100" y1="175" x2="680" y2="175" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="100" y1="225" x2="680" y2="225" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="100" y1="295" x2="680" y2="295" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="100" y1="345" x2="680" y2="345" stroke="#787878" stroke-width="0.5"/>
+  <!-- Row separators -->
+  <line x1="100" y1="80" x2="680" y2="80" stroke="#AAAAAA" stroke-width="0.5"/>
+  <line x1="100" y1="125" x2="680" y2="125" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="100" y1="175" x2="680" y2="175" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="100" y1="225" x2="680" y2="225" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="100" y1="295" x2="680" y2="295" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="100" y1="345" x2="680" y2="345" stroke="#AAAAAA" stroke-width="0.5"/>
 
-  <!-- Columns: 5 tiers across x = 100..680 (580 wide) → 116 wide each. Centers at 158, 274, 390, 506, 622 -->
-  <!-- Column heading bar (heights scaled to capability) -->
-  <!-- Capability bars at top, growing from short to tall: heights 12, 24, 38, 52, 64 px, anchored at y=72 -->
-  <rect x="116" y="60" width="84" height="12" fill="#ADADAD"/>
-  <rect x="232" y="48" width="84" height="24" fill="#787878"/>
-  <rect x="348" y="34" width="84" height="38" fill="#555555"/>
-  <rect x="464" y="20" width="84" height="52" fill="#000000"/>
-  <rect x="580" y="8" width="84" height="64" fill="#C8102E"/>
+  <!-- Columns: centers at 158, 274, 390, 506, 622 -->
+  <!-- Capability bars growing left to right: heights 12, 24, 38, 52, 64 px, anchored at y=72 -->
+  <rect x="116" y="60" width="84" height="12" fill="#DDDDDD"/>
+  <rect x="232" y="48" width="84" height="24" fill="#BBBBBB"/>
+  <rect x="348" y="34" width="84" height="38" fill="#888888"/>
+  <rect x="464" y="20" width="84" height="52" fill="#555555"/>
+  <rect x="580" y="8" width="84" height="64" fill="#333333"/>
 
   <!-- Column titles -->
   <text x="158" y="100" text-anchor="middle" class="col-ti">Cortex-M0+</text>
@@ -54,65 +53,66 @@
   <text x="622" y="100" text-anchor="middle" class="col-ti">NPU tier</text>
 
   <!-- Pipeline row -->
-  <text x="158" y="145" text-anchor="middle" class="lb">2-stage</text>
-  <text x="158" y="160" text-anchor="middle" class="sm">in-order</text>
-  <text x="274" y="145" text-anchor="middle" class="lb">3-stage</text>
-  <text x="274" y="160" text-anchor="middle" class="sm">in-order, FPU</text>
-  <text x="390" y="145" text-anchor="middle" class="lb">6-stage</text>
-  <text x="390" y="160" text-anchor="middle" class="sm">dual-issue, FPU</text>
-  <text x="506" y="145" text-anchor="middle" class="lb">8-stage</text>
-  <text x="506" y="160" text-anchor="middle" class="sm">out-of-order</text>
-  <text x="622" y="145" text-anchor="middle" class="lb">dataflow</text>
-  <text x="622" y="160" text-anchor="middle" class="sm">MAC array</text>
+  <text x="158" y="144" text-anchor="middle" class="lb">2-stage</text>
+  <text x="158" y="158" text-anchor="middle" class="sm">in-order</text>
+  <text x="274" y="144" text-anchor="middle" class="lb">3-stage</text>
+  <text x="274" y="158" text-anchor="middle" class="sm">in-order, FPU</text>
+  <text x="390" y="144" text-anchor="middle" class="lb">6-stage</text>
+  <text x="390" y="158" text-anchor="middle" class="sm">dual-issue, FPU</text>
+  <text x="506" y="144" text-anchor="middle" class="lb">8-stage</text>
+  <text x="506" y="158" text-anchor="middle" class="sm">out-of-order</text>
+  <text x="622" y="144" text-anchor="middle" class="lb">dataflow</text>
+  <text x="622" y="158" text-anchor="middle" class="sm">MAC array</text>
 
   <!-- SIMD row -->
-  <text x="158" y="195" text-anchor="middle" class="lb">none</text>
-  <text x="158" y="210" text-anchor="middle" class="sm">scalar only</text>
-  <text x="274" y="195" text-anchor="middle" class="lb">DSP ext.</text>
-  <text x="274" y="210" text-anchor="middle" class="sm">4×int8 / 2×int16</text>
-  <text x="390" y="195" text-anchor="middle" class="lb">DSP ext.</text>
-  <text x="390" y="210" text-anchor="middle" class="sm">4×int8 + dual issue</text>
-  <text x="506" y="195" text-anchor="middle" class="lb">NEON</text>
-  <text x="506" y="210" text-anchor="middle" class="sm">16×int8 per core</text>
-  <text x="622" y="195" text-anchor="middle" class="lb">grid SIMD</text>
-  <text x="622" y="210" text-anchor="middle" class="sm">128–256 MACs/cycle</text>
+  <text x="158" y="194" text-anchor="middle" class="lb">none</text>
+  <text x="158" y="208" text-anchor="middle" class="sm">scalar only</text>
+  <text x="274" y="194" text-anchor="middle" class="lb">DSP ext.</text>
+  <text x="274" y="208" text-anchor="middle" class="sm">4×int8 / 2×int16</text>
+  <text x="390" y="194" text-anchor="middle" class="lb">DSP ext.</text>
+  <text x="390" y="208" text-anchor="middle" class="sm">4×int8 + dual issue</text>
+  <text x="506" y="194" text-anchor="middle" class="lb">NEON</text>
+  <text x="506" y="208" text-anchor="middle" class="sm">16×int8 per core</text>
+  <text x="622" y="194" text-anchor="middle" class="lb">grid SIMD</text>
+  <text x="622" y="208" text-anchor="middle" class="sm">128–256 MACs/cycle</text>
 
   <!-- Clock row -->
-  <text x="158" y="245" text-anchor="middle" class="lb">≤ 48 MHz</text>
-  <text x="274" y="245" text-anchor="middle" class="lb">100 MHz</text>
-  <text x="390" y="245" text-anchor="middle" class="lb">400 MHz</text>
-  <text x="506" y="245" text-anchor="middle" class="lb">1 GHz × 4 cores</text>
-  <text x="622" y="245" text-anchor="middle" class="lb">200–500 MHz</text>
+  <text x="158" y="244" text-anchor="middle" class="lb">≤48 MHz</text>
+  <text x="274" y="244" text-anchor="middle" class="lb">100 MHz</text>
+  <text x="390" y="244" text-anchor="middle" class="lb">400 MHz</text>
+  <text x="506" y="244" text-anchor="middle" class="lb">1 GHz × 4 cores</text>
+  <text x="622" y="244" text-anchor="middle" class="lb">200–500 MHz</text>
 
   <!-- Peak MMAC/s row -->
-  <text x="158" y="275" text-anchor="middle" class="perf">≈ 1.5 M</text>
-  <text x="158" y="288" text-anchor="middle" class="sm">int32 scalar, sw multiply</text>
-  <text x="274" y="275" text-anchor="middle" class="perf">≈ 400 M</text>
-  <text x="274" y="288" text-anchor="middle" class="sm">int8 SIMD</text>
-  <text x="390" y="275" text-anchor="middle" class="perf">≈ 800 M</text>
-  <text x="390" y="288" text-anchor="middle" class="sm">f32 dual-issue</text>
-  <text x="506" y="275" text-anchor="middle" class="perf">≈ 64 G</text>
-  <text x="506" y="288" text-anchor="middle" class="sm">int8 NEON, 4 cores</text>
-  <text x="622" y="275" text-anchor="middle" class="perf-hi">≈ 250 G+</text>
-  <text x="622" y="288" text-anchor="middle" class="sm">int8 accelerator</text>
+  <text x="158" y="274" text-anchor="middle" class="perf">~1.5 M</text>
+  <text x="158" y="287" text-anchor="middle" class="sm">int32 scalar</text>
+  <text x="274" y="274" text-anchor="middle" class="perf">~400 M</text>
+  <text x="274" y="287" text-anchor="middle" class="sm">int8 SIMD</text>
+  <text x="390" y="274" text-anchor="middle" class="perf">~800 M</text>
+  <text x="390" y="287" text-anchor="middle" class="sm">f32 dual-issue</text>
+  <text x="506" y="274" text-anchor="middle" class="perf">~64 G</text>
+  <text x="506" y="287" text-anchor="middle" class="sm">int8 NEON, 4 cores</text>
+  <text x="622" y="274" text-anchor="middle" class="perf-hi">~250 G+</text>
+  <text x="622" y="287" text-anchor="middle" class="sm">int8 accelerator</text>
 
   <!-- Example chip row -->
-  <text x="158" y="315" text-anchor="middle" class="lb">RP2040, STM32F0</text>
-  <text x="158" y="328" text-anchor="middle" class="sm">≤ $2 BOM</text>
-  <text x="274" y="315" text-anchor="middle" class="lb">nRF52840, STM32L4</text>
-  <text x="274" y="328" text-anchor="middle" class="sm">$3–6 BOM</text>
-  <text x="390" y="315" text-anchor="middle" class="lb">STM32H7, RT1062</text>
-  <text x="390" y="328" text-anchor="middle" class="sm">$8–15 BOM</text>
-  <text x="506" y="315" text-anchor="middle" class="lb">Pi Zero 2 W</text>
-  <text x="506" y="328" text-anchor="middle" class="sm">$15–25 module</text>
-  <text x="622" y="315" text-anchor="middle" class="lb">M55 + Ethos-U55</text>
-  <text x="622" y="328" text-anchor="middle" class="sm">$10–20 BOM</text>
+  <text x="158" y="314" text-anchor="middle" class="lb">RP2040, STM32F0</text>
+  <text x="158" y="327" text-anchor="middle" class="sm">≤$2 BOM</text>
+  <text x="274" y="314" text-anchor="middle" class="lb">nRF52840, STM32L4</text>
+  <text x="274" y="327" text-anchor="middle" class="sm">$3–6 BOM</text>
+  <text x="390" y="314" text-anchor="middle" class="lb">STM32H7, RT1062</text>
+  <text x="390" y="327" text-anchor="middle" class="sm">$8–15 BOM</text>
+  <text x="506" y="314" text-anchor="middle" class="lb">Pi Zero 2 W</text>
+  <text x="506" y="327" text-anchor="middle" class="sm">$15–25 module</text>
+  <text x="622" y="314" text-anchor="middle" class="lb">M55 + Ethos-U55</text>
+  <text x="622" y="327" text-anchor="middle" class="sm">$10–20 BOM</text>
 
-  <!-- Climbing arrow under everything -->
-  <path d="M 100 380 L 660 380" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar3)"/>
-  <text x="380" y="395" text-anchor="middle" class="lb">capability × cost × power — all rise together</text>
+  <!-- Climbing arrow -->
+  <path d="M 100 378 L 660 378" fill="none" stroke="#333333" stroke-width="1" marker-end="url(#ar3)"/>
+  <text x="380" y="393" text-anchor="middle" class="lb">capability, cost, and power all rise together</text>
 
-  <!-- Footnote / cap -->
+  <!-- Footnotes -->
   <text x="350" y="425" text-anchor="middle" class="cap">Peak figures assume the right datatype (int8 with SIMD) and an optimized kernel (CMSIS-NN, CMSIS-DSP).</text>
   <text x="350" y="443" text-anchor="middle" class="cap">Sustained throughput is typically 0.5–0.9× of peak; profile before trusting any tier as the deployment plan.</text>
+  <text x="350" y="463" text-anchor="middle" class="cap">Figure 6-3. Processor-class ladder — five tiers by pipeline, SIMD, clock, and peak MMAC/s.</text>
 </svg>

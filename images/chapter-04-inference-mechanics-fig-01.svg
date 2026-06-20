@@ -1,82 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" role="img" aria-labelledby="t01 d01">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" role="img" aria-labelledby="t01 d01">
   <title id="t01">Four-stage inference pipeline — what the profiler measures vs. application latency</title>
   <desc id="d01">Horizontal flow of four stages: Input Preparation, Inference Execution, Output Interpretation, and Result Delivery. Annotations show the profiler typically measures Stage 2 only while application latency spans all four.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .badge { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #FFFFFF; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #111111; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .badge { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #FFFFFF; }
     </style>
     <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#333333"/>
     </marker>
-    <marker id="arRed" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#C8102E"/>
+    <marker id="arDash" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#666666"/>
     </marker>
   </defs>
-  <rect width="760" height="420" fill="#FFFFFF"/>
+  <rect width="760" height="440" fill="#FFFFFF"/>
 
   <text x="32" y="34" class="ti">Inference is four stages — profilers usually see only one</text>
   <text x="32" y="52" class="nm">application latency = stage 1 + stage 2 + stage 3 + stage 4</text>
 
-  <!-- four stage boxes -->
   <!-- Stage 1 -->
-  <rect x="32"  y="120" width="160" height="90" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-  <rect x="32"  y="120" width="160" height="20" fill="#555555"/>
+  <rect x="32"  y="120" width="160" height="90" fill="#FFFFFF" stroke="#333333" stroke-width="1.5"/>
+  <rect x="32"  y="120" width="160" height="20" fill="#444444"/>
   <text x="40"  y="135" class="badge">STAGE 1 — INPUT PREP</text>
   <text x="40"  y="160" class="lb">FFT, normalize, reshape</text>
-  <text x="40"  y="178" class="sm">ADC samples → tensor</text>
+  <text x="40"  y="178" class="sm">ADC samples to tensor</text>
   <text x="40"  y="194" class="sm">type-cast, scale to [0, 1]</text>
 
-  <!-- Stage 2 -->
-  <rect x="212" y="120" width="160" height="90" fill="#FFFFFF" stroke="#C8102E" stroke-width="2"/>
-  <rect x="212" y="120" width="160" height="20" fill="#C8102E"/>
+  <!-- Stage 2 — highlighted as the "profiler zone" -->
+  <rect x="212" y="120" width="160" height="90" fill="#F5F5F5" stroke="#111111" stroke-width="2"/>
+  <rect x="212" y="120" width="160" height="20" fill="#111111"/>
   <text x="220" y="135" class="badge">STAGE 2 — INFERENCE</text>
   <text x="220" y="160" class="lb">layer-by-layer execution</text>
   <text x="220" y="178" class="sm">weight load, MAC, write</text>
-  <text x="220" y="194" class="sm">most of the cycles live here</text>
+  <text x="220" y="194" class="sm">most cycles live here</text>
 
   <!-- Stage 3 -->
-  <rect x="392" y="120" width="160" height="90" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-  <rect x="392" y="120" width="160" height="20" fill="#555555"/>
+  <rect x="392" y="120" width="160" height="90" fill="#FFFFFF" stroke="#333333" stroke-width="1.5"/>
+  <rect x="392" y="120" width="160" height="20" fill="#444444"/>
   <text x="400" y="135" class="badge">STAGE 3 — OUTPUT INTERP</text>
   <text x="400" y="160" class="lb">softmax, NMS, threshold</text>
-  <text x="400" y="178" class="sm">logits → labels / boxes</text>
+  <text x="400" y="178" class="sm">logits to labels / boxes</text>
   <text x="400" y="194" class="sm">argmax, confidence gate</text>
 
   <!-- Stage 4 -->
-  <rect x="572" y="120" width="160" height="90" fill="#FFFFFF" stroke="#000000" stroke-width="1.5"/>
-  <rect x="572" y="120" width="160" height="20" fill="#555555"/>
+  <rect x="572" y="120" width="160" height="90" fill="#FFFFFF" stroke="#333333" stroke-width="1.5"/>
+  <rect x="572" y="120" width="160" height="20" fill="#444444"/>
   <text x="580" y="135" class="badge">STAGE 4 — DELIVERY</text>
   <text x="580" y="160" class="lb">GPIO, log, LoRaWAN</text>
   <text x="580" y="178" class="sm">act on the result</text>
   <text x="580" y="194" class="sm">network can dominate</text>
 
-  <!-- flow arrows between stages -->
-  <line x1="192" y1="165" x2="210" y2="165" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <line x1="372" y1="165" x2="390" y2="165" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <line x1="552" y1="165" x2="570" y2="165" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
+  <!-- flow arrows -->
+  <line x1="192" y1="165" x2="210" y2="165" stroke="#333333" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="372" y1="165" x2="390" y2="165" stroke="#333333" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="552" y1="165" x2="570" y2="165" stroke="#333333" stroke-width="1.5" marker-end="url(#ar)"/>
 
   <!-- profiler bracket: stage 2 only -->
-  <line x1="212" y1="240" x2="212" y2="260" stroke="#C8102E" stroke-width="1"/>
-  <line x1="372" y1="240" x2="372" y2="260" stroke="#C8102E" stroke-width="1"/>
-  <line x1="212" y1="260" x2="372" y2="260" stroke="#C8102E" stroke-width="1"/>
-  <text x="292" y="278" text-anchor="middle" class="lb" fill="#C8102E">what the profiler usually reports</text>
-  <text x="292" y="294" text-anchor="middle" class="sm" fill="#C8102E">e.g. 50 ms "inference latency"</text>
+  <line x1="212" y1="240" x2="212" y2="258" stroke="#555555" stroke-width="1"/>
+  <line x1="372" y1="240" x2="372" y2="258" stroke="#555555" stroke-width="1"/>
+  <line x1="212" y1="258" x2="372" y2="258" stroke="#555555" stroke-width="1"/>
+  <text x="292" y="276" text-anchor="middle" class="lb">what the profiler usually reports</text>
+  <text x="292" y="292" text-anchor="middle" class="sm">e.g. 50 ms "inference latency"</text>
 
   <!-- application bracket: all four -->
-  <line x1="32"  y1="335" x2="32"  y2="355" stroke="#000000" stroke-width="1"/>
-  <line x1="732" y1="335" x2="732" y2="355" stroke="#000000" stroke-width="1"/>
-  <line x1="32"  y1="355" x2="732" y2="355" stroke="#000000" stroke-width="1"/>
-  <text x="382" y="372" text-anchor="middle" class="lb">what the deadline measures — end-to-end application latency</text>
-  <text x="382" y="388" text-anchor="middle" class="sm">e.g. 150 ms once FFT, post-processing, and radio send are counted</text>
+  <line x1="32"  y1="334" x2="32"  y2="352" stroke="#111111" stroke-width="1"/>
+  <line x1="732" y1="334" x2="732" y2="352" stroke="#111111" stroke-width="1"/>
+  <line x1="32"  y1="352" x2="732" y2="352" stroke="#111111" stroke-width="1"/>
+  <text x="382" y="368" text-anchor="middle" class="lb">what the deadline measures — end-to-end application latency</text>
+  <text x="382" y="384" text-anchor="middle" class="sm">e.g. 150 ms once FFT, post-processing, and radio send are counted</text>
 
-  <!-- gap arrow -->
-  <path d="M 600 240 Q 600 320 105 335" fill="none" stroke="#C8102E" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arRed)"/>
-  <text x="630" y="240" class="cap" fill="#C8102E">the gap that surprises you</text>
+  <!-- gap callout arrow (grayscale dashed) -->
+  <path d="M 590 244 Q 590 318 115 334" fill="none" stroke="#666666" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arDash)"/>
+  <text x="606" y="240" class="cap">the gap that surprises you</text>
 
-  <text x="380" y="412" text-anchor="middle" class="cap">A 50 ms inference becomes a 150 ms application — the profiler does not lie, but it does not tell the whole story.</text>
+  <text x="380" y="418" text-anchor="middle" class="cap">A 50 ms inference becomes a 150 ms application — the profiler does not lie, but it does not tell the whole story.</text>
 </svg>

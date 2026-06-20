@@ -1,72 +1,70 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t01 d01">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t01 d01">
   <title id="t01">CPU vs NPU cycle utilization on a 128×128 matmul</title>
   <desc id="d01">Two stacked bars compare how a Cortex-M7 CPU and a dedicated NPU spend each cycle running a 128 by 128 matmul. The CPU bar splits 30 percent arithmetic, 50 percent memory access, 15 percent instruction fetch and decode, 5 percent pipeline stalls. The NPU bar is near-100 percent arithmetic with a thin sliver of data movement.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .seg { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #FFFFFF; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .seg { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #F5F5F5; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#111111"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#FFFFFF"/>
+  <rect width="700" height="440" fill="#FFFFFF"/>
 
   <!-- Title -->
   <text x="32" y="32" class="ti">Where each cycle goes — 128×128 int8 matmul</text>
   <text x="32" y="48" class="sm">Cortex-M7 at 400 MHz vs 16×16 NPU MAC array, same workload</text>
 
-  <!-- Axis (percent 0..100) -->
-  <line x1="120" y1="320" x2="640" y2="320" stroke="#787878" stroke-width="1"/>
+  <!-- X axis (percent 0..100), x=120..640 = 520 px for 100% -->
+  <line x1="120" y1="320" x2="640" y2="320" stroke="#888888" stroke-width="1"/>
   <text x="120" y="338" text-anchor="middle" class="sm">0%</text>
-  <line x1="120" y1="316" x2="120" y2="324" stroke="#555555"/>
+  <line x1="120" y1="316" x2="120" y2="324" stroke="#888888"/>
   <text x="250" y="338" text-anchor="middle" class="sm">25%</text>
-  <line x1="250" y1="316" x2="250" y2="324" stroke="#555555"/>
+  <line x1="250" y1="316" x2="250" y2="324" stroke="#888888"/>
   <text x="380" y="338" text-anchor="middle" class="sm">50%</text>
-  <line x1="380" y1="316" x2="380" y2="324" stroke="#555555"/>
+  <line x1="380" y1="316" x2="380" y2="324" stroke="#888888"/>
   <text x="510" y="338" text-anchor="middle" class="sm">75%</text>
-  <line x1="510" y1="316" x2="510" y2="324" stroke="#555555"/>
+  <line x1="510" y1="316" x2="510" y2="324" stroke="#888888"/>
   <text x="640" y="338" text-anchor="middle" class="sm">100%</text>
-  <line x1="640" y1="316" x2="640" y2="324" stroke="#555555"/>
-  <text x="380" y="358" text-anchor="middle" class="sm">fraction of cycles</text>
+  <line x1="640" y1="316" x2="640" y2="324" stroke="#888888"/>
+  <text x="380" y="356" text-anchor="middle" class="sm">fraction of cycles</text>
 
-  <!-- CPU bar — y=110, height=60, full width 520 -->
-  <text x="112" y="146" text-anchor="end" class="lb">Cortex-M7</text>
-  <text x="112" y="160" text-anchor="end" class="sm">CPU, CMSIS-NN</text>
+  <!-- CPU bar — y=110, h=60 -->
+  <text x="112" y="143" text-anchor="end" class="lb">Cortex-M7</text>
+  <text x="112" y="158" text-anchor="end" class="sm">CPU · CMSIS-NN</text>
   <!-- 30% arithmetic = 156 px -->
-  <rect x="120" y="110" width="156" height="60" fill="#000000"/>
-  <text x="198" y="144" text-anchor="middle" class="seg">30% arithmetic</text>
+  <rect x="120" y="110" width="156" height="60" fill="#111111"/>
+  <text x="198" y="145" text-anchor="middle" class="seg">30% arith.</text>
   <!-- 50% memory = 260 px -->
   <rect x="276" y="110" width="260" height="60" fill="#555555"/>
-  <text x="406" y="144" text-anchor="middle" class="seg">50% memory access</text>
+  <text x="406" y="145" text-anchor="middle" class="seg">50% memory</text>
   <!-- 15% fetch/decode = 78 px -->
-  <rect x="536" y="110" width="78" height="60" fill="#787878"/>
-  <text x="575" y="144" text-anchor="middle" class="seg">15% fetch</text>
+  <rect x="536" y="110" width="78" height="60" fill="#888888"/>
+  <text x="575" y="145" text-anchor="middle" class="seg">15% fetch</text>
   <!-- 5% stalls = 26 px -->
-  <rect x="614" y="110" width="26" height="60" fill="#ADADAD"/>
-  <text x="627" y="184" text-anchor="middle" class="sm">5% stall</text>
+  <rect x="614" y="110" width="26" height="60" fill="#BBBBBB"/>
+  <text x="627" y="185" text-anchor="middle" class="sm">5%</text>
   <!-- Overhead bracket -->
-  <path d="M 276 105 L 276 95 L 640 95 L 640 105" fill="none" stroke="#000000" stroke-width="1"/>
-  <text x="458" y="88" text-anchor="middle" class="lb">70% overhead</text>
+  <path d="M 276 105 L 276 96 L 640 96 L 640 105" fill="none" stroke="#333333" stroke-width="1"/>
+  <text x="458" y="90" text-anchor="middle" class="lb">70% overhead</text>
 
-  <!-- NPU bar — y=210, height=60 -->
-  <text x="112" y="246" text-anchor="end" class="lb">16×16 NPU</text>
-  <text x="112" y="260" text-anchor="end" class="sm">256 MACs/cycle</text>
+  <!-- NPU bar — y=215, h=60 -->
+  <text x="112" y="248" text-anchor="end" class="lb">16×16 NPU</text>
+  <text x="112" y="263" text-anchor="end" class="sm">256 MACs/cycle</text>
   <!-- 92% arithmetic = 478 px -->
-  <rect x="120" y="210" width="478" height="60" fill="#000000"/>
-  <text x="359" y="244" text-anchor="middle" class="seg">≈92% arithmetic — MAC array busy</text>
+  <rect x="120" y="215" width="478" height="60" fill="#333333"/>
+  <text x="359" y="250" text-anchor="middle" class="seg">92% arithmetic — MAC array busy</text>
   <!-- 8% data movement = 42 px -->
-  <rect x="598" y="210" width="42" height="60" fill="#787878"/>
-  <text x="619" y="284" text-anchor="middle" class="sm">8% move</text>
+  <rect x="598" y="215" width="42" height="60" fill="#888888"/>
+  <text x="619" y="290" text-anchor="middle" class="sm">8% move</text>
 
-  <!-- Speedup callout -->
-  <path d="M 250 178 L 250 196 L 250 200" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)"/>
-  <text x="660" y="240" text-anchor="end" class="lb" transform="rotate(0)"></text>
-  <text x="380" y="300" text-anchor="middle" class="lb">~8× faster — parallelism + no control overhead</text>
+  <!-- Speedup label -->
+  <text x="380" y="302" text-anchor="middle" class="lb">~8× faster — parallelism + no control overhead</text>
 
   <!-- Caption -->
-  <text x="350" y="395" text-anchor="middle" class="cap">A CPU spends two-thirds of its cycles on overhead. An NPU's silicon is the arithmetic.</text>
+  <text x="350" y="418" text-anchor="middle" class="cap">A CPU spends two-thirds of its cycles on overhead. An NPU's silicon is the arithmetic.</text>
 </svg>

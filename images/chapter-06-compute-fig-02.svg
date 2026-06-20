@@ -1,37 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t06-02 d06-02">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06-02 d06-02">
   <title id="t06-02">Roofline model — arithmetic intensity vs achievable performance</title>
   <desc id="d06-02">Log-log plot with arithmetic intensity in ops per byte on the x-axis and achievable performance in MMAC per second on the y-axis. A sloped memory-bandwidth ceiling meets a flat compute-bound plateau at the ridge point; three workloads are placed on or below the roof.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .ti { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .lb { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #333333; }
+      .sm { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #666666; }
+      .ax { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #666666; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #666666; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="700" height="480" fill="#FFFFFF"/>
 
   <text x="350" y="30" text-anchor="middle" class="ti">Roofline model — what limits a kernel on a Cortex-M7 at 400 MHz</text>
 
-  <!-- Plot area: x from 70 to 640 (570 wide), y from 70 to 360 (290 tall) -->
-  <!-- Axis x: log scale 0.25 (=2^-2) to 64 (=2^6) → 8 decades-log2 across 570 px = 71.25 px per doubling -->
-  <!-- Axis y: log scale 10 to 800 MMAC/s. log10(10)=1, log10(800)=2.903. Span 1.903 across 290 px = 152.4 px per decade -->
+  <!-- Plot area: x=70..640, y=70..360 -->
+  <!-- X log2 scale: 0.25 to 64 (8 doublings), 570 px / 8 = 71.25 px per doubling -->
+  <!-- Y log10 scale: 10 to 800 MMAC/s. log10(10)=1, log10(800)=2.903, span=1.903 over 290 px -->
 
-  <!-- Gridlines (vertical, at x = 0.25, 1, 4, 16, 64) -->
-  <line x1="70" y1="70" x2="70" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="212.5" y1="70" x2="212.5" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="355" y1="70" x2="355" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="497.5" y1="70" x2="497.5" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="640" y1="70" x2="640" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-
-  <!-- Horizontal gridlines (y = 10, 100, 1000 → 800) -->
-  <line x1="70" y1="360" x2="640" y2="360" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="70" y1="207.6" x2="640" y2="207.6" stroke="#F5F5F5" stroke-width="0.5"/>
-  <line x1="70" y1="70" x2="640" y2="70" stroke="#F5F5F5" stroke-width="0.5"/>
+  <!-- Light gridlines -->
+  <line x1="70" y1="70" x2="70" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="212.5" y1="70" x2="212.5" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="355" y1="70" x2="355" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="497.5" y1="70" x2="497.5" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="640" y1="70" x2="640" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="70" y1="360" x2="640" y2="360" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="70" y1="207.6" x2="640" y2="207.6" stroke="#DDDDDD" stroke-width="0.5"/>
+  <line x1="70" y1="70" x2="640" y2="70" stroke="#DDDDDD" stroke-width="0.5"/>
 
   <!-- Axes -->
   <line x1="70" y1="70" x2="70" y2="360" stroke="#555555" stroke-width="1"/>
@@ -43,7 +41,7 @@
   <text x="355" y="378" text-anchor="middle" class="ax">4</text>
   <text x="497.5" y="378" text-anchor="middle" class="ax">16</text>
   <text x="640" y="378" text-anchor="middle" class="ax">64</text>
-  <text x="355" y="398" text-anchor="middle" class="lb">Arithmetic intensity (MACs per byte transferred, log)</text>
+  <text x="355" y="398" text-anchor="middle" class="lb">Arithmetic intensity (MACs per byte transferred, log scale)</text>
 
   <!-- Y tick labels -->
   <text x="62" y="364" text-anchor="end" class="ax">10</text>
@@ -51,57 +49,50 @@
   <text x="62" y="74" text-anchor="end" class="ax">800</text>
   <text x="20" y="215" text-anchor="middle" class="lb" transform="rotate(-90 20 215)">Achievable performance (MMAC/s, log)</text>
 
-  <!-- Roofline -->
-  <!-- Compute ceiling (plateau): 400 MMAC/s sustained on M7 → y = log10(400) → 1+(log10(400)-1)/1.903*290 from 360. log10(400)=2.602; offset (2.602-1)/1.903 = 0.842 → y = 360 - 0.842*290 = 360 - 244.2 = 115.8 -->
-  <!-- Memory-bandwidth slope: peak performance = bandwidth × intensity. Bandwidth ~ 100 MMAC/(s·byte). On log-log this is a line of slope +1. -->
-  <!-- Ridge point: where bandwidth × intensity = compute_peak → intensity_ridge = 4 ops/byte. At I=4, y=400; at I=0.25, y=25; at I=64, y=400 (capped) -->
-
-  <!-- Slope segment from (0.25, 25) to (4, 400) -->
-  <!-- (0.25, 25): x=70, log10(25)=1.398, y=360-(0.398/1.903)*290 = 360 - 60.7 = 299.3 -->
-  <!-- (4, 400): x=355, y=115.8 -->
-  <line x1="70" y1="299.3" x2="355" y2="115.8" stroke="#000000" stroke-width="2"/>
-  <!-- Plateau segment from (4,400) to (64,400) -->
-  <line x1="355" y1="115.8" x2="640" y2="115.8" stroke="#000000" stroke-width="2"/>
+  <!-- Roofline: slope from (0.25,25) to ridge at (4,400), plateau from (4,400) to (64,400) -->
+  <!-- (0.25,25): x=70, y=299.3 -->
+  <!-- (4,400): x=355, y=115.8 -->
+  <line x1="70" y1="299.3" x2="355" y2="115.8" stroke="#111111" stroke-width="2"/>
+  <line x1="355" y1="115.8" x2="640" y2="115.8" stroke="#111111" stroke-width="2"/>
 
   <!-- Ridge dot -->
-  <circle cx="355" cy="115.8" r="3.5" fill="#000000"/>
-  <text x="362" y="108" class="sm">ridge point ≈ 4 ops/byte</text>
+  <circle cx="355" cy="115.8" r="3.5" fill="#111111"/>
+  <text x="362" y="109" class="sm">ridge point ~4 ops/byte</text>
 
-  <!-- Labels on roof segments -->
-  <text x="180" y="195" class="lb" transform="rotate(-32 180 195)">memory-bandwidth ceiling</text>
-  <text x="495" y="108" text-anchor="middle" class="lb">compute-bound plateau (400 MMAC/s sustained)</text>
+  <!-- Roof segment labels -->
+  <text x="175" y="200" class="lb" transform="rotate(-32 175 200)">memory-bandwidth ceiling</text>
+  <text x="500" y="108" text-anchor="middle" class="lb">compute-bound plateau (400 MMAC/s)</text>
 
-  <!-- Workload points -->
-  <!-- A: 64x64 matmul. intensity ~8, achieved 350 MMAC/s. At x=8 → log between 4 and 16 → (8/4)=2, log2=1, half of 142.5 → x = 355 + 71.25 = 426.25; y=350 → log10=2.544, (1.544/1.903)*290 = 235.3 → y = 360-235.3 = 124.7 -->
-  <circle cx="426.25" cy="124.7" r="5" fill="#000000"/>
-  <text x="436" y="127" class="lb">A — 64×64 matmul (in cache)</text>
-  <text x="436" y="142" class="sm">≈ 8 ops/byte → compute-bound, near roof</text>
+  <!-- Workload A: 64x64 matmul, intensity~8, achieved 350 MMAC/s -->
+  <!-- x=426.25, y=124.7 -->
+  <circle cx="426.25" cy="124.7" r="6" fill="#111111"/>
+  <text x="436" y="120" class="lb">A — 64×64 matmul (in cache)</text>
+  <text x="436" y="135" class="sm">~8 ops/byte — compute-bound, near roof</text>
 
-  <!-- B: 3x3 conv on 96x96x32 — effective intensity ~1.5, achieved 100 MMAC/s -->
-  <!-- x=1.5 → between 1 (x=212.5) and 4 (x=355). log2(1.5)=0.585 → x=212.5 + 0.585*142.5 = 212.5+83.4 = 295.9 -->
-  <!-- y=100 → at y=207.6 -->
-  <circle cx="295.9" cy="207.6" r="5" fill="#C8102E"/>
-  <text x="195" y="231" class="lb">B — 3×3 conv 96×96×32</text>
-  <text x="195" y="246" class="sm">≈ 1.5 ops/byte effective → memory-bound</text>
+  <!-- Workload B: 3x3 conv, intensity~1.5, achieved 100 MMAC/s -->
+  <!-- x=295.9, y=207.6 -->
+  <circle cx="295.9" cy="207.6" r="6" fill="#555555"/>
+  <text x="198" y="233" class="lb">B — 3×3 conv 96×96×32</text>
+  <text x="198" y="248" class="sm">~1.5 ops/byte — memory-bound</text>
 
-  <!-- C: large 512x512 matmul, intensity ~0.5, achieved 50 MMAC/s -->
-  <!-- x=0.5 → between 0.25 (x=70) and 1 (x=212.5). log2(2)=1 (since 0.5/0.25 = 2). x=70+142.5/2=141.25 -->
-  <!-- y=50 → log10(50)=1.699, (0.699/1.903)*290 = 106.5 → y = 360-106.5 = 253.5 -->
-  <circle cx="141.25" cy="253.5" r="5" fill="#C8102E"/>
-  <text x="76" y="278" class="lb">C — 512×512 matmul (cache thrash)</text>
-  <text x="76" y="293" class="sm">≈ 0.5 ops/byte → memory-bound, far below roof</text>
+  <!-- Workload C: 512x512 matmul cache-thrash, intensity~0.5, achieved 50 MMAC/s -->
+  <!-- x=141.25, y=253.5 -->
+  <circle cx="141.25" cy="253.5" r="6" fill="#888888"/>
+  <text x="76" y="277" class="lb">C — 512×512 matmul (cache thrash)</text>
+  <text x="76" y="292" class="sm">~0.5 ops/byte — memory-bound, far below roof</text>
 
-  <!-- Vertical drop dashed lines from points to x-axis -->
-  <line x1="141.25" y1="253.5" x2="141.25" y2="360" stroke="#787878" stroke-width="0.5" stroke-dasharray="3 3"/>
-  <line x1="295.9" y1="207.6" x2="295.9" y2="360" stroke="#787878" stroke-width="0.5" stroke-dasharray="3 3"/>
-  <line x1="426.25" y1="124.7" x2="426.25" y2="360" stroke="#787878" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <!-- Drop lines -->
+  <line x1="141.25" y1="253.5" x2="141.25" y2="360" stroke="#AAAAAA" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <line x1="295.9" y1="207.6" x2="295.9" y2="360" stroke="#AAAAAA" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <line x1="426.25" y1="124.7" x2="426.25" y2="360" stroke="#AAAAAA" stroke-width="0.5" stroke-dasharray="3 3"/>
 
-  <!-- Annotation: left of ridge = memory-bound, right = compute-bound -->
-  <line x1="355" y1="115.8" x2="355" y2="62" stroke="#787878" stroke-width="0.5" stroke-dasharray="3 3"/>
-  <text x="200" y="58" text-anchor="middle" class="cap">← memory-bound region</text>
-  <text x="495" y="58" text-anchor="middle" class="cap">compute-bound region →</text>
+  <!-- Region labels -->
+  <line x1="355" y1="115.8" x2="355" y2="62" stroke="#AAAAAA" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <text x="200" y="58" text-anchor="middle" class="cap">memory-bound region</text>
+  <text x="500" y="58" text-anchor="middle" class="cap">compute-bound region</text>
 
-  <!-- caption -->
+  <!-- Caption -->
   <text x="350" y="432" text-anchor="middle" class="cap">Left of the ridge, faster clocks barely help. Right of the ridge, doubling clock nearly doubles throughput.</text>
   <text x="350" y="450" text-anchor="middle" class="cap">Profile to locate your kernel; only then choose between SIMD, tiling, or a higher-class processor.</text>
+  <text x="350" y="468" text-anchor="middle" class="cap">Figure 6-2. Roofline model for Cortex-M7 at 400 MHz.</text>
 </svg>

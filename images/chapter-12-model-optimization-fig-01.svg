@@ -1,130 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t01 d01">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t01 d01">
   <title id="t01">Float32-to-int8 quantization mapping — clean range vs rounding mash zone</title>
-  <desc id="d01">Two number lines side by side. Top: a well-distributed weight range from minus one point five to one point five maps cleanly across the int8 range. Bottom: a small skewed activation range from 0.001 to 0.01 collapses many distinct values onto the same integer bins.</desc>
+  <desc id="d01">Two number lines. Top: a well-distributed weight range from minus 1.5 to 1.5 maps cleanly across the int8 range. Bottom: a small skewed activation range from 0.001 to 0.01 collapses many distinct values onto the same integer bins.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .mono { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; font-style: italic; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .badge { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
-      .verdict-good { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .verdict-bad { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #C8102E; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #333333; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .mono{ font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; font-style: italic; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .badge{ font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0,8 3,0 6" fill="#333333"/>
     </marker>
-    <marker id="arRed" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#C8102E"/>
+    <marker id="arG" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#666666"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
-  <text x="32" y="30" class="ti">The rounding does not damage values evenly — it damages the small ones</text>
-  <text x="32" y="48" class="sm">scale = (max − min) / 255 · zero_point shifts so the smallest float maps to int −128</text>
+  <text x="32" y="30" class="ti">Rounding damages small values more than large ones</text>
+  <text x="32" y="48" class="sm">scale = (max − min) / 255  ·  zero_point shifts so the smallest float maps to int −128</text>
 
-  <!-- ============ TOP CASE: well-distributed weights ============ -->
-  <text x="32" y="86" class="ti">Case A — Weight tensor [−1.5, 1.5]</text>
-  <text x="32" y="102" class="mono">scale ≈ 0.0118 · zero_point = 0 · 256 bins span 3.0 units</text>
+  <!-- CASE A -->
+  <text x="32" y="82" class="lb" font-weight="bold">Case A — Weight tensor [−1.5, 1.5]</text>
+  <text x="32" y="98" class="mono">scale ≈ 0.0118  ·  zero_point = 0  ·  256 bins span 3.0 units</text>
 
-  <!-- float line -->
-  <text x="32" y="128" class="sm">float</text>
-  <line x1="80" y1="128" x2="620" y2="128" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <!-- float ticks -->
-  <line x1="80"  y1="124" x2="80"  y2="132" stroke="#000000"/>
-  <line x1="350" y1="124" x2="350" y2="132" stroke="#000000"/>
-  <line x1="620" y1="124" x2="620" y2="132" stroke="#000000"/>
-  <text x="80"  y="120" text-anchor="middle" class="sm">−1.5</text>
-  <text x="350" y="120" text-anchor="middle" class="sm">0.0</text>
-  <text x="620" y="120" text-anchor="middle" class="sm">+1.5</text>
+  <text x="32" y="124" class="sm">float</text>
+  <line x1="80" y1="124" x2="620" y2="124" stroke="#333333" stroke-width="1.2" marker-end="url(#ar)"/>
+  <line x1="80"  y1="120" x2="80"  y2="128" stroke="#333333"/>
+  <line x1="350" y1="120" x2="350" y2="128" stroke="#333333"/>
+  <line x1="620" y1="120" x2="620" y2="128" stroke="#333333"/>
+  <text x="80"  y="116" text-anchor="middle" class="sm">−1.5</text>
+  <text x="350" y="116" text-anchor="middle" class="sm">0.0</text>
+  <text x="620" y="116" text-anchor="middle" class="sm">+1.5</text>
 
-  <!-- int8 line: dense ticks across full range -->
-  <text x="32" y="172" class="sm">int8</text>
-  <line x1="80" y1="172" x2="620" y2="172" stroke="#000000" stroke-width="1.2"/>
-  <g stroke="#555555" stroke-width="0.5">
-    <!-- 32 tick marks evenly distributed showing bins -->
-    <line x1="80"  y1="168" x2="80"  y2="176"/>
-    <line x1="98"  y1="170" x2="98"  y2="174"/>
-    <line x1="116" y1="170" x2="116" y2="174"/>
-    <line x1="134" y1="170" x2="134" y2="174"/>
-    <line x1="152" y1="170" x2="152" y2="174"/>
-    <line x1="170" y1="170" x2="170" y2="174"/>
-    <line x1="188" y1="170" x2="188" y2="174"/>
-    <line x1="206" y1="170" x2="206" y2="174"/>
-    <line x1="224" y1="170" x2="224" y2="174"/>
-    <line x1="242" y1="170" x2="242" y2="174"/>
-    <line x1="260" y1="170" x2="260" y2="174"/>
-    <line x1="278" y1="170" x2="278" y2="174"/>
-    <line x1="296" y1="170" x2="296" y2="174"/>
-    <line x1="314" y1="170" x2="314" y2="174"/>
-    <line x1="332" y1="170" x2="332" y2="174"/>
-    <line x1="350" y1="168" x2="350" y2="176"/>
-    <line x1="368" y1="170" x2="368" y2="174"/>
-    <line x1="386" y1="170" x2="386" y2="174"/>
-    <line x1="404" y1="170" x2="404" y2="174"/>
-    <line x1="422" y1="170" x2="422" y2="174"/>
-    <line x1="440" y1="170" x2="440" y2="174"/>
-    <line x1="458" y1="170" x2="458" y2="174"/>
-    <line x1="476" y1="170" x2="476" y2="174"/>
-    <line x1="494" y1="170" x2="494" y2="174"/>
-    <line x1="512" y1="170" x2="512" y2="174"/>
-    <line x1="530" y1="170" x2="530" y2="174"/>
-    <line x1="548" y1="170" x2="548" y2="174"/>
-    <line x1="566" y1="170" x2="566" y2="174"/>
-    <line x1="584" y1="170" x2="584" y2="174"/>
-    <line x1="602" y1="170" x2="602" y2="174"/>
-    <line x1="620" y1="168" x2="620" y2="176"/>
+  <text x="32" y="168" class="sm">int8</text>
+  <line x1="80" y1="168" x2="620" y2="168" stroke="#333333" stroke-width="1.2"/>
+  <g stroke="#AAAAAA" stroke-width="0.6">
+    <line x1="80"  y1="164" x2="80"  y2="172"/><line x1="98"  y1="166" x2="98"  y2="170"/>
+    <line x1="116" y1="166" x2="116" y2="170"/><line x1="134" y1="166" x2="134" y2="170"/>
+    <line x1="152" y1="166" x2="152" y2="170"/><line x1="170" y1="166" x2="170" y2="170"/>
+    <line x1="188" y1="166" x2="188" y2="170"/><line x1="206" y1="166" x2="206" y2="170"/>
+    <line x1="224" y1="166" x2="224" y2="170"/><line x1="242" y1="166" x2="242" y2="170"/>
+    <line x1="260" y1="166" x2="260" y2="170"/><line x1="278" y1="166" x2="278" y2="170"/>
+    <line x1="296" y1="166" x2="296" y2="170"/><line x1="314" y1="166" x2="314" y2="170"/>
+    <line x1="332" y1="166" x2="332" y2="170"/>
+    <line x1="350" y1="164" x2="350" y2="172"/>
+    <line x1="368" y1="166" x2="368" y2="170"/><line x1="386" y1="166" x2="386" y2="170"/>
+    <line x1="404" y1="166" x2="404" y2="170"/><line x1="422" y1="166" x2="422" y2="170"/>
+    <line x1="440" y1="166" x2="440" y2="170"/><line x1="458" y1="166" x2="458" y2="170"/>
+    <line x1="476" y1="166" x2="476" y2="170"/><line x1="494" y1="166" x2="494" y2="170"/>
+    <line x1="512" y1="166" x2="512" y2="170"/><line x1="530" y1="166" x2="530" y2="170"/>
+    <line x1="548" y1="166" x2="548" y2="170"/><line x1="566" y1="166" x2="566" y2="170"/>
+    <line x1="584" y1="166" x2="584" y2="170"/><line x1="602" y1="166" x2="602" y2="170"/>
+    <line x1="620" y1="164" x2="620" y2="172"/>
   </g>
-  <text x="80"  y="190" text-anchor="middle" class="sm">−128</text>
-  <text x="350" y="190" text-anchor="middle" class="sm">0</text>
-  <text x="620" y="190" text-anchor="middle" class="sm">+127</text>
+  <text x="80"  y="186" text-anchor="middle" class="sm">−128</text>
+  <text x="350" y="186" text-anchor="middle" class="sm">0</text>
+  <text x="620" y="186" text-anchor="middle" class="sm">+127</text>
 
-  <!-- mapping arrow: 0.5 → 42 -->
-  <path d="M 440 128 L 440 168" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#ar)"/>
-  <text x="446" y="148" class="mono">0.5 → 42 → 0.495 · error 0.005</text>
+  <path d="M 440 124 L 440 164" fill="none" stroke="#555555" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#ar)"/>
+  <text x="446" y="145" class="mono">0.5 → 42 → 0.495  ·  error 0.005</text>
 
-  <rect x="500" y="208" width="120" height="22" fill="#000000"/>
-  <text x="560" y="223" text-anchor="middle" class="badge">CLEAN MAPPING</text>
+  <rect x="490" y="202" width="130" height="22" fill="#333333"/>
+  <text x="555" y="217" text-anchor="middle" class="badge">CLEAN MAPPING</text>
 
-  <!-- ============ BOTTOM CASE: skewed activation ============ -->
-  <text x="32" y="262" class="ti">Case B — Activation tensor [0.001, 0.01]</text>
-  <text x="32" y="278" class="mono">scale ≈ 0.000039 · zero_point = −128 · whole tensor maps to a narrow integer band</text>
+  <!-- CASE B -->
+  <text x="32" y="262" class="lb" font-weight="bold">Case B — Activation tensor [0.001, 0.01]</text>
+  <text x="32" y="278" class="mono">scale ≈ 0.000039  ·  zero_point = −128  ·  whole tensor maps to a narrow integer band</text>
 
-  <!-- float line -->
   <text x="32" y="304" class="sm">float</text>
-  <line x1="80" y1="304" x2="620" y2="304" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <line x1="80"  y1="300" x2="80"  y2="308" stroke="#000000"/>
-  <line x1="350" y1="300" x2="350" y2="308" stroke="#000000"/>
-  <line x1="620" y1="300" x2="620" y2="308" stroke="#000000"/>
+  <line x1="80" y1="304" x2="620" y2="304" stroke="#333333" stroke-width="1.2" marker-end="url(#ar)"/>
+  <line x1="80"  y1="300" x2="80"  y2="308" stroke="#333333"/>
+  <line x1="350" y1="300" x2="350" y2="308" stroke="#333333"/>
+  <line x1="620" y1="300" x2="620" y2="308" stroke="#333333"/>
   <text x="80"  y="296" text-anchor="middle" class="sm">0.001</text>
   <text x="350" y="296" text-anchor="middle" class="sm">0.0055</text>
   <text x="620" y="296" text-anchor="middle" class="sm">0.01</text>
 
-  <!-- mash zone highlight on float line -->
-  <rect x="80" y="298" width="60" height="12" fill="#C8102E" fill-opacity="0.18"/>
-  <text x="110" y="288" text-anchor="middle" class="verdict-bad">mash zone</text>
+  <rect x="80" y="298" width="62" height="12" fill="#888888" fill-opacity="0.35"/>
+  <text x="111" y="290" text-anchor="middle" class="sm" font-weight="bold" fill="#444444">mash zone</text>
 
-  <!-- int8 line: only mid-section ticks dense; rest sparse -->
   <text x="32" y="348" class="sm">int8</text>
-  <line x1="80" y1="348" x2="620" y2="348" stroke="#000000" stroke-width="1.2"/>
-  <line x1="80"  y1="344" x2="80"  y2="352" stroke="#000000"/>
-  <line x1="350" y1="344" x2="350" y2="352" stroke="#000000"/>
-  <line x1="620" y1="344" x2="620" y2="352" stroke="#000000"/>
+  <line x1="80" y1="348" x2="620" y2="348" stroke="#333333" stroke-width="1.2"/>
+  <line x1="80"  y1="344" x2="80"  y2="352" stroke="#333333"/>
+  <line x1="350" y1="344" x2="350" y2="352" stroke="#333333"/>
+  <line x1="620" y1="344" x2="620" y2="352" stroke="#333333"/>
   <text x="80"  y="364" text-anchor="middle" class="sm">−128</text>
   <text x="350" y="364" text-anchor="middle" class="sm">0</text>
   <text x="620" y="364" text-anchor="middle" class="sm">+127</text>
 
-  <!-- arrows from float mash zone collapse to two integers -->
-  <path d="M 95 304 L 95 344" fill="none" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arRed)"/>
-  <path d="M 110 304 L 105 344" fill="none" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arRed)"/>
-  <path d="M 125 304 L 110 344" fill="none" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arRed)"/>
-  <path d="M 138 304 L 115 344" fill="none" stroke="#C8102E" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arRed)"/>
+  <path d="M 95 304 L 95 344" fill="none" stroke="#666666" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arG)"/>
+  <path d="M 110 304 L 105 344" fill="none" stroke="#666666" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arG)"/>
+  <path d="M 125 304 L 110 344" fill="none" stroke="#666666" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arG)"/>
+  <path d="M 138 304 L 115 344" fill="none" stroke="#666666" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arG)"/>
 
-  <text x="180" y="338" class="mono" fill="#C8102E">many distinct floats → same int — signal lost</text>
+  <text x="180" y="338" class="mono">many distinct floats → same int — signal lost</text>
 
-  <rect x="500" y="380" width="120" height="22" fill="#C8102E"/>
-  <text x="560" y="395" text-anchor="middle" class="badge">ROUNDING MASH</text>
+  <rect x="490" y="376" width="130" height="22" fill="#666666"/>
+  <text x="555" y="391" text-anchor="middle" class="badge">ROUNDING MASH</text>
 
-  <text x="350" y="428" text-anchor="middle" class="cap">Quantization damages accuracy where small-magnitude values carry information — not where dynamic range is wide.</text>
+  <text x="350" y="440" text-anchor="middle" class="cap">Quantization damages accuracy where small-magnitude values carry information — not where dynamic range is wide.</text>
 </svg>

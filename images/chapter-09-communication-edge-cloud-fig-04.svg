@@ -1,42 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="t04 d04">
   <title id="t04">Battery life vs transmission interval — four radios on a 2000 mAh cell</title>
-  <desc id="d04">Log-log line chart. The x-axis is the seconds between transmissions from 1 second to one day. The y-axis is days of battery life on a 2000 mAh cell. Four lines for LoRaWAN, BLE, WiFi, and NB-IoT. A horizontal reference shows the 1 milliwatt average power budget where battery life collapses from years to hours.</desc>
+  <desc id="d04">Log-log line chart. X-axis: seconds between transmissions from 1 s to 1 day. Y-axis: days of battery life on a 2000 mAh cell. Four lines for LoRaWAN, BLE, WiFi, and NB-IoT.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .ax { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .leg { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #111111; }
+      .ax  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .leg { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
     </style>
-    <marker id="ar4" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#000000"/>
-    </marker>
   </defs>
-  <rect width="720" height="460" fill="#FFFFFF"/>
+  <rect width="760" height="460" fill="#FFFFFF"/>
 
-  <text x="32" y="32" class="ti">Battery years or battery hours — the radio choice and the interval choose for you</text>
-  <text x="32" y="50" class="nm">log-log. 2 000 mAh × 3.3 V = 23 760 J cell. days_battery = 23 760 / (events_per_day × mJ_per_event / 1 000)</text>
+  <text x="32" y="32" class="ti">Battery years or battery hours — radio choice and interval decide</text>
+  <text x="32" y="50" class="nm">log-log. 2 000 mAh × 3.3 V = 23 760 J cell. days = 23 760 × T / (86.4 × mJ_per_event)</text>
 
-  <!-- Plot region: x in [70, 660], y in [80, 360]. 5.94 decades on x (1 s to 86400 s), so width 590 / log10(86400) -->
-  <!-- x: log10(s). 1 s → 0; 10 s → 1; 60 s → 1.78; 600 s → 2.78; 3600 s → 3.56; 86400 s → 4.94 -->
-  <!-- x(s) = 70 + (log10(s)/4.94)*590 -->
-  <!-- y: log10(days). y(days) = 360 - (log10(days)+1)/5 * 280 → days from 0.1 (-1) to 10000 (4) -->
-  <!-- That's a 5-decade range mapped to 280 px: 0.1 → 360, 1 → 304, 10 → 248, 100 → 192, 1000 → 136, 10000 → 80 -->
-
-  <!-- gridlines x -->
-  <g stroke="#ADADAD" stroke-width="0.6">
-    <line x1="70"  y1="80" x2="70"  y2="360"/>
+  <!-- Plot region: x [70,660], y [80,360] -->
+  <!-- x: log10(s), range 0–4.94 → 590 px. x(s)=70+(log10(s)/4.94)*590 -->
+  <!-- y: log10(days)+1 over 5 decades → 280 px. y(d)=360-280*(log10(d)+1)/5 -->
+  <!-- Gridlines x -->
+  <g stroke="#DDDDDD" stroke-width="0.8">
+    <line x1="70"    y1="80" x2="70"    y2="360"/>
     <line x1="189.4" y1="80" x2="189.4" y2="360"/>
     <line x1="282.6" y1="80" x2="282.6" y2="360"/>
-    <line x1="402"  y1="80" x2="402"  y2="360"/>
-    <line x1="495"  y1="80" x2="495"  y2="360"/>
-    <line x1="660"  y1="80" x2="660"  y2="360"/>
+    <line x1="402"   y1="80" x2="402"   y2="360"/>
+    <line x1="495"   y1="80" x2="495"   y2="360"/>
+    <line x1="660"   y1="80" x2="660"   y2="360"/>
   </g>
-  <!-- gridlines y -->
-  <g stroke="#ADADAD" stroke-width="0.6">
+  <!-- Gridlines y -->
+  <g stroke="#DDDDDD" stroke-width="0.8">
     <line x1="70" y1="80"  x2="660" y2="80"/>
     <line x1="70" y1="136" x2="660" y2="136"/>
     <line x1="70" y1="192" x2="660" y2="192"/>
@@ -45,7 +39,7 @@
     <line x1="70" y1="360" x2="660" y2="360"/>
   </g>
 
-  <!-- axes -->
+  <!-- Axes -->
   <line x1="70" y1="360" x2="660" y2="360" stroke="#555555" stroke-width="1"/>
   <line x1="70" y1="80"  x2="70"  y2="360" stroke="#555555" stroke-width="1"/>
 
@@ -56,7 +50,7 @@
   <text x="402"   y="376" text-anchor="middle" class="ax">10 min</text>
   <text x="495"   y="376" text-anchor="middle" class="ax">1 hour</text>
   <text x="660"   y="376" text-anchor="middle" class="ax">1 day</text>
-  <text x="365"   y="396" text-anchor="middle" class="lb">interval between transmissions (log)</text>
+  <text x="365"   y="396" text-anchor="middle" class="lb">interval between transmissions (log scale)</text>
 
   <!-- y labels -->
   <text x="62" y="364" text-anchor="end" class="ax">0.1 d</text>
@@ -67,83 +61,43 @@
   <text x="62" y="84"  text-anchor="end" class="ax">10 000 d</text>
   <text x="20" y="220" class="lb" transform="rotate(-90 20 220)">battery life on 2 000 mAh · 3.3 V cell</text>
 
-  <!-- Compute days for each radio at intervals 1, 10, 60, 600, 3600, 86400 s.
-       events/day = 86400/T. days = 23760 / (events/day * mJ_event / 1000)
-       Equivalent: days = 23760 * T / (86400 * mJ_event / 1000) = 23760*T / (86.4 * mJ_event) = 275*T / mJ_event
-       So days(T) = 275 * T / mJ_event
-       LoRaWAN mJ=21:  days(T) = 13.10 T
-       BLE      mJ=0.1: days(T) = 2750 T
-       WiFi     mJ=50:  days(T) = 5.50 T
-       NB-IoT   mJ=150: days(T) = 1.83 T
-    Convert days→y: y = 360 - 280*(log10(days)+1)/5
-    And T→x: x = 70 + 119.4*log10(T)
-  -->
+  <!-- LoRaWAN (21 mJ/event) — solid black -->
+  <polyline points="70,241.5 189.4,185.4 282.6,141.9 402,85.8 495,80 660,80"
+            fill="none" stroke="#111111" stroke-width="2"/>
 
-  <!-- Build polylines: x grid points & y values for each radio. Use anchors at log T = 0,1,1.78,2.78,3.56,4.94 -->
-  <!-- LoRaWAN (21 mJ): points at T=1,10,60,600,3600,86400 → days = 13.1, 131, 786, 7860, 47160, 1131600
-       log10(days) = 1.117, 2.117, 2.895, 3.895, 4.673, 6.054
-       Clamp to 4 (top). y = 360 - 280*(L+1)/5
-       y(1.117) = 360 - 280*2.117/5 = 241.5
-       y(2.117) = 360 - 280*3.117/5 = 185.4
-       y(2.895) = 360 - 280*3.895/5 = 141.9
-       y(3.895) = 360 - 280*4.895/5 = 85.8
-       y(4.673) clamp to 80
-       y(6.054) clamp to 80
-  -->
-  <polyline points="70,241.5 189.4,185.4 282.6,141.9 402,85.8 495,80 660,80" fill="none" stroke="#000000" stroke-width="2"/>
+  <!-- BLE (0.1 mJ/event) — dashed dark gray -->
+  <polyline points="70,111.4 189.4,80 282.6,80 402,80 495,80 660,80"
+            fill="none" stroke="#444444" stroke-width="2" stroke-dasharray="8 4"/>
 
-  <!-- BLE (0.1 mJ): days = 2750, 27500, 165000, 1.65e6, 9.9e6, 2.376e8 → all > 10000 → y=80 across plot
-       Plot only where it's interesting: actually starts at 2750 → log10 = 3.44 → y = 110.6
-       T=1: 2750 → L=3.439, y=360-280*4.439/5= 111.4
-       T=10: 27500 → L=4.439, clamp 4 → y=80
-  -->
-  <polyline points="70,111.4 189.4,80 282.6,80 402,80 495,80 660,80" fill="none" stroke="#555555" stroke-width="2" stroke-dasharray="6 3"/>
+  <!-- WiFi (50 mJ/event) — solid mid gray -->
+  <polyline points="70,262.6 189.4,206.6 282.6,162.9 402,106.9 495,80 660,80"
+            fill="none" stroke="#777777" stroke-width="2"/>
 
-  <!-- WiFi (50 mJ): days = 5.5, 55, 330, 3300, 19800, 475200
-       log10 = 0.74, 1.74, 2.52, 3.52, 4.30, 5.68
-       y(0.74) = 360 - 280*1.74/5 = 262.6
-       y(1.74) = 360 - 280*2.74/5 = 206.6
-       y(2.52) = 360 - 280*3.52/5 = 162.9
-       y(3.52) = 360 - 280*4.52/5 = 106.9
-       y(4.30) clamp 4 → 80
-       y(5.68) clamp 4 → 80
-  -->
-  <polyline points="70,262.6 189.4,206.6 282.6,162.9 402,106.9 495,80 660,80" fill="none" stroke="#787878" stroke-width="2"/>
+  <!-- NB-IoT (150 mJ/event) — dashed light gray -->
+  <polyline points="70,289.3 189.4,233.3 282.6,189.7 402,133.7 495,90 660,80"
+            fill="none" stroke="#AAAAAA" stroke-width="2" stroke-dasharray="4 4"/>
 
-  <!-- NB-IoT (150 mJ): days = 1.83, 18.3, 110, 1100, 6600, 158400
-       log10 = 0.262, 1.262, 2.041, 3.041, 3.820, 5.200
-       y(0.262) = 360 - 280*1.262/5 = 289.3
-       y(1.262) = 360 - 280*2.262/5 = 233.3
-       y(2.041) = 360 - 280*3.041/5 = 189.7
-       y(3.041) = 360 - 280*4.041/5 = 133.7
-       y(3.820) = 360 - 280*4.820/5 = 90.0
-       y(5.200) clamp 4 → 80
-  -->
-  <polyline points="70,289.3 189.4,233.3 282.6,189.7 402,133.7 495,90 660,80" fill="none" stroke="#C8102E" stroke-width="2"/>
+  <!-- 1 mW budget line at 275 d -->
+  <line x1="70" y1="167.6" x2="660" y2="167.6" stroke="#555555" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="665" y="171" class="sm">1 mW avg · 275 d</text>
 
-  <!-- Horizontal 1 mW budget line: 1 mW × 86 400 s = 86.4 J/day; battery = 23 760 J → 275 days → log10 ≈ 2.44, y = 167.6 -->
-  <line x1="70" y1="167.6" x2="660" y2="167.6" stroke="#000000" stroke-width="1" stroke-dasharray="3 3"/>
-  <text x="665" y="171" class="sm">1 mW average · 275 d</text>
+  <!-- End-of-line labels -->
+  <text x="668" y="84"  class="leg">BLE</text>
+  <text x="668" y="97"  class="sm">0.1 mJ/event</text>
 
-  <!-- end-of-line labels -->
-  <text x="668" y="84"  class="leg">BLE (0.1 mJ)</text>
-  <text x="668" y="100" class="sm">≈ 4 mW peak, ms bursts</text>
+  <text x="668" y="148" class="leg">LoRaWAN</text>
+  <text x="668" y="161" class="sm">21 mJ/event</text>
 
-  <text x="668" y="148" class="leg" fill="#000000">LoRaWAN (21 mJ)</text>
-  <text x="668" y="164" class="sm">≈ 132 mW TX, 160 ms</text>
+  <text x="668" y="206" class="leg">WiFi</text>
+  <text x="668" y="219" class="sm">50 mJ/event</text>
 
-  <text x="668" y="206" class="leg" fill="#787878">WiFi (50 mJ)</text>
-  <text x="668" y="222" class="sm">≈ 1 W TX, 50 ms</text>
+  <text x="668" y="244" class="leg">NB-IoT</text>
+  <text x="668" y="257" class="sm">150 mJ/event</text>
 
-  <text x="668" y="244" class="leg" fill="#C8102E">NB-IoT (150 mJ)</text>
-  <text x="668" y="260" class="sm">≈ 600 mW TX, 250 ms</text>
-
-  <!-- Region annotations -->
+  <!-- Annotations -->
   <text x="100" y="100" class="cap">years on a coin cell</text>
-  <text x="450" y="350" class="cap" fill="#C8102E">hours, not days</text>
+  <text x="440" y="350" class="cap">hours, not days</text>
+  <text x="80"  y="320" class="sm">collapse zone — below 1 day fails most field deployments</text>
 
-  <line x1="70" y1="304" x2="120" y2="320" stroke="#C8102E" stroke-width="1"/>
-  <text x="125" y="324" class="sm" fill="#C8102E">collapse zone — anything below 1 day fails most field deployments</text>
-
-  <text x="365" y="430" text-anchor="middle" class="cap">Halve the interval, halve the lifetime. Halve the per-event energy, double it. Both levers live on this plane.</text>
+  <text x="365" y="430" text-anchor="middle" class="cap">Halve the interval, halve the lifetime. Halve the per-event energy, double it.</text>
 </svg>

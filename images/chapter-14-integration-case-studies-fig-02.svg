@@ -1,66 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t02 d02">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t02 d02">
   <title id="t02">Industrial vibration case — three-architecture decision tree, two branches killed by cost</title>
-  <desc id="d02">A branching diagram with three architecture options for the CNC-machine vibration monitor: fully on-device wins; edge-gateway over RS-485 is rejected because wiring 200 sensors exceeds the deployment budget; the hybrid threshold-plus-radio approach is rejected because adding a sub-GHz radio to each sensor exceeds the forty-dollar bill of materials ceiling. Each rejected branch is annotated with the binding constraint that killed it.</desc>
+  <desc id="d02">A branching diagram with three architecture options for the CNC-machine vibration monitor: fully on-device wins; edge-gateway over RS-485 is rejected because wiring 200 sensors exceeds the deployment budget; the hybrid threshold-plus-radio approach is rejected because adding a sub-GHz radio to each sensor exceeds the forty-dollar BOM ceiling.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .nm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .win { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-      .ko { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #787878; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+      .win { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+      .ko  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #888888; }
     </style>
     <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
     <marker id="arx" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#787878"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#888888"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="32" y="30" class="ti">Industrial vibration — three architectures considered, two killed before the model is chosen</text>
   <text x="32" y="48" class="sm">200 CNC machines · 18-month battery · $40 BOM ceiling · no Wi-Fi, no cellular</text>
 
   <!-- Root node -->
-  <rect x="260" y="72" width="180" height="50" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
+  <rect x="260" y="72" width="180" height="50" fill="#F5F5F5" stroke="#333333" stroke-width="1.25"/>
   <text x="350" y="92" text-anchor="middle" class="nm">Acceptance specs</text>
   <text x="350" y="108" text-anchor="middle" class="sm">≥95% sens · &lt;5% FP · 10 s latency · $40</text>
 
-  <!-- Branch lines down -->
-  <path d="M 350 122 L 350 150 L 115 150 L 115 178" fill="none" stroke="#000000" stroke-width="1"/>
-  <path d="M 350 122 L 350 178" fill="none" stroke="#000000" stroke-width="1"/>
-  <path d="M 350 122 L 350 150 L 585 150 L 585 178" fill="none" stroke="#000000" stroke-width="1"/>
+  <!-- Branch lines -->
+  <path d="M 350 122 L 350 150 L 115 150 L 115 178" fill="none" stroke="#333333" stroke-width="1"/>
+  <path d="M 350 122 L 350 178" fill="none" stroke="#333333" stroke-width="1"/>
+  <path d="M 350 122 L 350 150 L 585 150 L 585 178" fill="none" stroke="#333333" stroke-width="1"/>
 
   <!-- Branch 1: Fully on-device (WINS) -->
-  <rect x="32" y="178" width="170" height="64" fill="#F5F5F5" stroke="#000000" stroke-width="1.5"/>
-  <rect x="32" y="178" width="6" height="64" fill="#000000"/>
+  <rect x="32" y="178" width="170" height="64" fill="#F5F5F5" stroke="#333333" stroke-width="1.5"/>
+  <rect x="32" y="178" width="6"   height="64" fill="#111111"/>
   <text x="48" y="198" class="win">Fully on-device</text>
   <text x="48" y="214" class="sm">classify on MCU, log locally,</text>
   <text x="48" y="228" class="sm">forward once daily via wired</text>
   <text x="48" y="242" class="sm">gateway</text>
 
   <!-- Branch 2: Edge-gateway (REJECTED) -->
-  <rect x="265" y="178" width="170" height="64" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
-  <rect x="265" y="178" width="6" height="64" fill="#ADADAD"/>
-  <text x="281" y="198" class="nm" fill="#787878">Edge-gateway (RS-485)</text>
+  <rect x="265" y="178" width="170" height="64" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75"/>
+  <rect x="265" y="178" width="6"   height="64" fill="#BBBBBB"/>
+  <text x="281" y="198" class="ko" font-weight="bold">Edge-gateway (RS-485)</text>
   <text x="281" y="214" class="ko">raw vibration streamed to</text>
   <text x="281" y="228" class="ko">industrial PC for ML</text>
   <text x="281" y="242" class="ko">processing</text>
 
   <!-- Branch 3: Hybrid (REJECTED) -->
-  <rect x="500" y="178" width="170" height="64" fill="#FFFFFF" stroke="#787878" stroke-width="0.75"/>
-  <rect x="500" y="178" width="6" height="64" fill="#ADADAD"/>
-  <text x="516" y="198" class="nm" fill="#787878">Hybrid threshold + radio</text>
+  <rect x="500" y="178" width="170" height="64" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75"/>
+  <rect x="500" y="178" width="6"   height="64" fill="#BBBBBB"/>
+  <text x="516" y="198" class="ko" font-weight="bold">Hybrid threshold + radio</text>
   <text x="516" y="214" class="ko">simple trigger on-device,</text>
-  <text x="516" y="228" class="ko">forward 1s window for</text>
+  <text x="516" y="228" class="ko">forward 1 s window for</text>
   <text x="516" y="242" class="ko">gateway classification</text>
 
-  <!-- Outcome row -->
   <!-- Branch 1 outcome: WIN -->
-  <path d="M 117 244 L 117 274" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
-  <rect x="32" y="280" width="170" height="84" fill="#FFFFFF" stroke="#000000" stroke-width="1.25"/>
+  <path d="M 117 244 L 117 274" fill="none" stroke="#333333" stroke-width="1" marker-end="url(#ar2)"/>
+  <rect x="32" y="280" width="170" height="84" fill="#FFFFFF" stroke="#333333" stroke-width="1.25"/>
   <text x="117" y="300" text-anchor="middle" class="win">WINS</text>
   <text x="48" y="318" class="sm">random forest, 25 features</text>
   <text x="48" y="332" class="sm">STM32L4R5 · 0.4 µA sleep</text>
@@ -68,25 +67,26 @@
   <text x="48" y="360" class="sm">$38 BOM · 16.5 mo battery</text>
 
   <!-- Branch 2 outcome: rejected -->
-  <path d="M 350 244 L 350 274" fill="none" stroke="#787878" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arx)"/>
-  <rect x="265" y="280" width="170" height="84" fill="#FFFFFF" stroke="#787878" stroke-width="0.75" stroke-dasharray="4 3"/>
-  <text x="350" y="300" text-anchor="middle" class="nm" fill="#787878">rejected</text>
+  <path d="M 350 244 L 350 274" fill="none" stroke="#888888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arx)"/>
+  <rect x="265" y="280" width="170" height="84" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75" stroke-dasharray="4 3"/>
+  <text x="350" y="300" text-anchor="middle" class="ko" font-weight="bold">rejected</text>
   <text x="281" y="318" class="ko">wiring 200 sensors over</text>
   <text x="281" y="332" class="ko">RS-485 across the factory</text>
   <text x="281" y="346" class="ko">blows the deployment budget</text>
-  <text x="281" y="360" class="nm" fill="#787878">↑ deployment cost</text>
+  <text x="281" y="360" class="ko" font-weight="bold">↑ deployment cost</text>
 
   <!-- Branch 3 outcome: rejected -->
-  <path d="M 585 244 L 585 274" fill="none" stroke="#787878" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arx)"/>
-  <rect x="500" y="280" width="170" height="84" fill="#FFFFFF" stroke="#787878" stroke-width="0.75" stroke-dasharray="4 3"/>
-  <text x="585" y="300" text-anchor="middle" class="nm" fill="#787878">rejected</text>
+  <path d="M 585 244 L 585 274" fill="none" stroke="#888888" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arx)"/>
+  <rect x="500" y="280" width="170" height="84" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="0.75" stroke-dasharray="4 3"/>
+  <text x="585" y="300" text-anchor="middle" class="ko" font-weight="bold">rejected</text>
   <text x="516" y="318" class="ko">sub-GHz radio per sensor</text>
   <text x="516" y="332" class="ko">adds $8–12 to the BOM,</text>
   <text x="516" y="346" class="ko">breaks the $40 ceiling</text>
-  <text x="516" y="360" class="nm" fill="#787878">↑ BOM ceiling</text>
+  <text x="516" y="360" class="ko" font-weight="bold">↑ BOM ceiling</text>
 
-  <!-- Legend strip -->
-  <line x1="32" y1="388" x2="668" y2="388" stroke="#ADADAD" stroke-width="0.5"/>
-  <text x="32" y="406" class="cap">Two viable-looking architectures die not on technical grounds but on deployment economics —</text>
-  <text x="32" y="420" class="cap">the binding constraints (200-sensor wiring cost, $40 BOM) eliminate them before the model class is chosen.</text>
+  <line x1="32" y1="390" x2="668" y2="390" stroke="#DDDDDD" stroke-width="0.5"/>
+  <text x="32" y="408" class="cap">Two viable-looking architectures die not on technical grounds but on deployment economics —</text>
+  <text x="32" y="422" class="cap">the binding constraints (200-sensor wiring cost, $40 BOM) eliminate them before the model class is chosen.</text>
+
+  <text x="350" y="446" text-anchor="middle" class="cap">Architecture selection is an economics problem before it is an ML problem.</text>
 </svg>

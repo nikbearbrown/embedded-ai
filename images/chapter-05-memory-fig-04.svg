@@ -1,90 +1,86 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 430" role="img" aria-labelledby="t04 d04">
   <title id="t04">Three activation layout strategies — in-place, buffer reuse, scratch pad</title>
   <desc id="d04">Three side-by-side buffer diagrams. Left: in-place computation, a single buffer with input and output overlaid. Middle: buffer reuse, two ping-pong buffers swapping across feedforward layers. Right: scratch pad, a main activation buffer plus a small tiled scratch region for im2col.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .pt { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .it { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #FFFFFF; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .cost { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #A4804A; font-weight: bold; }
+      text { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; }
+      .ti   { font-size: 14px; font-weight: bold; fill: #111111; }
+      .pt   { font-size: 12px; font-weight: bold; fill: #111111; }
+      .lb   { font-size: 11px; fill: #111111; }
+      .sm   { font-size: 10px; fill: #555555; }
+      .it   { font-size: 10px; fill: #FFFFFF; }
+      .cap  { font-size: 10px; font-style: italic; fill: #555555; }
+      .cost { font-size: 10px; font-weight: bold; fill: #333333; }
     </style>
     <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="420" fill="#FFFFFF"/>
+  <rect width="700" height="430" fill="#FFFFFF"/>
 
   <text x="32" y="28" class="ti">Three ways to lay out activation memory</text>
   <text x="32" y="44" class="sm">each applies to a different operator class · all combine in a real engine</text>
 
-  <!-- PANEL 1: in-place (left) — x 30 → 230 -->
+  <!-- PANEL 1: in-place (left) -->
   <text x="130" y="76" text-anchor="middle" class="pt">1 · in-place</text>
   <text x="130" y="92" text-anchor="middle" class="sm">ReLU, BN, residual-add</text>
 
-  <!-- single buffer, input then overwritten -->
-  <rect x="50" y="110" width="160" height="50" fill="#555555"/>
+  <rect x="50" y="110" width="160" height="50" fill="#444444"/>
   <text x="130" y="132" text-anchor="middle" class="it">buffer B</text>
-  <text x="130" y="148" text-anchor="middle" class="it">read in[i] → write back to in[i]</text>
+  <text x="130" y="148" text-anchor="middle" class="it">read in[i] → write back</text>
 
-  <!-- arrow loop -->
-  <path d="M 60 175 Q 130 200 200 175" fill="none" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
+  <path d="M 60 175 Q 130 200 200 175" fill="none" stroke="#333333" stroke-width="1.5" marker-end="url(#ar4)"/>
   <text x="130" y="220" text-anchor="middle" class="sm">output dimensions = input</text>
   <text x="130" y="234" text-anchor="middle" class="sm">one read, one write, same address</text>
 
   <text x="130" y="280" text-anchor="middle" class="cost">cost: 0 extra buffer</text>
 
-  <!-- PANEL 2: buffer reuse (middle) — x 240 → 460 -->
-  <line x1="234" y1="60" x2="234" y2="360" stroke="#ADADAD" stroke-width="0.75"/>
+  <!-- divider -->
+  <line x1="234" y1="60" x2="234" y2="370" stroke="#DDDDDD" stroke-width="1"/>
 
+  <!-- PANEL 2: buffer reuse (middle) -->
   <text x="350" y="76" text-anchor="middle" class="pt">2 · buffer reuse</text>
   <text x="350" y="92" text-anchor="middle" class="sm">feedforward layers, ping-pong</text>
 
-  <!-- two buffers A and B -->
-  <rect x="260" y="110" width="80" height="50" fill="#000000"/>
-  <text x="300" y="138" text-anchor="middle" class="it">buffer A</text>
-  <text x="300" y="152" text-anchor="middle" class="it">L1 in</text>
+  <rect x="260" y="110" width="80" height="50" fill="#111111"/>
+  <text x="300" y="133" text-anchor="middle" class="it">buffer A</text>
+  <text x="300" y="147" text-anchor="middle" class="it">L1 in</text>
 
-  <rect x="360" y="110" width="80" height="50" fill="#787878"/>
-  <text x="400" y="138" text-anchor="middle" class="it">buffer B</text>
-  <text x="400" y="152" text-anchor="middle" class="it">L1 out</text>
+  <rect x="360" y="110" width="80" height="50" fill="#666666"/>
+  <text x="400" y="133" text-anchor="middle" class="it">buffer B</text>
+  <text x="400" y="147" text-anchor="middle" class="it">L1 out</text>
 
-  <!-- arrows showing swap -->
-  <line x1="340" y1="135" x2="358" y2="135" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
+  <line x1="340" y1="135" x2="358" y2="135" stroke="#333333" stroke-width="1.5" marker-end="url(#ar4)"/>
 
-  <rect x="260" y="180" width="80" height="50" fill="#787878"/>
-  <text x="300" y="208" text-anchor="middle" class="it">A reused</text>
-  <text x="300" y="222" text-anchor="middle" class="it">L2 out</text>
+  <rect x="260" y="180" width="80" height="50" fill="#666666"/>
+  <text x="300" y="203" text-anchor="middle" class="it">A reused</text>
+  <text x="300" y="217" text-anchor="middle" class="it">L2 out</text>
 
-  <rect x="360" y="180" width="80" height="50" fill="#000000"/>
+  <rect x="360" y="180" width="80" height="50" fill="#111111"/>
   <text x="400" y="208" text-anchor="middle" class="it">B = L2 in</text>
 
-  <line x1="358" y1="205" x2="342" y2="205" stroke="#000000" stroke-width="1" marker-end="url(#ar4)"/>
+  <line x1="358" y1="205" x2="342" y2="205" stroke="#333333" stroke-width="1.5" marker-end="url(#ar4)"/>
 
-  <text x="350" y="260" text-anchor="middle" class="sm">L1 in → L1 out → L2 out → L3 out …</text>
+  <text x="350" y="260" text-anchor="middle" class="sm">L1 in → L1 out → L2 out → …</text>
   <text x="350" y="274" text-anchor="middle" class="sm">peak = max(layer outputs)</text>
 
   <text x="350" y="304" text-anchor="middle" class="cost">cost: 2× largest tensor</text>
 
-  <!-- PANEL 3: scratch pad (right) — x 470 → 670 -->
-  <line x1="464" y1="60" x2="464" y2="360" stroke="#ADADAD" stroke-width="0.75"/>
+  <!-- divider -->
+  <line x1="464" y1="60" x2="464" y2="370" stroke="#DDDDDD" stroke-width="1"/>
 
+  <!-- PANEL 3: scratch pad (right) -->
   <text x="570" y="76" text-anchor="middle" class="pt">3 · scratch pad</text>
   <text x="570" y="92" text-anchor="middle" class="sm">im2col tiles, GEMM workspace</text>
 
-  <!-- main arena -->
-  <rect x="490" y="110" width="160" height="50" fill="#000000"/>
+  <rect x="490" y="110" width="160" height="50" fill="#111111"/>
   <text x="570" y="132" text-anchor="middle" class="it">main activation arena</text>
   <text x="570" y="148" text-anchor="middle" class="it">layer inputs + outputs</text>
 
-  <!-- tiled scratch (small ochre region) -->
-  <rect x="490" y="170" width="60" height="30" fill="#A4804A"/>
+  <rect x="490" y="170" width="60" height="30" fill="#888888"/>
   <text x="520" y="190" text-anchor="middle" class="it">scratch</text>
   <text x="490" y="216" class="sm">small tile · fits in cache</text>
 
-  <!-- side note explaining tradeoff -->
   <text x="490" y="240" class="sm">embedded-optimized kernels</text>
   <text x="490" y="254" class="sm">size scratch to stay tiny</text>
   <text x="490" y="268" class="sm">(CMSIS-NN, TFLite Micro)</text>
@@ -92,5 +88,5 @@
   <text x="570" y="304" text-anchor="middle" class="cost">cost: arena + tile budget</text>
 
   <!-- caption -->
-  <text x="350" y="395" text-anchor="middle" class="cap">In-place is free when shapes match; reuse halves arena; scratch is the silent killer when kernels assume desktop matmul.</text>
+  <text x="350" y="398" text-anchor="middle" class="cap">In-place is free when shapes match; reuse halves arena; scratch is the silent killer when kernels assume desktop matmul.</text>
 </svg>
