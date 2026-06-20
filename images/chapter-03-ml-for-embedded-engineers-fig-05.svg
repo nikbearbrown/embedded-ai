@@ -1,115 +1,111 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t05 d05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 500" role="img" aria-labelledby="t05 d05">
   <title id="t05">Sensing task to model class — primary recommendation and fallback</title>
-  <desc id="d05">A grid mapping five sensing tasks on rows to five model classes on columns, ordered left to right from cheapest to most expensive: tree, 1D CNN, 2D CNN, depthwise-separable CNN, and RNN. Filled squares mark primary recommendations; rings mark fallbacks.</desc>
+  <desc id="d05">A grid mapping five sensing tasks on rows to five model classes on columns, ordered cheapest to most expensive. Filled squares mark primary recommendations; rings mark fallbacks.</desc>
   <defs>
     <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
-      .em { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
-      .col { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #000000; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #555555; }
+      .em  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #000000; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
     </style>
     <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="700" height="460" fill="#FFFFFF"/>
+  <rect width="720" height="500" fill="#FFFFFF"/>
 
-  <text x="350" y="30" text-anchor="middle" class="ti">Pick the cheapest model that meets the bar.</text>
+  <text x="360" y="28" text-anchor="middle" class="ti">Pick the cheapest model that meets the accuracy bar.</text>
 
-  <!-- cost axis arrow at top -->
-  <line x1="200" y1="58" x2="660" y2="58" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
-  <text x="200" y="50" class="sm">cheaper</text>
-  <text x="664" y="50" text-anchor="end" class="sm">more expensive</text>
+  <!-- cost axis -->
+  <line x1="200" y1="54" x2="690" y2="54" stroke="#000000" stroke-width="1.2" marker-end="url(#ar)"/>
+  <text x="200" y="48" class="sm">cheaper</text>
+  <text x="688" y="48" text-anchor="end" class="sm">more expensive</text>
 
-  <!-- COLUMN HEADERS -->
-  <!-- 5 cols starting at x=210, width=88 each -->
-  <text x="254" y="80" text-anchor="middle" class="em">Tree</text>
-  <text x="254" y="94" text-anchor="middle" class="sm">if-then leaves</text>
+  <!-- COLUMN HEADERS (5 cols: centers at 250,342,334,426,518,610) -->
+  <!-- col width = 88, starts at x=206 -->
+  <text x="250" y="74" text-anchor="middle" class="em">Tree</text>
+  <text x="250" y="88" text-anchor="middle" class="sm">if-then leaves</text>
 
-  <text x="342" y="80" text-anchor="middle" class="em">1D CNN</text>
-  <text x="342" y="94" text-anchor="middle" class="sm">sequences</text>
+  <text x="338" y="74" text-anchor="middle" class="em">1D CNN</text>
+  <text x="338" y="88" text-anchor="middle" class="sm">sequences</text>
 
-  <text x="430" y="80" text-anchor="middle" class="em">2D CNN</text>
-  <text x="430" y="94" text-anchor="middle" class="sm">image</text>
+  <text x="426" y="74" text-anchor="middle" class="em">2D CNN</text>
+  <text x="426" y="88" text-anchor="middle" class="sm">image</text>
 
-  <text x="518" y="80" text-anchor="middle" class="em">DS-CNN</text>
-  <text x="518" y="94" text-anchor="middle" class="sm">depthwise sep</text>
+  <text x="514" y="74" text-anchor="middle" class="em">DS-CNN</text>
+  <text x="514" y="88" text-anchor="middle" class="sm">depthwise sep</text>
 
-  <text x="606" y="80" text-anchor="middle" class="em">RNN / LSTM</text>
-  <text x="606" y="94" text-anchor="middle" class="sm">stateful</text>
+  <text x="602" y="74" text-anchor="middle" class="em">RNN / LSTM</text>
+  <text x="602" y="88" text-anchor="middle" class="sm">stateful</text>
 
-  <!-- divider under headers -->
-  <line x1="40" y1="108" x2="660" y2="108" stroke="#ADADAD" stroke-width="0.75"/>
+  <!-- header divider -->
+  <line x1="30" y1="102" x2="690" y2="102" stroke="#BBBBBB" stroke-width="0.75"/>
 
-  <!-- Grid (vertical gridlines between cols) -->
-  <g stroke="#ADADAD" stroke-width="0.5">
-    <line x1="210" y1="108" x2="210" y2="400"/>
-    <line x1="298" y1="108" x2="298" y2="400"/>
-    <line x1="386" y1="108" x2="386" y2="400"/>
-    <line x1="474" y1="108" x2="474" y2="400"/>
-    <line x1="562" y1="108" x2="562" y2="400"/>
-    <line x1="650" y1="108" x2="650" y2="400"/>
+  <!-- vertical grid lines -->
+  <g stroke="#BBBBBB" stroke-width="0.5">
+    <line x1="206" y1="102" x2="206" y2="408"/>
+    <line x1="294" y1="102" x2="294" y2="408"/>
+    <line x1="382" y1="102" x2="382" y2="408"/>
+    <line x1="470" y1="102" x2="470" y2="408"/>
+    <line x1="558" y1="102" x2="558" y2="408"/>
+    <line x1="646" y1="102" x2="646" y2="408"/>
   </g>
 
-  <!-- ROW labels and cells. Rows start y=130, height 56 each, 5 rows -->
-  <!-- helper to draw rows -->
+  <!-- ROW 1: Image classification (y=102, h=60, center=132) -->
+  <text x="196" y="128" text-anchor="end" class="lb">Image classification</text>
+  <text x="196" y="142" text-anchor="end" class="sm">vision, 96x96+ px</text>
+  <line x1="30" y1="162" x2="690" y2="162" stroke="#BBBBBB" stroke-width="0.4" stroke-dasharray="3 3"/>
+  <!-- primary: 2D CNN col3 cx=426; fallback DS-CNN col4 cx=514 -->
+  <rect x="404" y="118" width="44" height="34" fill="#111111"/>
+  <text x="426" y="139" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
+  <circle cx="514" cy="135" r="14" fill="none" stroke="#111111" stroke-width="1.5"/>
+  <text x="514" y="139" text-anchor="middle" class="sm">fb</text>
 
-  <!-- ROW 1: Image classification -->
-  <text x="200" y="148" text-anchor="end" class="lb">Image classification</text>
-  <text x="200" y="162" text-anchor="end" class="sm">vision · 96×96+ pixels</text>
-  <line x1="40" y1="172" x2="660" y2="172" stroke="#ADADAD" stroke-width="0.4" stroke-dasharray="3 3"/>
-  <!-- primary: 2D CNN (col 3 = x 430); fallback: DS-CNN (col 4 = x 518) -->
-  <rect x="408" y="130" width="44" height="34" fill="#000000"/>
-  <text x="430" y="152" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
-  <circle cx="518" cy="147" r="14" fill="none" stroke="#000000" stroke-width="1.4"/>
-  <text x="518" y="151" text-anchor="middle" class="sm">fb</text>
+  <!-- ROW 2: Keyword spotting (y=162, h=60) -->
+  <text x="196" y="188" text-anchor="end" class="lb">Keyword spotting</text>
+  <text x="196" y="202" text-anchor="end" class="sm">audio, spectrograms</text>
+  <line x1="30" y1="222" x2="690" y2="222" stroke="#BBBBBB" stroke-width="0.4" stroke-dasharray="3 3"/>
+  <!-- primary: DS-CNN col4 cx=514; fallback RNN col5 cx=602 -->
+  <rect x="492" y="170" width="44" height="34" fill="#111111"/>
+  <text x="514" y="191" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
+  <circle cx="602" cy="187" r="14" fill="none" stroke="#111111" stroke-width="1.5"/>
+  <text x="602" y="191" text-anchor="middle" class="sm">fb</text>
 
-  <!-- ROW 2: Keyword spotting -->
-  <text x="200" y="200" text-anchor="end" class="lb">Keyword spotting</text>
-  <text x="200" y="214" text-anchor="end" class="sm">audio · spectrograms</text>
-  <line x1="40" y1="224" x2="660" y2="224" stroke="#ADADAD" stroke-width="0.4" stroke-dasharray="3 3"/>
-  <!-- primary: DS-CNN; fallback: RNN -->
-  <rect x="496" y="182" width="44" height="34" fill="#000000"/>
-  <text x="518" y="204" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
-  <circle cx="606" cy="199" r="14" fill="none" stroke="#000000" stroke-width="1.4"/>
-  <text x="606" y="203" text-anchor="middle" class="sm">fb</text>
+  <!-- ROW 3: Time-series anomaly (y=222, h=60) -->
+  <text x="196" y="248" text-anchor="end" class="lb">Time-series anomaly</text>
+  <text x="196" y="262" text-anchor="end" class="sm">sensor streams</text>
+  <line x1="30" y1="282" x2="690" y2="282" stroke="#BBBBBB" stroke-width="0.4" stroke-dasharray="3 3"/>
+  <!-- primary: Tree col1 cx=250; fallback 1D CNN col2 cx=338 -->
+  <rect x="228" y="230" width="44" height="34" fill="#111111"/>
+  <text x="250" y="251" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
+  <circle cx="338" cy="247" r="14" fill="none" stroke="#111111" stroke-width="1.5"/>
+  <text x="338" y="251" text-anchor="middle" class="sm">fb</text>
 
-  <!-- ROW 3: Time-series anomaly -->
-  <text x="200" y="252" text-anchor="end" class="lb">Time-series anomaly</text>
-  <text x="200" y="266" text-anchor="end" class="sm">sensor streams</text>
-  <line x1="40" y1="276" x2="660" y2="276" stroke="#ADADAD" stroke-width="0.4" stroke-dasharray="3 3"/>
-  <!-- primary: Tree; fallback: 1D CNN -->
-  <rect x="232" y="234" width="44" height="34" fill="#000000"/>
-  <text x="254" y="256" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
-  <circle cx="342" cy="251" r="14" fill="none" stroke="#000000" stroke-width="1.4"/>
-  <text x="342" y="255" text-anchor="middle" class="sm">fb</text>
+  <!-- ROW 4: Structured tabular (y=282, h=60) -->
+  <text x="196" y="308" text-anchor="end" class="lb">Structured tabular</text>
+  <text x="196" y="322" text-anchor="end" class="sm">engineered features</text>
+  <line x1="30" y1="342" x2="690" y2="342" stroke="#BBBBBB" stroke-width="0.4" stroke-dasharray="3 3"/>
+  <!-- primary: Tree col1 cx=250 -->
+  <rect x="228" y="290" width="44" height="34" fill="#111111"/>
+  <text x="250" y="311" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
 
-  <!-- ROW 4: Tabular / structured -->
-  <text x="200" y="304" text-anchor="end" class="lb">Structured tabular</text>
-  <text x="200" y="318" text-anchor="end" class="sm">engineered features</text>
-  <line x1="40" y1="328" x2="660" y2="328" stroke="#ADADAD" stroke-width="0.4" stroke-dasharray="3 3"/>
-  <!-- primary: Tree -->
-  <rect x="232" y="286" width="44" height="34" fill="#000000"/>
-  <text x="254" y="308" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
-
-  <!-- ROW 5: Gesture / motion -->
-  <text x="200" y="356" text-anchor="end" class="lb">Gesture / motion</text>
-  <text x="200" y="370" text-anchor="end" class="sm">accelerometer</text>
-  <!-- primary: 1D CNN; fallback: Tree -->
-  <rect x="320" y="338" width="44" height="34" fill="#000000"/>
-  <text x="342" y="360" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
-  <circle cx="254" cy="355" r="14" fill="none" stroke="#000000" stroke-width="1.4"/>
-  <text x="254" y="359" text-anchor="middle" class="sm">fb</text>
+  <!-- ROW 5: Gesture / motion (y=342, h=60) -->
+  <text x="196" y="368" text-anchor="end" class="lb">Gesture / motion</text>
+  <text x="196" y="382" text-anchor="end" class="sm">accelerometer</text>
+  <!-- primary: 1D CNN col2 cx=338; fallback Tree col1 cx=250 -->
+  <rect x="316" y="350" width="44" height="34" fill="#111111"/>
+  <text x="338" y="371" text-anchor="middle" class="sm" fill="#FFFFFF">primary</text>
+  <circle cx="250" cy="367" r="14" fill="none" stroke="#111111" stroke-width="1.5"/>
+  <text x="250" y="371" text-anchor="middle" class="sm">fb</text>
 
   <!-- Legend -->
-  <line x1="40" y1="400" x2="660" y2="400" stroke="#ADADAD" stroke-width="0.75"/>
-  <rect x="50" y="416" width="20" height="14" fill="#000000"/>
-  <text x="80" y="427" class="sm">primary recommendation</text>
-  <circle cx="252" cy="423" r="9" fill="none" stroke="#000000" stroke-width="1.4"/>
-  <text x="270" y="427" class="sm">fallback when constraints permit</text>
+  <line x1="30" y1="408" x2="690" y2="408" stroke="#BBBBBB" stroke-width="0.75"/>
+  <rect x="40" y="422" width="20" height="14" fill="#111111"/>
+  <text x="68" y="433" class="sm">primary recommendation</text>
+  <circle cx="240" cy="429" r="9" fill="none" stroke="#111111" stroke-width="1.5"/>
+  <text x="258" y="433" class="sm">fallback when constraints permit</text>
 
-  <!-- caption -->
-  <text x="350" y="450" text-anchor="middle" class="cap">Walk left to right. Stop at the first model that meets your accuracy bar.</text>
+  <!-- Caption -->
+  <text x="360" y="484" text-anchor="middle" class="cap">Walk left to right. Stop at the first model that meets your accuracy bar.</text>
 </svg>
