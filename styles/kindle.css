@@ -35,10 +35,15 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 1em auto;
+  margin: 2em auto 0.75em auto;
 }
 
-figure { margin: 1.5em 0; }
+p:has(img) {
+  margin: 1.5em 0;
+  text-indent: 0;
+}
+
+figure { margin: 2em 0; }
 figcaption { font-size: 0.85em; text-align: center; }
 
 /* ─────────────────────────────────────────────
