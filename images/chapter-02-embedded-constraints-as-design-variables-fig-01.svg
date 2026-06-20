@@ -1,85 +1,106 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" role="img" aria-labelledby="t01 d01">
-  <title id="t01">nRF52840 memory budget — flash and SRAM under inference workload</title>
-  <desc id="d01">Stacked-bar memory map of the nRF52840 microcontroller. Left bar shows 1 MB flash split into firmware, int8 weights versus float32 weights overflow. Right bar shows 256 KB SRAM split into BLE stack, activations, application heap and stack, with remaining headroom.</desc>
-  <defs>
-    <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .seg { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #FFFFFF; }
-    </style>
-    <marker id="ar1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
-    </marker>
-  </defs>
-  <rect width="700" height="500" fill="#FFFFFF"/>
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" font-family="Lato, Arial, sans-serif">
 
-  <!-- Header -->
-  <text x="350" y="28" text-anchor="middle" class="ti">nRF52840 memory map — does the model fit in the right region?</text>
-  <text x="350" y="44" text-anchor="middle" class="sm">total memory is not the question; flash vs SRAM is</text>
+  <!-- Background -->
+  <rect width="800" height="500" fill="#FFFFFF"/>
 
-  <!-- LEFT — FLASH (1 MB = 1024 KB) -->
-  <text x="160" y="75" text-anchor="middle" class="ti">Flash · 1 MB (1024 KB)</text>
-  <text x="160" y="90" text-anchor="middle" class="sm">non-volatile · weights live here</text>
+  <!-- Title -->
+  <text x="400" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#111111">nRF52840 Memory Map</text>
+  <text x="400" y="42" text-anchor="middle" font-size="11" fill="#555555">Flash 1024 KB · SRAM 256 KB — int8 model fits; float32 does not</text>
 
-  <!-- Flash bar: 250 KB firmware, 300 KB int8 weights, ~474 KB free  -->
-  <!-- bar y range 110..380, height 270 px = 1024 KB; 1 KB = 0.2637 px -->
-  <g>
-    <!-- firmware -->
-    <rect x="100" y="110" width="120" height="65.9" fill="#555555" stroke="#000000" stroke-width="0.75"/>
-    <text x="160" y="146" text-anchor="middle" class="seg">firmware</text>
-    <text x="160" y="160" text-anchor="middle" class="seg">~250 KB</text>
-    <!-- int8 weights -->
-    <rect x="100" y="175.9" width="120" height="79.1" fill="#000000" stroke="#000000" stroke-width="0.75"/>
-    <text x="160" y="210" text-anchor="middle" class="seg">int8 weights</text>
-    <text x="160" y="224" text-anchor="middle" class="seg">300 KB · fits</text>
-    <!-- remaining free -->
-    <rect x="100" y="255" width="120" height="125" fill="#ADADAD" stroke="#000000" stroke-width="0.75"/>
-    <text x="160" y="312" text-anchor="middle" class="sm">free flash</text>
-    <text x="160" y="326" text-anchor="middle" class="sm">~474 KB</text>
-  </g>
-  <text x="160" y="396" text-anchor="middle" class="lb">int8: 300 KB · fits</text>
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- FLASH BAR (x=110, width=110, total height=300px)       -->
+  <!-- ═══════════════════════════════════════════════════════ -->
 
-  <!-- Overflow ghost bar: float32 weights = 1.2 MB shown next to flash bar -->
-  <g>
-    <rect x="240" y="110" width="40" height="316.4" fill="none" stroke="#000000" stroke-width="0.75" stroke-dasharray="3 2"/>
-    <text x="260" y="270" text-anchor="middle" class="sm" transform="rotate(-90 260 270)">float32 weights · 1.2 MB</text>
-  </g>
-  <path d="M 220 145 L 240 145" stroke="#000000" stroke-width="1" marker-end="url(#ar1)"/>
-  <text x="262" y="100" text-anchor="middle" class="lb">over budget</text>
-  <text x="260" y="438" text-anchor="middle" class="sm">float32: 1.2 MB · fails</text>
+  <!-- Flash bar header label -->
+  <text x="165" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">Flash 1024 KB</text>
 
-  <!-- RIGHT — SRAM (256 KB) -->
-  <text x="500" y="75" text-anchor="middle" class="ti">SRAM · 256 KB</text>
-  <text x="500" y="90" text-anchor="middle" class="sm">volatile · activations + system live here</text>
+  <!-- firmware 250 KB → 73.2px, y=80 -->
+  <rect x="110" y="80" width="110" height="73" fill="#333333"/>
+  <text x="165" y="113" text-anchor="middle" font-size="10" fill="#FFFFFF">Firmware</text>
+  <text x="165" y="126" text-anchor="middle" font-size="9" fill="#CCCCCC">250 KB</text>
 
-  <!-- SRAM bar: BLE 30 KB, activations 180 KB, remaining 46 KB  -->
-  <!-- bar y range 110..380, height 270 px = 256 KB; 1 KB = 1.055 px -->
-  <g>
-    <!-- BLE -->
-    <rect x="440" y="110" width="120" height="31.6" fill="#555555" stroke="#000000" stroke-width="0.75"/>
-    <text x="500" y="130" text-anchor="middle" class="seg">BLE stack · 30 KB</text>
-    <!-- activations -->
-    <rect x="440" y="141.6" width="120" height="189.8" fill="#000000" stroke="#000000" stroke-width="0.75"/>
-    <text x="500" y="226" text-anchor="middle" class="seg">activations</text>
-    <text x="500" y="240" text-anchor="middle" class="seg">180 KB</text>
-    <text x="500" y="254" text-anchor="middle" class="seg">tensor arena</text>
-    <!-- remaining -->
-    <rect x="440" y="331.4" width="120" height="48.6" fill="#ADADAD" stroke="#000000" stroke-width="0.75"/>
-    <text x="500" y="356" text-anchor="middle" class="sm">remaining · 46 KB</text>
-    <text x="500" y="369" text-anchor="middle" class="sm">heap, stack, RTOS</text>
-  </g>
-  <text x="500" y="396" text-anchor="middle" class="lb">tight but workable</text>
+  <!-- int8 weights 300 KB → 87.9px, y=153 -->
+  <rect x="110" y="153" width="110" height="88" fill="#111111"/>
+  <text x="165" y="191" text-anchor="middle" font-size="10" fill="#FFFFFF">int8 Weights</text>
+  <text x="165" y="204" text-anchor="middle" font-size="9" fill="#AAAAAA">300 KB</text>
 
-  <!-- danger annotation -->
-  <path d="M 580 200 L 615 200 L 615 340 L 580 340" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4 3"/>
-  <path d="M 615 270 L 645 270" stroke="#000000" stroke-width="1" marker-end="url(#ar1)"/>
-  <text x="678" y="262" text-anchor="middle" class="lb">arena</text>
-  <text x="678" y="276" text-anchor="middle" class="lb">+20 KB</text>
-  <text x="678" y="290" text-anchor="middle" class="sm">→ fails</text>
+  <!-- free flash 474 KB → 138.9px, y=241 -->
+  <rect x="110" y="241" width="110" height="139" fill="#BBBBBB"/>
+  <text x="165" y="305" text-anchor="middle" font-size="10" fill="#444444">Free Flash</text>
+  <text x="165" y="318" text-anchor="middle" font-size="9" fill="#444444">474 KB</text>
 
-  <!-- caption -->
-  <text x="350" y="456" text-anchor="middle" class="cap">"Does the model fit" splits into two questions: weights in flash, activations in SRAM.</text>
-  <text x="350" y="476" text-anchor="middle" class="sm">BLE stack shown as 30 KB assumes a minimal BLE configuration; richer stacks leave less SRAM headroom.</text>
+  <!-- Bar outline -->
+  <rect x="110" y="80" width="110" height="300" fill="none" stroke="#333333" stroke-width="1.5"/>
+
+  <!-- Flash label below -->
+  <text x="165" y="398" text-anchor="middle" font-size="11" fill="#333333">Flash</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- FLOAT32 GHOST BAR (x=240, width=50, height=352px)      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- Ghost bar from y=80, height=300 (capped to match Flash bar visual) -->
+  <rect x="240" y="80" width="50" height="300" fill="none" stroke="#555555" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- Overflow indicator — jagged bottom -->
+  <polyline points="240,380 248,390 256,375 264,390 272,375 280,385 290,380" fill="none" stroke="#555555" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- "FAILS" label above ghost bar -->
+  <text x="265" y="70" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">FAILS</text>
+  <text x="265" y="57" text-anchor="middle" font-size="9" fill="#555555">float32 weights</text>
+  <text x="265" y="46" text-anchor="middle" font-size="9" fill="#555555">1.2 MB &gt; 1 MB</text>
+
+  <!-- Rotated label inside ghost bar -->
+  <text transform="translate(265,240) rotate(-90)" text-anchor="middle" font-size="9" fill="#777777">1200 KB — over budget</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SRAM BAR (x=520, width=110, total height=270px used)   -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- SRAM bar header label -->
+  <text x="575" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">SRAM 256 KB</text>
+
+  <!-- BLE stack 30 KB → 31.6px, y=80 -->
+  <rect x="520" y="80" width="110" height="32" fill="#555555"/>
+  <text x="575" y="100" text-anchor="middle" font-size="10" fill="#FFFFFF">BLE Stack 30 KB</text>
+
+  <!-- activations 180 KB → 189.9px, y=112 -->
+  <rect x="520" y="112" width="110" height="190" fill="#111111"/>
+  <text x="575" y="199" text-anchor="middle" font-size="10" fill="#FFFFFF">Activations</text>
+  <text x="575" y="213" text-anchor="middle" font-size="9" fill="#AAAAAA">180 KB</text>
+
+  <!-- remaining 46 KB → 48.5px, y=302 -->
+  <rect x="520" y="302" width="110" height="48" fill="#AAAAAA"/>
+  <text x="575" y="330" text-anchor="middle" font-size="10" fill="#444444">Remaining 46 KB</text>
+
+  <!-- Bar outline -->
+  <rect x="520" y="80" width="110" height="270" fill="none" stroke="#333333" stroke-width="1.5"/>
+
+  <!-- SRAM label below -->
+  <text x="575" y="398" text-anchor="middle" font-size="11" fill="#333333">SRAM</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- DANGER BRACKET — right of SRAM, spanning activations   -->
+  <!-- Activations: y=112 to y=302 (190px tall)               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- Bracket lines -->
+  <line x1="634" y1="112" x2="650" y2="112" stroke="#333333" stroke-width="1.5"/>
+  <line x1="650" y1="112" x2="650" y2="302" stroke="#333333" stroke-width="1.5"/>
+  <line x1="634" y1="302" x2="650" y2="302" stroke="#333333" stroke-width="1.5"/>
+
+  <!-- Arrow pointing right at midpoint -->
+  <line x1="650" y1="207" x2="668" y2="207" stroke="#333333" stroke-width="1.5"/>
+  <polygon points="668,203 676,207 668,211" fill="#333333"/>
+
+  <!-- Danger text -->
+  <text x="679" y="200" font-size="10" font-weight="bold" fill="#333333">arena +20 KB</text>
+  <text x="679" y="214" font-size="10" fill="#555555">→ fails</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- CAPTION                                                 -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <text x="400" y="460" text-anchor="middle" font-size="10" fill="#777777">Figure 2-1. nRF52840 memory layout with int8 model (fits) vs. float32 model (overflows Flash). SRAM arena cannot grow by 20 KB.</text>
+
 </svg>

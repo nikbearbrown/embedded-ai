@@ -1,84 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" role="img" aria-labelledby="t02 d02">
-  <title id="t02">Inference latency across three embedded targets for a 50M-MAC model</title>
-  <desc id="d02">Horizontal bar chart comparing inference latency for a 50 million MAC model on the STM32F411 at 830 milliseconds, the STM32H7A3 at 250 milliseconds, and the Raspberry Pi Zero 2 W at 25 milliseconds, with a 100 millisecond budget line.</desc>
-  <defs>
-    <style>
-      .ti { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 14px; font-weight: bold; fill: #000000; }
-      .lb { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; fill: #000000; }
-      .sm { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; fill: #555555; }
-      .cap { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
-      .val { font-family: 'Real Head Pro', 'FF Real', Lato, sans-serif; font-size: 11px; font-weight: bold; fill: #000000; }
-    </style>
-    <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
-    </marker>
-  </defs>
-  <rect width="700" height="420" fill="#FFFFFF"/>
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" font-family="Lato, Arial, sans-serif">
 
-  <text x="350" y="32" text-anchor="middle" class="ti">Inference latency · 50 M MACs · three targets vs 100 ms budget</text>
-  <text x="350" y="50" text-anchor="middle" class="sm">log-spaced axis · sustained throughput, not peak</text>
+  <!-- Background -->
+  <rect width="800" height="400" fill="#FFFFFF"/>
 
-  <!-- Plot area: x from 100 to 670, y from 80 to 320 -->
-  <!-- log scale: log10(10)=1 .. log10(1000)=3, so x = 100 + (log10(v)-1)*285 -->
-  <!-- 10 -> 100, 100 -> 385, 1000 -> 670 -->
+  <!-- Title -->
+  <text x="400" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#111111">Inference Latency vs. 100 ms Budget</text>
+  <text x="400" y="42" text-anchor="middle" font-size="11" fill="#555555">50M-MAC model · log scale · three embedded targets</text>
 
-  <!-- x axis ticks -->
-  <line x1="100" y1="320" x2="670" y2="320" stroke="#555555" stroke-width="1"/>
-  <g class="sm">
-    <line x1="100" y1="320" x2="100" y2="324" stroke="#555555"/>
-    <text x="100" y="336" text-anchor="middle">10 ms</text>
-    <line x1="270.4" y1="320" x2="270.4" y2="324" stroke="#555555"/>
-    <text x="270.4" y="336" text-anchor="middle">30 ms</text>
-    <line x1="385" y1="320" x2="385" y2="324" stroke="#555555"/>
-    <text x="385" y="336" text-anchor="middle">100 ms</text>
-    <line x1="555.4" y1="320" x2="555.4" y2="324" stroke="#555555"/>
-    <text x="555.4" y="336" text-anchor="middle">300 ms</text>
-    <line x1="670" y1="320" x2="670" y2="324" stroke="#555555"/>
-    <text x="670" y="336" text-anchor="middle">1000 ms</text>
-  </g>
-  <text x="385" y="358" text-anchor="middle" class="sm">latency (log scale)</text>
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- BARS                                                    -->
+  <!-- x=120 (10ms) to x=700 (1000ms)                        -->
+  <!-- formula: x = 120 + (log10(v) - 1) × 290               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
 
-  <!-- 100 ms budget line -->
-  <line x1="385" y1="70" x2="385" y2="320" stroke="#000000" stroke-width="1.25" stroke-dasharray="5 3"/>
-  <text x="385" y="64" text-anchor="middle" class="lb">100 ms budget</text>
+  <!-- Row 1: RPi Zero 2 W — 25ms → x=235.4, fill=#111111 -->
+  <rect x="120" y="100" width="115" height="28" fill="#111111"/>
 
-  <!-- Bars: each row ~ 60 px high -->
-  <!-- RPi: 25 ms -> x_end = 100 + (log10(25)-1)*285 = 100 + 0.398*285 = 213.4 -->
-  <!-- H7A3: 250 ms -> x_end = 100 + (log10(250)-1)*285 = 100 + 1.398*285 = 498.4 -->
-  <!-- F411: 830 ms -> x_end = 100 + (log10(830)-1)*285 = 100 + 1.919*285 = 647.0 -->
+  <!-- Row 2: STM32H7A3 — 250ms → x=525.4, fill=#555555 -->
+  <rect x="120" y="165" width="405" height="28" fill="#555555"/>
+
+  <!-- Row 3: STM32F411 — 830ms → x=676.5, fill=#888888 -->
+  <rect x="120" y="230" width="557" height="28" fill="#888888"/>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- LEFT LABELS                                             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
 
   <!-- RPi Zero 2 W -->
-  <g>
-    <text x="92" y="105" text-anchor="end" class="lb">RPi Zero 2 W</text>
-    <text x="92" y="119" text-anchor="end" class="sm">A53 · NEON · int8</text>
-    <rect x="100" y="92" width="113.4" height="26" fill="#000000"/>
-    <text x="222" y="110" class="val">~25 ms</text>
-    <text x="222" y="124" class="sm">comfortable</text>
-  </g>
+  <text x="115" y="110" text-anchor="end" font-size="10" font-weight="bold" fill="#111111">RPi Zero 2 W</text>
+  <text x="115" y="123" text-anchor="end" font-size="9" fill="#555555">A53 · NEON · int8</text>
 
   <!-- STM32H7A3 -->
-  <g>
-    <text x="92" y="172" text-anchor="end" class="lb">STM32H7A3</text>
-    <text x="92" y="186" text-anchor="end" class="sm">M7 · 280 MHz · FPU</text>
-    <rect x="100" y="159" width="398.4" height="26" fill="#555555"/>
-    <text x="507" y="177" class="val">~250 ms</text>
-    <text x="507" y="191" class="sm">plausible if int8/SIMD</text>
-  </g>
+  <text x="115" y="175" text-anchor="end" font-size="10" font-weight="bold" fill="#111111">STM32H7A3</text>
+  <text x="115" y="188" text-anchor="end" font-size="9" fill="#555555">M7 · 280 MHz · FPU</text>
 
   <!-- STM32F411 -->
-  <g>
-    <text x="92" y="239" text-anchor="end" class="lb">STM32F411</text>
-    <text x="92" y="253" text-anchor="end" class="sm">M4 · 100 MHz · FPU</text>
-    <rect x="100" y="226" width="547" height="26" fill="#787878"/>
-    <text x="100" y="244" class="val" fill="#FFFFFF" dx="6">~830 ms</text>
-    <text x="660" y="244" text-anchor="end" class="sm" fill="#FFFFFF">misses budget by 8×</text>
-  </g>
+  <text x="115" y="240" text-anchor="end" font-size="10" font-weight="bold" fill="#111111">STM32F411</text>
+  <text x="115" y="253" text-anchor="end" font-size="9" fill="#555555">M4 · 100 MHz · FPU</text>
 
-  <!-- Annotation: which side passes -->
-  <path d="M 230 290 L 350 290" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
-  <text x="290" y="282" text-anchor="middle" class="sm">clears budget</text>
-  <path d="M 540 290 L 420 290" stroke="#000000" stroke-width="1" marker-end="url(#ar2)"/>
-  <text x="480" y="282" text-anchor="middle" class="sm">over budget</text>
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- VALUE + VERDICT LABELS (right of bars)                 -->
+  <!-- ═══════════════════════════════════════════════════════ -->
 
-  <text x="350" y="395" text-anchor="middle" class="cap">A model that runs in 25 ms on one target runs in 830 ms on another. Memory was never the question here.</text>
+  <!-- RPi: 25ms PASS — bar ends at x=235, label at x=245 -->
+  <text x="245" y="119" font-size="10" font-weight="bold" fill="#111111">25 ms ✓ PASS</text>
+
+  <!-- H7A3: 250ms — bar ends at x=525, label at x=535 -->
+  <text x="535" y="184" font-size="10" fill="#333333">250 ms — needs int8</text>
+
+  <!-- F411: 830ms — bar ends at x=677, label at x=686 -->
+  <text x="686" y="249" font-size="10" font-weight="bold" fill="#333333">830 ms ✗ FAIL</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- BUDGET LINE at x=410 (100ms)                           -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <line x1="410" y1="75" x2="410" y2="290" stroke="#333333" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="410" y="70" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">100 ms budget</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- X-AXIS                                                  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <line x1="120" y1="290" x2="700" y2="290" stroke="#333333" stroke-width="1.5"/>
+
+  <!-- Tick at 10ms → x=120 -->
+  <line x1="120" y1="290" x2="120" y2="297" stroke="#333333" stroke-width="1.5"/>
+  <text x="120" y="310" text-anchor="middle" font-size="10" fill="#555555">10 ms</text>
+
+  <!-- Tick at 100ms → x=410 -->
+  <line x1="410" y1="290" x2="410" y2="297" stroke="#333333" stroke-width="1.5"/>
+  <text x="410" y="310" text-anchor="middle" font-size="10" fill="#555555">100 ms</text>
+
+  <!-- Tick at 1000ms → x=700 -->
+  <line x1="700" y1="290" x2="700" y2="297" stroke="#333333" stroke-width="1.5"/>
+  <text x="700" y="310" text-anchor="middle" font-size="10" fill="#555555">1000 ms</text>
+
+  <!-- X-axis label -->
+  <text x="410" y="330" text-anchor="middle" font-size="10" fill="#555555">Latency (log scale)</text>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- CAPTION                                                 -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <text x="400" y="370" text-anchor="middle" font-size="10" fill="#777777">Figure 2-2. Inference latency on three targets. RPi Zero 2 W meets the 100 ms budget; STM32H7A3 needs int8/SIMD; STM32F411 misses by 8×.</text>
+
 </svg>
