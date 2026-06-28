@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06-02 d06-02">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" role="img" aria-labelledby="t06-02 d06-02">
   <title id="t06-02">Roofline model — arithmetic intensity vs achievable performance</title>
   <desc id="d06-02">Log-log plot with arithmetic intensity in ops per byte on the x-axis and achievable performance in MMAC per second on the y-axis. A sloped memory-bandwidth ceiling meets a flat compute-bound plateau at the ridge point; three workloads are placed on or below the roof.</desc>
   <defs>
@@ -13,7 +13,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="480" fill="#FFFFFF"/>
+  <rect width="700" height="500" fill="#FFFFFF"/>
 
   <text x="350" y="30" text-anchor="middle" class="ti">Roofline model — what limits a kernel on a Cortex-M7 at 400 MHz</text>
 

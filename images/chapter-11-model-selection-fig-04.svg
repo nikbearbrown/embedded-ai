@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t11d d11d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 495" role="img" aria-labelledby="t11d d11d">
   <title id="t11d">Pareto frontier — six face-detection candidates against latency and accuracy</title>
   <desc id="d11d">Scatter plot of latency (ms) vs accuracy (%). Six face-detection models plotted; Pareto frontier connects TinyFace, MobileNetV3-Small, MobileNetV2-0.35, and EfficientNet-Lite0. MobileNetV2-0.25 and ResNet18 are dominated. Bubble size encodes memory footprint.</desc>
   <defs>

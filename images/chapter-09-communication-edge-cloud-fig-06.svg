@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 480" role="img" aria-labelledby="t06 d06">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 495" role="img" aria-labelledby="t06 d06">
   <title id="t06">Three predictive-maintenance strategies compared on four axes</title>
   <desc id="d06">Four small bar panels — latency, monthly data, monthly cost, and accuracy — comparing Strategy 1 on-device, Strategy 2 full cloud, and Strategy 3 split inference. Strategy 2 exceeds budget; Strategy 3 wins.</desc>
   <defs>

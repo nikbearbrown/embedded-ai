@@ -1,4 +1,4 @@
-<svg viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig-title-01">
+<svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig-title-01">
   <title id="fig-title-01">Embedded memory hierarchy</title>
   <desc>Four embedded memory tiers arranged from fastest and smallest to slowest and largest, with latency, capacity, volatility, and typical embedded-AI artifacts labeled for each tier.</desc>
   <defs>
@@ -21,7 +21,7 @@
     </style>
   </defs>
 
-  <rect width="900" height="540" fill="#FFFFFF"/>
+  <rect width="900" height="500" fill="#FFFFFF"/>
 
   <text x="40" y="38" class="title">Embedded memory hierarchy</text>
   <text x="40" y="60" class="subtitle">Read top to bottom: latency rises as capacity expands and placement becomes a deployment decision.</text>
@@ -76,5 +76,4 @@
 
   <line x1="322" y1="452" x2="622" y2="452" stroke="#888888" stroke-width="1.5"/>
   <text x="322" y="476" class="caption">Deployment question: which artifact belongs in the fastest tier that can hold it?</text>
-  <text x="322" y="520" class="caption"> </text>
 </svg>

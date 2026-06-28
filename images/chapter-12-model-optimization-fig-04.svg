@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t04 d04">
   <title id="t04">Accuracy versus structured pruning rate — the cliff past 70 percent</title>
   <desc id="d04">A curve showing model accuracy declining as the percentage of channels removed increases from 0 to 90 percent. The slope is gentle through 20 percent, steepens through 60 percent, and collapses past 70 percent. A shaded band marks the 20 to 40 percent sweet spot.</desc>
   <defs>
@@ -85,5 +85,5 @@
   <path d="M 521.1 139 L 538 295" fill="none" stroke="#555555" stroke-width="0.8" stroke-dasharray="2 2" marker-end="url(#ar)"/>
   <text x="540" y="307" class="sm" font-weight="bold" fill="#444444">cliff — switch to distillation</text>
 
-  <text x="350" y="436" text-anchor="middle" class="cap">Past 60% compression, the right move is not more pruning — it is distilling onto a smaller architecture designed to be small.</text>
+  <text x="350" y="432" text-anchor="middle" class="cap">Past 60% compression, the right move is not more pruning — it is distilling onto a smaller architecture designed to be small.</text>
 </svg>

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="t04 d04">
   <title id="t04">Standard convolution versus depthwise separable convolution</title>
   <desc id="d04">Top: a single standard conv block, 18432 multiplications per output pixel. Bottom: depthwise then pointwise blocks, 288 + 2048 = 2336 multiplications. Roughly 8x cheaper.</desc>
   <defs>
@@ -14,7 +14,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="720" height="460" fill="#FFFFFF"/>
+  <rect width="720" height="480" fill="#FFFFFF"/>
 
   <text x="360" y="28" text-anchor="middle" class="ti">Split spatial filtering from channel mixing — pay less for both.</text>
 

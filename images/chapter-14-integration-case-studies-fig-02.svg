@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t02 d02">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 470" role="img" aria-labelledby="t02 d02">
   <title id="t02">Industrial vibration case — three-architecture decision tree, two branches killed by cost</title>
   <desc id="d02">A branching diagram with three architecture options for the CNC-machine vibration monitor: fully on-device wins; edge-gateway over RS-485 is rejected because wiring 200 sensors exceeds the deployment budget; the hybrid threshold-plus-radio approach is rejected because adding a sub-GHz radio to each sensor exceeds the forty-dollar BOM ceiling.</desc>
   <defs>
@@ -88,5 +88,5 @@
   <text x="32" y="408" class="cap">Two viable-looking architectures die not on technical grounds but on deployment economics —</text>
   <text x="32" y="422" class="cap">the binding constraints (200-sensor wiring cost, $40 BOM) eliminate them before the model class is chosen.</text>
 
-  <text x="350" y="446" text-anchor="middle" class="cap">Architecture selection is an economics problem before it is an ML problem.</text>
+  <text x="350" y="442" text-anchor="middle" class="cap">Architecture selection is an economics problem before it is an ML problem.</text>
 </svg>

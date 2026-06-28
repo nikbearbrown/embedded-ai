@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 470" role="img" aria-labelledby="t04 d04">
   <title id="t04">Three-stage accuracy bisection from Python source to device</title>
   <desc id="d04">A horizontal bar chart of accuracy at three pipeline stages — Python source 94.2 percent, TFLite interpreter 93.1 percent, on-device 92.8 percent — with the two deltas labelled and the four candidate root causes mapped to the gap they explain.</desc>
   <defs>
@@ -85,5 +85,5 @@
   <text x="364" y="412" class="sm">gap 2 (compile + runtime):</text>
   <text x="364" y="428" class="sm">float-precision drift · alignment fault · kernel bug</text>
 
-  <text x="350" y="452" text-anchor="middle" class="cap">Bisect by measuring the same validation set at each stage — the gap that appears first localizes the bug.</text>
+  <text x="350" y="442" text-anchor="middle" class="cap">Bisect by measuring the same validation set at each stage — the gap that appears first localizes the bug.</text>
 </svg>

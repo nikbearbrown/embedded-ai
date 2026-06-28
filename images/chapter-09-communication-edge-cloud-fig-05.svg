@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="t05 d05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" role="img" aria-labelledby="t05 d05">
   <title id="t05">MobileNetV2 split-inference — activation size shrinks before bandwidth has to lift it</title>
   <desc id="d05">A horizontal stack of MobileNetV2 layer blocks with activation tensor sizes annotated below each block. A dashed split-cut line between block 6 and block 7 separates the device side from the cloud side.</desc>
   <defs>

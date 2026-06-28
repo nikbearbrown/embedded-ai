@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="t05 d05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 490" role="img" aria-labelledby="t05 d05">
   <title id="t05">Keyword spotter deployed on Arduino Nano 33 BLE Sense — budget vs measured</title>
   <desc id="d05">Four panels. Latency budget 100 ms versus measured 42 ms. SRAM available 256 KB versus used 100 KB split into 80 KB arena and 20 KB stack. Flash model size 85 KB. Accuracy across three pipeline stages — 94.2, 93.1, 92.8 percent.</desc>
   <defs>

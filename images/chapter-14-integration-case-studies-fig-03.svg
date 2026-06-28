@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t03 d03">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 470" role="img" aria-labelledby="t03 d03">
   <title id="t03">Industrial energy budget — random forest fits the envelope, 1D CNN overflows it</title>
   <desc id="d03">Two stacked bars on the same axis. The random-forest schedule at 2.5-second intervals stays inside the 0.28 mW envelope: sleep 0.037 mW, inference 0.225 mW. A 1D CNN at the same cadence demands roughly 1.5 mW, overflowing the envelope by more than five times.</desc>
   <defs>
@@ -83,5 +83,5 @@
   <text x="350" y="420" text-anchor="middle" class="cap">The model that would have been more accurate cannot fit inside the milliwatts the battery can spare —</text>
   <text x="350" y="434" text-anchor="middle" class="cap">that is why the random forest, not the CNN, wins the industrial case.</text>
 
-  <text x="350" y="452" text-anchor="middle" class="cap">Energy budget drives model selection before accuracy does.</text>
+  <text x="350" y="442" text-anchor="middle" class="cap">Energy budget drives model selection before accuracy does.</text>
 </svg>

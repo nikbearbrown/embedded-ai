@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06-05 d06-05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" role="img" aria-labelledby="t06-05 d06-05">
   <title id="t06-05">Latency-accuracy Pareto plot — three gesture-recognition variants against deadline and accuracy floor</title>
   <desc id="d06-05">Latency on the x-axis (log) versus accuracy percentage on the y-axis. Three models A, B, and C trace a Pareto frontier. A vertical dashed line marks the 250 ms deadline; a horizontal dashed line marks the 88 percent accuracy floor; the feasible region in the upper-left corner is shaded.</desc>
   <defs>
@@ -14,7 +14,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
     </marker>
   </defs>
-  <rect width="700" height="480" fill="#FFFFFF"/>
+  <rect width="700" height="500" fill="#FFFFFF"/>
 
   <text x="350" y="28" text-anchor="middle" class="ti">Pareto frontier — latency vs accuracy, three gesture models on Cortex-M4 @ 100 MHz</text>
 

@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 490" role="img" aria-labelledby="t05 d05" font-family="Lato, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 496" role="img" aria-labelledby="t05 d05" font-family="Lato, Arial, sans-serif">
   <title id="t05">Radar comparison of three candidate platforms for a smart-agriculture sensor</title>
   <desc id="d05">A four-axis radar chart comparing ESP32-S3, STM32L4R5, and Raspberry Pi Zero 2 W on memory headroom, compute margin, projected battery life on a log scale with a six-month target marked, and cost. The Pi clears compute and memory but collapses on battery life.</desc>
 
   <!-- Background -->
-  <rect width="800" height="490" fill="#FFFFFF"/>
+  <rect width="800" height="496" fill="#FFFFFF"/>
 
   <!-- Ring polygons (diamond, center=320,270) -->
   <polygon points="320,100 490,270 320,440 150,270" fill="none" stroke="#CCCCCC" stroke-width="1"/>

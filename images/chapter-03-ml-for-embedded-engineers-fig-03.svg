@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 460" role="img" aria-labelledby="t03 d03">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 480" role="img" aria-labelledby="t03 d03">
   <title id="t03">Fully connected versus convolution — weight sharing wins</title>
   <desc id="d03">Left: flattened pixel vector with dense crossing lines to outputs, 19 million weights, 76 MB. Right: 2D image grid with a 3x3 filter sliding to multiple positions, 9 shared weights reused across the image.</desc>
   <defs>
@@ -13,7 +13,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="740" height="460" fill="#FFFFFF"/>
+  <rect width="740" height="480" fill="#FFFFFF"/>
 
   <!-- LEFT: Fully Connected -->
   <text x="32" y="30" class="ti">Fully connected</text>

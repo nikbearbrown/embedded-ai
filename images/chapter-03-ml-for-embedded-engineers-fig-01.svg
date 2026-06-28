@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460" role="img" aria-labelledby="t01 d01">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="t01 d01">
   <title id="t01">Weights live in flash, activations live in RAM</title>
   <desc id="d01">A feedforward network with arrows flowing left to right through four layers. Weights persist in flash storage; activations are recomputed in RAM per inference and discarded after each layer.</desc>
   <defs>
@@ -16,7 +16,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#888888"/>
     </marker>
   </defs>
-  <rect width="720" height="460" fill="#FFFFFF"/>
+  <rect width="720" height="480" fill="#FFFFFF"/>
   <text x="360" y="30" text-anchor="middle" class="ti">Two memories. Two behaviors. One inference.</text>
   <!-- FLASH BAND -->
   <rect x="40" y="50" width="640" height="120" fill="#F5F5F5" stroke="#BBBBBB" stroke-width="1"/>

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 500" role="img" aria-labelledby="t05 d05">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-labelledby="t05 d05">
   <title id="t05">Sensing task to model class — primary recommendation and fallback</title>
   <desc id="d05">A grid mapping five sensing tasks on rows to five model classes on columns, ordered cheapest to most expensive. Filled squares mark primary recommendations; rings mark fallbacks.</desc>
   <defs>
@@ -13,7 +13,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
     </marker>
   </defs>
-  <rect width="720" height="500" fill="#FFFFFF"/>
+  <rect width="720" height="520" fill="#FFFFFF"/>
 
   <text x="360" y="28" text-anchor="middle" class="ti">Pick the cheapest model that meets the accuracy bar.</text>
 

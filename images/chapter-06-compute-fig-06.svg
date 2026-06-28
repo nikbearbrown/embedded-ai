@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="t06-06 d06-06">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t06-06 d06-06">
   <title id="t06-06">Latency budget waterfall — one-second duty cycle with 80 ms inference at 28 mA against a 5 mA average</title>
   <desc id="d06-06">Horizontal stacked bar showing the 1000 ms duty cycle. A narrow 80 ms inference block at 28 mA is highlighted against the 920 ms sleep block at near-zero current. Annotations show the time-weighted average of 2.24 mA against a 5 mA budget ceiling.</desc>
   <defs>
@@ -14,7 +14,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
     </marker>
   </defs>
-  <rect width="700" height="440" fill="#FFFFFF"/>
+  <rect width="700" height="460" fill="#FFFFFF"/>
 
   <text x="350" y="28" text-anchor="middle" class="ti">Duty-cycle waterfall — inference is loud but brief; the average stays under budget</text>
 

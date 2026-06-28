@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t11a d11a">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 490" role="img" aria-labelledby="t11a d11a">
   <title id="t11a">Five deployment-aware metrics — what to measure before choosing a model</title>
   <desc id="d11a">A central candidate-model node surrounded by five deployment-aware metrics: latency on target hardware, memory footprint at int8, energy per inference, accuracy on your dataset, and accuracy under quantization.</desc>
   <defs>

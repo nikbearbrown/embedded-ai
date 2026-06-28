@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 460" role="img" aria-labelledby="t04 d04">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 470" role="img" aria-labelledby="t04 d04">
   <title id="t04">Medical wearable compression cascade — model size shrinks while sensitivity climbs back to the regulatory floor</title>
   <desc id="d04">A dual-axis chart tracking a 1D CNN for arrhythmia detection across four optimization stages: float32 baseline at 10 MB, 40 percent structured pruning, distillation onto a smaller student, and int8 quantization-aware training. Left axis tracks model size, right axis tracks VT/VF sensitivity. Reference lines mark the 2 MB flash ceiling and the 98 percent regulatory sensitivity floor.</desc>
   <defs>

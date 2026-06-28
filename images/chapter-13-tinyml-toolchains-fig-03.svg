@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="t03 d03">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 490" role="img" aria-labelledby="t03 d03">
   <title id="t03">Toolchain feature matrix — six toolchains across six capabilities</title>
   <desc id="d03">Heatmap-style matrix. Rows are TFLite Micro, Edge Impulse, STM32Cube.AI, Vela, Edge TPU compiler, ONNX Runtime. Columns are custom layers, intermediate artifacts, quantization control, vendor-tuned kernels, GUI workflow, debug access. Cells are shaded full, partial, or none.</desc>
   <defs>
