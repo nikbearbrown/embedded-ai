@@ -1,0 +1,147 @@
+{
+  "book": "embedded-ai",
+  "book_title": "Embedded AI — \"",
+  "chapter_count": 20,
+  "chapters": [
+    {
+      "file": "chapters/00-introduction.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/00-introduction.md",
+      "title": "Introduction",
+      "words": 498,
+      "images": 0
+    },
+    {
+      "file": "chapters/01-chapter-when-ai-meets-constrained-hardware.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/01-chapter-when-ai-meets-constrained-hardware.md",
+      "title": "Chapter 1 — When AI Meets Constrained Hardware",
+      "words": 3412,
+      "images": 5
+    },
+    {
+      "file": "chapters/02-chapter-embedded-constraints-as-design-variables.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/02-chapter-embedded-constraints-as-design-variables.md",
+      "title": "Chapter 2 — Embedded Constraints as Design Variables",
+      "words": 3774,
+      "images": 6
+    },
+    {
+      "file": "chapters/03-chapter-ml-for-embedded-engineers.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/03-chapter-ml-for-embedded-engineers.md",
+      "title": "Chapter 3 — Machine Learning for Embedded Engineers",
+      "words": 3362,
+      "images": 5
+    },
+    {
+      "file": "chapters/04-chapter-inference-mechanics.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/04-chapter-inference-mechanics.md",
+      "title": "Chapter 4 — Inference Mechanics",
+      "words": 3799,
+      "images": 5
+    },
+    {
+      "file": "chapters/05-chapter-memory.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/05-chapter-memory.md",
+      "title": "Chapter 5 — Memory",
+      "words": 3450,
+      "images": 6
+    },
+    {
+      "file": "chapters/06-chapter-compute.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/06-chapter-compute.md",
+      "title": "Chapter 6 — Compute",
+      "words": 3232,
+      "images": 6
+    },
+    {
+      "file": "chapters/07-chapter-power-and-energy.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/07-chapter-power-and-energy.md",
+      "title": "Chapter 7 — Power and Energy",
+      "words": 3551,
+      "images": 6
+    },
+    {
+      "file": "chapters/08-chapter-hardware-for-ai.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/08-chapter-hardware-for-ai.md",
+      "title": "Chapter 8 — Hardware for AI",
+      "words": 3534,
+      "images": 6
+    },
+    {
+      "file": "chapters/09-chapter-communication-edge-cloud.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/09-chapter-communication-edge-cloud.md",
+      "title": "Chapter 9 — Communication and the Edge-Cloud Spectrum",
+      "words": 3455,
+      "images": 6
+    },
+    {
+      "file": "chapters/10-chapter-real-time-ai.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/10-chapter-real-time-ai.md",
+      "title": "Chapter 10 — Real-Time AI",
+      "words": 3523,
+      "images": 5
+    },
+    {
+      "file": "chapters/11-chapter-model-selection.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/11-chapter-model-selection.md",
+      "title": "Chapter 11 — Selecting Models for Constrained Deployment",
+      "words": 3611,
+      "images": 6
+    },
+    {
+      "file": "chapters/12-chapter-model-optimization.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/12-chapter-model-optimization.md",
+      "title": "Chapter 12 — Optimizing Models: Quantization, Pruning, and Distillation",
+      "words": 3671,
+      "images": 6
+    },
+    {
+      "file": "chapters/13-chapter-tinyml-toolchains.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/13-chapter-tinyml-toolchains.md",
+      "title": "Chapter 13 — TinyML Toolchains and Deployment Pipelines",
+      "words": 3473,
+      "images": 5
+    },
+    {
+      "file": "chapters/14-chapter-integration-case-studies.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/14-chapter-integration-case-studies.md",
+      "title": "Chapter 14 — Integration Case Studies: Full Design Decisions",
+      "words": 3395,
+      "images": 6
+    },
+    {
+      "file": "chapters/90-appendix-a-embedded-quick-reference.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/90-appendix-a-embedded-quick-reference.md",
+      "title": "Appendix A: Embedded Systems Quick Reference",
+      "words": 2030,
+      "images": 0
+    },
+    {
+      "file": "chapters/91-appendix-b-ml-quick-reference.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/91-appendix-b-ml-quick-reference.md",
+      "title": "Appendix B: Machine Learning Quick Reference",
+      "words": 2160,
+      "images": 0
+    },
+    {
+      "file": "chapters/92-appendix-c-hardware-reference.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/92-appendix-c-hardware-reference.md",
+      "title": "Appendix C: Hardware Reference — AI-Capable Microcontroller and SoC Comparison",
+      "words": 1496,
+      "images": 0
+    },
+    {
+      "file": "chapters/93-appendix-d-toolchain-setup.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/93-appendix-d-toolchain-setup.md",
+      "title": "Appendix D: Toolchain Setup Guides",
+      "words": 1949,
+      "images": 0
+    },
+    {
+      "file": "chapters/97-fundamental-themes.md",
+      "path": "/sessions/quirky-bold-hamilton/mnt/bear-textbooks/books/embedded-ai/chapters/97-fundamental-themes.md",
+      "title": "The Fundamental Themes",
+      "words": 7449,
+      "images": 0
+    }
+  ]
+}
