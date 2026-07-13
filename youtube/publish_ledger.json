@@ -1,0 +1,15 @@
+{
+ "cli-roofline": "qMj2cVVf2B0",
+ "cli-memory-verdict": "v8os5S68h0M",
+ "cli-battery-life": "sZAy56cjM4I",
+ "cli-brownout": "FXVmHyiGIpQ",
+ "cli-int8-mash": "sM9Tn2PVucA",
+ "cli-latency-predictor": "AI0K20Gt9Wk",
+ "cli-compression-journey": "4Q48zdjLbmw",
+ "cli-pruning-cliff": "pqMsH6nRD2Y",
+ "cli-prune-benchmark": "V2nRFCTWLug",
+ "cli-distill": "FChOjELTxi0",
+ "cli-pareto-selector": "PY-OwIFMdic",
+ "cli-realtime-verdict": "q_THYmugVls",
+ "cli-deploy-runner": "Oi-Eq6GWBWY"
+}
