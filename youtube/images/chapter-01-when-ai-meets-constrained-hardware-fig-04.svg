@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="t04 d04">
+  <title id="t04">Four Constraints, Six Couplings</title>
+  <desc id="d04">Diamond diagram: memory top, compute right, power bottom, real-time left. Six edges show the named trade between each pair of constraints.</desc>
+  <defs>
+    <style>
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .sub { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .vx  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #FFFFFF; }
+      .vxd { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  fill: #DDDDDD; }
+      .el  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #111111; }
+      .ef  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+    </style>
+  </defs>
+
+  <rect width="900" height="600" fill="#FFFFFF"/>
+
+  <!-- Title -->
+  <text x="450" y="26" text-anchor="middle" class="ti">Four Constraints, Six Couplings</text>
+  <text x="450" y="42" text-anchor="middle" class="sub">Each vertex is a budget. Each edge names what you give up. No lever is free.</text>
+
+  <!--
+    Vertices (r=42):
+      memory    top:    (450, 115)
+      compute   right:  (680, 325)
+      power     bottom: (450, 535)
+      real-time left:   (220, 325)
+    Center: (450, 325)
+  -->
+
+  <!-- Outer diamond edges -->
+  <line x1="450" y1="115" x2="680" y2="325" stroke="#888888" stroke-width="1.5"/>
+  <line x1="680" y1="325" x2="450" y2="535" stroke="#888888" stroke-width="1.5"/>
+  <line x1="450" y1="535" x2="220" y2="325" stroke="#888888" stroke-width="1.5"/>
+  <line x1="220" y1="325" x2="450" y2="115" stroke="#888888" stroke-width="1.5"/>
+
+  <!-- Diagonal edges (dashed) -->
+  <line x1="450" y1="115" x2="450" y2="535" stroke="#CCCCCC" stroke-width="1" stroke-dasharray="4 3"/>
+  <line x1="220" y1="325" x2="680" y2="325" stroke="#CCCCCC" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- ══ EDGE LABELS — placed in the 4 outer quadrants ══ -->
+
+  <!-- NE: memory ↔ compute — box centered (630, 185) -->
+  <rect x="565" y="165" width="130" height="40" rx="3" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="0.75"/>
+  <text x="630" y="181" text-anchor="middle" class="el">int8 quantize</text>
+  <text x="630" y="197" text-anchor="middle" class="ef">↓ size  ↑ speed  ↓ accuracy</text>
+
+  <!-- SE: compute ↔ power — box centered (630, 463) -->
+  <rect x="565" y="443" width="130" height="40" rx="3" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="0.75"/>
+  <text x="630" y="459" text-anchor="middle" class="el">lower clock</text>
+  <text x="630" y="475" text-anchor="middle" class="ef">↓ power  ↑ latency</text>
+
+  <!-- SW: power ↔ real-time — box centered (270, 463) -->
+  <rect x="205" y="443" width="130" height="40" rx="3" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="0.75"/>
+  <text x="270" y="459" text-anchor="middle" class="el">lower duty cycle</text>
+  <text x="270" y="475" text-anchor="middle" class="ef">↓ current  ↑ response time</text>
+
+  <!-- NW: real-time ↔ memory — box centered (270, 185) -->
+  <rect x="205" y="165" width="130" height="40" rx="3" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="0.75"/>
+  <text x="270" y="181" text-anchor="middle" class="el">weights in flash</text>
+  <text x="270" y="197" text-anchor="middle" class="ef">↓ SRAM  ↑ fetch time</text>
+
+  <!-- ══ DIAGONAL LABELS — split left/right of centre ══ -->
+
+  <!-- memory ↔ power (vertical diagonal) — LEFT of centre -->
+  <rect x="285" y="305" width="120" height="40" rx="3" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="0.75"/>
+  <text x="345" y="321" text-anchor="middle" class="el">prune model</text>
+  <text x="345" y="337" text-anchor="middle" class="ef">↓ size  ↓ accuracy</text>
+
+  <!-- compute ↔ real-time (horizontal diagonal) — RIGHT of centre -->
+  <rect x="495" y="305" width="120" height="40" rx="3" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="0.75"/>
+  <text x="555" y="321" text-anchor="middle" class="el">add NPU</text>
+  <text x="555" y="337" text-anchor="middle" class="ef">↓ latency  ↑ cost</text>
+
+  <!-- ══ VERTICES (drawn last, on top of edges) ══ -->
+
+  <!-- memory (top) — black -->
+  <circle cx="450" cy="115" r="42" fill="#111111"/>
+  <text x="450" y="110" text-anchor="middle" class="vx">memory</text>
+  <text x="450" y="124" text-anchor="middle" class="vxd">SRAM · flash</text>
+  <text x="450" y="136" text-anchor="middle" class="vxd">what you store</text>
+
+  <!-- compute (right) — dark gray -->
+  <circle cx="680" cy="325" r="42" fill="#444444"/>
+  <text x="680" y="320" text-anchor="middle" class="vx">compute</text>
+  <text x="680" y="334" text-anchor="middle" class="vxd">MHz · FLOPS</text>
+  <text x="680" y="346" text-anchor="middle" class="vxd">how fast</text>
+
+  <!-- power (bottom) — medium gray -->
+  <circle cx="450" cy="535" r="42" fill="#666666"/>
+  <text x="450" y="530" text-anchor="middle" class="vx">power</text>
+  <text x="450" y="544" text-anchor="middle" class="vxd">mW · mAh</text>
+  <text x="450" y="556" text-anchor="middle" class="vxd">how long</text>
+
+  <!-- real-time (left) — light gray -->
+  <circle cx="220" cy="325" r="42" fill="#888888"/>
+  <text x="220" y="320" text-anchor="middle" class="vx">real-time</text>
+  <text x="220" y="334" text-anchor="middle" class="vxd">WCET · jitter</text>
+  <text x="220" y="346" text-anchor="middle" class="vxd">by when</text>
+
+  <!-- Caption -->
+  <text x="450" y="576" text-anchor="middle" class="cap">No edge is free. The integrator who cannot name the cost cannot make the choice.</text>
+</svg>

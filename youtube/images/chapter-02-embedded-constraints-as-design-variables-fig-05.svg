@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 496" role="img" aria-labelledby="t05 d05" font-family="Lato, Arial, sans-serif">
+  <title id="t05">Radar comparison of three candidate platforms for a smart-agriculture sensor</title>
+  <desc id="d05">A four-axis radar chart comparing ESP32-S3, STM32L4R5, and Raspberry Pi Zero 2 W on memory headroom, compute margin, projected battery life on a log scale with a six-month target marked, and cost. The Pi clears compute and memory but collapses on battery life.</desc>
+
+  <!-- Background -->
+  <rect width="800" height="496" fill="#FFFFFF"/>
+
+  <!-- Ring polygons (diamond, center=320,270) -->
+  <polygon points="320,100 490,270 320,440 150,270" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <polygon points="320,142.5 447.5,270 320,397.5 192.5,270" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <polygon points="320,185 405,270 320,355 235,270" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+  <polygon points="320,227.5 362.5,270 320,312.5 277.5,270" fill="none" stroke="#CCCCCC" stroke-width="1"/>
+
+  <!-- Axis lines -->
+  <line x1="320" y1="270" x2="320" y2="100" stroke="#999999" stroke-width="1"/>
+  <line x1="320" y1="270" x2="490" y2="270" stroke="#999999" stroke-width="1"/>
+  <line x1="320" y1="270" x2="320" y2="440" stroke="#999999" stroke-width="1"/>
+  <line x1="320" y1="270" x2="150" y2="270" stroke="#999999" stroke-width="1"/>
+
+  <!-- ESP32-S3: memory(320,117), compute(481.5,270), battery(320,438.3), cost(187.4,270) -->
+  <polygon points="320,117 481.5,270 320,438.3 187.4,270"
+           fill="#111111" fill-opacity="0.15" stroke="#111111" stroke-width="1.5"/>
+
+  <!-- STM32L4R5: memory(320,125.5), compute(425.4,270), battery(320,440), cost(201,270) -->
+  <polygon points="320,125.5 425.4,270 320,440 201,270"
+           fill="#444444" fill-opacity="0.12" stroke="#444444" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+  <!-- RPi Zero 2W: memory(320,100), compute(490,270), battery(320,278.5), cost(277.5,270) -->
+  <polygon points="320,100 490,270 320,278.5 277.5,270"
+           fill="#888888" fill-opacity="0.10" stroke="#777777" stroke-width="1.5" stroke-dasharray="2 2"/>
+
+  <!-- 6-month target marker on battery axis, y=419.6 -->
+  <circle cx="320" cy="419.6" r="5" fill="none" stroke="#333333" stroke-width="1.5"/>
+  <text x="330" y="423" font-size="10" fill="#333333">6-mo target</text>
+
+  <!-- Ring scale labels on top axis -->
+  <text x="325" y="231" font-size="9" fill="#888888">0.25</text>
+  <text x="325" y="188" font-size="9" fill="#888888">0.50</text>
+  <text x="325" y="146" font-size="9" fill="#888888">0.75</text>
+  <text x="325" y="104" font-size="9" fill="#888888">1.00</text>
+
+  <!-- Axis labels -->
+  <text x="320" y="88" text-anchor="middle" font-size="11" font-weight="bold" fill="#222222">memory headroom</text>
+  <text x="500" y="274" font-size="11" font-weight="bold" fill="#222222">compute margin</text>
+  <text x="320" y="456" text-anchor="middle" font-size="11" font-weight="bold" fill="#222222">battery life (log)</text>
+  <text x="140" y="274" text-anchor="end" font-size="11" font-weight="bold" fill="#222222">cost score (inv)</text>
+
+  <!-- Legend box -->
+  <rect x="520" y="110" width="250" height="160" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1" rx="4"/>
+  <text x="533" y="130" font-size="11" font-weight="bold" fill="#222222">Platform</text>
+
+  <!-- ESP32-S3 -->
+  <rect x="533" y="140" width="14" height="10" fill="#111111" fill-opacity="0.15" stroke="#111111" stroke-width="1.5"/>
+  <text x="553" y="150" font-size="10" font-weight="bold" fill="#222222">ESP32-S3</text>
+  <text x="553" y="162" font-size="9" fill="#555555">$4.50 · 19 yr · viable</text>
+
+  <!-- STM32L4R5 -->
+  <rect x="533" y="176" width="14" height="10" fill="#444444" fill-opacity="0.12" stroke="#444444" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="553" y="186" font-size="10" font-weight="bold" fill="#222222">STM32L4R5</text>
+  <text x="553" y="198" font-size="9" fill="#555555">$6.00 · &gt;6 mo · viable</text>
+
+  <!-- RPi Zero 2W -->
+  <rect x="533" y="212" width="14" height="10" fill="#888888" fill-opacity="0.10" stroke="#777777" stroke-width="1.5" stroke-dasharray="2 2"/>
+  <text x="553" y="222" font-size="10" font-weight="bold" fill="#222222">RPi Zero 2 W</text>
+  <text x="553" y="234" font-size="9" fill="#555555">$15 · ~1.4 d · fails battery</text>
+
+  <!-- Caption -->
+  <text x="400" y="476" text-anchor="middle" font-size="10" fill="#555555">Figure 2-5. Radar chart comparing ESP32-S3, STM32L4R5, and RPi Zero 2 W across four embedded-AI constraints.</text>
+
+</svg>

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 534" role="img" aria-labelledby="t04 d04" font-family="Lato, Arial, sans-serif">
+  <title id="t04">Four-constraint coupling diagram for embedded AI design</title>
+  <desc id="d04">A four-node diagram with memory, compute, power, and real-time at the corners. Directed arrows between nodes carry annotations naming the cross-constraint effects of common optimizations such as clocking faster, moving to external PSRAM, quantizing to int8, and locking memory into TCM.</desc>
+
+  <style>
+    text { font-family: Lato, Arial, sans-serif; }
+    .title  { font-size:15px; font-weight:700; fill:#111; }
+    .node   { font-size:13px; font-weight:700; }
+    .elabel { font-size:9px;  fill:#222; }
+    .cap    { font-size:10px; fill:#666; font-style:italic; }
+  </style>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#333"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Four-constraint coupling in embedded AI design</text>
+
+  <!-- Node positions:
+       memory:    (190, 150)
+       compute:   (610, 150)
+       power:     (190, 380)
+       real-time: (610, 380) -->
+
+  <!-- ===== EDGES ===== -->
+
+  <!-- memory ↔ compute (top horizontal, two arrows offset vertically) -->
+  <!-- top arrow: memory→compute -->
+  <line x1="280" y1="142" x2="518" y2="142" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- bottom arrow: compute→memory -->
+  <line x1="520" y1="158" x2="282" y2="158" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- label boxes -->
+  <rect x="320" y="128" width="160" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="400" y="139" text-anchor="middle" class="elabel">int8 → fewer bytes, fewer cycles</text>
+  <rect x="320" y="158" width="160" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="400" y="169" text-anchor="middle" class="elabel">larger model → more activation RAM</text>
+
+  <!-- memory ↔ power (left vertical, two arrows offset horizontally) -->
+  <!-- left arrow: memory→power -->
+  <line x1="178" y1="194" x2="178" y2="334" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- right arrow: power→memory -->
+  <line x1="202" y1="336" x2="202" y2="196" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- label boxes: beside left edge, to the right -->
+  <rect x="8" y="248" width="155" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="85" y="259" text-anchor="middle" class="elabel">PSRAM → higher energy/access</text>
+  <rect x="8" y="264" width="165" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="90" y="275" text-anchor="middle" class="elabel">int8 weights → less flash, less energy</text>
+
+  <!-- compute ↔ real-time (right vertical, two arrows offset horizontally) -->
+  <!-- left arrow: compute→real-time -->
+  <line x1="598" y1="194" x2="598" y2="334" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- right arrow: real-time→compute -->
+  <line x1="622" y1="336" x2="622" y2="196" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- label boxes: beside right edge -->
+  <rect x="632" y="246" width="158" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="711" y="257" text-anchor="middle" class="elabel">dynamic graph → WCET variance ↑</text>
+  <rect x="632" y="262" width="158" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="711" y="273" text-anchor="middle" class="elabel">tight deadline → forces faster code</text>
+
+  <!-- power ↔ real-time (bottom horizontal, two arrows offset vertically) -->
+  <!-- top arrow: power→real-time -->
+  <line x1="282" y1="372" x2="518" y2="372" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- bottom arrow: real-time→power -->
+  <line x1="520" y1="388" x2="284" y2="388" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- label boxes -->
+  <rect x="318" y="356" width="164" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="400" y="367" text-anchor="middle" class="elabel">current spike → brownout reset</text>
+  <rect x="318" y="388" width="164" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="400" y="399" text-anchor="middle" class="elabel">lock to TCM → WCET ↓, area ↑</text>
+
+  <!-- compute ↔ power (diagonal top-right → bottom-left) -->
+  <!-- single arrow each way; offset one above center, one below -->
+  <line x1="566" y1="182" x2="236" y2="348" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- label above center of diagonal (center ~401,265) -->
+  <rect x="310" y="238" width="172" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="396" y="249" text-anchor="middle" class="elabel">clock faster → active current ↑</text>
+
+  <!-- memory ↔ real-time (diagonal top-left → bottom-right) -->
+  <line x1="236" y1="182" x2="566" y2="348" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- label below center of diagonal (center ~401,265) -->
+  <rect x="310" y="272" width="172" height="14" rx="2" fill="white" stroke="#ccc" stroke-width="0.7"/>
+  <text x="396" y="283" text-anchor="middle" class="elabel">cache misses → WCET variance ↑</text>
+
+  <!-- ===== NODES (drawn on top of edges) ===== -->
+
+  <!-- memory: (190,150) fill=#111111 -->
+  <ellipse cx="190" cy="150" rx="90" ry="44" fill="#111111" stroke="#111" stroke-width="1.5"/>
+  <text x="190" y="154" text-anchor="middle" class="node" fill="white">Memory</text>
+
+  <!-- compute: (610,150) fill=#444444 -->
+  <ellipse cx="610" cy="150" rx="90" ry="44" fill="#444444" stroke="#444" stroke-width="1.5"/>
+  <text x="610" y="154" text-anchor="middle" class="node" fill="white">Compute</text>
+
+  <!-- power: (190,380) fill=#777777 -->
+  <ellipse cx="190" cy="380" rx="90" ry="44" fill="#777777" stroke="#777" stroke-width="1.5"/>
+  <text x="190" y="384" text-anchor="middle" class="node" fill="white">Power</text>
+
+  <!-- real-time: (610,380) fill=#999999 -->
+  <ellipse cx="610" cy="380" rx="90" ry="44" fill="#999999" stroke="#999" stroke-width="1.5"/>
+  <text x="610" y="384" text-anchor="middle" class="node" fill="white">Real-Time</text>
+
+  <!-- Caption -->
+  <text x="400" y="510" text-anchor="middle" class="cap">Figure 2-4. Every embedded AI constraint couples to every other — optimising one axis routinely tightens or relaxes a different axis.</text>
+
+</svg>

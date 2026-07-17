@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 470" role="img" aria-labelledby="t04 d04">
+  <title id="t04">Medical wearable compression cascade — model size shrinks while sensitivity climbs back to the regulatory floor</title>
+  <desc id="d04">A dual-axis chart tracking a 1D CNN for arrhythmia detection across four optimization stages: float32 baseline at 10 MB, 40 percent structured pruning, distillation onto a smaller student, and int8 quantization-aware training. Left axis tracks model size, right axis tracks VT/VF sensitivity. Reference lines mark the 2 MB flash ceiling and the 98 percent regulatory sensitivity floor.</desc>
+  <defs>
+    <style>
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+    </style>
+    <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
+    </marker>
+  </defs>
+  <rect width="700" height="460" fill="#FFFFFF"/>
+
+  <text x="32" y="30" class="ti">Medical wearable compression cascade — prune → distill → QAT</text>
+  <text x="32" y="48" class="sm">model size (left axis) and VT/VF sensitivity (right axis) across four stages</text>
+
+  <!-- Plot area: x 130–640, y 80–320 -->
+  <line x1="130" y1="320" x2="640" y2="320" stroke="#888888" stroke-width="1"/>
+  <line x1="130" y1="80"  x2="130" y2="320" stroke="#888888" stroke-width="1"/>
+  <line x1="640" y1="80"  x2="640" y2="320" stroke="#888888" stroke-width="1"/>
+
+  <!-- Left y-axis: model size labels -->
+  <g class="sm">
+    <line x1="128" y1="80"  x2="130" y2="80"  stroke="#555555"/>
+    <text x="124" y="83"  text-anchor="end">10 MB</text>
+    <line x1="128" y1="140" x2="130" y2="140" stroke="#555555"/>
+    <text x="124" y="143" text-anchor="end">6 MB</text>
+    <line x1="128" y1="200" x2="130" y2="200" stroke="#555555"/>
+    <text x="124" y="203" text-anchor="end">3 MB</text>
+    <line x1="128" y1="260" x2="130" y2="260" stroke="#555555"/>
+    <text x="124" y="263" text-anchor="end">1.5 MB</text>
+    <line x1="128" y1="320" x2="130" y2="320" stroke="#555555"/>
+    <text x="124" y="323" text-anchor="end">0.5 MB</text>
+  </g>
+  <text x="70" y="200" text-anchor="middle" transform="rotate(-90 70 200)" class="lb">model size</text>
+
+  <!-- Right y-axis: sensitivity 92%–99% -->
+  <g class="sm">
+    <line x1="640" y1="320"   x2="642" y2="320"   stroke="#555555"/>
+    <text x="646" y="323">92%</text>
+    <line x1="640" y1="251.4" x2="642" y2="251.4" stroke="#555555"/>
+    <text x="646" y="254">94%</text>
+    <line x1="640" y1="182.9" x2="642" y2="182.9" stroke="#555555"/>
+    <text x="646" y="186">96%</text>
+    <line x1="640" y1="114.3" x2="642" y2="114.3" stroke="#555555"/>
+    <text x="646" y="117">98%</text>
+    <line x1="640" y1="80"    x2="642" y2="80"    stroke="#555555"/>
+    <text x="646" y="83">99%</text>
+  </g>
+  <text x="688" y="200" text-anchor="middle" transform="rotate(90 688 200)" class="lb">VT/VF sensitivity</text>
+
+  <!-- X-axis stage labels -->
+  <g class="sm">
+    <text x="200" y="338" text-anchor="middle">float32</text>
+    <text x="200" y="352" text-anchor="middle" fill="#888888">baseline</text>
+    <text x="330" y="338" text-anchor="middle">pruned 40%</text>
+    <text x="330" y="352" text-anchor="middle" fill="#888888">1.5 M params</text>
+    <text x="460" y="338" text-anchor="middle">distilled</text>
+    <text x="460" y="352" text-anchor="middle" fill="#888888">800 K student</text>
+    <text x="590" y="338" text-anchor="middle">QAT int8</text>
+    <text x="590" y="352" text-anchor="middle" fill="#888888">800 KB</text>
+  </g>
+
+  <!-- Gridlines -->
+  <g stroke="#EEEEEE" stroke-width="0.75">
+    <line x1="130" y1="140" x2="640" y2="140"/>
+    <line x1="130" y1="200" x2="640" y2="200"/>
+    <line x1="130" y1="260" x2="640" y2="260"/>
+  </g>
+
+  <!-- 2 MB flash ceiling: y = 282 -->
+  <line x1="130" y1="282" x2="640" y2="282" stroke="#333333" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="135" y="278" class="lb">2 MB flash ceiling</text>
+
+  <!-- 98% sensitivity regulatory floor: y = 114.3 -->
+  <line x1="130" y1="114.3" x2="640" y2="114.3" stroke="#555555" stroke-width="1" stroke-dasharray="6 3"/>
+  <text x="635" y="110" text-anchor="end" class="lb">98% regulatory floor</text>
+
+  <!-- Model size line (solid dark) -->
+  <polyline points="200,80 330,140 460,195 590,312" fill="none" stroke="#111111" stroke-width="2"/>
+  <circle cx="200" cy="80"  r="4" fill="#111111"/>
+  <circle cx="330" cy="140" r="4" fill="#111111"/>
+  <circle cx="460" cy="195" r="4" fill="#111111"/>
+  <circle cx="590" cy="312" r="4" fill="#111111"/>
+  <text x="200" y="72"  text-anchor="middle" class="sm">10 MB</text>
+  <text x="330" y="132" text-anchor="middle" class="sm">6 MB</text>
+  <text x="460" y="187" text-anchor="middle" class="sm">3.2 MB</text>
+  <text x="590" y="304" text-anchor="middle" class="sm">0.8 MB</text>
+
+  <!-- Sensitivity line (dashed gray) -->
+  <polyline points="200,97 330,141.6 460,110.8 590,121.1" fill="none" stroke="#888888" stroke-width="2" stroke-dasharray="4 3"/>
+  <circle cx="200" cy="97"   r="4" fill="#888888"/>
+  <circle cx="330" cy="141.6" r="4" fill="#888888"/>
+  <circle cx="460" cy="110.8" r="4" fill="#888888"/>
+  <circle cx="590" cy="121.1" r="4" fill="#888888"/>
+  <text x="208" y="93"  class="sm">98.5%</text>
+  <text x="338" y="138" class="sm">97.2%</text>
+  <text x="468" y="107" class="sm">98.1%</text>
+  <text x="598" y="118" class="sm">97.8%</text>
+
+  <!-- Status row -->
+  <g class="sm">
+    <text x="200" y="372" text-anchor="middle" fill="#888888">overflows flash</text>
+    <text x="330" y="372" text-anchor="middle" fill="#888888">below floor</text>
+    <text x="460" y="372" text-anchor="middle" class="nm">above floor</text>
+    <text x="590" y="372" text-anchor="middle" class="nm">accepted: 0.2 pt gap</text>
+  </g>
+
+  <!-- Legend -->
+  <line x1="32"  y1="396" x2="60"  y2="396" stroke="#111111" stroke-width="2"/>
+  <text x="66"  y="400" class="sm">model size</text>
+  <line x1="150" y1="396" x2="178" y2="396" stroke="#888888" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="184" y="400" class="sm">VT/VF sensitivity</text>
+
+  <text x="350" y="428" text-anchor="middle" class="cap">Prune first, distill second, quantize last — the only sequence that puts a 10 MB ECG CNN inside 2 MB of flash</text>
+  <text x="350" y="442" text-anchor="middle" class="cap">without losing the regulatory floor.</text>
+</svg>

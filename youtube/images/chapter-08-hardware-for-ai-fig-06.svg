@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06 d06">
+  <title id="t06">Embedded AI parts on int8 throughput vs active power</title>
+  <desc id="d06">A log-log scatter plot. X-axis is active power in milliwatts from 0.1 to 1000. Y-axis is int8 throughput in GOPS from 0.1 to 10000. Points shown: Cortex-M7 with CMSIS-NN, Syntiant NDP120, K210, Ethos-U55 variants, and STM32N6. Three diagonal iso-efficiency lines mark 0.01, 1, and 100 TOPS/W.</desc>
+  <defs>
+    <style>
+      .ti      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .lb      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .sm      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .iso-lab { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #888888; font-style: italic; }
+    </style>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#111111"/>
+    </marker>
+  </defs>
+  <rect width="700" height="480" fill="#FFFFFF"/>
+
+  <text x="32" y="32" class="ti">TOPS/W — which parts are efficient</text>
+  <text x="32" y="48" class="sm">int8 throughput vs active power; iso-efficiency diagonals at 0.01, 1, 100 TOPS/W</text>
+
+  <!-- Plot area: x=90..640 (550 px = 4 decades of mW: 0.1–1000), y=80..370 (290 px = 5 decades of GOPS: 0.01–1000) -->
+  <!-- X: decade width = 550/4 = 137.5 px. x(mW) = 90 + (log10(mW) - log10(0.1)) * 137.5 = 90 + (log10(mW)+1)*137.5 -->
+  <!-- Y: decade height = 290/4 = 72.5 px. y(GOPS) = 370 - (log10(GOPS) - log10(0.1)) * 72.5 = 370 - (log10(GOPS)+1)*72.5 -->
+  <line x1="90" y1="370" x2="640" y2="370" stroke="#888888" stroke-width="1"/>
+  <line x1="90" y1="80"  x2="90"  y2="370" stroke="#888888" stroke-width="1"/>
+
+  <!-- X ticks: 0.1, 1, 10, 100, 1000 mW -->
+  <line x1="90"    y1="368" x2="90"    y2="374" stroke="#666666"/>
+  <text x="90"    y="387" text-anchor="middle" class="sm">0.1</text>
+  <line x1="227.5" y1="368" x2="227.5" y2="374" stroke="#666666"/>
+  <text x="227.5" y="387" text-anchor="middle" class="sm">1</text>
+  <line x1="365"   y1="368" x2="365"   y2="374" stroke="#666666"/>
+  <text x="365"   y="387" text-anchor="middle" class="sm">10</text>
+  <line x1="502.5" y1="368" x2="502.5" y2="374" stroke="#666666"/>
+  <text x="502.5" y="387" text-anchor="middle" class="sm">100</text>
+  <line x1="640"   y1="368" x2="640"   y2="374" stroke="#666666"/>
+  <text x="640"   y="387" text-anchor="middle" class="sm">1000</text>
+  <text x="365" y="406" text-anchor="middle" class="sm">active power (mW, log scale)</text>
+
+  <!-- Y ticks: 0.1, 1, 10, 100, 1000 GOPS — 4 decades over 290 px = 72.5 px each -->
+  <line x1="88" y1="370" x2="92" y2="370" stroke="#666666"/>
+  <text x="84" y="373" text-anchor="end" class="sm">0.1</text>
+  <line x1="88" y1="297.5" x2="92" y2="297.5" stroke="#666666"/>
+  <text x="84" y="301"   text-anchor="end" class="sm">1</text>
+  <line x1="88" y1="225"  x2="92" y2="225"  stroke="#666666"/>
+  <text x="84" y="228"   text-anchor="end" class="sm">10</text>
+  <line x1="88" y1="152.5" x2="92" y2="152.5" stroke="#666666"/>
+  <text x="84" y="156"   text-anchor="end" class="sm">100</text>
+  <line x1="88" y1="80"   x2="92" y2="80"   stroke="#666666"/>
+  <text x="84" y="83"    text-anchor="end" class="sm">1000</text>
+  <text x="32" y="225" text-anchor="middle" class="sm" transform="rotate(-90 32 225)">int8 throughput (GOPS, log scale)</text>
+
+  <!-- Light gridlines -->
+  <g stroke="#DDDDDD" stroke-width="0.5">
+    <line x1="227.5" y1="80" x2="227.5" y2="370"/>
+    <line x1="365"   y1="80" x2="365"   y2="370"/>
+    <line x1="502.5" y1="80" x2="502.5" y2="370"/>
+    <line x1="90" y1="297.5" x2="640" y2="297.5"/>
+    <line x1="90" y1="225"   x2="640" y2="225"/>
+    <line x1="90" y1="152.5" x2="640" y2="152.5"/>
+  </g>
+
+  <!-- Iso-efficiency diagonals: GOPS = (TOPS/W) * mW -->
+  <!-- 0.01 TOPS/W: GOPS = 0.01*mW. At mW=10 → GOPS=0.1 (x=365, y=370); at mW=1000 → GOPS=10 (x=640, y=225) -->
+  <line x1="365" y1="370" x2="640" y2="225" stroke="#AAAAAA" stroke-width="0.75" stroke-dasharray="5 3"/>
+  <text x="600" y="220" class="iso-lab">0.01 TOPS/W</text>
+
+  <!-- 1 TOPS/W: GOPS = mW. At mW=0.1 → GOPS=0.1 (x=90, y=370); at mW=1000 → GOPS=1000 (x=640, y=80) -->
+  <line x1="90" y1="370" x2="640" y2="80" stroke="#888888" stroke-width="0.75" stroke-dasharray="5 3"/>
+  <text x="600" y="75" class="iso-lab">1 TOPS/W</text>
+
+  <!-- 100 TOPS/W: GOPS = 100*mW. At mW=0.1 → GOPS=10 (x=90, y=225); at mW=10 → GOPS=1000 (x=365, y=80) -->
+  <line x1="90" y1="225" x2="365" y2="80" stroke="#555555" stroke-width="0.75" stroke-dasharray="5 3"/>
+  <text x="330" y="76" class="iso-lab">100 TOPS/W</text>
+
+  <!-- Points — using formula: x = 90+(log10(mW)+1)*137.5, y = 370-(log10(GOPS)+1)*72.5 -->
+
+  <!-- Cortex-M7 + CMSIS-NN: 50 mW, 0.2 GOPS → x=90+(1.699+1)*137.5=90+371=461, y=370-(-0.699+1)*72.5=370-21.8=348 -->
+  <circle cx="461" cy="348" r="5" fill="#555555" stroke="#F5F5F5" stroke-width="1.5"/>
+  <text x="461" y="342" text-anchor="middle" class="sm">M7 + CMSIS-NN</text>
+
+  <!-- Syntiant NDP120: 0.2 mW, 0.6 GOPS → x=90+(−0.699+1)*137.5=90+41.4=131, y=370-(-0.222+1)*72.5=370-56.4=314 -->
+  <circle cx="131" cy="314" r="5" fill="#333333" stroke="#F5F5F5" stroke-width="1.5"/>
+  <text x="131" y="308" text-anchor="middle" class="sm">Syntiant NDP120</text>
+
+  <!-- K210: 300 mW, 0.5 GOPS → x=90+(2.477+1)*137.5=90+478.1=568, y=370-(−0.301+1)*72.5=370-50.7=319 -->
+  <circle cx="568" cy="319" r="5" fill="#555555" stroke="#F5F5F5" stroke-width="1.5"/>
+  <text x="568" y="313" text-anchor="middle" class="sm">K210</text>
+
+  <!-- Ethos-U55 32 MACs: 50 mW, 32 GOPS → x=461, y=370-(1.505+1)*72.5=370-181.6=188 -->
+  <circle cx="461" cy="188" r="5" fill="#111111" stroke="#F5F5F5" stroke-width="1.5"/>
+  <text x="461" y="182" text-anchor="middle" class="sm">U55 (32)</text>
+
+  <!-- Ethos-U55 64: 70 mW, 64 GOPS → x=90+(1.845+1)*137.5=90+391.2=481, y=370-(1.806+1)*72.5=370-203.4=167 -->
+  <circle cx="481" cy="167" r="5" fill="#111111" stroke="#F5F5F5" stroke-width="1.5"/>
+
+  <!-- Ethos-U55 128: 100 mW, 128 GOPS → x=90+(2+1)*137.5=502.5, y=370-(2.107+1)*72.5=370-225.3=145 -->
+  <circle cx="502" cy="145" r="5" fill="#111111" stroke="#F5F5F5" stroke-width="1.5"/>
+
+  <!-- Ethos-U55 256: 150 mW, 256 GOPS → x=90+(2.176+1)*137.5=90+436.7=527, y=370-(2.408+1)*72.5=370-247.1=123 -->
+  <circle cx="527" cy="123" r="5" fill="#111111" stroke="#F5F5F5" stroke-width="1.5"/>
+  <text x="544" y="117" class="sm">U55 (64·128·256)</text>
+
+  <!-- Connecting line through Ethos-U55 variants -->
+  <polyline points="461,188 481,167 502,145 527,123" fill="none" stroke="#444444" stroke-width="1" stroke-dasharray="3 3"/>
+
+  <!-- STM32N6: 180 mW, 3000 GOPS → x=90+(2.255+1)*137.5=90+447.6=538, y=370-(3.477+1)*72.5=370-324.6=45 (clamp to 82) -->
+  <circle cx="538" cy="82" r="5" fill="#111111" stroke="#F5F5F5" stroke-width="1.5"/>
+  <text x="538" y="76" text-anchor="middle" class="sm">STM32N6 (3 TOPS)</text>
+
+  <!-- Callout: always-on -->
+  <path d="M 145 292 L 145 240" fill="none" stroke="#333333" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+  <text x="145" y="230" text-anchor="middle" class="lb">always-on at µW</text>
+
+  <!-- Callout: vision-class efficiency -->
+  <path d="M 510 108 L 535 90" fill="none" stroke="#333333" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+
+  <!-- Caption -->
+  <text x="350" y="455" text-anchor="middle" class="cap">Efficiency runs along the diagonals. Move up by adding MACs; move left by killing overhead.</text>
+</svg>

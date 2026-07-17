@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 495" role="img" aria-labelledby="t06 d06">
+  <title id="t06">Three predictive-maintenance strategies compared on four axes</title>
+  <desc id="d06">Four small bar panels — latency, monthly data, monthly cost, and accuracy — comparing Strategy 1 on-device, Strategy 2 full cloud, and Strategy 3 split inference. Strategy 2 exceeds budget; Strategy 3 wins.</desc>
+  <defs>
+    <style>
+      .ti      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #111111; }
+      .h2      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: bold; fill: #111111; }
+      .lb      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #111111; }
+      .ax      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  fill: #555555; }
+      .sm      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .nm      { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+      .val     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #111111; }
+      .cap     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+      .badge   { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 9px;  font-weight: bold; fill: #FFFFFF; }
+      .verdict { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #333333; }
+      .win     { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #FFFFFF; }
+    </style>
+  </defs>
+  <rect width="760" height="480" fill="#FFFFFF"/>
+
+  <text x="32" y="32" class="ti">Same problem, three architectures — each panel a different axis</text>
+  <text x="32" y="50" class="nm">predictive maintenance, motor vibration · target ≥90 % accuracy · ≤1 s latency · ≤$10/device/mo · NB-IoT</text>
+
+  <!-- Legend -->
+  <rect x="32"  y="66" width="12" height="12" fill="#777777"/>
+  <text x="50"  y="76" class="lb">S1 — full on-device · Model B (200 K params)</text>
+  <rect x="310" y="66" width="12" height="12" fill="#BBBBBB"/>
+  <text x="328" y="76" class="lb">S2 — full cloud · Model C (1 M params)</text>
+  <rect x="560" y="66" width="12" height="12" fill="#111111"/>
+  <text x="578" y="76" class="lb">S3 — split · Model C</text>
+
+  <!-- ===== PANEL 1: LATENCY (ms), max 1000 ===== -->
+  <!-- plot area x [48,360], y [136,248], height 112 px -->
+  <text x="48"  y="108" class="h2">Latency (ms) · budget 1 000 ms</text>
+  <line x1="48"  y1="248" x2="360" y2="248" stroke="#555555" stroke-width="1"/>
+  <line x1="48"  y1="136" x2="48"  y2="248" stroke="#555555" stroke-width="1"/>
+  <text x="42"  y="251" text-anchor="end" class="ax">0</text>
+  <text x="42"  y="195" text-anchor="end" class="ax">500</text>
+  <line x1="46"  y1="192" x2="48" y2="192" stroke="#555555"/>
+  <text x="42"  y="139" text-anchor="end" class="ax">1 000</text>
+  <line x1="46"  y1="136" x2="48" y2="136" stroke="#555555"/>
+  <!-- budget line -->
+  <line x1="48" y1="136" x2="360" y2="136" stroke="#555555" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="356" y="132" text-anchor="end" class="sm">budget 1 000 ms</text>
+  <!-- Bars: S1=220, S2=250, S3=350. y=248−v*112/1000 -->
+  <rect x="82"  y="223.4" width="56" height="24.6" fill="#777777"/>
+  <text x="110" y="219"   text-anchor="middle" class="val">220 ms</text>
+  <rect x="175" y="220"   width="56" height="28"   fill="#BBBBBB"/>
+  <text x="203" y="216"   text-anchor="middle" class="val">250 ms</text>
+  <rect x="268" y="208.8" width="56" height="39.2" fill="#111111"/>
+  <text x="296" y="205"   text-anchor="middle" class="val">350 ms</text>
+  <text x="110" y="262"   text-anchor="middle" class="sm">S1</text>
+  <text x="203" y="262"   text-anchor="middle" class="sm">S2</text>
+  <text x="296" y="262"   text-anchor="middle" class="sm">S3</text>
+
+  <!-- ===== PANEL 2: MONTHLY DATA (MB), max 150 ===== -->
+  <!-- plot area x [416,728], y [136,248] -->
+  <text x="416" y="108" class="h2">Monthly data (MB) · NB-IoT plan</text>
+  <line x1="416" y1="248" x2="728" y2="248" stroke="#555555" stroke-width="1"/>
+  <line x1="416" y1="136" x2="416" y2="248" stroke="#555555" stroke-width="1"/>
+  <text x="410" y="251" text-anchor="end" class="ax">0</text>
+  <text x="410" y="195" text-anchor="end" class="ax">75 MB</text>
+  <line x1="414" y1="192" x2="416" y2="192" stroke="#555555"/>
+  <text x="410" y="139" text-anchor="end" class="ax">150 MB</text>
+  <line x1="414" y1="136" x2="416" y2="136" stroke="#555555"/>
+  <!-- 10 MB plan ceiling: y=248−10*112/150=240.5 -->
+  <line x1="416" y1="240.5" x2="728" y2="240.5" stroke="#555555" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="724" y="237" text-anchor="end" class="sm">10 MB plan ceiling</text>
+  <!-- S1≈0 MB, S2=129.6 MB, S3=2.88 MB. y=248−v*112/150 -->
+  <rect x="450" y="247.98" width="56" height="0.02" fill="#777777"/>
+  <text x="478" y="244"    text-anchor="middle" class="val">~0 MB</text>
+  <rect x="543" y="151.2"  width="56" height="96.8" fill="#BBBBBB"/>
+  <text x="571" y="147"    text-anchor="middle" class="val">129.6 MB</text>
+  <!-- over-budget callout -->
+  <text x="571" y="136"    text-anchor="middle" class="verdict">over plan</text>
+  <rect x="636" y="245.8"  width="56" height="2.2"  fill="#111111"/>
+  <text x="664" y="242"    text-anchor="middle" class="val">2.88 MB</text>
+  <text x="478" y="262"    text-anchor="middle" class="sm">S1</text>
+  <text x="571" y="262"    text-anchor="middle" class="sm">S2</text>
+  <text x="664" y="262"    text-anchor="middle" class="sm">S3</text>
+
+  <!-- ===== PANEL 3: MONTHLY COST ($), max 30 ===== -->
+  <!-- plot area x [48,360], y [316,428] -->
+  <text x="48"  y="300" class="h2">Monthly cost ($) · budget ≤ $10</text>
+  <line x1="48"  y1="428" x2="360" y2="428" stroke="#555555" stroke-width="1"/>
+  <line x1="48"  y1="316" x2="48"  y2="428" stroke="#555555" stroke-width="1"/>
+  <text x="42"  y="431" text-anchor="end" class="ax">$0</text>
+  <text x="42"  y="375" text-anchor="end" class="ax">$15</text>
+  <line x1="46"  y1="372" x2="48" y2="372" stroke="#555555"/>
+  <text x="42"  y="319" text-anchor="end" class="ax">$30</text>
+  <line x1="46"  y1="316" x2="48" y2="316" stroke="#555555"/>
+  <!-- budget line at $10: y=428−10*112/30=390.7 -->
+  <line x1="48" y1="390.7" x2="360" y2="390.7" stroke="#555555" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="356" y="387" text-anchor="end" class="sm">budget $10/mo</text>
+  <!-- S1=$2, S2=$25.72, S3=$5.72. y=428−v*112/30 -->
+  <rect x="82"  y="420.5"  width="56" height="7.5"  fill="#777777"/>
+  <text x="110" y="416"    text-anchor="middle" class="val">$2.00</text>
+  <rect x="175" y="332"    width="56" height="96"   fill="#BBBBBB"/>
+  <text x="203" y="328"    text-anchor="middle" class="val">$25.72</text>
+  <text x="203" y="318"    text-anchor="middle" class="verdict">over budget</text>
+  <rect x="268" y="406.6"  width="56" height="21.4" fill="#111111"/>
+  <text x="296" y="402"    text-anchor="middle" class="val">$5.72</text>
+  <text x="110" y="444"    text-anchor="middle" class="sm">S1</text>
+  <text x="203" y="444"    text-anchor="middle" class="sm">S2</text>
+  <text x="296" y="444"    text-anchor="middle" class="sm">S3</text>
+
+  <!-- ===== PANEL 4: ACCURACY (%), max 100 ===== -->
+  <!-- plot area x [416,728], y [316,428] -->
+  <text x="416" y="300" class="h2">Accuracy (%) · floor 90 %</text>
+  <line x1="416" y1="428" x2="728" y2="428" stroke="#555555" stroke-width="1"/>
+  <line x1="416" y1="316" x2="416" y2="428" stroke="#555555" stroke-width="1"/>
+  <text x="410" y="431" text-anchor="end" class="ax">0 %</text>
+  <text x="410" y="375" text-anchor="end" class="ax">50 %</text>
+  <line x1="414" y1="372" x2="416" y2="372" stroke="#555555"/>
+  <text x="410" y="319" text-anchor="end" class="ax">100 %</text>
+  <line x1="414" y1="316" x2="416" y2="316" stroke="#555555"/>
+  <!-- floor at 90%: y=428−90*112/100=327.2 -->
+  <line x1="416" y1="327.2" x2="728" y2="327.2" stroke="#555555" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="724" y="324" text-anchor="end" class="sm">floor 90 %</text>
+  <!-- S1=91%, S2=96%, S3=96%. y=428−v*112/100 -->
+  <rect x="450" y="326.1"  width="56" height="101.9" fill="#777777"/>
+  <text x="478" y="322"    text-anchor="middle" class="val">91 %</text>
+  <rect x="543" y="320.5"  width="56" height="107.5" fill="#BBBBBB"/>
+  <text x="571" y="316"    text-anchor="middle" class="val">96 %</text>
+  <rect x="636" y="320.5"  width="56" height="107.5" fill="#111111"/>
+  <text x="664" y="316"    text-anchor="middle" class="val">96 %</text>
+  <text x="478" y="444"    text-anchor="middle" class="sm">S1</text>
+  <text x="571" y="444"    text-anchor="middle" class="sm">S2</text>
+  <text x="664" y="444"    text-anchor="middle" class="sm">S3</text>
+
+  <!-- Winner badge -->
+  <rect x="628" y="298" width="74" height="16" fill="#111111"/>
+  <text x="665" y="310" text-anchor="middle" class="win">S3 WINS</text>
+
+  <text x="380" y="468" text-anchor="middle" class="cap">S3 meets every constraint: latency under budget, data within plan, cost under cap, accuracy matches cloud.</text>
+</svg>

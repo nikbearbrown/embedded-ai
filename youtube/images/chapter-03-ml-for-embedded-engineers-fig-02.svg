@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" role="img" aria-labelledby="t02 d02">
+  <title id="t02">Three-layer MLP — 784 to 128 to 10</title>
+  <desc id="d02">A small feedforward network with input layer of 784 neurons, hidden layer of 128, output layer of 10. Edges labeled with weight matrix sizes; totals shown for flash and peak RAM.</desc>
+  <defs>
+    <style>
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: bold; fill: #000000; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; fill: #000000; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #555555; }
+      .em  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #000000; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-style: italic; fill: #555555; }
+    </style>
+    <marker id="ar" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#000000"/>
+    </marker>
+  </defs>
+  <rect width="720" height="480" fill="#FFFFFF"/>
+  <text x="360" y="30" text-anchor="middle" class="ti">A small MLP — three layers, two cost columns</text>
+  <!-- LAYER 0 input -->
+  <rect x="60" y="100" width="100" height="190" fill="#111111"/>
+  <text x="110" y="162" text-anchor="middle" class="sm" fill="#FFFFFF">input</text>
+  <text x="110" y="178" text-anchor="middle" class="sm" fill="#FFFFFF">28 x 28</text>
+  <text x="110" y="194" text-anchor="middle" class="sm" fill="#FFFFFF">784 neurons</text>
+  <text x="110" y="312" text-anchor="middle" class="lb">layer 0</text>
+  <text x="110" y="328" text-anchor="middle" class="sm">activation: 784 x 4 B = 3.1 KB</text>
+  <!-- Edge 1 -->
+  <line x1="162" y1="195" x2="296" y2="195" stroke="#000000" stroke-width="1.4" marker-end="url(#ar)"/>
+  <rect x="177" y="158" width="104" height="30" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="1"/>
+  <text x="229" y="171" text-anchor="middle" class="sm">W1 : 784x128</text>
+  <text x="229" y="183" text-anchor="middle" class="sm">approx 401 KB</text>
+  <!-- LAYER 1 hidden -->
+  <rect x="298" y="130" width="100" height="130" fill="#555555"/>
+  <text x="348" y="183" text-anchor="middle" class="sm" fill="#FFFFFF">hidden</text>
+  <text x="348" y="199" text-anchor="middle" class="sm" fill="#FFFFFF">128 neurons</text>
+  <text x="348" y="312" text-anchor="middle" class="lb">layer 1</text>
+  <text x="348" y="328" text-anchor="middle" class="sm">activation: 128 x 4 B = 512 B</text>
+  <!-- Edge 2 -->
+  <line x1="400" y1="195" x2="534" y2="195" stroke="#000000" stroke-width="1.4" marker-end="url(#ar)"/>
+  <rect x="415" y="158" width="104" height="30" fill="#FFFFFF" stroke="#BBBBBB" stroke-width="1"/>
+  <text x="467" y="171" text-anchor="middle" class="sm">W2 : 128x10</text>
+  <text x="467" y="183" text-anchor="middle" class="sm">approx 5 KB</text>
+  <!-- LAYER 2 output -->
+  <rect x="536" y="175" width="100" height="40" fill="#888888"/>
+  <text x="586" y="191" text-anchor="middle" class="sm" fill="#FFFFFF">output</text>
+  <text x="586" y="207" text-anchor="middle" class="sm" fill="#FFFFFF">10 classes</text>
+  <text x="586" y="312" text-anchor="middle" class="lb">layer 2</text>
+  <text x="586" y="328" text-anchor="middle" class="sm">activation: 10 x 4 B = 40 B</text>
+  <!-- Totals -->
+  <line x1="40" y1="356" x2="680" y2="356" stroke="#BBBBBB" stroke-width="0.75"/>
+  <text x="60" y="378" class="em">Totals</text>
+  <text x="150" y="378" class="lb">Flash: ~406 KB (weights + biases)</text>
+  <text x="430" y="378" class="lb">Peak RAM: &lt; 1 KB (one hidden layer at a time)</text>
+  <!-- Caption -->
+  <text x="360" y="444" text-anchor="middle" class="cap">Weights dominate flash by three orders of magnitude. Peak activation barely registers.</text>
+</svg>

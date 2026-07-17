@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t11c d11c">
+  <title id="t11c">Architecture family comparison — six candidates across three normalized axes</title>
+  <desc id="d11c">Grouped bar chart comparing MobileNetV2-1.0, MobileNetV3-Small, EfficientNet-Lite0, SqueezeNet, Tiny-YOLOv3, and a random forest baseline across parameter count, GFLOPs, and top-1 accuracy normalized 0–1.</desc>
+  <defs>
+    <style>
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #666666; }
+      .nm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111111; }
+    </style>
+  </defs>
+  <rect width="700" height="480" fill="#FFFFFF"/>
+
+  <text x="32" y="30" class="ti">Architecture family comparison — six candidates, three normalized axes</text>
+  <text x="32" y="46" class="sm">Bars normalized 0–1 within axis; lower flash and GFLOPs are better, higher accuracy is better.</text>
+
+  <!-- Legend -->
+  <rect x="360" y="20" width="10" height="10" fill="#111111"/>
+  <text x="374" y="29" class="sm">flash (params)</text>
+  <rect x="450" y="20" width="10" height="10" fill="#666666"/>
+  <text x="464" y="29" class="sm">compute (GFLOPs)</text>
+  <rect x="570" y="20" width="10" height="10" fill="#BBBBBB"/>
+  <text x="584" y="29" class="sm">accuracy (top-1)</text>
+
+  <!-- Axes -->
+  <line x1="190" y1="72" x2="190" y2="408" stroke="#AAAAAA" stroke-width="1"/>
+  <line x1="190" y1="408" x2="660" y2="408" stroke="#AAAAAA" stroke-width="1"/>
+
+  <!-- x ticks -->
+  <line x1="190" y1="408" x2="190" y2="413" stroke="#888888"/>
+  <text x="190" y="426" text-anchor="middle" class="sm">0</text>
+  <line x1="425" y1="408" x2="425" y2="413" stroke="#888888"/>
+  <text x="425" y="426" text-anchor="middle" class="sm">0.5</text>
+  <line x1="660" y1="408" x2="660" y2="413" stroke="#888888"/>
+  <text x="660" y="426" text-anchor="middle" class="sm">1.0</text>
+  <text x="350" y="442" text-anchor="middle" class="sm">normalized value (flash/GFLOPs: lower better · accuracy: higher better)</text>
+
+  <!-- Row 1 — MobileNetV2-1.0 -->
+  <text x="180" y="92" text-anchor="end" class="nm">MobileNetV2-1.0</text>
+  <rect x="190" y="80" width="108" height="10" fill="#111111"/>
+  <text x="304" y="89" class="sm">3.4 M</text>
+  <rect x="190" y="92" width="24" height="10" fill="#666666"/>
+  <text x="220" y="101" class="sm">0.30 GF</text>
+  <rect x="190" y="104" width="381" height="10" fill="#BBBBBB"/>
+  <text x="577" y="113" class="sm">72%</text>
+
+  <!-- Row 2 — MobileNetV3-Small -->
+  <text x="180" y="146" text-anchor="end" class="nm">MobileNetV3-Small</text>
+  <rect x="190" y="134" width="80" height="10" fill="#111111"/>
+  <text x="276" y="143" class="sm">2.5 M</text>
+  <rect x="190" y="146" width="5" height="10" fill="#666666"/>
+  <text x="201" y="155" class="sm">0.06 GF</text>
+  <rect x="190" y="158" width="357" height="10" fill="#BBBBBB"/>
+  <text x="553" y="167" class="sm">68%</text>
+
+  <!-- Row 3 — EfficientNet-Lite0 -->
+  <text x="180" y="200" text-anchor="end" class="nm">EfficientNet-Lite0</text>
+  <rect x="190" y="188" width="146" height="10" fill="#111111"/>
+  <text x="342" y="197" class="sm">4.6 M</text>
+  <rect x="190" y="200" width="33" height="10" fill="#666666"/>
+  <text x="229" y="209" class="sm">0.40 GF</text>
+  <rect x="190" y="212" width="395" height="10" fill="#BBBBBB"/>
+  <text x="591" y="221" class="sm">75%</text>
+
+  <!-- Row 4 — SqueezeNet -->
+  <text x="180" y="254" text-anchor="end" class="nm">SqueezeNet</text>
+  <rect x="190" y="242" width="38" height="10" fill="#111111"/>
+  <text x="234" y="251" class="sm">1.2 M · small flash</text>
+  <rect x="190" y="254" width="71" height="10" fill="#666666"/>
+  <text x="267" y="263" class="sm">0.83 GF</text>
+  <rect x="190" y="266" width="305" height="10" fill="#BBBBBB"/>
+  <text x="501" y="275" class="sm">58%</text>
+
+  <!-- Row 5 — Tiny-YOLOv3 -->
+  <text x="180" y="308" text-anchor="end" class="nm">Tiny-YOLOv3</text>
+  <rect x="190" y="296" width="470" height="10" fill="#111111"/>
+  <text x="658" y="305" text-anchor="end" font-family="Lato,'Helvetica Neue',Arial,sans-serif" font-size="10" fill="#FFFFFF">15 M</text>
+  <rect x="190" y="308" width="470" height="10" fill="#666666"/>
+  <text x="658" y="317" text-anchor="end" font-family="Lato,'Helvetica Neue',Arial,sans-serif" font-size="10" fill="#FFFFFF">5.5 GF</text>
+  <rect x="190" y="320" width="268" height="10" fill="#BBBBBB"/>
+  <text x="464" y="329" class="sm">51% (mAP)</text>
+
+  <!-- Row 6 — Random forest -->
+  <text x="180" y="362" text-anchor="end" class="nm">Random forest</text>
+  <rect x="190" y="350" width="2" height="10" fill="#111111"/>
+  <text x="198" y="359" class="sm">0.05 M · tiny</text>
+  <rect x="190" y="362" width="2" height="10" fill="#666666"/>
+  <text x="198" y="371" class="sm">~0 GFLOPs</text>
+  <rect x="190" y="374" width="470" height="10" fill="#BBBBBB"/>
+  <text x="658" y="383" text-anchor="end" class="sm">89% (tabular)</text>
+
+  <!-- bottom caption -->
+  <text x="350" y="458" text-anchor="middle" class="cap">No architecture wins all three axes. Each earned its efficiency by substituting a cheap op for an expensive one.</text>
+</svg>

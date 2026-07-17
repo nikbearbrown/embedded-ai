@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 460" role="img" aria-labelledby="t06 d06" font-family="Lato, Arial, sans-serif">
+  <title id="t06">Decision flowchart — does this model deploy on this part?</title>
+  <desc id="d06">Sequential four-gate decision flowchart. Memory gate splits into flash and SRAM checks. Compute gate compares operations divided by sustained throughput against the latency budget. Power gate checks average and peak current against battery and supply limits. Real-time gate checks worst-case execution time plus margin against the deadline. Each gate branches to iterate or viable platform.</desc>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#333333"/>
+    </marker>
+    <marker id="arrowhead-no" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="820" height="460" fill="#FFFFFF"/>
+
+  <!-- Inlet arrow: x=10,y=140 → gate1 left (x=40,y=140) -->
+  <line x1="10" y1="140" x2="37" y2="140" stroke="#333333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="32" y="130" font-size="9" fill="#333333" text-anchor="middle">model + part</text>
+
+  <!-- Gate 1: memory, center=(110,140) -->
+  <polygon points="110,90 180,140 110,190 40,140" fill="#111111"/>
+  <text x="110" y="135" text-anchor="middle" font-size="9" font-weight="bold" fill="#FFFFFF">memory</text>
+  <text x="110" y="148" text-anchor="middle" font-size="8" fill="#FFFFFF">weights+SRAM?</text>
+
+  <!-- Gate 2: compute, center=(280,140) -->
+  <polygon points="280,90 350,140 280,190 210,140" fill="#333333"/>
+  <text x="280" y="135" text-anchor="middle" font-size="9" font-weight="bold" fill="#FFFFFF">compute</text>
+  <text x="280" y="148" text-anchor="middle" font-size="8" fill="#FFFFFF">ops &lt; budget?</text>
+
+  <!-- Gate 3: power, center=(450,140) -->
+  <polygon points="450,90 520,140 450,190 380,140" fill="#555555"/>
+  <text x="450" y="135" text-anchor="middle" font-size="9" font-weight="bold" fill="#FFFFFF">power</text>
+  <text x="450" y="148" text-anchor="middle" font-size="8" fill="#FFFFFF">avg + peak I?</text>
+
+  <!-- Gate 4: real-time, center=(620,140) -->
+  <polygon points="620,90 690,140 620,190 550,140" fill="#777777"/>
+  <text x="620" y="135" text-anchor="middle" font-size="9" font-weight="bold" fill="#FFFFFF">real-time</text>
+  <text x="620" y="148" text-anchor="middle" font-size="8" fill="#FFFFFF">WCET &lt; deadline?</text>
+
+  <!-- Yes arrows between gates -->
+  <line x1="180" y1="140" x2="207" y2="140" stroke="#333333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="193" y="133" font-size="9" fill="#333333" text-anchor="middle">yes</text>
+
+  <line x1="350" y1="140" x2="377" y2="140" stroke="#333333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="363" y="133" font-size="9" fill="#333333" text-anchor="middle">yes</text>
+
+  <line x1="520" y1="140" x2="547" y2="140" stroke="#333333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="533" y="133" font-size="9" fill="#333333" text-anchor="middle">yes</text>
+
+  <!-- Yes arrow gate4 right → VIABLE box -->
+  <line x1="690" y1="140" x2="697" y2="140" stroke="#333333" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="693" y="133" font-size="9" fill="#333333" text-anchor="middle">yes</text>
+
+  <!-- VIABLE box: x=700, y=115, w=100, h=50 -->
+  <rect x="700" y="115" width="100" height="50" fill="#CCCCCC" stroke="#555555" stroke-width="1.5" rx="4"/>
+  <text x="750" y="137" text-anchor="middle" font-size="11" font-weight="bold" fill="#111111">VIABLE</text>
+  <text x="750" y="152" text-anchor="middle" font-size="9" fill="#333333">deploy</text>
+
+  <!-- No arrows (downward from gate bottoms) -->
+  <!-- Gate1 bottom (110,190) → iterate1 top (110,240) -->
+  <line x1="110" y1="190" x2="110" y2="237" stroke="#555555" stroke-width="1.5" marker-end="url(#arrowhead-no)"/>
+  <text x="118" y="218" font-size="9" fill="#333333">no</text>
+
+  <!-- Gate2 bottom (280,190) → iterate2 top (280,240) -->
+  <line x1="280" y1="190" x2="280" y2="237" stroke="#555555" stroke-width="1.5" marker-end="url(#arrowhead-no)"/>
+  <text x="288" y="218" font-size="9" fill="#333333">no</text>
+
+  <!-- Gate3 bottom (450,190) → iterate3 top (450,240) -->
+  <line x1="450" y1="190" x2="450" y2="237" stroke="#555555" stroke-width="1.5" marker-end="url(#arrowhead-no)"/>
+  <text x="458" y="218" font-size="9" fill="#333333">no</text>
+
+  <!-- Gate4 bottom (620,190) → iterate4 top (620,240) -->
+  <line x1="620" y1="190" x2="620" y2="237" stroke="#555555" stroke-width="1.5" marker-end="url(#arrowhead-no)"/>
+  <text x="628" y="218" font-size="9" fill="#333333">no</text>
+
+  <!-- Iterate box 1: x=40, y=240, w=140, h=100 -->
+  <rect x="40" y="240" width="140" height="100" fill="#FFFFFF" stroke="#555555" stroke-width="1" rx="3"/>
+  <text x="110" y="258" text-anchor="middle" font-size="9" fill="#333333">quantize weights</text>
+  <text x="110" y="272" text-anchor="middle" font-size="9" fill="#333333">prune layers</text>
+  <text x="110" y="286" text-anchor="middle" font-size="9" fill="#333333">shrink activations</text>
+  <text x="110" y="300" text-anchor="middle" font-size="9" font-style="italic" fill="#555555">→ retry gate 1</text>
+  <text x="110" y="330" text-anchor="middle" font-size="8" font-weight="bold" fill="#333333">iterate</text>
+
+  <!-- Iterate box 2: x=210, y=240, w=140, h=100 -->
+  <rect x="210" y="240" width="140" height="100" fill="#FFFFFF" stroke="#555555" stroke-width="1" rx="3"/>
+  <text x="280" y="258" text-anchor="middle" font-size="9" fill="#333333">raise clock</text>
+  <text x="280" y="272" text-anchor="middle" font-size="9" fill="#333333">int8 + SIMD</text>
+  <text x="280" y="286" text-anchor="middle" font-size="9" fill="#333333">shrink model</text>
+  <text x="280" y="300" text-anchor="middle" font-size="9" font-style="italic" fill="#555555">→ retry gate 2</text>
+  <text x="280" y="330" text-anchor="middle" font-size="8" font-weight="bold" fill="#333333">iterate</text>
+
+  <!-- Iterate box 3: x=380, y=240, w=140, h=100 -->
+  <rect x="380" y="240" width="140" height="100" fill="#FFFFFF" stroke="#555555" stroke-width="1" rx="3"/>
+  <text x="450" y="258" text-anchor="middle" font-size="9" fill="#333333">stretch duty cycle</text>
+  <text x="450" y="272" text-anchor="middle" font-size="9" fill="#333333">larger battery</text>
+  <text x="450" y="286" text-anchor="middle" font-size="9" fill="#333333">bulk cap peak</text>
+  <text x="450" y="300" text-anchor="middle" font-size="9" font-style="italic" fill="#555555">→ retry gate 3</text>
+  <text x="450" y="330" text-anchor="middle" font-size="8" font-weight="bold" fill="#333333">iterate</text>
+
+  <!-- Iterate box 4: x=550, y=240, w=140, h=100 -->
+  <rect x="550" y="240" width="140" height="100" fill="#FFFFFF" stroke="#555555" stroke-width="1" rx="3"/>
+  <text x="620" y="258" text-anchor="middle" font-size="9" fill="#333333">lock to TCM</text>
+  <text x="620" y="272" text-anchor="middle" font-size="9" fill="#333333">integer graph</text>
+  <text x="620" y="286" text-anchor="middle" font-size="9" fill="#333333">raise priority</text>
+  <text x="620" y="300" text-anchor="middle" font-size="9" font-style="italic" fill="#555555">→ retry gate 4</text>
+  <text x="620" y="330" text-anchor="middle" font-size="8" font-weight="bold" fill="#333333">iterate</text>
+
+  <!-- Arrows from iterate boxes bottom (y=340) to bail-out box top (y=375) -->
+  <line x1="110" y1="340" x2="110" y2="372" stroke="#555555" stroke-width="1.2" marker-end="url(#arrowhead-no)"/>
+  <line x1="280" y1="340" x2="280" y2="372" stroke="#555555" stroke-width="1.2" marker-end="url(#arrowhead-no)"/>
+  <line x1="450" y1="340" x2="450" y2="372" stroke="#555555" stroke-width="1.2" marker-end="url(#arrowhead-no)"/>
+  <line x1="620" y1="340" x2="620" y2="372" stroke="#555555" stroke-width="1.2" marker-end="url(#arrowhead-no)"/>
+
+  <!-- Bail-out box: x=40, y=375, w=750, h=50 -->
+  <rect x="40" y="375" width="750" height="50" fill="#EEEEEE" stroke="#888888" stroke-width="1" rx="3"/>
+  <text x="415" y="395" text-anchor="middle" font-size="10" fill="#333333">if no iteration closes the gap — change the part, the model class, or the requirement</text>
+  <text x="415" y="413" text-anchor="middle" font-size="10" fill="#333333">a constraint that cannot be loosened selects a different platform</text>
+
+  <!-- Caption -->
+  <text x="410" y="442" text-anchor="middle" font-size="10" fill="#555555">Figure 2-6. Four-gate deployment decision flowchart; each failed gate triggers iteration or platform change.</text>
+
+</svg>

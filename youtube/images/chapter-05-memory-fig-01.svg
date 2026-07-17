@@ -1,0 +1,79 @@
+<svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig-title-01">
+  <title id="fig-title-01">Embedded memory hierarchy</title>
+  <desc>Four embedded memory tiers arranged from fastest and smallest to slowest and largest, with latency, capacity, volatility, and typical embedded-AI artifacts labeled for each tier.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#111111"/>
+    </marker>
+    <style>
+      text { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; }
+      .title { font-size: 16px; font-weight: 700; fill: #111111; }
+      .subtitle { font-size: 13px; font-weight: 400; fill: #555555; }
+      .header { font-size: 11px; font-weight: 700; fill: #555555; letter-spacing: 0.03em; }
+      .tier-name { font-size: 13px; font-weight: 700; fill: #111111; }
+      .body { font-size: 12px; font-weight: 400; fill: #111111; }
+      .small { font-size: 11px; font-weight: 400; fill: #555555; }
+      .axis { font-size: 11px; font-weight: 400; fill: #555555; }
+      .caption { font-size: 12px; font-weight: 400; fill: #555555; }
+      .bar { stroke: #333333; stroke-width: 1.25; }
+      .guide { stroke: #DDDDDD; stroke-width: 0.75; stroke-dasharray: 4 3; fill: none; }
+      .rule { stroke: #DDDDDD; stroke-width: 0.75; }
+    </style>
+  </defs>
+
+  <rect width="900" height="500" fill="#FFFFFF"/>
+
+  <text x="40" y="38" class="title">Embedded memory hierarchy</text>
+  <text x="40" y="60" class="subtitle">Read top to bottom: latency rises as capacity expands and placement becomes a deployment decision.</text>
+
+  <text x="40" y="104" class="header">LATENCY</text>
+  <text x="142" y="104" class="header">TIER</text>
+  <text x="322" y="104" class="header">CAPACITY SCALE</text>
+  <text x="660" y="104" class="header">WHAT LIVES THERE</text>
+  <line x1="40" y1="116" x2="860" y2="116" class="rule"/>
+
+  <line x1="78" y1="136" x2="78" y2="424" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="62" y="146" text-anchor="end" class="axis">1 cycle</text>
+  <text x="62" y="214" text-anchor="end" class="axis">1–2 cycles</text>
+  <text x="62" y="290" text-anchor="end" class="axis">10–50 cycles</text>
+  <text x="62" y="380" text-anchor="end" class="axis">100s cycles</text>
+
+  <g id="row-registers">
+    <line x1="96" y1="144" x2="860" y2="144" class="guide"/>
+    <text x="142" y="138" class="tier-name">Registers</text>
+    <text x="142" y="156" class="small">bytes to words</text>
+    <rect x="322" y="127" width="88" height="34" class="bar" fill="#333333"/>
+    <text x="660" y="138" class="body">Active working set</text>
+    <text x="660" y="156" class="small">fastest access; compiler and CPU owned</text>
+  </g>
+
+  <g id="row-sram">
+    <line x1="96" y1="212" x2="860" y2="212" class="guide"/>
+    <text x="142" y="206" class="tier-name">SRAM</text>
+    <text x="142" y="224" class="small">64 KB–2 MB</text>
+    <rect x="322" y="187" width="146" height="50" class="bar" fill="#555555"/>
+    <text x="660" y="206" class="body">Stack, heap, activations</text>
+    <text x="660" y="224" class="small">DMA scratch; volatile runtime state</text>
+  </g>
+
+  <g id="row-flash">
+    <line x1="96" y1="290" x2="860" y2="290" class="guide"/>
+    <text x="142" y="282" class="tier-name">On-chip flash</text>
+    <text x="142" y="300" class="small">512 KB–2 MB</text>
+    <rect x="322" y="258" width="224" height="64" class="bar" fill="#888888"/>
+    <text x="660" y="282" class="body">Firmware and model weights</text>
+    <text x="660" y="300" class="small">bias tables, LUTs, read-mostly assets</text>
+  </g>
+
+  <g id="row-external">
+    <line x1="96" y1="380" x2="860" y2="380" class="guide"/>
+    <text x="142" y="372" class="tier-name">External PSRAM / SDRAM</text>
+    <text x="142" y="390" class="small">MB–GB</text>
+    <rect x="322" y="342" width="300" height="76" class="bar" fill="#DDDDDD"/>
+    <text x="660" y="372" class="body">Overflow buffers</text>
+    <text x="660" y="390" class="small">large tensors; frame buffers; overflow</text>
+  </g>
+
+  <line x1="322" y1="452" x2="622" y2="452" stroke="#888888" stroke-width="1.5"/>
+  <text x="322" y="476" class="caption">Deployment question: which artifact belongs in the fastest tier that can hold it?</text>
+</svg>

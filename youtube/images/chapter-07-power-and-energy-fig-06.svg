@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" role="img" aria-labelledby="t06 d06">
+  <title id="t06">Battery life vs inference period — the radio sets the ceiling</title>
+  <desc id="d06">Battery-life curve for the agricultural sensor on two AA cells. X-axis: inference period 1–600 s, log scale. Y-axis: battery life in days, log scale. Four curves for LoRa intervals: 1/hour, 1/6 h, 1/day, no radio. Dashed line marks 180-day target.</desc>
+  <defs>
+    <style>
+      .ti  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: bold; fill: #111111; }
+      .lb  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 11px; fill: #333333; }
+      .sm  { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; fill: #555555; }
+      .cap { font-family: Lato, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-style: italic; fill: #555555; }
+    </style>
+    <marker id="ar6" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+  <rect width="700" height="480" fill="#FFFFFF"/>
+  <text x="350" y="28" text-anchor="middle" class="ti">Battery life vs inference period — agricultural sensor on 2 × AA</text>
+  <text x="350" y="44" text-anchor="middle" class="sm">8,550 mWh budget · STM32L4 + LoRa</text>
+
+  <!-- chart area: x 90..660, y 70..360 -->
+  <line x1="90" y1="70" x2="90" y2="360" stroke="#888888"/>
+  <line x1="90" y1="360" x2="660" y2="360" stroke="#888888"/>
+
+  <!-- light gridlines -->
+  <line x1="90" y1="287" x2="660" y2="287" stroke="#DDDDDD" stroke-width="0.7"/>
+  <line x1="90" y1="215" x2="660" y2="215" stroke="#DDDDDD" stroke-width="0.7"/>
+  <line x1="90" y1="142" x2="660" y2="142" stroke="#DDDDDD" stroke-width="0.7"/>
+  <line x1="295" y1="70" x2="295" y2="360" stroke="#DDDDDD" stroke-width="0.7"/>
+  <line x1="500" y1="70" x2="500" y2="360" stroke="#DDDDDD" stroke-width="0.7"/>
+
+  <!-- y tick labels -->
+  <text x="84" y="363" text-anchor="end" class="sm">1 d</text>
+  <text x="84" y="290" text-anchor="end" class="sm">10</text>
+  <text x="84" y="218" text-anchor="end" class="sm">100</text>
+  <text x="84" y="145" text-anchor="end" class="sm">1,000</text>
+  <text x="84" y="73"  text-anchor="end" class="sm">10,000</text>
+  <text x="38" y="215" class="sm" transform="rotate(-90 38 215)">battery life (days)</text>
+
+  <!-- x tick labels -->
+  <text x="90"  y="376" text-anchor="middle" class="sm">1 s</text>
+  <text x="295" y="376" text-anchor="middle" class="sm">10 s</text>
+  <text x="500" y="376" text-anchor="middle" class="sm">100 s</text>
+  <text x="660" y="376" text-anchor="middle" class="sm">600 s</text>
+  <text x="375" y="392" text-anchor="middle" class="sm">inference period (log scale)</text>
+
+  <!-- 180-day dashed target line -->
+  <!-- y = 215 - log10(1.8)*72.5 = 215 - 18.7 = 196 -->
+  <line x1="90" y1="196" x2="660" y2="196" stroke="#555555" stroke-width="1" stroke-dasharray="6 4"/>
+  <text x="656" y="190" text-anchor="end" class="sm">180-day target</text>
+
+  <!-- Curve A: 1/hour — stays low ~11–21 days, solid -->
+  <path d="M 90 286 Q 200 251 295 234 Q 400 224 500 222 L 660 222"
+        fill="none" stroke="#333333" stroke-width="1.8"/>
+  <text x="656" y="218" text-anchor="end" class="lb">1 / hour</text>
+
+  <!-- Curve B: 1/6 h — moderate, long-dash -->
+  <path d="M 90 256 Q 200 220 295 200 Q 400 185 500 184 L 660 184"
+        fill="none" stroke="#555555" stroke-width="1.8" stroke-dasharray="8 4"/>
+  <text x="656" y="180" text-anchor="end" class="lb">1 / 6 h</text>
+
+  <!-- Curve C: 1/day — rises well above target, short-dash -->
+  <path d="M 90 251 Q 200 200 295 165 Q 400 142 500 132 L 660 130"
+        fill="none" stroke="#777777" stroke-width="1.8" stroke-dasharray="3 4"/>
+  <text x="656" y="126" text-anchor="end" class="lb">1 / day</text>
+
+  <!-- Curve D: no radio — highest, dotted -->
+  <path d="M 90 250 Q 200 165 295 110 Q 400 90 500 78 L 660 72"
+        fill="none" stroke="#AAAAAA" stroke-width="2" stroke-dasharray="1 4"/>
+  <text x="656" y="68" text-anchor="end" class="lb">no radio</text>
+
+  <!-- example points on 1/hour curve -->
+  <circle cx="90"  cy="286" r="4" fill="#333333"/>
+  <circle cx="455" cy="224" r="4" fill="#333333"/>
+  <circle cx="660" cy="222" r="4" fill="#333333"/>
+
+  <!-- annotations -->
+  <path d="M 90 286 L 130 302" stroke="#555555" stroke-width="0.8" fill="none" marker-end="url(#ar6)"/>
+  <text x="134" y="306" class="sm">1 s · 11 days · FAILS</text>
+
+  <path d="M 455 224 L 410 240" stroke="#555555" stroke-width="0.8" fill="none" marker-end="url(#ar6)"/>
+  <text x="406" y="244" text-anchor="end" class="sm">60 s · 21 days · radio-bound</text>
+
+  <path d="M 660 222 L 615 208" stroke="#555555" stroke-width="0.8" fill="none" marker-end="url(#ar6)"/>
+  <text x="611" y="204" text-anchor="end" class="sm">600 s · 21 days · radio sets ceiling</text>
+
+  <!-- caption -->
+  <text x="350" y="438" text-anchor="middle" class="cap">Above the 180-day line only when LoRa drops to 1/day or vanishes.</text>
+  <text x="350" y="452" text-anchor="middle" class="cap">The inference period axis barely matters once the radio duty cycle is fixed.</text>
+</svg>
